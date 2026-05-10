@@ -36,7 +36,9 @@
       color: var(--text-color);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
-    }
+      overflow-x: hidden;
+      width: 100%;
+}
 
     a {
       text-decoration: none;
@@ -160,10 +162,8 @@
         /* 【重要】パディングを含めた高さを100vhに収める */
         box-sizing: border-box; 
         padding: 100px 20px 40px;
-        
-        /* 【重要】はみ出た余分なスクロールバーを非表示にする */
-        overflow: hidden; 
-
+        overflow-y: auto; /* メニュー内の項目が多い場合にスクロール可能に */
+        overflow-x: hidden; /* メニュー自体が横に揺れるのを防ぐ */        
         box-shadow: -10px 0 30px rgba(0,0,0,0.1);
         transition: right 0.5s cubic-bezier(0.65, 0, 0.35, 1);
       }
