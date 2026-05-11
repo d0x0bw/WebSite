@@ -153,23 +153,24 @@
       .menu-content {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: -100%;/* ここで右側に隠している */
         width: 300px;
-        height: 100vh; /* 100% から 100vh（画面の高さぴったり）に変更 */
+        height: 100vh; /* 100% から 100vh（画面の高さぴったり）に変更【重要】パディングを含めた高さを100vhに収める */
         background-color: var(--card-bg);
         z-index: 1050;
-        
-        /* 【重要】パディングを含めた高さを100vhに収める */
         box-sizing: border-box; 
         padding: 100px 20px 40px;
         overflow-y: auto; /* メニュー内の項目が多い場合にスクロール可能に */
         overflow-x: hidden; /* メニュー自体が横に揺れるのを防ぐ */        
         box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-        transition: right 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-      }
+        transition: right 0.5s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.5s; /* visibilityもアニメーションに含める */
+        visibility: hidden;/* 【追加】閉じているときは存在を消す */
+}
 
-      #menu-btn-check:checked ~ .menu-content {
+      /* 【追加】チェックが入った（開いた）ときに表示する */
+        #menu-btn-check:checked ~ .menu-content {
         right: 0;
+        visibility: visible;
       }
 
       /* リスト項目フェードインアニメーション */
@@ -819,9 +820,9 @@
     </div>
 
     <div class="intro-text">
-      <h1>CSSのみで実装したメニュー</h1>
+      <h1>バーガーメニューでの閉じる以外をCSSのみで実装したページ</h1>
       <p>画面サイズを小さくして、右上のボタンを押してみて。</p>
-      <p>メニュー項目が時間差で左やや下からふわっと現れます。</p>
+      <p>メニュー項目が時間差で左からふわっと現れます。</p>
     </div>
 
     <section class="about-section" id="about">
@@ -1018,5 +1019,17 @@
     <span class="arrow" title="トップへ戻る"></span>
   </a>
 
+<script>
+  // メニュー内のリンクをすべて取得
+  const menuLinks = document.querySelectorAll('.menu-content a');
+  const menuCheck = document.getElementById('menu-btn-check');
+
+  // リンクがクリックされたら、チェックボックスのチェックを外す
+  menuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      menuCheck.checked = false;
+    });
+  });
+</script>
 </body>
 </html>
