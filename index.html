@@ -19,7 +19,15 @@
       --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
       --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
-
+    
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /* 以下の1行を追加：画面の端でバウンドするのを防ぐ */
+  overscroll-behavior-x: none; 
+}
     html {
       scroll-behavior: smooth;
     }
