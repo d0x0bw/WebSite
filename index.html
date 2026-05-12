@@ -3,858 +3,288 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SHERRY's GARDEN</title>
-  <style>
-    /* ============================================================
-       1. 基本設定・変数
-       ============================================================ */
-    :root {
-      --bg-color: #f9f8f2;
-      --text-color: #333333;
-      --text-muted: #777777;
-      --accent-color: #a48a5c;
-      --card-bg: #ffffff;
-      --border-color: #eeeeee;
-      --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
-      --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    /* 横揺れ徹底防止 */
-    html, body {
-      overflow-x: hidden;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      overscroll-behavior-x: none;
-      background-color: var(--bg-color);
-      font-family: var(--font-serif);
-      color: var(--text-color);
-      line-height: 1.7;
-      scroll-behavior: smooth;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-      transition: var(--transition-smooth);
-    }
-
-    ul { list-style: none; }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* ============================================================
-       2. ヘッダー & メニュー
-       ============================================================ */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 5%;
-      height: 75px;
-      background-color: rgba(249, 248, 242, 0.95);
-      backdrop-filter: blur(5px);
-      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .logo {
-      font-size: 1.8rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-    }
-
-    .logo a:hover { color: var(--accent-color); }
-
-    #menu-btn-check { display: none; }
-
-    /* --- スマホ向けメニュー設定 --- */
-    @media (max-width: 768px) {
-      .menu-btn {
-        position: relative;
-        display: flex;
-        height: 50px;
-        width: 50px;
-        justify-content: center;
-        align-items: center;
-        z-index: 1100;
-        cursor: pointer;
-      }
-
-      .menu-btn span, .menu-btn span::before, .menu-btn span::after {
-        content: '';
-        display: block;
-        height: 2px;
-        width: 25px;
-        background-color: var(--text-color);
-        position: absolute;
-        transition: var(--transition-smooth);
-      }
-
-      .menu-btn span::before { bottom: 8px; }
-      .menu-btn span::after { top: 8px; }
-
-      /* ハンバーガーアニメーション */
-      #menu-btn-check:checked + .menu-btn span { background-color: transparent; }
-      #menu-btn-check:checked + .menu-btn span::before { bottom: 0; transform: rotate(45deg); }
-      #menu-btn-check:checked + .menu-btn span::after { top: 0; transform: rotate(-45deg); }
-
-      .menu-background {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1010;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.4s ease, visibility 0.4s;
-      }
-
-      #menu-btn-check:checked ~ .menu-background {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .menu-content {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 300px;
-        height: 100vh;
-        background-color: var(--card-bg);
-        z-index: 1050;
-        padding: 100px 20px 40px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        box-shadow: -10px 0 30px rgba(0,0,0,0.1);
-        transition: right 0.5s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.5s;
-        visibility: hidden;
-      }
-
-      #menu-btn-check:checked ~ .menu-content {
-        right: 0;
-        visibility: visible;
-      }
-
-      .menu-content ul li {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: var(--transition-smooth);
-      }
-
-      #menu-btn-check:checked ~ .menu-content ul li {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      /* 項目ごとのディレイ設定 */
-      #menu-btn-check:checked ~ .menu-content ul li:nth-child(1) { transition-delay: 0.1s; }
-      #menu-btn-check:checked ~ .menu-content ul li:nth-child(2) { transition-delay: 0.15s; }
-      #menu-btn-check:checked ~ .menu-content ul li:nth-child(3) { transition-delay: 0.2s; }
-      #menu-btn-check:checked ~ .menu-content ul li:nth-child(4) { transition-delay: 0.25s; }
-      #menu-btn-check:checked ~ .menu-content ul li:nth-child(5) { transition-delay: 0.3s; }
-
-      .menu-content ul li a {
-        display: block;
-        padding: 20px 25px;
-        font-size: 1.2rem;
-        border-bottom: 1px solid var(--border-color);
-      }
-    }
-
-    /* --- PC向けメニュー設定 --- */
-    @media (min-width: 769px) {
-      .menu-btn, .menu-background { display: none; }
-      .menu-content ul { display: flex; align-items: center; }
-      .menu-content ul li { margin-left: 30px; }
-      .menu-content ul li a {
-        font-size: 1rem;
-        letter-spacing: 1px;
-        padding: 10px 0;
-        position: relative;
-      }
-      .menu-content ul li a::after {
-        content: '';
-        position: absolute;
-        bottom: 0; left: 0; width: 100%; height: 1px;
-        background-color: var(--accent-color);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-      }
-      .menu-content ul li a:hover::after { transform: scaleX(1); }
-    }
-
-    /* ============================================================
-       3. コンテンツ・ヒーロー
-       ============================================================ */
-    .content {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 40px 24px;
-      text-align: center;
-      overflow: hidden; /* はみ出し防止最終防衛線 */
-    }
-
-    .hero-image {
-      width: 100%;
-      margin-bottom: 40px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
-
-    .hero-image-wrapper img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      transition: transform 2s ease;
-    }
-
-    .hero-image-wrapper img:hover { transform: scale(1.05); }
-
-    /* メインタイトルアニメーション風 */
-    .text {
-      font-family: var(--font-serif);
-      font-size: clamp(2.2rem, 6vw, 4.5rem);
-      font-weight: bold;
-      color: rgba(0,0,0,0.1);
-      background-image: url('photo.jpg');
-      background-size: cover;
-      background-position: center;
-      -webkit-background-clip: text;
-      background-clip: text;
-      margin-bottom: 30px;
-      letter-spacing: 6px;
-      max-width: 100%;
-      overflow: hidden;
-      word-wrap: break-word;
-    }
-
-    .text span {
-      display: block;
-      font-size: clamp(0.8rem, 2vw, 1rem);
-      color: #fff;
-      background-color: var(--text-color);
-      padding: 4px 15px;
-      width: fit-content;
-      margin: 10px auto 0;
-      letter-spacing: 2px;
-      border-radius: 2px;
-    }
-
-    .intro-text h1 {
-      font-size: clamp(1.3rem, 4vw, 1.8rem);
-      margin-bottom: 15px;
-      font-weight: normal;
-    }
-
-    /* ============================================================
-       4. セクション共通・About
-       ============================================================ */
-    section { scroll-margin-top: 90px; padding: 60px 0; }
-
-    .section-title {
-      font-size: 1.8rem;
-      margin-bottom: 40px;
-      position: relative;
-      display: inline-block;
-      letter-spacing: 0.15em;
-    }
-
-    .section-title::after {
-      content: '';
-      position: absolute;
-      bottom: -10px; left: 50%;
-      transform: translateX(-50%);
-      width: 30px; height: 2px;
-      background-color: var(--accent-color);
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 40px;
-      max-width: 850px;
-      margin: 40px auto 0;
-    }
-
-      .feature-img {
-        flex: 0 0 160px;
-        width: 80%;
-      }
-    .feature-img img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 50%;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-    }
-    .feature-text { flex: 1; text-align: left; }
-
-    @media (max-width: 768px) {
-      .feature-item { flex-direction: column; text-align: center; }
-      .feature-text { text-align: center; }
-    }
-
-    /* ============================================================
-       5. ギャラリー & モーダル
-       ============================================================ */
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-    }
-
-    @media (max-width: 768px) {
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .gallery-item { aspect-ratio: 1/1; overflow: hidden; border-radius: 6px; }
-    .gallery-item img { cursor: pointer; transition: 0.4s; height: 100%; object-fit: cover; }
-    .gallery-item img:hover { transform: scale(1.08); }
-
-    .pop-check { display: none; }
-.pop-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(15, 15, 15, 0.95);
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-
-  /* --- ここを追加：中身を上下左右中央に配置する --- */
-  display: flex;
-  justify-content: center; /* 左右中央 */
-  align-items: center;     /* 上下中央 */
-}
-
-/* 画像を包むクリックエリア */
-.pop-close-area {
-  display: flex;           /* 追加 */
-  justify-content: center; /* 追加 */
-  align-items: center;     /* 追加 */
-  width: 100%;             /* 100vwから100%に修正 */
-  height: 100%;            /* 100vhから100%に修正 */
-  cursor: pointer;
-}
-
-/* ポップアップされる画像本体 */
-.pop-overlay img {
-  max-width: 90%;
-  max-height: 85%;
-  object-fit: contain;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  
-  /* 余計な余白がつかないように念のため */
-  margin: auto; 
-}
-
-    .pop-check:checked ~ .pop-overlay { opacity: 1; visibility: visible; }
-    .pop-overlay img { max-width: 90%; max-height: 80%; transform: scale(0.9); transition: 0.4s; }
-    .pop-check:checked ~ .pop-overlay img { transform: scale(1); }
-
-
-/* 縦長ギャラリー専用の設定 */
-  .v-grid {
-  grid-template-columns: repeat(4, 1fr); /* 縦長なので3列くらいが綺麗です */
-}
-
-  .v-item {
-  aspect-ratio: 1 / 2 !important; /* 縦横比を2:3に固定（お好みで3/4などに変更可） */
-}
-
-  @media (max-width: 768px) {
-  .v-grid {
-  grid-template-columns: repeat(2, 1fr); /* スマホでは2列 */
-  gap: 10px;
-  }
-}
-
-    /* ============================================================
-       6. プロフィール (猫)
-       ============================================================ */
-    .cat-profile {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.03);
-      margin-bottom: 40px;
-      max-width: 850px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .profile-header { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
-    .profile-img { flex: 0 0 150px; }
-    .profile-img img { border-radius: 10px; }
-    .profile-summary { flex: 1; text-align: left; }
-    .cat-name { font-size: 1.6rem; border-bottom: 1.5px solid var(--accent-color); display: inline-block; }
-    .cat-name span { font-size: 0.9rem; color: var(--text-muted); margin-left: 10px; }
-
-    .spec-table { width: 100%; border-collapse: collapse; text-align: left; }
-    .spec-table th { background: #fafafa; padding: 12px; font-size: 0.8rem; width: 25%; }
-    .spec-table td { padding: 12px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); }
-
-    @media (max-width: 768px) {
-      .profile-header { flex-direction: column; text-align: center; }
-      .profile-summary { text-align: left; }
-      .spec-table, .spec-table th, .spec-table td { display: block; width: 100%; }
-      .spec-table th { background: transparent; color: var(--accent-color); padding-bottom: 0; }
-    }
-
-    /* 偶数番目のレイアウト反転 */
-    @media (min-width: 769px) {
-      .cat-profile:nth-of-type(even) .profile-header { flex-direction: row-reverse; }
-      .cat-profile:nth-of-type(even) .profile-summary { text-align: right; }
-    }
-
-    /* ============================================================
-       7. フッター & 各種ボタン
-       ============================================================ */
-    .link-buttons { display: flex; justify-content: center; gap: 20px; }
-    .btn {
-      padding: 10px 30px;
-      border: 1px solid var(--text-color);
-      border-radius: 25px;
-      font-size: 0.9rem;
-      font-weight: bold;
-    }
-    .btn:hover { background: var(--text-color); color: #fff; transform: translateY(-3px); }
-
-    .footer { background: var(--text-color); color: rgba(255,255,255,0.6); padding: 30px; margin-top: 60px; font-size: 0.8rem; }
-
-    .gotop {
-      position: fixed; right: 20px; bottom: 20px;
-      width: 45px; height: 45px; background: rgba(51,51,51,0.8);
-      border-radius: 50%; display: flex; justify-content: center; align-items: center;
-      z-index: 900; transition: 0.3s;
-    }
-    .gotop:hover { background: #000; transform: translateY(-5px); }
-    .arrow { width: 8px; height: 8px; border-top: 2px solid #fff; border-right: 2px solid #fff; transform: rotate(-45deg); margin-top: 4px; }
-  </style>
+  <title>Premium CSS Hamburger Menu</title>
+  <link rel="stylesheet" href="index.css">
 </head>
 <body>
 
+
+  <!-- ==========================================
+       ヘッダー（ナビゲーション）
+       ========================================== -->
+
   <header class="header">
-    <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
+    <div class="logo"><a href="index.html">Neko</a></div>
+
+    <!-- メニューの切り替え用チェックボックス -->
     <input type="checkbox" id="menu-btn-check">
+    
+    <!-- 三本線アイコン（label） -->
     <label for="menu-btn-check" class="menu-btn"><span></span></label>
 
+
+    <!-- メニュー本体 -->
     <nav class="menu-content">
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#gallery2">Gallery2</a></li>
-        <li><a href="#profile">Profile</a></li>
-        <li><a href="#link">Link</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#gallery">Gallery</a></li>
+        <li><a href="index.html#link">Link</a></li>
       </ul>
     </nav>
+
+
+    <!-- 背景を暗くするオーバーレイ（ここをタップしても閉じます） -->
     <label for="menu-btn-check" class="menu-background"></label>
   </header>
 
   <main class="content">
-    <div class="hero-image">
-      <div class="hero-image-wrapper">
-        <img src="./Photo/photo.jpg" alt="メインイメージ" title="シェリーとラム">
-      </div>
-    </div>
+
+  <!-- 画像の追加 -->
+  <div class="hero-image">
+  <div class="hero-image-wrapper">
+    <img src="photo.jpg" alt="メインイメージ" title="シェリー">
+  </div>
+  </div>
+  <div>
+    <p class="text">SHERRY's GARDEN
+    <span>since 2023</span></p>
+  </div>
+
+
+
+<div class="intro-text">
+  <h1>CSSのみで実装した高機能メニュー</h1>
+  <p>画面サイズを小さくして、右上のボタンを押してみてください。</p>
+  <p>背景が暗くなり、メニュー項目が時間差で下からふわっと現れます。</p>
+</div>
+
+
+    <!-- ==========================================
+         Aboutセクション
+         ========================================== -->
+  <section class="about-section" id="about">
+    <h2 class="section-title">About</h2>
+    <p class="intro-text">ここに紹介文が入ります。猫と庭を愛するSHERRYのプライベートガーデンです。</p>
+<div class="feature-item">
+  <div class="feature-img">
+    <img src="photo1.jpg" alt="特徴画像">
+  </div>
+  <div class="feature-text">
+    <h3>ここにタイトル</h3>
+    <p>ここに文章が入ります。Galleryの画像よりも少し控えめなサイズで、右側に説明文を添えることができます。猫の日常や庭の手入れについてなど、自由に書き込んでください。</p>
+  </div>
+</div>
+  </section>
+
+
+
+    <!-- ==========================================
+         フォトギャラリー（ポップアップ機能付き）
+         ========================================== -->
+
+<section class="gallery-section" id="gallery">
+  <h2 class="section-title">Gallery</h2>
+  <div class="gallery-grid">
     
-    <div class="title-area">
-      <p class="text">SHERRY's GARDEN<span>since 2023</span></p>
-    </div>
-
-    <div class="intro-text">
-      <h1>猫たちと過ごす穏やかな時間</h1>
-      <p>日々の何気ない記録をまとめています。</p>
-    </div>
-
-    <!-- About Section -->
-    <section id="about">
-      <h2 class="section-title">About</h2>
-      <div class="feature-item">
-        <div class="feature-img">
-          <img src="./Photo/photo1.jpg" alt="特徴画像">
-        </div>
-        <div class="feature-text">
-          <h3>Concept</h3>
-          <p>何気なく撮りためた写真たち。<br>それらを一つの形にしたいという想いから、<br>このプライベートガーデンは始まりました。</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Gallery Section -->
-    <section id="gallery">
-      <h2 class="section-title">Gallery</h2>
-      <div class="gallery-grid">
-
-        <!-- 繰り返し項目は構造を統一 -->
-        <div class="gallery-item">
-          <input type="checkbox" id="pop1" class="pop-check">
-          <label for="pop1"><img src="./Photo/photo1.jpg" alt="Gallery 1"></label>
-          <div class="pop-overlay">
-            <label for="pop1" style="width:100%; height:100%; display:flex; justify:center; align-items:center; cursor:pointer;">
-              <img src="./Photo/photo1.jpg" alt="Gallery 1">
-            </label>
-          </div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop2" class="pop-check">
-          <label for="pop2"><img src="./Photo/photo2.jpg" alt="Gallery 2"></label>
-          <div class="pop-overlay"><label for="pop2"><img src="./Photo/photo2.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop3" class="pop-check">
-          <label for="pop3"><img src="./Photo/photo3.jpg" alt="Gallery 3"></label>
-          <div class="pop-overlay"><label for="pop3"><img src="./Photo/photo3.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop4" class="pop-check">
-          <label for="pop4"><img src="./Photo/photo4.jpg" alt="Gallery 4"></label>
-          <div class="pop-overlay"><label for="pop4"><img src="./Photo/photo4.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop5" class="pop-check">
-          <label for="pop5"><img src="./Photo/photo5.jpg" alt="Gallery 5"></label>
-          <div class="pop-overlay"><label for="pop5"><img src="./Photo/photo5.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop6" class="pop-check">
-          <label for="pop6"><img src="./Photo/photo6.jpg" alt="Gallery 6"></label>
-          <div class="pop-overlay"><label for="pop6"><img src="./Photo/photo6.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop7" class="pop-check">
-          <label for="pop7"><img src="./Photo/photo7.jpg" alt="Gallery 7"></label>
-          <div class="pop-overlay"><label for="pop7"><img src="./Photo/photo7.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop8" class="pop-check">
-          <label for="pop8"><img src="./Photo/photo8.jpg" alt="Gallery 8"></label>
-          <div class="pop-overlay"><label for="pop8"><img src="./Photo/photo8.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop9" class="pop-check">
-          <label for="pop9"><img src="./Photo/photo9.jpg" alt="Gallery 9"></label>
-          <div class="pop-overlay"><label for="pop9"><img src="./Photo/photo9.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop10" class="pop-check">
-          <label for="pop10"><img src="./Photo/photo10.jpg" alt="Gallery 10"></label>
-          <div class="pop-overlay"><label for="pop10"><img src="./Photo/photo10.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop11" class="pop-check">
-          <label for="pop11"><img src="./Photo/photo11.jpg" alt="Gallery 11"></label>
-          <div class="pop-overlay"><label for="pop11"><img src="./Photo/photo11.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop12" class="pop-check">
-          <label for="pop12"><img src="./Photo/photo12.jpg" alt="Gallery 12"></label>
-          <div class="pop-overlay"><label for="pop12"><img src="./Photo/photo12.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop13" class="pop-check">
-          <label for="pop13"><img src="./Photo/photo13.jpg" alt="Gallery 13"></label>
-          <div class="pop-overlay"><label for="pop13"><img src="./Photo/photo13.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop14" class="pop-check">
-          <label for="pop14"><img src="./Photo/photo14.jpg" alt="Gallery 14"></label>
-          <div class="pop-overlay"><label for="pop14"><img src="./Photo/photo14.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop15" class="pop-check">
-          <label for="pop15"><img src="./Photo/photo15.jpg" alt="Gallery 15"></label>
-          <div class="pop-overlay"><label for="pop15"><img src="./Photo/photo15.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop16" class="pop-check">
-          <label for="pop16"><img src="./Photo/photo16.jpg" alt="Gallery 16"></label>
-          <div class="pop-overlay"><label for="pop16"><img src="./Photo/photo16.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop17" class="pop-check">
-          <label for="pop17"><img src="./Photo/photo17.jpg" alt="Gallery 17"></label>
-          <div class="pop-overlay"><label for="pop17"><img src="./Photo/photo17.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop18" class="pop-check">
-          <label for="pop18"><img src="./Photo/photo18.jpg" alt="Gallery 18"></label>
-          <div class="pop-overlay"><label for="pop18"><img src="./Photo/photo18.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop19" class="pop-check">
-          <label for="pop19"><img src="./Photo/photo19.jpg" alt="Gallery 19"></label>
-          <div class="pop-overlay"><label for="pop19"><img src="./Photo/photo19.jpg"></label></div>
-        </div>
-
-        <div class="gallery-item">
-          <input type="checkbox" id="pop20" class="pop-check">
-          <label for="pop20"><img src="./Photo/photo20.jpg" alt="Gallery 20"></label>
-          <div class="pop-overlay"><label for="pop20"><img src="./Photo/photo20.jpg"></label></div>
-        </div>
-
-      </div>
-    </section>
-
-<!-- Gallery 2 (縦長ギャラリー) -->
-<section class="gallery-section" id="gallery2">
-  <h2 class="section-title">Gallery 2</h2>
-  <div class="gallery-grid v-grid">
-    
-    <!-- 縦長アイテム1 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v21" class="pop-check">
-      <label for="pop-v21">
-        <img src="./Photo/photo21.jpg" alt="Gallery 2-1">
+    <!-- 1つ目の画像セット -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop1" class="pop-check">
+      <label for="pop1">
+        <img src="photo1.jpg" alt="Gallery 1">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v21" class="pop-close-area">
-          <img src="./Photo/photo21.jpg" alt="Gallery 2-1 Large">
-        </label>
+  <!-- 画像全体をlabelで囲むことで、画像タップで閉じられるようになります -->
+        <label for="pop1" class="pop-close-area">×
+        <img src="photo1.jpg" alt="Gallery 1 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム2 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v22" class="pop-check">
-      <label for="pop-v22">
-        <img src="./Photo/photo22.jpg" alt="Gallery 2-2">
+    <!-- 2つ目の画像セット（idを変えて繰り返す） -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop2" class="pop-check">
+      <label for="pop2">
+        <img src="photo2.jpg" alt="Gallery 2">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v22" class="pop-close-area">
-          <img src="./Photo/photo22.jpg" alt="Gallery 2-2 Large">
-        </label>
+        <label for="pop2" class="pop-close-area">
+        <img src="photo2.jpg" alt="Gallery 2 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム3 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v23" class="pop-check">
-      <label for="pop-v23">
-        <img src="./Photo/photo23.jpg" alt="Gallery 2-3">
+    <!-- 3つ目の画像セット -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop3" class="pop-check">
+      <label for="pop3">
+        <img src="photo3.jpg" alt="Gallery 3">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v23" class="pop-close-area">
-          <img src="./Photo/photo23.jpg" alt="Gallery 2-3 Large">
-        </label>
+        <label for="pop3" class="pop-close-area">
+        <img src="photo3.jpg" alt="Gallery 3 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム4 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v24" class="pop-check">
-      <label for="pop-v24">
-        <img src="./Photo/photo24.jpg" alt="Gallery 2-4">
+    <!-- 4つ目の画像セット（idを変えて繰り返す） -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop4" class="pop-check">
+      <label for="pop4">
+        <img src="photo4.jpg" alt="Gallery 4">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v24" class="pop-close-area">
-          <img src="./Photo/photo24.jpg" alt="Gallery 2-4 Large">
-        </label>
+        <label for="pop4" class="pop-close-area">
+        <img src="photo4.jpg" alt="Gallery 4 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム5 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v25" class="pop-check">
-      <label for="pop-v25">
-        <img src="./Photo/photo25.jpg" alt="Gallery 2-5">
+    <!-- 5つ目の画像セット -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop5" class="pop-check">
+      <label for="pop5">
+        <img src="photo5.jpg" alt="Gallery 5">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v25" class="pop-close-area">
-          <img src="./Photo/photo25.jpg" alt="Gallery 2-5 Large">
-        </label>
+        <label for="pop5" class="pop-close-area">×
+        <img src="photo5.jpg" alt="Gallery 5 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム6 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v26" class="pop-check">
-      <label for="pop-v26">
-        <img src="./Photo/photo26.jpg" alt="Gallery 2-6">
+    <!-- 6つ目の画像セット（idを変えて繰り返す） -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop6" class="pop-check">
+      <label for="pop6">
+        <img src="photo6.jpg" alt="Gallery 6">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v26" class="pop-close-area">
-          <img src="./Photo/photo26.jpg" alt="Gallery 2-6 Large">
-        </label>
-      </div>
-    </div>
-    <!-- 縦長アイテム7 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v27" class="pop-check">
-      <label for="pop-v27">
-        <img src="./Photo/photo27.jpg" alt="Gallery 2-7">
+        <label for="pop6" class="pop-close-area">
+        <img src="photo6.jpg" alt="Gallery 6 Large">
       </label>
-      <div class="pop-overlay">
-        <label for="pop-v27" class="pop-close-area">
-          <img src="./Photo/photo27.jpg" alt="Gallery 2-7 Large">
-        </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム8 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v28" class="pop-check">
-      <label for="pop-v28">
-        <img src="./Photo/photo28.jpg" alt="Gallery 2-8">
+    <!-- 7つ目の画像セット -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop7" class="pop-check">
+      <label for="pop7">
+        <img src="photo7.jpg" alt="Gallery 7">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v28" class="pop-close-area">
-          <img src="./Photo/photo28.jpg" alt="Gallery 2-8 Large">
-        </label>
+        <label for="pop7" class="pop-close-area">
+        <img src="photo7.jpg" alt="Gallery 7 Large">
+      </label>
       </div>
     </div>
 
-    <!-- 縦長アイテム9 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v29" class="pop-check">
-      <label for="pop-v29">
-        <img src="./Photo/photo29.jpg" alt="Gallery 2-9">
+    <!-- 8つ目の画像セット（idを変えて繰り返す） -->
+    <div class="gallery-item">
+      <input type="checkbox" id="pop8" class="pop-check">
+      <label for="pop8">
+        <img src="photo8.jpg" alt="Gallery 8">
       </label>
       <div class="pop-overlay">
-        <label for="pop-v29" class="pop-close-area">
-          <img src="./Photo/photo29.jpg" alt="Gallery 2-9 Large">
-        </label>
-      </div>
-    </div>
-
-    <!-- 縦長アイテム10 -->
-    <div class="gallery-item v-item">
-      <input type="checkbox" id="pop-v30" class="pop-check">
-      <label for="pop-v30">
-        <img src="./Photo/photo30.jpg" alt="Gallery 2-10">
+        <label for="pop8" class="pop-close-area">
+        <img src="photo8.jpg" alt="Gallery 8 Large">
       </label>
-      <div class="pop-overlay">
-        <label for="pop-v30" class="pop-close-area">
-          <img src="./Photo/photo30.jpg" alt="Gallery 2-10 Large">
-        </label>
       </div>
     </div>
+    <!-- 必要分（pop1, pop2, pop3...）繰り返す -->
 
   </div>
 </section>
 
 
-    <!-- Profile Section -->
-    <section id="profile">
-      <h2 class="section-title">Profile</h2>
 
-      <article class="cat-profile">
-        <div class="profile-header">
-          <div class="profile-img"><img src="./Photo/a.png" alt="ラグドール"></div>
-          <div class="profile-summary">
-            <h3 class="cat-name">ラグドール<span>Ragdoll</span></h3>
-            <p>「ぬいぐるみ」という名の通り、抱っこされるのが大好きな穏やかな性格。<br>青い瞳とふわふわの被毛が特徴的な、非常に人気のある大型種です。</p>
-          </div>
-        </div>
-          <table class="spec-table">
-            <tr><th>気質</th><td>穏やか、従順、人懐っこい</td></tr>
-            <tr><th>毛種</th><td>長毛種</td></tr>
-            <tr><th>毛質</th><td>シルクのように柔らかく、もつれにくい</td></tr>
-            <tr><th>毛色</th><td>シール、ブルー、チョコ、ライラックなど</td></tr>
-            <tr><th>模様</th><td>ポイント、ミテッド、バイカラー</td></tr>
-            <tr><th>体型</th><td>ロング＆サブスタンシャル（大型でがっしり）</td></tr>
-            <tr><th>体重</th><td>4.5kg 〜 9.0kg</td></tr>
-            <tr><th>初心者向け</th><td>★★★★★（非常に飼いやすい）</td></tr>
-            <tr><th>性格・特性</th><td>鳴き声が小さく、攻撃性が低い。子供や他のペットとも仲良くできる。</td></tr>
-            <tr><th>平均寿命</th><td>12歳 〜 15歳</td></tr>
-          </table>
-      </article>
+    <!-- ==========================================
+         猫種プロフィール（共通クラス：cat-profile）
+         ========================================== -->
 
-      <article class="cat-profile">
-        <div class="profile-header">
-          <div class="profile-img"><img src="./Photo/a.png" alt="スコティッシュフォールド"></div>
-          <div class="profile-summary">
-            <h3 class="cat-name">スコティッシュフォールド<span>Scottish Fold</span></h3>
-            <p>スコティッシュフォールド<span>Scottish Fold</span></h3>
-            <p>最大の特徴は、前方に折れ曲がった可愛らしい耳。<br>のんびりとした温厚な性格で、家族に非常に甘えん坊。<br>遊ぶことも大好きで、日本の住宅環境に最も適した猫種の一つです。</p>
-          </div>
-        </div>
-          <table class="spec-table">
-            <tr><th>気質</th><td>穏やか、温厚、甘えん坊、遊び好き</td></tr>
-            <tr><th>毛種</th><td>短毛種（一部長毛のロングヘアも存在）</td></tr>
-            <tr><th>毛質</th><td>密度が高く、ふかふかとした触り心地</td></tr>
-            <tr><th>毛色</th><td>ホワイト、クリーム、キャリコ、タビーなど多様</td></tr>
-            <tr><th>模様</th><td>ソリッド、タビー、バイカラーなどほぼ全て</td></tr>
-            <tr><th>体型</th><td>セミコビー（丸みを帯びた筋肉質な体型）</td></tr>
-            <tr><th>体重</th><td>3.0kg 〜 6.0kg（中型種）</td></tr>
-            <tr><th>初心者向け</th><td>★★★★★（とても飼いやすく留守番も得意）</td></tr>
-            <tr><th>性格・特性</th><td>折れ耳は全体の約3割。愛嬌のある「スコ座り」をすることがあります。</td></tr>
-            <tr><th>平均寿命</th><td>10歳 〜 13歳</td></tr>
-          </table>
-      </article>
-    </section>
 
-    <!-- Link Section -->
-    <section id="link">
-      <h2 class="section-title">Link</h2>
-      <div class="link-buttons">
-        <a href="#" class="btn">Instagram</a>
-        <a href="#" class="btn">X (Twitter)</a>
-      </div>
-    </section>
+
+<!-- ラグドールのセクション -->
+<section class="cat-profile" id="ragdoll">
+  <div class="profile-header">
+    <div class="profile-img">
+      <img src="a.png" alt="ラグドール">
+    </div>
+    <div class="profile-summary">
+      <h2 class="cat-name">ラグドール<span>Ragdoll</span></h2>
+      <p>「ぬいぐるみ」という名の通り、抱っこされるのが大好きな穏やかな性格。青い瞳とふわふわの被毛が特徴的な、非常に人気のある大型種です。</p>
+    </div>
+  </div>
+
+  <div class="profile-details">
+    <table class="spec-table">
+      <tr><th>気質</th><td>穏やか、従順、人懐っこい</td></tr>
+      <tr><th>毛種</th><td>長毛種</td></tr>
+      <tr><th>毛質</th><td>シルクのように柔らかく、もつれにくい</td></tr>
+      <tr><th>毛色</th><td>シール、ブルー、チョコ、ライラックなど</td></tr>
+      <tr><th>模様</th><td>ポイント、ミテッド、バイカラー</td></tr>
+      <tr><th>体型</th><td>ロング＆サブスタンシャル（大型でがっしり）</td></tr>
+      <tr><th>体重</th><td>4.5kg 〜 9kg</td></tr>
+      <tr><th>初心者向け</th><td>★★★★★（非常に飼いやすい）</td></tr>
+      <tr><th>性格・特性</th><td>鳴き声が小さく、攻撃性が低い。子供や他のペットとも仲良くできる。</td></tr>
+      <tr><th>平均寿命</th><td>12歳 〜 15歳</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- スコティッシュフォールドのセクション -->
+<section class="cat-profile" id="scottish">
+  <div class="profile-header">
+    <div class="profile-img">
+      <img src="a.png" alt="スコティッシュフォールド">
+    </div>
+    <div class="profile-summary">
+      <h2 class="cat-name">スコティッシュフォールド<span>Scottish Fold</span></h2>
+      <p>折れ曲がった耳が特徴。のんびりとした性格で家族と一緒に過ごすのが大好きです。</p>
+    </div>
+  </div>
+
+  <div class="profile-details">
+    <table class="spec-table">
+      <tr><th>気質</th><td>穏やか、従順、人懐っこい</td></tr>
+      <tr><th>毛種</th><td>長毛種</td></tr>
+      <tr><th>毛質</th><td>シルクのように柔らかく、もつれにくい</td></tr>
+      <tr><th>毛色</th><td>シール、ブルー、チョコ、ライラックなど</td></tr>
+      <tr><th>模様</th><td>ポイント、ミテッド、バイカラー</td></tr>
+      <tr><th>体型</th><td>ロング＆サブスタンシャル（大型でがっしり）</td></tr>
+      <tr><th>体重</th><td>4.5kg 〜 9kg</td></tr>
+      <tr><th>初心者向け</th><td>★★★★★（非常に飼いやすい）</td></tr>
+      <tr><th>性格・特性</th><td>鳴き声が小さく、攻撃性が低い。子供や他のペットとも仲良くできる。</td></tr>
+      <tr><th>平均寿命</th><td>12歳 〜 15歳</td></tr>
+    </table>
+  </div>
+</section>
+
+
+
+    <!-- ==========================================
+         Linkセクション
+         ========================================== -->
+
+  <section class="link-section" id="link">
+    <h2 class="section-title">Link</h2>
+    <div class="link-buttons">
+      <a href="index.html" class="btn">Instagram</a>
+      <a href="index.html" class="btn">X (Twitter)</a>
+    </div>
+  </section>
+
   </main>
 
-  <footer class="footer">
-    <p>&copy; 2023 SHERRY's GARDEN. All Rights Reserved.</p>
-  </footer>
 
-  <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
+  <!-- フッター -->
+<footer style="background: #333; color: #fff; text-align: center; padding: 20px; margin-top: 50px;">
+  <p>&copy; 2023 SHERRY's GARDEN. All Rights Reserved.</p>
+</footer>
 
-  <script>
-    // メニュー制御
-    const menuCheck = document.getElementById('menu-btn-check');
-    const menuLinks = document.querySelectorAll('.menu-content a');
-    const menuBg = document.querySelector('.menu-background');
-
-    // リンククリック時に閉じる
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => { menuCheck.checked = false; });
-    });
-
-    // 背景（暗い部分）クリック時に閉じる
-    menuBg.addEventListener('click', () => { menuCheck.checked = false; });
-  </script>
-
+<!-- トップに戻るボタン -->
+<a href="#" class="gotop">
+  <span class="arrow" title="トップへ戻る"></span>
+</a>
 </body>
 </html>
-
-```
