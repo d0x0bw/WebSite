@@ -291,7 +291,7 @@
       margin: 40px auto 0;
     }
 
-      .feature-img {
+    .feature-img {
         flex: 0 0 160px;
         width: 80%;
       }
@@ -327,45 +327,45 @@
     .gallery-item img:hover { transform: scale(1.08); }
 
     .pop-check { display: none; }
-.pop-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(15, 15, 15, 0.95);
-  z-index: 2000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+    .pop-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(15, 15, 15, 0.95);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
 
   /* --- ここを追加：中身を上下左右中央に配置する --- */
-  display: flex;
-  justify-content: center; /* 左右中央 */
-  align-items: center;     /* 上下中央 */
+    display: flex;
+      justify-content: center; /* 左右中央 */
+      align-items: center;     /* 上下中央 */
 }
 
 /* 画像を包むクリックエリア */
-.pop-close-area {
-  display: flex;           /* 追加 */
-  justify-content: center; /* 追加 */
-  align-items: center;     /* 追加 */
-  width: 100%;             /* 100vwから100%に修正 */
-  height: 100%;            /* 100vhから100%に修正 */
-  cursor: pointer;
+    .pop-close-area {
+      display: flex;           /* 追加 */
+      justify-content: center; /* 追加 */
+      align-items: center;     /* 追加 */
+      width: 100%;             /* 100vwから100%に修正 */
+      height: 100%;            /* 100vhから100%に修正 */
+      cursor: pointer;
 }
 
 /* ポップアップされる画像本体 */
-.pop-overlay img {
-  max-width: 90%;
-  max-height: 85%;
-  object-fit: contain;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    .pop-overlay img {
+      max-width: 90%;
+      max-height: 85%;
+      object-fit: contain;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   
   /* 余計な余白がつかないように念のため */
-  margin: auto; 
+    margin: auto; 
 }
 
     .pop-check:checked ~ .pop-overlay { opacity: 1; visibility: visible; }
@@ -374,18 +374,18 @@
 
 
 /* 縦長ギャラリー専用の設定 */
-  .v-grid {
-  grid-template-columns: repeat(4, 1fr); /* 縦長なので3列くらいが綺麗です */
+    .v-grid {
+    grid-template-columns: repeat(4, 1fr); /* 縦長なので3列くらいが綺麗です */
 }
 
-  .v-item {
-  aspect-ratio: 1 / 2 !important; /* 縦横比を2:3に固定（お好みで3/4などに変更可） */
+    .v-item {
+      aspect-ratio: 1 / 2 !important; /* 縦横比を2:3に固定（お好みで3/4などに変更可） */
 }
 
-  @media (max-width: 768px) {
-  .v-grid {
-  grid-template-columns: repeat(2, 1fr); /* スマホでは2列 */
-  gap: 10px;
+    @media (max-width: 768px) {
+    .v-grid {
+      grid-template-columns: repeat(2, 1fr); /* スマホでは2列 */
+      gap: 10px;
   }
 }
 
@@ -493,7 +493,7 @@
       <h2 class="section-title">About</h2>
       <div class="feature-item">
         <div class="feature-img">
-          <img src="./Photo/photo1.jpg" alt="特徴画像">
+          <img src="./Photo/photo1.jpg" alt="特徴画像" title="ラム">
         </div>
         <div class="feature-text">
           <h3>Concept</h3>
@@ -635,10 +635,11 @@
       </div>
     </section>
 
-<!-- Gallery 2 (縦長ギャラリー) -->
-<section class="gallery-section" id="gallery2">
-  <h2 class="section-title">Gallery 2</h2>
-  <div class="gallery-grid v-grid">
+
+    <!-- Gallery Section (縦長ギャラリー) -->
+    <section class="gallery-section" id="gallery2">
+      <h2 class="section-title">Gallery 2</h2>
+      <div class="gallery-grid v-grid">
     
     <!-- 縦長アイテム1 -->
     <div class="gallery-item v-item">
@@ -765,6 +766,32 @@
       <div class="pop-overlay">
         <label for="pop-v30" class="pop-close-area">
           <img src="./Photo/photo30.jpg" alt="Gallery 2-10 Large">
+        </label>
+      </div>
+    </div>
+
+    <!-- 縦長アイテム11 -->
+    <div class="gallery-item v-item">
+      <input type="checkbox" id="pop-v31" class="pop-check">
+      <label for="pop-v31">
+        <img src="./Photo/photo31.jpg" alt="Gallery 2-11">
+      </label>
+      <div class="pop-overlay">
+        <label for="pop-v31" class="pop-close-area">
+          <img src="./Photo/photo31.jpg" alt="Gallery 2-11 Large">
+        </label>
+      </div>
+    </div>
+
+    <!-- 縦長アイテム12 -->
+    <div class="gallery-item v-item">
+      <input type="checkbox" id="pop-v32" class="pop-check">
+      <label for="pop-v32">
+        <img src="./Photo/photo32.jpg" alt="Gallery 2-12">
+      </label>
+      <div class="pop-overlay">
+        <label for="pop-v32" class="pop-close-area">
+          <img src="./Photo/photo32.jpg" alt="Gallery 2-12 Large">
         </label>
       </div>
     </div>
