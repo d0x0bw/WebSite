@@ -1,0 +1,178 @@
+
+html, body {
+
+  background-color: #eeeeee;
+
+}
+
+/* ============================================================
+   スライドショー組み込み用カスタムスタイル（修正・統合版）
+   ============================================================ */
+
+/* ラジオボタンを非表示 */
+.main-image input[type="radio"] {
+  display: none;
+}
+ 
+#slideshow {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  display: block; /* 高さを潰さずに矢印の基準を作る */
+}
+
+/* ▼ PC（画面幅769px以上）でのサイズ・比率の厳密な制御 */
+@media (min-width: 769px) {
+  #slideshow {
+    /* 画面の高さ(100vh)からヘッダー分(120px)を引いた高さを基準に、16:9の横幅を計算して最大幅とする */
+    max-width: calc((100vh - 120px) * 16 / 9); 
+  }
+}
+ 
+.slideContents {
+  position: relative;
+  text-align: center;
+  user-select: none;
+  width: 100%;
+  overflow: hidden; /* スマホでの横はみ出しを徹底防御 */
+  border-radius: 12px; /* サイトの雰囲気に合わせた角丸 */
+}
+ 
+.slideContents section {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateX(100%);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  opacity: 0;
+}
+ 
+.slideContents section img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  vertical-align: middle;
+}
+ 
+/* --- スライド切り替え挙動 --- */
+#switch1:checked ~ #slideshow .slideContents #slide1,
+#switch2:checked ~ #slideshow .slideContents #slide2,
+#switch3:checked ~ #slideshow .slideContents #slide3,
+#switch4:checked ~ #slideshow .slideContents #slide4,
+#switch5:checked ~ #slideshow .slideContents #slide5 {
+  z-index: 1;
+  position: relative;
+  transform: translateX(0);
+  opacity: 1;
+}
+ 
+#switch1:checked ~ #slideshow .slideContents #slide5,
+#switch1:checked ~ #slideshow .slideContents #slide4,
+#switch2:checked ~ #slideshow .slideContents #slide1,
+#switch2:checked ~ #slideshow .slideContents #slide5,
+#switch3:checked ~ #slideshow .slideContents #slide2,
+#switch3:checked ~ #slideshow .slideContents #slide1,
+#switch4:checked ~ #slideshow .slideContents #slide3,
+#switch4:checked ~ #slideshow .slideContents #slide2,
+#switch5:checked ~ #slideshow .slideContents #slide4,
+#switch5:checked ~ #slideshow .slideContents #slide3 {
+  transform: translateX(-100%);
+}
+ 
+#switch1:checked ~ #slideshow .slideContents #slide3,
+#switch2:checked ~ #slideshow .slideContents #slide4,
+#switch3:checked ~ #slideshow .slideContents #slide5,
+#switch4:checked ~ #slideshow .slideContents #slide1,
+#switch5:checked ~ #slideshow .slideContents #slide2 {
+  transition-duration: 0s;
+}
+ 
+/* --- 矢印ナビゲーション（構造と重なりの修正） --- */
+.slide-arrow,
+.slide-arrow label,
+.slide-ico {
+  position: absolute;
+}
+ 
+.slide-arrow {
+  top: 0;
+  margin: 0;
+  height: 100%;
+  width: 60px; /* タップ・クリック可能な横幅 */
+  background: transparent;
+  transition: background 0.3s;
+  z-index: 20; /* ★重要：スライド画像(z-index:1)より手前に浮かせる */
+  cursor: pointer;
+}
+
+/* 常に画像の左右両端にぴったり固定 */
+.slide-arrow.prev { left: 0; }
+.slide-arrow.next { right: 0; }
+ 
+@media (max-width: 768px) {
+  .slide-arrow {
+    width: 45px; /* スマホでは幅を少しスリムにして写真を見やすく */
+  }
+}
+ 
+/* ホバー時にほんのり暗くするエフェクト（PCのみ） */
+@media (hover: hover) {
+  .slide-arrow:hover {
+    background: rgba(0, 0, 0, 0.08);
+  }
+}
+ 
+.slide-arrow label {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  pointer-events: none;
+}
+ 
+/* 矢印アイコン本体（サイト共通の落ち着いたダークグレー） */
+.slide-ico {
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-top: 2px solid var(--text-color, #333); /* 変数が無い場合も#333で保険 */
+  border-right: 2px solid var(--text-color, #333);
+  opacity: 0.6;
+  z-index: 25; /* アイコンも最前面に */
+  transition: all 0.3s ease;
+}
+ 
+.slide-arrow.prev .slide-ico {
+  left: 50%;
+  transform: translate(-20%, -50%) rotate(-135deg);
+}
+ 
+.slide-arrow.next .slide-ico {
+  right: 50%;
+  transform: translate(20%, -50%) rotate(45deg);
+}
+
+/* ホバー時に矢印が細かく動く演出（PCのみ） */
+@media (hover: hover) {
+  .slide-arrow.prev:hover .slide-ico { transform: translate(-50%, -50%) rotate(-135deg); opacity: 1; }
+  .slide-arrow.next:hover .slide-ico { transform: translate(50%, -50%) rotate(45deg); opacity: 1; }
+}
+ 
+/* --- クリック判定の有効化（クラス指定の修正） --- */
+#switch1:checked ~ #slideshow .slide-arrow.prev label[for="switch5"],
+#switch2:checked ~ #slideshow .slide-arrow.prev label[for="switch1"],
+#switch3:checked ~ #slideshow .slide-arrow.prev label[for="switch2"],
+#switch4:checked ~ #slideshow .slide-arrow.prev label[for="switch3"],
+#switch5:checked ~ #slideshow .slide-arrow.prev label[for="switch4"],
+ 
+#switch1:checked ~ #slideshow .slide-arrow.next label[for="switch2"],
+#switch2:checked ~ #slideshow .slide-arrow.next label[for="switch3"],
+#switch3:checked ~ #slideshow .slide-arrow.next label[for="switch4"],
+#switch4:checked ~ #slideshow .slide-arrow.next label[for="switch5"],
+#switch5:checked ~ #slideshow .slide-arrow.next label[for="switch1"] {
+  pointer-events: auto;
+}

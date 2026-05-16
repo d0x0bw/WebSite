@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>slideshow</title>
+  <link rel="stylesheet" href="slideshow.css">
+
+</head>
+<body>
+
+  <div class="main-image">
+    <input type="radio" name="slideshow" id="switch1" checked>
+    <input type="radio" name="slideshow" id="switch2">
+    <input type="radio" name="slideshow" id="switch3">
+    <input type="radio" name="slideshow" id="switch4">
+    <input type="radio" name="slideshow" id="switch5">
+    
+    <div id="slideshow">
+      <div class="slideContents">
+        <section id="slide1"><img src="./Photo/photo.jpg" alt="メインイメージ1" title="シェリーとラム"></section>
+        <section id="slide2"><img src="./Photo/photo1.jpg" alt="メインイメージ2"></section>
+        <section id="slide3"><img src="./Photo/photo2.jpg" alt="メインイメージ3"></section>
+        <section id="slide4"><img src="./Photo/photo3.jpg" alt="メインイメージ4"></section>
+        <section id="slide5"><img src="./Photo/photo4.jpg" alt="メインイメージ5"></section>
+      </div>
+      
+      <p class="slide-arrow prev">
+        <i class="slide-ico"></i>
+        <label for="switch1"></label>
+        <label for="switch2"></label>
+        <label for="switch3"></label>
+        <label for="switch4"></label>
+        <label for="switch5"></label>
+      </p>
+      
+      <p class="slide-arrow next">
+        <i class="slide-ico"></i>
+        <label for="switch1"></label>
+        <label for="switch2"></label>
+        <label for="switch3"></label>
+        <label for="switch4"></label>
+        <label for="switch5"></label>
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>
