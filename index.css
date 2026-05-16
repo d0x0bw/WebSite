@@ -374,6 +374,41 @@ section { scroll-margin-top: 90px; padding: 60px 0; }
   aspect-ratio: 1 / 2 !important;
 }
 
+/* ============================================================
+   ギャラリー「More」ボタンの設定
+   ============================================================ */
+.gallery-more-btn {
+  /* PCでは4列目（一番右）に強制配置 */
+  grid-column: 4; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed var(--accent-color);
+  background-color: rgba(164, 138, 92, 0.03); /* アクセントカラーを薄く敷く */
+  border-radius: 6px;
+  color: var(--accent-color);
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: var(--transition-smooth);
+}
+
+/* ホバー時の演出 */
+.gallery-more-btn:hover {
+  background-color: var(--accent-color);
+  color: #fff;
+  border-style: solid;
+}
+
+/* --- スマホ向けのレスポンシブ設定 --- */
+@media (max-width: 768px) {
+  .gallery-more-btn {
+    /* スマホ（2列構成）では、左右いっぱいに広げて中央配置 */
+    grid-column: 1 / -1; 
+    aspect-ratio: auto; /* 縦長ギャラリーなどで形が崩れるのを防ぐ */
+    padding: 15px 0;
+    margin-top: 10px;
+  }
+}
 @media (max-width: 768px) {
   .v-grid {
     grid-template-columns: repeat(2, 1fr);
