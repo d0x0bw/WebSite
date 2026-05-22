@@ -10,20 +10,21 @@
 
   <header class="header">
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
-    <input type="checkbox" id="menu-btn-check">
-    <label for="menu-btn-check" class="menu-btn"><span></span></label>
-
-    <nav class="menu-content">
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#profile">Profile</a></li>
-        <li><a href="#link">Link</a></li>
-      </ul>
-    </nav>
-    <label for="menu-btn-check" class="menu-background"></label>
   </header>
+
+  <input type="checkbox" id="menu-btn-check">
+  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+
+  <nav class="menu-content">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#profile">Profile</a></li>
+      <li><a href="#link">Link</a></li>
+    </ul>
+  </nav>
+  <label for="menu-btn-check" class="menu-background"></label>
 
   <main class="content">
     <div class="main-image">
@@ -45,7 +46,7 @@
       <h2 class="section-title">About</h2>
       <div class="feature-item">
         <div class="feature-img">
-          <img src="icon.jpg" alt="画像" title="ラム">
+          <img src="icon.png" alt="画像" title="ラム">
         </div>
         <div class="feature-text">
           <h3>Concept</h3>
@@ -178,7 +179,7 @@
             <p>好奇心旺盛、元気で活発な女の子。<br>温かみのあるオレンジ色の縞模様がチャームポイント。<br>親しみやすさと愛嬌で、みんなを笑顔にしてくれるアイドルです。</p>
           </div>
         </div>
-<table class="spec-table">
+        <table class="spec-table">
           <tr><th>性格</th><td>甘えん坊、陽気、人懐っこい、好奇心旺盛、食いしん坊(笑)</td></tr>
           <tr><th>毛種</th><td>短毛種</td></tr>
           <tr><th>毛質</th><td>柔らかく、密度の高い日本猫らしい毛並み</td></tr>
@@ -199,9 +200,8 @@
     <section id="link">
       <h2 class="section-title">Link</h2>
       <div class="link-buttons">
-        <a href="#" class="btn">Instagram</a>
-        <a href="#" class="btn">X (Twitter)</a>
-        <a href="../index.html" class="btn">d0x0bw</a>
+        <a href="../index.html" class="btn">X (Twitter)</a>
+        <a href="../index.html" class="btn">GitHub Pages</a>
       </div>
     </section>
   </main>
@@ -217,11 +217,37 @@
     const menuLinks = document.querySelectorAll('.menu-content a');
     const menuBg = document.querySelector('.menu-background');
 
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => { menuCheck.checked = false; });
+    // --- メニュー開閉時にスクロールを制御 ---
+    menuCheck.addEventListener('change', () => {
+      if (menuCheck.checked) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     });
 
-    menuBg.addEventListener('click', () => { menuCheck.checked = false; });
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => { 
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    });
+
+    menuBg.addEventListener('click', () => { 
+      menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+
+    // --- トップへ戻るボタンの制御 ---
+    const goTopBtn = document.querySelector('.gotop');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        goTopBtn.classList.add('is-show');
+      } else {
+        goTopBtn.classList.remove('is-show');
+      }
+    });
   </script>
 
 </body>
