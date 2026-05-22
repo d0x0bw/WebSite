@@ -10,18 +10,19 @@
 
   <header class="header">
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
-    <input type="checkbox" id="menu-btn-check">
-    <label for="menu-btn-check" class="menu-btn"><span></span></label>
+  </header>
 
-    <nav class="menu-content">
+  <input type="checkbox" id="menu-btn-check">
+  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+
+  <nav class="menu-content">
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="#gallery1">Gallery1</a></li>
         <li><a href="#gallery2">Gallery2</a></li>
       </ul>
-    </nav>
-    <label for="menu-btn-check" class="menu-background"></label>
-  </header>
+  </nav>
+  <label for="menu-btn-check" class="menu-background"></label>
 
   <main class="content">
     
@@ -31,8 +32,8 @@
 
 
     <!-- Gallery Section -->
-    <section class="gallery-section" id="gallery1">
-      <h2 class="section-title">Gallery1</h2>
+    <section id="gallery">
+      <h2 class="section-title">Gallery</h2>
       <div class="gallery-grid">
 
         <!-- 繰り返し項目は構造を統一 -->
@@ -349,18 +350,41 @@
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
   <script>
-    // メニュー制御
     const menuCheck = document.getElementById('menu-btn-check');
     const menuLinks = document.querySelectorAll('.menu-content a');
     const menuBg = document.querySelector('.menu-background');
 
-    // リンククリック時に閉じる
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => { menuCheck.checked = false; });
+    // --- メニュー開閉時にスクロールを制御 ---
+    menuCheck.addEventListener('change', () => {
+      if (menuCheck.checked) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     });
 
-    // 背景（暗い部分）クリック時に閉じる
-    menuBg.addEventListener('click', () => { menuCheck.checked = false; });
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => { 
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    });
+
+    menuBg.addEventListener('click', () => { 
+      menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+
+    // --- トップへ戻るボタンの制御 ---
+    const goTopBtn = document.querySelector('.gotop');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        goTopBtn.classList.add('is-show');
+      } else {
+        goTopBtn.classList.remove('is-show');
+      }
+    });
   </script>
 
 </body>

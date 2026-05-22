@@ -10,19 +10,21 @@
 
   <header class="header">
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
-    <input type="checkbox" id="menu-btn-check">
-    <label for="menu-btn-check" class="menu-btn"><span></span></label>
+  </header>
 
-    <nav class="menu-content">
+  <input type="checkbox" id="menu-btn-check">
+  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+
+  <nav class="menu-content">
       <ul>
         <li><a href="index.html">Home</a></li>
+        <li><a href="#Rum">Rum(Red Tabby Mix)</a></li>
         <li><a href="#Ragdoll">Ragdoll</a></li>
         <li><a href="#Scottish Fold">Scottish Fold</a></li>
         <li><a href="#Norwegian Forest Cat">Norwegian Forest Cat</a></li>
       </ul>
-    </nav>
-    <label for="menu-btn-check" class="menu-background"></label>
-  </header>
+  </nav>
+  <label for="menu-btn-check" class="menu-background"></label>
 
   <main class="content">
 
@@ -33,7 +35,26 @@
     <section id="profile">
       <h2 class="section-title">Profile</h2>
 
-      <article class="cat-profile" id="Ragdoll">
+      <article class="cat-profile" id="Rum">
+        <div class="profile-header">
+          <div class="profile-img"><img src="./Photo/rum.jpg" alt="茶トラ白（まるどら）"></div>
+          <div class="profile-summary">
+            <h3 class="cat-name"><big>ラム</big>(茶トラ白)<span><big>Rum</big>(Red Tabby Mix)</span></h3>
+            <p>好奇心旺盛、元気で活発な女の子。<br>温かみのあるオレンジ色の縞模様がチャームポイント。<br>親しみやすさと愛嬌で、みんなを笑顔にしてくれるアイドルです。</p>
+          </div>
+        </div>
+        <table class="spec-table">
+          <tr><th>性格</th><td>甘えん坊、陽気、人懐っこい、好奇心旺盛、食いしん坊(笑)</td></tr>
+          <tr><th>毛種</th><td>短毛種</td></tr>
+          <tr><th>毛質</th><td>柔らかく、密度の高い日本猫らしい毛並み</td></tr>
+          <tr><th>毛色</th><td>ジンジャー（明るい茶色）、ホワイト</td></tr>
+          <tr><th>模様</th><td>マッカレルタビー（魚の骨のような美しい縞模様）</td></tr>
+          <tr><th>体型</th><td>コラットまたはフォーリン（スマートで引き締まった体型）</td></tr>
+          <tr><th>チャームポイント</th><td>クリクリの大きな瞳と、おでこの見事なM字マーク</td></tr>
+        </table>
+      </article>
+
+     <article class="cat-profile" id="Ragdoll">
         <div class="profile-header">
           <div class="profile-img"><img src="./Profile/ragdoll .jpg" alt="ラグドール"></div>
           <div class="profile-summary">
@@ -120,11 +141,37 @@
     const menuLinks = document.querySelectorAll('.menu-content a');
     const menuBg = document.querySelector('.menu-background');
 
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => { menuCheck.checked = false; });
+    // --- メニュー開閉時にスクロールを制御 ---
+    menuCheck.addEventListener('change', () => {
+      if (menuCheck.checked) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     });
 
-    menuBg.addEventListener('click', () => { menuCheck.checked = false; });
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => { 
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    });
+
+    menuBg.addEventListener('click', () => { 
+      menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+
+    // --- トップへ戻るボタンの制御 ---
+    const goTopBtn = document.querySelector('.gotop');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        goTopBtn.classList.add('is-show');
+      } else {
+        goTopBtn.classList.remove('is-show');
+      }
+    });
   </script>
 
 </body>
