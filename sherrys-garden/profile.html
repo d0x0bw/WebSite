@@ -162,16 +162,22 @@
       document.body.style.overflow = ''; 
     });
 
-    // --- トップへ戻るボタンの制御 ---
-    const goTopBtn = document.querySelector('.gotop');
+// --- トップへ戻るボタンの制御 ---
+const goTopBtn = document.querySelector('.gotop');
 
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 200) {
-        goTopBtn.classList.add('is-show');
-      } else {
-        goTopBtn.classList.remove('is-show');
-      }
-    });
+if (goTopBtn) {
+  goTopBtn.classList.add('js-hidden');
+}
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 200) {
+    goTopBtn.classList.remove('js-hidden');
+    goTopBtn.classList.add('is-show');
+  } else {
+    goTopBtn.classList.add('js-hidden');
+    goTopBtn.classList.remove('is-show');
+  }
+});
   </script>
 
 </body>

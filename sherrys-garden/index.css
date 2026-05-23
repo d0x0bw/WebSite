@@ -486,28 +486,58 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 .footer { background: var(--text-color); color: rgba(255,255,255,0.6); padding: 30px; margin-top: 60px; font-size: 0.8rem; }
 
 /* --- トップへ戻るボタン（初期状態は非表示） --- */
+/* --- トップへ戻るボタン --- */
 .gotop {
-  position: fixed; right: 20px; bottom: 20px;
-  width: 45px; height: 45px; background: rgba(51,51,51,0.8);
-  border-radius: 50%; display: flex; justify-content: center; align-items: center;
+  position: fixed; 
+  right: 20px; 
+  bottom: 20px;
+  width: 45px; 
+  height: 45px; 
+  background: rgba(51,51,51,0.8);
+  border-radius: 50%; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
   z-index: 900; 
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(15px);
+  
+  /* ★【JSオフ（初期状態）の設定】 */
+  /* 最初から通常通り表示（不透明・クリック可能） */
+  opacity: 1;             
+  visibility: visible;    
+  pointer-events: auto;   
+  transform: translateY(0);
+  
+  /* フェードイン・アウトのアニメーション */
   transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.is-show.gotop {
+/* ★【JSオンの時の制御用クラス】 */
+/* JSが読み込まれたら、このクラスを付与して「非表示状態」に */
+.gotop.js-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(15px); /* 単位(px)を補完 */
+}
+
+/* スクロールされたら、このクラスを付けて出現させる */
+.gotop.is-show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
 }
 
-.is-show.gotop:hover { 
+.gotop:hover { 
   background: #000; 
   transform: translateY(-5px); 
 }
 
-.arrow { width: 8px; height: 8px; border-top: 2px solid #fff; border-right: 2px solid #fff; transform: rotate(-45deg); margin-top: 4px; }
+.arrow { 
+  width: 8px; 
+  height: 8px; 
+  border-top: 2px solid #fff; 
+  border-right: 2px solid #fff; 
+  transform: rotate(-45deg); 
+  margin-top: 4px; 
+}
