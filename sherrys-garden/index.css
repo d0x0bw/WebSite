@@ -239,11 +239,65 @@ img {
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-.main-image-wrapper img {
+/* 親要素を相対配置にし、高さを固定（アスペクト比を維持） */
+.main-image-wrapper {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
+}
+
+/* 画像をすべて重ね合わせる */
+.main-image-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  transition: transform 2s ease;
+  opacity: 0; /* 初期状態はすべて非表示 */
+  
+  /* アニメーションの設定：30秒かけてループ再生 */
+  animation: fadeSlider 30s infinite;
+}
+
+/* --- 時間差（ディレイ）の設定 ---
+   全体の時間を 24秒 とした場合の設定 */
+
+/* 1枚目：ディレイなし */
+.main-image-wrapper img:nth-child(1) {
+  animation-delay: 0s;
+}
+
+/* 2枚目：8秒遅らせてスタート */
+.main-image-wrapper img:nth-child(2) {
+  animation-delay: 10s;
+}
+
+/* 3枚目：16秒遅らせてスタート */
+.main-image-wrapper img:nth-child(3) {
+  animation-delay: 20s;
+}
+
+/* --- フェードイン・アウトのアニメーション（3枚用） ---
+   0%〜20%（最初の4秒弱）で表示され、そこからじわじわ消えていく計算 */
+@keyframes fadeSlider {
+  0% {
+    opacity: 0;
+    transform: scale(1); /* ほんのりズームさせる場合 */
+  }
+  5% {
+    opacity: 1; /* ふわっと表示 */
+  }
+  30% {
+    opacity: 1; /* 表示を維持 */
+  }
+  38% {
+    opacity: 0; /* ふわっと消える */
+    transform: scale(1.00); /* 消えながら縮小拡大する場合は値を増減 */
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .main-image-wrapper img:hover { transform: scale(1.05); }
@@ -253,7 +307,7 @@ img {
   font-size: clamp(2.2rem, 6vw, 4.5rem);
   font-weight: bold;
   color: rgba(0,0,0,0.1);
-  background-image: url('./Photo/photo.jpg');
+  background-image: url('./Photo/top photo.jpg');
   background-size: cover;
   background-position: center;
   -webkit-background-clip: text;
