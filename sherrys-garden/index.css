@@ -256,8 +256,8 @@ img {
   object-fit: cover;
   opacity: 0; /* 初期状態はすべて非表示 */
   
-  /* アニメーションの設定：30秒かけてループ再生 */
-  animation: fadeSlider 30s infinite;
+  /* アニメーションの設定：24秒かけてループ再生 */
+  animation: fadeSlider 24s infinite;
 }
 
 /* --- 時間差（ディレイ）の設定 ---
@@ -270,12 +270,12 @@ img {
 
 /* 2枚目：8秒遅らせてスタート */
 .main-image-wrapper img:nth-child(2) {
-  animation-delay: 10s;
+  animation-delay: 8s;
 }
 
 /* 3枚目：16秒遅らせてスタート */
 .main-image-wrapper img:nth-child(3) {
-  animation-delay: 20s;
+  animation-delay: 16s;
 }
 
 /* --- フェードイン・アウトのアニメーション（3枚用） ---
