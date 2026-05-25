@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEST PAGE</title>
+  <title>Computer Science Laboratory</title>
   <style>
     /* === 全体のリセットとベース設定 === */
     * {
@@ -48,7 +48,7 @@
       border-top-right-radius: 12px;
     }
     .site-header h1 {
-      font-size: 24px;
+      font-size: 1.5rem;
       font-family: 'Comic Sans MS', sans-serif;
       margin: 0 0 5px 0;
     }
@@ -63,7 +63,7 @@
       vertical-align: middle;
     }
     .site-subtitle {
-      font-size: 12px;
+      font-size: 0.750rem;
       color: #4f3930;
     }
 
@@ -89,7 +89,7 @@
     .main-nav a {
       display: block;
       padding: 8px 0;
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-family: Verdana, sans-serif;
       color: #4f3930;
       background-color: #f3efd5;
@@ -131,7 +131,7 @@
     }
 
     /* ==========================================
-       ★ バーガーメニュー（隠しチェックボックス・ボタン）
+       バーガーメニュー（隠しチェックボックス・ボタン）
     ========================================== */
     #nav-toggle {
       display: none;
@@ -205,7 +205,7 @@
         border-right: none;
         border-bottom: solid 1px #d3b391;
         padding: 12px 20px;
-        font-size: 14px;
+        font-size: 0.875rem;
       }
       .main-nav ul ul {
         display: block;
@@ -219,7 +219,7 @@
         background-color: #eaddbd;
         border: none;
         border-bottom: solid 1px #cbb082;
-        font-size: 12px;
+        font-size: 0.750rem;
       }
 
       #nav-toggle:checked ~ .main-nav {
@@ -257,17 +257,21 @@
     }
     .sidebar-left div {
       margin-bottom: 4px;
+      font-size: 0.9375rem;
+      font-weight: bold;
+      color: #4f3930;
     }
-    /* ★変更：左サイドバー内リンクボタンの角を丸くする */
+    /* 左サイドバー内リンクボタンの角を丸くする */
+ 
     .sidebar-left a {
       display: block;
       padding: 8px 10px 8px 15px;
-      font-size: 12px;
+      font-size: 0.750rem;
       font-weight: bold;
       color: #4f3930;
       background-color: #d3b391;
       border: solid 1px #4f3930;
-      border-radius: 4px;              /* 角を4px丸くして優しい印象に */
+      border-radius: 4px; /* 角を4px丸くして優しい印象に */
     }
     .sidebar-left a:hover {
       background-color: #cd7755;
@@ -288,7 +292,7 @@
     }
     .photo-info .photo-title {
       display: block;
-      font-size: 15px;
+      font-size: 0.9375rem;
       font-weight: bold;
       margin-bottom: 8px;
     }
@@ -309,7 +313,7 @@
       position: absolute;
       right: 10px;
       bottom: 10px;
-      font-size: 11px;
+      font-size: 0.6875rem;
       color: #ffffff;
       background-color: rgba(79, 57, 48, 0.75);
       padding: 3px 8px;
@@ -317,9 +321,9 @@
       letter-spacing: 0.5px;
     }
 
-    /* ★変更：中央メインのH1タイトル枠の角を丸くする */
+    /* 中央メインのH1タイトル枠の角を丸くする */
     .main-content h1 {
-      font-size: 16px;
+      font-size: 1rem;
       font-family: Arial, sans-serif;
       border: solid 1px #4f3930;
       padding: 4px;
@@ -327,19 +331,19 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      border-radius: 4px;              /* 枠線の角を4px丸くする */
+      border-radius: 4px; /* 枠線の角を4px丸くする */
     }
     .main-content h1 img {
       display: block;
     }
     .main-content h2 {
       border-bottom: solid 3px #4f3930;
-      font-size: 14px;
+      font-size: 0.875rem;
       padding-bottom: 3px;
       margin: 0 0 15px 0;
     }
     .main-content p {
-      font-size: 12px;
+      font-size: 0.750rem;
       line-height: 1.6;
       margin: 0 0 15px 0;
     }
@@ -352,7 +356,7 @@
     }
     .card-item {
       flex: 1;
-      font-size: 11px;
+      font-size: 0.6875rem;
       line-height: 1.5;
     }
     .card-item img {
@@ -369,7 +373,7 @@
     }
     .photo-section h3 {
       border-top: solid 1px #4f3930;
-      font-size: 14px;
+      font-size: 0.875rem;
       padding-top: 5px;
       margin: 15px 0 10px 0;
     }
@@ -400,7 +404,7 @@
     }
     .more-photos-btn {
       display: inline-block;
-      font-size: 12px;
+      font-size: 0.750rem;
       font-weight: bold;
       color: #4f3930;
       background-color: #d3b391;
@@ -424,9 +428,9 @@
       /* PC表示時、右下の角を丸く切り抜く */
       border-bottom-right-radius: 12px;
     }
-    /* ★右サイドバーの小見出し（SUBMENU）枠の角を丸くする */
+    /* 右サイドバーの小見出し（SUBMENU）枠の角を丸くする */
     .sidebar-right .submenu {
-      font-size: 12px;
+      font-size: 0.750rem;
       font-family: Arial, sans-serif;
       background-color: #d3b391;
       border: solid 1px #4f3930;
@@ -444,7 +448,7 @@
       margin-top: 0;
     }
     .sidebar-right .archive-item {
-      font-size: 12px;
+      font-size: 0.750rem;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
@@ -461,7 +465,7 @@
     .site-footer {
       border-top: solid 3px #336666;
       padding: 15px 0;
-      font-size: 10px;
+      font-size: 0.625rem;
       text-align: center;
     }
     .site-footer a {
@@ -481,7 +485,7 @@
       height: 50px;
       background-color: #4f3930;
       color: #f3efd5;
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-weight: bold;
       text-align: center;
       line-height: 1.2;
@@ -538,6 +542,8 @@
       }
       .photo-grid a {
         flex: 0 0 calc(25% - 5px);
+        font-size: 0.625rem;
+        line-height: 1.5;
       }
     }
   </style>
@@ -549,7 +555,7 @@
   <header class="site-header">
     <h1 lang="en">
       <a href="home.html">
-        <img src="title.gif" alt="TEST PAGE">
+        <img src="logo.png" alt="Computer Science Laboratory">
       </a>
     </h1>
     <div class="site-subtitle">TEST PAGE</div>
@@ -567,26 +573,27 @@
       <ul>
         <li><a href="home.html">HOME</a></li>
         <li>
-          <a href="home.html">Antispyware</a>
+          <a href="home.html">Antimalware</a>
           <ul>
-            <li><a href="home.html">spybot</a></li>
-            <li><a href="#">a-squared</a></li>
-            <li><a href="#">spywareblaster</a></li>
+            <li><a href="#">kaspersky</a></li>
+            <li><a href="#">bitdefender</a></li>
+            <li><a href="#">eset</a></li>
             <li><a href="#">windows defender</a></li>
           </ul>
         </li>
         <li>
           <a href="home.html">Antispyware</a>
           <ul>
+            <li><a href="#">malwarebytes</a></li>
             <li><a href="#">spybot</a></li>
             <li><a href="#">a-squared</a></li>
             <li><a href="#">spywareblaster</a></li>
-            <li><a href="#">windows defender</a></li>
           </ul>
         </li>
         <li>
           <a href="home.html">PersonalFireWall</a>
           <ul>
+            <li><a href="#">simple firewall pro</a></li>
             <li><a href="#">jetico personalfirewall</a></li>
             <li><a href="#">comodo firewall pro</a></li>
           </ul>
@@ -594,8 +601,8 @@
         <li>
           <a href="home.html">LINK</a>
           <ul>
-            <li><a href="#">Cyber TA</a></li>
-            <li><a href="#">IME</a></li>
+            <li><a href="#">MITRE ATT&CK</a></li>
+            <li><a href="#">Computer Science Laboratory</a></li>
           </ul>
         </li>
         <li><a href="home.html">ETC</a></li>
@@ -606,8 +613,9 @@
   <div class="site-content">
 
     <aside class="sidebar-left">
-      <div><a href="#">vol.1 パスタ</a></div>
-      <div><a href="#">vol.2 緑の風景</a></div>
+      <div>最新コラム</div>
+      <div><a href="#">Cybersecurity for executives online training</a></div>
+      <div><a href="#">Cyber capacity building program</a></div>
       <div><a href="#">vol.3 バラ園</a></div>
       <div><a href="#">vol.4 コスモス</a></div>
       <div><a href="#">vol.5 蜂蜜の味</a></div>
@@ -628,7 +636,7 @@
         </div>
       </div>
 
-      <h1 lang="en"><img src="logo.gif" alt="">タイトル</h1>
+      <h1 lang="en"><img src="title.png" alt="">タイトル</h1>
       <h2>サブタイトル</h2>
 
       <p>お散歩ついでに覗いてみると気持ちいいかもしれません。</p>
@@ -692,7 +700,7 @@
       <p>どれみふぁそらしど</p>
 
       <footer class="site-footer">
-        Copyright (C) <a href="index.html">INDEX</a>, All Rights Reserved.
+        Copyright (C) <a href="../index.html">d0x0bw</a>, All Rights Reserved.
       </footer>
 
     </main>
