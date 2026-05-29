@@ -6,794 +6,788 @@
   <title>TEST SITE2</title>
   <style>
 
-/* ==========================================================================
-   1. 全体・リセット設定（サイト共通のベース）
-   ========================================================================== */
-html, body {
-	margin: 0;
-	padding: 0;
-	height: 100vh;
-	font-size: 14px; /* 画面幅900px以上で16pxに拡張されます */
-}
-
-body {
-	font-family: "ヒラギノ丸ゴ Pro", "Hiragino Maru Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
-	-webkit-text-size-adjust: none;
-	background: #e8e4da url(./images/bg.jpg) repeat center center/200px;
-	color: #595037;
-	line-height: 2;
-}
-
-figure, dd, nav, ul {
-	margin: 0;
-	padding: 0;
-}
-
-ul {
-	margin-bottom: 30px;
-}
-
-img {
-	border: none;
-	max-width: 100%;
-	height: auto;
-	vertical-align: middle;
-}
-
-a {
-	color: #ccc;
-	text-decoration: none;
-	transition: 0.3s;
-}
-
-a:hover {
-	opacity: 0.8;
-}
-
-
-/* ==========================================================================
-   2. 主要レイアウト（背景・ヘッダー・メニュー・フッター）
-   ========================================================================== */
-/* メイン背景イメージ */
-#mainimg {
-	text-indent: -9999px;
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: -1;
-	width: 100%;
-	height: 100%;
-	background: url(./images/bg_main.jpg) no-repeat center center / cover;
-}
-
-/* ヘッダー全体 */
-header {
-	height: auto;
-	background-color: #2e2e2e; /* 👈 上部を暗いグレーで満たす */
-	display: flow-root;        /* 👈 上部の隙間（マージンのはみ出し）を完全にシャットアウトする設定 */
-}
-
-/* ロゴ画像（薄い影つき） */
-header #logo img {
-	width: 48px;
-	position: fixed;
-	left: 14px;
-	top: 18px;
-	filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.12));
-}
-
-/* メインメニュー（丸型ボタン） */
-#menubar li {
-	display: inline-block;
-	position: fixed;
-	text-align: center;
-	font-size: 1.5em;
-	border-radius: 50%;
-	box-shadow: 0px 0px 30px rgba(0,0,0,0.3);
-	overflow: hidden;
-	animation: opa1 1.5s both;
-	transition: 0.5s;
-}
-
-#menubar li a {
-	display: block;
-	color: #000;
-}
-
-#menubar li:hover {
-	transform: scale(1.05);
-	filter: brightness(1.1);
-}
-
-/* 各メニューの個別配置（backgroundをrgbaに変更して少し透過0.66） */
-#menubar li:nth-of-type(1) { left: 1%; top: 15%; animation-delay: 0.2s; background: rgba(255, 255, 255, 0.66); width: 90px; line-height: 90px; }
-/* Gallery */
-#menubar li:nth-of-type(2) { left: 1%; top: 28%; animation-delay: 0.4s; background: rgba(255, 255, 255, 0.66); width: 100px; line-height: 100px; }
-/* Link */
-#menubar li:nth-of-type(3) { left: 3%; top: 42.2%; animation-delay: 0.6s; background: rgba(255, 255, 255, 0.66); width: 70px; line-height: 70px; }
-
-/* フッター */
-footer {
-	font-size: 0.6em;
-	text-align: center;
-	padding: 20px;
-	color: #595037;
-}
-
-footer a {
-	color: #211d13;
-}
-
-footer .pr {
-	display: block;
-}
-
-
-/* ==========================================================================
-   3. メインコンテンツ・装飾（テキスト・見出し・背景・テーブル）
-   ========================================================================== */
-.contents {
-	overflow: hidden;
-	padding: 0 4% 50px 124px;
-}
-
-/* 最初のコンテンツブロックの余白リセット（トップ画像用） */
-main .contents:first-of-type,
-main .contents:first-of-type section {
-	padding-top: 0 !important;
-	margin-top: 0 !important;
-}
-
-main .contents:first-of-type img {
-	display: block;
-	margin: 0 auto;
-	border-radius: 20px;
-}
-
-/* 大きな背景透過テキスト */
-.text {
-	font-family: var(--font-serif);
-	font-size: clamp(2.2rem, 6vw, 4.5rem);
-	font-weight: bold;
-	text-align: center;
-	color: rgba(0,0,0,0.1);
-	background-image: url('./Photo/top photo.jpg');
-	background-size: cover;
-	background-position: center;
-	-webkit-background-clip: text;
-	background-clip: text;
-	margin-bottom: 30px;
-	letter-spacing: 6px;
-	max-width: 100%;
-	overflow: hidden;
-	word-wrap: break-word;
-	-webkit-text-stroke: 0.4px #c9c9c9; /* 縁取り */
-	paint-order: stroke fill;       /* 縁取り線が文字の内側を潰さないようにする設定 */
-}
-
-/* 各種見出し */
-main h2 {
-	font-size: 2em;
-	margin-bottom: 20px;
-	text-align: center;
-	letter-spacing: 0.2em;
-}
-
-main h2::before {
-	content: "＊";
-	display: block;
-	text-shadow: 20px 10px 0px rgba(255,255,255,0.5);
-}
-
-main h2 span {
-	display: block;
-	font-size: 0.7em;
-}
-
-main h3 {
-	margin-bottom: 20px;
-	letter-spacing: 0.1em;
-	background: rgba(255,255,255,0.3);
-	text-align: center;
-	border-radius: 30px;
-	padding: 0px 20px;
-}
-
-main p {
-	padding: 0 30px 30px;
-}
-
-/* 各セクションの背景画像（または背景色） */
-.bg1 { background: url(./images/bg1a.jpg) repeat center top/ 200px #2e2e2e; }
-.bg2 { background: url(./images/bg2a.jpg) repeat center top/ 200px; }
-.bg3 { background: url(./images/bg3a.jpg) repeat center top/ 200px #1a1613; }
-
-/* bg4のエリア全体を白文字にする */
-.bg4 { 
-	background: url(../images/bg4.jpg) repeat center top/ 200px #6a6158; 
-	color: #fff; /* 通常のテキストを白にする */
-}
-
-/* bg4の中にある「見出し(h2)」も白にする */
-.bg4 h2 {
-	color: #fff;
-}
-
-/* bg4の中にある「テーブルの文字と枠線」も白っぽく調整する */
-.bg4 .ta1, 
-.bg4 .ta1 tr {
-	border-color: rgba(255, 255, 255, 0.4); /* 枠線を白透明にする */
-}
-.bg4 .ta1 th, 
-.bg4 .ta1 td {
-	color: #fff; /* 表の中の文字を白にする */
-}
-.bg4 .ta1 th a {
-	color: #fff;             /* サイト名の色を白にする */
-	text-decoration: underline; /* リンクと分かりやすくするために下線をつける（不要なら削除OK） */
-}
-
-/* マウスを乗せたときに、わかりやすく少し透明にする演出 */
-.bg4 .ta1 th a:hover {
-	opacity: 0.6;
-}
-
-
-/* フォトギャラリーの画像自体の角を丸くする */
-.contents table td a img {
-	border-radius: 12px;
-	transition: transform 0.3s ease; /* マウスを乗せたときの動きを滑らかに */
-}
-
-/* マウスを乗せたときに少しだけフワッと大きくする */
-.contents table td a:hover img {
-	transform: scale(1.03);
-}
-
-/* 一般テーブル (Linkセクションなど) */
-.ta1 {
-	border-collapse: collapse;
-	border-top: 1px solid rgba(255,255,255,0.5);
-	width: 100%;
-	margin: 0 auto 30px;
-}
-
-.ta1 tr {
-	border-bottom: 1px solid rgba(255,255,255,0.5);
-}
-
-.ta1 caption {
-	font-weight: bold;
-	padding: 10px 5px;
-	background: rgba(255,255,255,0.2);
-	margin-bottom: 15px;
-	border-radius: 5px;
-}
-
-.ta1 th, .ta1 td {
-	padding: 10px 5px;
-	word-break: break-all;
-}
-
-.ta1 th {
-	width: 30%;
-	text-align: left;
-}
-
-
-/* ==========================================================================
-   4. 固有機能パーツ（Lightbox風ギャラリー・TOPボタン・ユーティリティ）
-   ========================================================================== */
-/* CSSのみのLightbox機能 */
-.lb {
-	display: flex;
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	justify-content: center;
-	align-items: center;
-	background: rgba(0,0,0,.7);
-	opacity: 0;
-	transition: .3s opacity ease;
-	pointer-events: none;
-	z-index: 100;
-}
-
-.lb img {
-	width: auto !important;
-	max-height: 100% !important;
-	cursor: pointer;
-	transform: scale(.85);
-	transition: .3s all ease;
-}
-
-.lb:target {
-	opacity: 1;
-	pointer-events: auto;
-	z-index: 101;
-}
-
-.lb:target img {
-	transform: scale(1);
-}
-
-.lb::before, .lb::after {
-	display: block;
-	position: fixed;
-	content: "";
-	width: 24px;
-	height: 3px;
-	top: 24px;
-	right: 12px;
-	background: #fff;
-	border-radius: 4px;
-}
-
-.lb::before { transform: rotate(-315deg); }
-.lb::after { transform: rotate(315deg); }
-
-/* スクロール連動型 TOPに戻るボタン */
-#gotop {
-	display: block;
-	position: fixed;
-	z-index: 99;
-	right: 25px;
-	bottom: 25px;
-	background: rgba(255, 255, 255, 0.4);
-	width: 40px;
-	height: 40px;
-	border-radius: 50%;
-	box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-	text-indent: -9999px;
-	overflow: hidden;
-	transition: all 0.3s ease;
-	animation: showGoTop linear both;
-	animation-timeline: scroll();
-	animation-range: 0px 300px;
-}
-
-#gotop::after {
-	content: "";
-	position: absolute;
-	top: 55%;
-	left: 50%;
-	width: 10px;
-	height: 10px;
-	border-top: 2.5px solid #595037;
-	border-left: 2.5px solid #595037;
-	transform: translate(-50%, -50%) rotate(45deg);
-}
-
-#gotop:hover {
-	transform: translateY(-3px);
-	background: rgba(255, 255, 255, 0.95);
-}
-
-@keyframes showGoTop {
-	from { opacity: 0; pointer-events: none; }
-	to { opacity: 1; pointer-events: auto; }
-}
-
-/* ユーティリティクラス */
-.color-theme, .color-theme a { color: #74791b !important; }
-.color-check, .color-check a { color: #f00 !important; }
-.c { text-align: center !important; }
-.ws { width: 95%; display: block; }
-.mb30 { margin-bottom: 30px !important; }
-.look { display: inline-block; padding: 0px 10px; background: #666; color: #fff; border-radius: 3px; margin: 5px 0; }
-.look .color-check { color: #ffcc00 !important; }
-
-
-/* ==========================================================================
-   5. レスポンシブ設定（画面幅・デバイスに応じた調整）
-   ========================================================================== */
-
-/* ── スマホ横画面用の調整 ── */
-@media screen and (max-width:900px) and (orientation: landscape) {
-	.contents {
-		padding-left: 130px;
-	}
-}
-
-/* ── スマホ・タブレット（縦横共通）/ ハンバーガーメニュー有効化 ── */
-@media screen and (max-width: 900px), screen and (max-height: 620px) {
-	#menubar li {
-		position: static !important;
-		display: block !important;
-		width: 100% !important;
-		line-height: 60px !important;
-		box-shadow: none !important;
-		border-bottom: 1px solid rgba(0,0,0,0.05);
-		animation: none !important;
-		border-radius: 0 !important;
-	}
-
-	header nav {
-		position: fixed;
-		top: 0;
-		left: -100%;
-		width: 250px;
-		height: 100vh;
-		background: rgba(255, 255, 255, 0.98);
-		z-index: 98;
-		padding-top: 100px;
-		box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-		overflow-y: auto;
-		transition: all 0.4s ease;
-	}
-
-	/* メニュー展開時にリンクをタップしたら閉じるための透明オーバーレイ（CSSのみで完結） */
-	.close-overlay {
-		display: none;
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100vw;
-		height: 100vh;
-		z-index: -1; /* メニューの文字（li）のすぐ後ろに配置 */
-		cursor: pointer;
-	}
-
-	/* ハンバーガーメニューが開いた時だけ透明オーバーレイを有効化 */
-	#menu-btn-check:checked ~ nav .close-overlay {
-		display: block;
-	}
-
-	.menu-btn {
-		position: fixed;
-		top: 20px;
-		right: 20px;
-		display: flex;
-		height: 44px;
-		width: 44px;
-		justify-content: center;
-		align-items: center;
-		z-index: 99;
-		background: #fff;
-		border-radius: 50%;
-		box-shadow: 0 0 15px rgba(0,0,0,0.2);
-		cursor: pointer;
-	}
-
-	.menu-btn span, .menu-btn span::before, .menu-btn span::after {
-		content: '';
-		display: block;
-		height: 3px;
-		width: 22px;
-		border-radius: 3px;
-		background: #595037;
-		position: absolute;
-		transition: all 0.3s ease;
-	}
-	.menu-btn span::before { bottom: 8px; }
-	.menu-btn span::after { top: 8px; }
-
-	#menu-btn-check:checked ~ .menu-btn span { background: rgba(255, 255, 255, 0); }
-	#menu-btn-check:checked ~ .menu-btn span::before { bottom: 0; transform: rotate(45deg); }
-	#menu-btn-check:checked ~ .menu-btn span::after { top: 0; transform: rotate(-45deg); }
-	
-	#menu-btn-check:checked ~ nav { left: 0; }
-
-	.contents {
-		padding-left: 10% !important;
-		padding-right: 10% !important;
-	}
-	main .contents:first-of-type {
-		padding-top: 0 !important;
-	}
-}
-
-/* ── PC環境（画面幅901px以上 ＆ 十分な高さがある場合） ── */
-@media screen and (min-width: 901px) and (min-height: 621px) {
-	html, body {
-		font-size: 16px;
-	}
-
-	.menu-btn {
-		display: none;
-	}
-
-	header #logo img {
-		width: 220px;
-		left: 5%;
-	}
-
-	#menubar li {
-		font-size: 2em;
-	}
-
-	#menubar li:nth-of-type(1) { left: 12%; top: 20%; width: 150px; line-height: 150px; }
-	#menubar li:nth-of-type(2) { left: 4%; top: 36%; width: 190px; line-height: 190px; }
-	#menubar li:nth-of-type(3) { left: 12%; top: 58%; width: 130px; line-height: 130px; }
-
-	.contents {
-		padding: 0 4% 50px 35%;
-	}
-
-	main .contents:first-of-type {
-		padding-top: 0 !important;
-	}
-
-	.ta1 caption { padding: 5px 15px; }
-	.ta1 th, .ta1 td { padding: 20px 15px; }
-	.ta1 th { width: 20%; }
-
-	.ws { width: 48%; display: inline; }
-}
-
-/* アニメーションキーフレーム */
-@keyframes opa1 {
-	0% { opacity: 0; }
-	100% { opacity: 1; }
-}
+    /* ==========================================================================
+       1. 全体・リセット設定（サイト共通のベース）
+       ========================================================================== */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        font-size: 14px; /* 画面幅900px以上で16pxに拡張されます */
+    }
+
+    body {
+        font-family: "ヒラギノ丸ゴ Pro", "Hiragino Maru Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+        -webkit-text-size-adjust: none;
+        background: #e8e4da url(./images/bg.jpg) repeat center center/200px;
+        color: #595037;
+        line-height: 2;
+    }
+
+    figure, dd, nav, ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    ul {
+        margin-bottom: 30px;
+    }
+
+    img {
+        border: none;
+        max-width: 100%;
+        height: auto;
+        vertical-align: middle;
+    }
+
+    a {
+        color: #ccc;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    a:hover {
+        opacity: 0.8;
+    }
+
+
+    /* ==========================================================================
+       2. 主要レイアウト（背景・ヘッダー・メニュー・フッター）
+       ========================================================================== */
+    /* メイン背景イメージ */
+    #mainimg {
+        text-indent: -9999px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        background: url(./images/bg_main.jpg) no-repeat center center / cover;
+    }
+
+    /* ヘッダー全体 */
+    header {
+        height: auto;
+        background-color: #2e2e2e; /* 上部を暗いグレーで満たす */
+        display: flow-root;        /* 上部の隙間（マージンのはみ出し）を完全にシャットアウトする設定 */
+    }
+
+    /* ロゴ画像（薄い影つき） */
+    header #logo img {
+        width: 48px;
+        position: fixed;
+        left: 14px;
+        top: 18px;
+        filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.12));
+    }
+
+    /* メインメニュー（丸型ボタンの共通設定） */
+    #menubar li {
+        display: inline-block;
+        position: fixed;
+        text-align: center;
+        font-size: 1.5em;
+        border-radius: 50%;
+        box-shadow: 0px 0px 30px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: opa1 1.5s both;
+        transition: 0.5s;
+    }
+
+    #menubar li a {
+        display: block;
+        color: #000;
+    }
+
+    #menubar li:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+
+    /* 各メニューの個別配置（backgroundをrgbaに変更して少し透過0.66） */
+    #menubar li:nth-of-type(1) { left: 1%; top: 15%; animation-delay: 0.2s; background: rgba(255, 255, 255, 0.66); width: 90px; line-height: 90px; } /* About */
+    #menubar li:nth-of-type(2) { left: 1%; top: 28%; animation-delay: 0.4s; background: rgba(255, 255, 255, 0.66); width: 100px; line-height: 100px; } /* Gallery */
+    #menubar li:nth-of-type(3) { left: 3%; top: 42.2%; animation-delay: 0.6s; background: rgba(255, 255, 255, 0.66); width: 70px; line-height: 70px; } /* Link */
+
+    /* フッター */
+    footer {
+        font-size: 0.6em;
+        text-align: center;
+        padding: 20px;
+        color: #595037;
+    }
+
+    footer a {
+        color: #211d13;
+    }
+
+    footer .pr {
+        display: block;
+    }
+
+
+    /* ==========================================================================
+       3. メインコンテンツ・装飾（テキスト・見出し・背景・テーブル）
+       ========================================================================== */
+    .contents {
+        overflow: hidden;
+        padding: 0 4% 50px 124px;
+    }
+
+    /* 最初のコンテンツブロックの余白リセット（トップ画像用） */
+    main .contents:first-of-type,
+    main .contents:first-of-type section {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    main .contents:first-of-type img {
+        display: block;
+        margin: 0 auto;
+        border-radius: 20px;
+    }
+
+    /* 大きな背景透過テキスト（文字型抜き演出） */
+    .text {
+        font-family: var(--font-serif);
+        font-size: clamp(2.2rem, 6vw, 4.5rem);
+        font-weight: bold;
+        text-align: center;
+        color: rgba(0,0,0,0.1);
+        background-image: url('./Photo/top photo.jpg');
+        background-size: cover;
+        background-position: center;
+        -webkit-background-clip: text;
+        background-clip: text;
+        margin-bottom: 30px;
+        letter-spacing: 6px;
+        max-width: 100%;
+        overflow: hidden;
+        word-wrap: break-word;
+        -webkit-text-stroke: 0.4px #c9c9c9; /* 縁取り */
+        paint-order: stroke fill;           /* 縁取り線が文字の内側を潰さないようにする設定 */
+    }
+
+    /* 各種見出し */
+    main h2 {
+        font-size: 2em;
+        margin-bottom: 20px;
+        text-align: center;
+        letter-spacing: 0.2em;
+    }
+
+    main h2::before {
+        content: "❄";
+        display: block;
+        text-shadow: 14px 12px 0px rgba(255,255,255,0.12);
+    }
+
+    main h2 span {
+        display: block;
+        font-size: 0.7em;
+    }
+
+    main h3 {
+        margin-bottom: 20px;
+        letter-spacing: 0.1em;
+        background: rgba(255,255,255,0.3);
+        text-align: center;
+        border-radius: 30px;
+        padding: 0px 20px;
+    }
+
+    main p {
+        padding: 0 30px 30px;
+    }
+
+    /* 各セクションの背景画像設定 */
+    .bg1 { background: url(./images/bg1a.jpg) repeat center top/ 200px #2e2e2e; }
+    .bg2 { background: url(./images/bg2a.jpg) repeat center top/ 200px; }
+    .bg3 { background: url(./images/bg3a.jpg) repeat center top/ 200px #1a1613; }
+
+    /* bg4（リンクエリア全体）のカラーカスタマイズ */
+    .bg4 { 
+        background: url(../images/bg4.jpg) repeat center top/ 200px #6a6158; 
+        color: #fff; /* 通常のテキストを白にする */
+    }
+
+    .bg4 h2 {
+        color: #fff;
+    }
+
+    /* bg4内にあるリンクテーブル用の白基調デザイン */
+    .bg4 .ta1, 
+    .bg4 .ta1 tr {
+        border-color: rgba(255, 255, 255, 0.4); /* 枠線を白透明にする */
+    }
+    .bg4 .ta1 th, 
+    .bg4 .ta1 td {
+        color: #fff; /* 表の中の文字を白にする */
+    }
+    .bg4 .ta1 th a {
+        color: #fff;               /* サイト名の色を白にする */
+        text-decoration: underline; /* リンクと分かりやすくするために下線をつける */
+    }
+    .bg4 .ta1 th a:hover {
+        opacity: 0.6;
+    }
+
+    /* 一般リンクテーブル (Linkセクション) の配置・中央寄せ設定 */
+    .ta1 {
+        border-collapse: collapse;
+        border-top: 1px solid rgba(255,255,255,0.5);
+        width: 100%;
+        max-width: 600px;   /* 広がりすぎ防止用の最大幅 */
+        margin: 0 auto 30px; /* 左右を「auto」にすることで、テーブル本体を中央配置 */
+    }
+
+    .ta1 tr {
+        border-bottom: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .ta1 caption {
+        font-weight: bold;
+        padding: 10px 5px;
+        background: rgba(255,255,255,0.2);
+        margin-bottom: 15px;
+        border-radius: 5px;
+    }
+
+    /* リンクテーブル内のテキストも中央揃えにする設定 */
+    .ta1 th, .ta1 td {
+        padding: 10px 5px;
+        word-break: break-all;
+        text-align: center; /* 文字をすべて中央寄せにする */
+    }
+
+    .ta1 th {
+        width: 40%; /* 左右の表示比率バランスを綺麗に整える調整 */
+    }
+
+
+    /* ==========================================================================
+       4. 固有機能パーツ（改良版・CSSのみのLightboxギャラリー）
+       ========================================================================== */
+    /* トリガー用のチェックボックス本体は画面から隠す */
+    .lb-check {
+        display: none;
+    }
+
+    /* 一覧（サムネイル）画像のスタイルとホバー演出 */
+    .open-btn {
+        cursor: pointer;
+        display: block;
+    }
+
+    .open-btn img {
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .open-btn:hover img {
+        transform: scale(1.03);
+    }
+
+    /* ポップアップ展開時の背景（ブラックアウト）全体のレイアウト */
+    .lb-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 101; /* 他のパーツ（ヘッダー等）より必ず手前に出す設定 */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    /* 画像の周りの「黒い背景」をタップして閉じるための透明ボタンエリア */
+    .close-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 102;
+    }
+
+    /* ポップアップ右上の「×」マークをCSSで描画 */
+    .close-btn::before, .close-btn::after {
+        content: "";
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        width: 30px;
+        height: 3px;
+        background: #fff;
+        border-radius: 2px;
+        z-index: 104;
+    }
+    .close-btn::before { transform: rotate(45deg); }
+    .close-btn::after { transform: rotate(-45deg); }
+
+    /* 拡大画像自体を包むラッパー（画像クリックでも閉じられるようにするための設定） */
+    .lb-img-wrap {
+        cursor: pointer;
+        z-index: 103; /* 背景のclose-btnより手前に配置してクリック可能にする */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 90%;
+        height: 85vh;
+    }
+
+    /* 拡大表示される画像自体のスタイル設定 */
+    .lb-img-wrap img {
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    /* 💡 【重要】チェックボックスがON（画像タップ）された時の表示切り替え挙動 */
+    .lb-check:checked ~ .lb-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* ポップアップ表示と連動して、画像をふわっと実寸（scale 1）にするアニメーション */
+    .lb-check:checked ~ .lb-overlay .lb-img-wrap img {
+        transform: scale(1);
+    }
+
+
+    /* ==========================================================================
+       5. 共通パーツ（TOPに戻るボタン ＆ ユーティリティクラス）
+       ========================================================================== */
+    /* スクロール連動型 TOPに戻るボタン */
+    #gotop {
+        display: block;
+        position: fixed;
+        z-index: 99;
+        right: 25px;
+        bottom: 25px;
+        background: rgba(255, 255, 255, 0.4);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+        text-indent: -9999px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        animation: showGoTop linear both;
+        animation-timeline: scroll();
+        animation-range: 0px 300px;
+    }
+
+    #gotop::after {
+        content: "";
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        width: 10px;
+        height: 10px;
+        border-top: 2.5px solid #595037;
+        border-left: 2.5px solid #595037;
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    #gotop:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    @keyframes showGoTop {
+        from { opacity: 0; pointer-events: none; }
+        to { opacity: 1; pointer-events: auto; }
+    }
+
+    /* ユーティリティクラス（微調整用の便利設定パーツ） */
+    .color-theme, .color-theme a { color: #74791b !important; }
+    .color-check, .color-check a { color: #f00 !important; }
+    .c { text-align: center !important; }
+    .ws { width: 95%; display: block; }
+    .mb30 { margin-bottom: 30px !important; }
+    .look { display: inline-block; padding: 0px 10px; background: #666; color: #fff; border-radius: 3px; margin: 5px 0; }
+    .look .color-check { color: #ffcc00 !important; }
+
+
+    /* ==========================================================================
+       6. レスポンシブ設定（画面幅・デバイスに応じた調整）
+       ========================================================================== */
+
+    /* ── スマホ横画面用の調整 ── */
+    @media screen and (max-width:900px) and (orientation: landscape) {
+        .contents {
+            padding-left: 130px;
+        }
+    }
+
+    /* ── スマホ・タブレット（縦横共通）/ ハンバーガーメニュー有効化設定 ── */
+    @media screen and (max-width: 900px), screen and (max-height: 620px) {
+        #menubar li {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
+            line-height: 60px !important;
+            box-shadow: none !important;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            animation: none !important;
+            border-radius: 0 !important;
+        }
+
+        header nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 250px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 98;
+            padding-top: 100px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            transition: all 0.4s ease;
+        }
+
+        /* メニュー展開時に背後をタップしたら閉じるための透明オーバーレイ（CSSのみで完結） */
+        .close-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            cursor: pointer;
+        }
+
+        /* ハンバーガーメニューが開いた時だけ透明オーバーレイを有効化 */
+        #menu-btn-check:checked ~ nav .close-overlay {
+            display: block;
+        }
+
+        /* スマホ用三本線メニューボタンの土台（丸い白ボタン） */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            height: 44px;
+            width: 44px;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        /* ハンバーガーメニューの三本線をCSSで描画 */
+        .menu-btn span, .menu-btn span::before, .menu-btn span::after {
+            content: '';
+            display: block;
+            height: 3px;
+            width: 22px;
+            border-radius: 3px;
+            background: #595037;
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+        .menu-btn span::before { bottom: 8px; }
+        .menu-btn span::after { top: 8px; }
+
+        /* ボタンがチェック（オープン状態）された時の三本線⇒×印へのトランスフォーム */
+        #menu-btn-check:checked ~ .menu-btn span { background: rgba(255, 255, 255, 0); }
+        #menu-btn-check:checked ~ .menu-btn span::before { bottom: 0; transform: rotate(45deg); }
+        #menu-btn-check:checked ~ .menu-btn span::after { top: 0; transform: rotate(-45deg); }
+        
+        #menu-btn-check:checked ~ nav { left: 0; }
+
+        .contents {
+            padding-left: 10% !important;
+            padding-right: 10% !important;
+        }
+        main .contents:first-of-type {
+            padding-top: 0 !important;
+        }
+    }
+
+    /* ── PC環境（画面幅901px以上 ＆ 十分な高さがある画面用） ── */
+    @media screen and (min-width: 901px) and (min-height: 621px) {
+        html, body {
+            font-size: 16px;
+        }
+
+        .menu-btn {
+            display: none;
+        }
+
+        header #logo img {
+            width: 220px;
+            left: 5%;
+        }
+
+        #menubar li {
+            font-size: 2em;
+        }
+
+        /* メニュー（丸型ボタン）をPC大画面時に左側に縦並びで美しく配置する設定 */
+        #menubar li:nth-of-type(1) { left: 12%; top: 20%; width: 150px; line-height: 150px; }
+        #menubar li:nth-of-type(2) { left: 4%; top: 36%; width: 190px; line-height: 190px; }
+        #menubar li:nth-of-type(3) { left: 12%; top: 58%; width: 130px; line-height: 130px; }
+
+        .contents {
+            padding: 0 4% 50px 35%;
+        }
+
+        main .contents:first-of-type {
+            padding-top: 0 !important;
+        }
+
+        /* リンク用テーブルのPC表示時における余白と中央配置の最適化 */
+        .ta1 caption { padding: 5px 15px; }
+        .ta1 th, .ta1 td { padding: 20px 15px; }
+        .ta1 th { 
+            width: 40%;
+            text-align: center; /* PCでもサイト名テキストを中央揃えにする */
+        }
+    }
+
+    /* メニューフェードイン用のアニメーション */
+    @keyframes opa1 {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
 
   </style>
 </head>
 
 <body>
 
-<aside id="mainimg">メインイメージ</aside>
-
-<header>
-
-<h1 id="logo"><a href="index.html"><img src="images/logo.png" alt="Sherry's Garden"></a></h1>
-
-<input type="checkbox" id="menu-btn-check" style="display: none;">
-<label for="menu-btn-check" class="menu-btn"><span></span></label>
-
-<nav>
-<ul id="menubar">
-<li><a href="#about">About</a></li>
-<li><a href="#gallery">Gallery</a></li>
-<li><a href="#link">Link</a></li>
-<li><a href="#"><i class="fab fa-instagram"></i></a></li>
-</ul>
-<!-- 🔗 CSSのみでメニューを自動で解除（閉じる）するための透明トリガーを配置 -->
-<label for="menu-btn-check" class="close-overlay"></label>
-</nav>
-
-</header>
-
-<main>
-
-<div class="contents bg1">
-
-<section>
-<img src="./Photo/top photo.jpg" alt="Top Photo">
-<p class="text">SHERRY's GARDEN</p>
-</section>
-
-</div>
-
-
-<div class="contents bg2" id="about">
-
-<section>
-
-<h2>猫たちと過ごす穏やかな時間</h2>
-
-
-<h3>May all living things be treated with love.🌞🌜️✨️</h3>
-<br>
-
-<p>
-世界各地の文化には、すべての生命を神聖なものとし、敬意を払う素晴らしい哲学や教えが存在します。<br>
-代表的な4つの視点を紹介します。
-</p>
-
-<p>
-🕉️ インドの「アヒンサー（非暴力）」<br>
-・概要：仏教、ジャイナ教、ヒンドゥー教の根底にある核心的な教えです。<br>
-・思想：言葉や行動だけでなく、心の中でも「あらゆる生き物を傷つけない」ことを目指します。<br>
-・影響：すべての命はつながっており、他者を変に傷つけることは自分を傷つけること（カルマ）と考え、菜食主義の基盤となりました。<br>
-<br>
-🕊️ 北米先住民の「すべてのものは私の親族（オール・マイ・リレーションズ）」<br>
-概要：ラコタ族など、ネイティブ・アメリカンに伝わる世界観です。<br>
-思想：人間、動物、植物、環境、そして岩や川までもが、すべて一つの大きな家族（親族）であると考えます。<br>
-影響：自然から何かを得るときは必ず感謝を捧げ、必要以上の狩猟や採取を行せず、
-次の「7世代先」の子供たちのために自然を残すという行動規範が生み出されました。<br>
-<br>
-⛩️ 日本の「アニミズム（八百万の神）」と「慈悲の心」<br>
-・概要：神道や日本仏教に深く根ざした自然観です。<br>
-・思想：あらゆる自然物や道具にまで神が宿るとする「八百万の神」の考え方や、
-草木や国土さえも成仏できるとする「草木国土悉皆成仏（そうもくこくどしっかいじょうぶつ）」の思想があります。<br>
-・影響：生き物だけでなく、役目を終えた針や人形、筆などに感謝を込めて供養する「針供養」や「人形供養」といった独自の文化が育まれました。<br>
-<br>
-🌍 アフリカの「ウブントゥ（Ubuntu）」<br>
-・概要：南アフリカのバンツー語群に由来する倫理思想です。<br>
-・思想：「あなたがいるから、私がいる（私は私たちを通じて私となる）」という意味を持ちます。<br>
-・影響：元々は人と人とのつながりや優しさを表す言葉ですが、
-現代では「人間は自然環境や他の生き物との相互関係の中でしか生きられない」という、生態系全体への敬意としても解釈されています。
-</p>
-
-
-<h3>アプローチこそ異なれど「すべての生命を愛し、尊ぶ」という共通の目的地を持つ思想。</h3>
-<p>
-<span class="look">仏教の「慈悲（じひ）」</span><br>
-
-・概要：生きとし生けるものが苦しみから逃れ、幸せであるようにと願う、仏教の根底にある慈愛の心です。<br>
-・思想：「慈（じ）」は友愛（幸せを願う心）、「悲（ひ）」は同情（苦しみを除く心）を意味します。
-仏教では「すべての命は繋がり合っている（縁起）」と考えます。他者の苦しみは自分の苦しみであり、
-他者の幸せは自分の幸せであるという「自他一如（じたいちにょ）」の境地から生まれる無条件の愛です。<br>
-・影響：アジア全域の文化や道徳観に深く溶け込みました。
-「殺生（せっしょう）を戒める」文化を生み、精進料理の発展や、
-動物を供養する風習（現代のペット供養など）に繋がっています。<br><br>
-
-
-<span class="look">キリスト教の「アガペー（無償の愛）」</span><br>
-
-・概要：神から人間や全被造物（作られた命）へと注がれる、見返りを求めない絶対的な愛です。<br>
-・思想
-人間が何かを成し遂げたから愛されるのではなく、不完全なままで「ただ存在していること」を肯定する愛です。
-聖書では、すべての自然や生き物は神が愛を込めて創造したものとされます。
-そのため、すべての命を等しく尊び、大切にすることが神の愛に応える道であると考えます。<br>
-・影響：近代の「基本的人権」や「平等主義」の思想的土台となりました。
-また、マザー・テレサに代表されるような、国境や宗教を超えた国際的な福祉活動や
-人道支援の精神（ボランティア精神）に大きな影響を与え続けています。<br><br>
-
-
-<span class="look">先住民族の「調和（ちょうわ）」</span><br>
-
-・ 概要：人間・動物・植物・大自然をすべて同じ「地球の家族」と捉え、バランスを保って共生する生き方です。<br>
-・ 思想：人間を自然の支配者ではなく、大きな循環の一端にすぎないと考えます。
-例えばアメリカ先住民（ネイティブ・アメリカン）の間では
-「すべてのものは私に繋がっている（ミタクエ・オヤシン）」という言葉があります。
-生き物を生きるためにいただく（狩る）際も、命への感謝と敬意を払い、必要以上の搾取を行いません。<br>
-・ 影響：現代の「環境倫理学」や「サステナビリティ（持続可能性）」の思想に極めて大きな影響を与えました。
-人間中心主義による環境破壊への反省から、彼らの「7世代先の子供たちのために自然を残す」という知恵が世界中で再評価されています。<br><br>
-
-</p>
-<p>
-
----- 💡 これら3つの思想の視点（あるいは共通点）について ----<br>
-
-仏教、キリスト教、そして先住民族の思想には、時代や場所を超えて深く結びつく3つの決定的な共通点があります。<br><br>
-
-<span class="look">1. 「すべての命は繋がっている」という全体論（ホリズム）</span><br>
-どの思想も、人間を孤立した存在としては捉えていません。<br>
-仏教：すべての存在が原因と結果で結びついている（縁起）。<br>
-キリスト教：すべての命が同じ神によって創られたきょうだいである。<br>
-先住民族：人間も草木もすべて地球という一つの家族である。<br>
-「自分と他者は地続きである」という認識があるからこそ、他の生命への愛が自然と湧き上がります。<br><br>
-
-<span class="look">2. 「見返りを求めない」無条件の優しさ</span><br>
-相手が自分に利益をもたらすから大切にする、という「取引」の姿勢を明確に否定しています。<br>
-仏教：敵や味方の区別なく、すべての生き物の幸せを願う（平等大慈悲）。<br>
-キリスト教：罪人であっても、ただ存在していることを肯定して愛する（アガペー）。<br>
-先住民族：自然からの恵みを独占せず、分かち合い、次の世代のために残す。<br>
-利己主義を超えた、純粋な利他主義（他者を思いやる心）が根底にあります。<br><br>
-
-<span class="look">3. 「命をいただくこと」への謙虚さと痛み</span><br>
-私たちは他の命を奪わなければ生きていけない、という冷厳な事実に対する、深い謙虚さを持っています。<br>
-仏教：不殺生を理想としつつ、命をいただく罪自覚から「いただきます」の感謝が生まれる。<br>
-キリスト教：神が与えてくれた日々の糧に感謝を捧げる（食前の祈り）。<br>
-先住民族：狩った動物の魂に祈りを捧げ、決して無駄にしない。<br>
-命を神聖視するからこそ、生きるための「消費」に対しても深い敬意と祈りが伴います。
-
-</p>
-
-
-</section>
-
-</div>
-
-
-<div class="contents bg3" id="gallery">
-
-<section>
-
-
-<h2>Photo Gallery</h2>
-
-<table>
-<tr>
-<td>
-<a href="#sample01"><img src="./Photo/photo 1.jpg" alt="Photo 1"></a>
-<a id="sample01" href="#close" class="lb"><img src="./Photo/photo 1.jpg" alt="Photo 1"></a>
-</td>
-
-<td>
-<a href="#sample02"><img src="./Photo/photo 2.jpg" alt="Photo 2"></a>
-<a id="sample02" href="#close" class="lb"><img src="./Photo/photo 2.jpg" alt="Photo 2"></a>
-</td>
-
-<td>
-<a href="#sample03"><img src="./Photo/photo 3.jpg" alt="Photo 3"></a>
-<a id="sample03" href="#close" class="lb"><img src="./Photo/photo 3.jpg" alt="Photo 3"></a>
-</td>
-
-<td>
-<a href="#sample04"><img src="./Photo/photo 4.jpg" alt="Photo 4"></a>
-<a id="sample04" href="#close" class="lb"><img src="./Photo/photo 4.jpg" alt="Photo 4"></a>
-</td>
-</tr>
-
-<tr>
-<td>
-<a href="#sample05"><img src="./Photo/photo 5.jpg" alt="Photo 5"></a>
-<a id="sample05" href="#close" class="lb"><img src="./Photo/photo 5.jpg" alt="Photo 5"></a>
-</td>
-
-<td>
-<a href="#sample06"><img src="./Photo/photo 6.jpg" alt="Photo 6"></a>
-<a id="sample06" href="#close" class="lb"><img src="./Photo/photo 6.jpg" alt="Photo 6"></a>
-</td>
-
-<td>
-<a href="#sample07"><img src="./Photo/photo 7.jpg" alt="Photo 7"></a>
-<a id="sample07" href="#close" class="lb"><img src="./Photo/photo 7.jpg" alt="Photo 7"></a>
-</td>
-
-<td>
-<a href="#sample08"><img src="./Photo/photo 8.jpg" alt="Photo 8"></a>
-<a id="sample08" href="#close" class="lb"><img src="./Photo/photo 8.jpg" alt="Photo 8"></a>
-</td>
-</tr>
-
-<tr>
-<td>
-<a href="#sample09"><img src="./Photo/photo 9.jpg" alt="Photo 9"></a>
-<a id="sample09" href="#close" class="lb"><img src="./Photo/photo 9.jpg" alt="Photo 9"></a>
-</td>
-
-<td>
-<a href="#sample10"><img src="./Photo/photo 10.jpg" alt="Photo 10"></a>
-<a id="sample10" href="#close" class="lb"><img src="./Photo/photo 10.jpg" alt="Photo 10"></a>
-</td>
-
-<td>
-<a href="#sample11"><img src="./Photo/photo 11.jpg" alt="Photo 11"></a>
-<a id="sample11" href="#close" class="lb"><img src="./Photo/photo 11.jpg" alt="Photo 11"></a>
-</td>
-
-<td>
-<a href="#sample12"><img src="./Photo/photo 12.jpg" alt="Photo 12"></a>
-<a id="sample12" href="#close" class="lb"><img src="./Photo/photo 12.jpg" alt="Photo 12"></a>
-</td>
-</tr>
-</table>
-
-</section>
-
-</div>
-
-
-<div class="contents bg4" id="link">
-
-<section>
-
-<h2>リンク</h2>
-
-<table class="ta1">
-
-<tr>
-<th><a href="../index.html">d0x0bw.github.io</a></th>
-<td>GitHub Pages</td>
-</tr>
-<tr>
-<th><a href="../sherrys-garden/index.html">SHERRY's GARDEN</a></th>
-<td>フォトギャラリー</td>
-</tr>
-<tr>
-<th><a href="#">TEST SITE</a></th>
-<td>テストページ</td>
-</tr>
-</table>
-
-</section>
-
-</div>
-</main>
-
-
-<footer>
-Copyright&copy; <a href="../index.html">d0x0bw</a> All Rights Reserved.
-</footer>
-
-
-<a href="#" id="gotop">TOP</a>
+  <aside id="mainimg">メインイメージ</aside>
+
+  <header>
+    <h1 id="logo">
+      <a href="index.html"><img src="images/logo.png" alt="Sherry's Garden"></a>
+    </h1>
+
+    <input type="checkbox" id="menu-btn-check" style="display: none;">
+    <label for="menu-btn-check" class="menu-btn"><span></span></label>
+
+    <nav>
+      <ul id="menubar">
+        <li><a href="#about">About</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#link">Link</a></li>
+        <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+      </ul>
+      <label for="menu-btn-check" class="close-overlay"></label>
+    </nav>
+  </header>
+
+  <main>
+
+    <div class="contents bg1">
+      <section>
+        <img src="./Photo/top photo.jpg" alt="Top Photo">
+        <p class="text">SHERRY's GARDEN</p>
+      </section>
+    </div>
+
+    <div class="contents bg2" id="about">
+      <section>
+        <h2>猫たちと過ごす穏やかな時間</h2>
+        <h3>May all living things be treated with love.🌞🌜️✨️</h3>
+        <br>
+
+        <p>
+          世界各地の文化には、すべての生命を神聖なものとし、敬意を払う素晴らしい哲学や教えが存在します。<br>
+          代表的な4つの視点を紹介します。
+        </p>
+
+        <p>
+          🕉️ インドの「アヒンサー（非暴力）」<br>
+          ・概要：仏教、ジャイナ教、ヒンドゥー教の根底にある核心的な教えです。<br>
+          ・思想：言葉や行動だけでなく、心の中でも「あらゆる生き物を傷つけない」ことを目指します。<br>
+          ・影響：すべての命はつながっており、他者を変に傷つけることは自分を傷つけること（カルマ）と考え、菜食主義の基盤となりました。<br>
+          <br>
+          🕊️ 北米先住民の「すべてのものは私の親族（オール・マイ・リレーションズ）」<br>
+          概要：ラコタ族など、ネイティブ・アメリカンに伝わる世界観です。<br>
+          思想：人間、動物、植物、環境、そして岩や川までもが、すべて一つの大きな家族（親族）であると考えます。<br>
+          影響：自然から何かを得るときは必ず感謝を捧げ、必要以上の狩猟や採取を行せず、次の「7世代先」の子供たちのために自然を残すという行動規範が生み出されました。<br>
+          <br>
+          ⛩️ 日本の「アニミズム（八百万の神）」と「慈悲の心」<br>
+          ・概要：神道や日本仏教に深く根ざした自然観です。<br>
+          ・思想：あらゆる自然物や道具にまで神が宿るとする「八百万の神」の考え方や、草木や国土さえも成仏できるとする「草木国土悉皆成仏（そうもくこくどしっかいじょうぶつ）」の思想があります。<br>
+          ・影響：生き物だけでなく、役目を終えた針や人形、筆などに感謝を込めて供養する「針供養」や「人形供養」といった独自の文化が育まれました。<br>
+          <br>
+          🌍 アフリカの「ウブントゥ（Ubuntu）」<br>
+          ・概要：南アフリカのバンツー語群に由来する倫理思想です。<br>
+          ・思想：「あなたがいるから、私がいる（私は私たちを通じて私となる）」という意味を持ちます。<br>
+          ・影響：元々は人と人とのつながりや優しさを表す言葉ですが、現代では「人間は自然環境や他の生き物との相互関係の中でしか生きられない」という、生態系全体への敬意としても解釈されています。
+        </p>
+
+        <h3>アプローチこそ異なれど「すべての生命を愛し、尊ぶ」という共通の目的地を持つ思想。</h3>
+        
+        <p>
+          <span class="look">仏教の「慈悲（じひ）」</span><br>
+          ・概要：生きとし生けるものが苦しみから逃れ、幸せであるようにと願う、仏教の根底にある慈愛の心です。<br>
+          ・思想：「慈（じ）」は友愛（幸せを願う心）、「悲（ひ）」は同情（苦しみを除く心）を意味します。仏教では「すべての命は繋がり合っている（縁起）」と考えます。他者の苦しみは自分の苦しみであり、他者の幸せは自分の幸せであるという「自他一如（じたいちにょ）」の境地から生まれる無条件の愛です。<br>
+          ・影響：アジア全域の文化や道徳観に深く溶け込みました。「殺生（せっしょう）を戒める」文化を生み、精進料理の発展や、動物を供養する風習（現代のペット供養など）に繋がっています。<br><br>
+
+          <span class="look">キリスト教の「アガペー（無償の愛）」</span><br>
+          ・概要：神から人間や全被造物（作られた命）へと注がれる、見返りを求めない絶対的な愛です。<br>
+          ・思想：人間が何かを成し遂げたから愛されるのではなく、不完全なままで「ただ存在していること」を肯定する愛です。聖書では、すべての自然や生き物は神が愛を込めて創造したものとされます。そのため、すべての命を等しく尊び、大切にすることが神の愛に応える道であると考えます。<br>
+          ・影響：近代の「基本的人権」や「平等主義」の思想的土台となりました。また、マザー・テレサに代表されるような、国境や宗教を超えた国際的な福祉活動や人道支援の精神（ボランティア精神）に大きな影響を与え続けています。<br><br>
+
+          <span class="look">先住民族の「調和（ちょうわ）」</span><br>
+          ・ 概要：人間・動物・植物・大自然をすべて同じ「地球の家族」と捉え、バランスを保って共生する生き方です。<br>
+          ・ 思想：人間を自然の支配者ではなく、大きな循環の一端にすぎないと考えます。例えばアメリカ先住民（ネイティブ・アメリカン）の間では「すべてのものは私に繋がっている（ミタクエ・オヤシン）」という言葉があります。生き物を生きるためにいただく（狩る）際も、命への感謝と敬意を払い、必要以上の搾取を行いません。<br>
+          ・ 影響：現代の「環境倫理学」や「サステナビリティ（持続可能性）」の思想に極めて大きな影響を与えました。人間中心主義による環境破壊への反省から、彼らの「7世代先の子供たちのために自然を残す」という知恵が世界中で再評価されています。<br><br>
+        </p>
+        
+        <p>
+          ---- 💡 これら3つの思想の視点（あるいは共通点）について ----<br><br>
+          仏教、キリスト教、そして先住民族の思想には、時代や場所を超えて深く結びつく3つの決定的な共通点があります。<br><br>
+
+          <span class="look">1. 「すべての命は繋がっている」という全体論（ホリズム）</span><br>
+          どの思想も、人間を孤立した存在としては捉えていません。<br>
+          仏教：すべての存在が原因と結果で結びついている（縁起）。<br>
+          キリスト教：すべての命が同じ神によって創られたきょうだいである。<br>
+          先住民族：人間も草木もすべて地球という一つの家族である。<br>
+          「自分と他者は地続きである」という認識があるからこそ、他の生命への愛が自然と湧き上がります。<br><br>
+
+          <span class="look">2. 「見返りを求めない」無条件の優しさ</span><br>
+          相手が自分に利益をもたらすから大切にする、という「取引」の姿勢を明確に否定しています。<br>
+          仏教：敵や味方の区別なく、すべての生き物の幸せを願う（平等大慈悲）。<br>
+          キリスト教：罪人であっても、ただ存在していることを肯定して愛する（アガペー）。<br>
+          先住民族：自然からの恵みを独占せず、分か分かち合い、次の世代のために残す。<br>
+          利己主義を超えた、純粋な利他主義（他者を思いやる心）が根底にあります。<br><br>
+
+          <span class="look">3. 「命をいただくこと」への謙虚さと痛み</span><br>
+          私たちは他の命を奪わなければ生きていけない、という冷厳な事実に対する、深い謙虚さを持っています。<br>
+          仏教：不殺生を理想としつつ、命をいただく罪の自覚から「いただきます」の感謝が生まれる。<br>
+          キリスト教：神が与えてくれた日々の糧に感謝を捧げる（食前の祈り）。<br>
+          先住民族：狩った動物の魂に祈りを捧げ、決して無駄にしない。<br>
+          命を神聖視するからこそ、生きるための「消費」に対しても深い敬意と祈りが伴います。
+        </p>
+      </section>
+    </div>
+
+    <div class="contents bg3" id="gallery">
+      <section>
+        <h2>Photo Gallery</h2>
+        <table>
+          <tr>
+            <td>
+              <input type="checkbox" id="pop01" class="lb-check">
+              <label for="pop01" class="open-btn"><img src="./Photo/photo 1.jpg" alt="Photo 1"></label>
+              <div class="lb-overlay">
+                <label for="pop01" class="close-btn"></label>
+                <label for="pop01" class="lb-img-wrap"><img src="./Photo/photo 1.jpg" alt="Photo 1"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop02" class="lb-check">
+              <label for="pop02" class="open-btn"><img src="./Photo/photo 2.jpg" alt="Photo 2"></label>
+              <div class="lb-overlay">
+                <label for="pop02" class="close-btn"></label>
+                <label for="pop02" class="lb-img-wrap"><img src="./Photo/photo 2.jpg" alt="Photo 2"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop03" class="lb-check">
+              <label for="pop03" class="open-btn"><img src="./Photo/photo 3.jpg" alt="Photo 3"></label>
+              <div class="lb-overlay">
+                <label for="pop03" class="close-btn"></label>
+                <label for="pop03" class="lb-img-wrap"><img src="./Photo/photo 3.jpg" alt="Photo 3"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop04" class="lb-check">
+              <label for="pop04" class="open-btn"><img src="./Photo/photo 4.jpg" alt="Photo 4"></label>
+              <div class="lb-overlay">
+                <label for="pop04" class="close-btn"></label>
+                <label for="pop04" class="lb-img-wrap"><img src="./Photo/photo 4.jpg" alt="Photo 4"></label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <input type="checkbox" id="pop05" class="lb-check">
+              <label for="pop05" class="open-btn"><img src="./Photo/photo 5.jpg" alt="photo 5"></label>
+              <div class="lb-overlay">
+                <label for="pop05" class="close-btn"></label>
+                <label for="pop05" class="lb-img-wrap"><img src="./Photo/photo 5.jpg" alt="photo 5"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop06" class="lb-check">
+              <label for="pop06" class="open-btn"><img src="./Photo/photo 6.jpg" alt="photo 6"></label>
+              <div class="lb-overlay">
+                <label for="pop06" class="close-btn"></label>
+                <label for="pop06" class="lb-img-wrap"><img src="./Photo/photo 6.jpg" alt="photo 6"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop07" class="lb-check">
+              <label for="pop07" class="open-btn"><img src="./Photo/photo 7.jpg" alt="photo 7"></label>
+              <div class="lb-overlay">
+                <label for="pop07" class="close-btn"></label>
+                <label for="pop07" class="lb-img-wrap"><img src="./Photo/photo 7.jpg" alt="photo 7"></label>
+              </div>
+            </td>
+            <td>
+              <input type="checkbox" id="pop08" class="lb-check">
+              <label for="pop08" class="open-btn"><img src="./Photo/photo 8.jpg" alt="photo 8"></label>
+              <div class="lb-overlay">
+                <label for="pop08" class="close-btn"></label>
+                <label for="pop08" class="lb-img-wrap"><img src="./Photo/photo 8.jpg" alt="photo 8"></label>
+              </div>
+            </td>
+          </tr>
+          </table>
+      </section>
+    </div>
+
+    <div class="contents bg4" id="link">
+      <section>
+        <h2>リンク</h2>
+        <table class="ta1">
+          <tr>
+            <th><a href="#">d0x0bw.github.io</a></th>
+            <td>GitHub Pages</td>
+          </tr>
+          <tr>
+            <th><a href="#">SHERRY's GARDEN</a></th>
+            <td>フォトギャラリー</td>
+          </tr>
+          <tr>
+            <th><a href="#">TEST SITE</a></th>
+            <td>テストページ</td>
+          </tr>
+        </table>
+      </section>
+    </div>
+
+  </main>
+
+  <footer>
+    Copyright&copy; <a href="index.html">d0x0bw</a> All Rights Reserved.
+  </footer>
+
+  <a href="#" id="gotop">TOP</a>
 
 </body>
 </html>
