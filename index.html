@@ -38,7 +38,6 @@
     }
 
     /* ヘッダー部分 */
-
     .head h1 {
       font-size: 1.625rem; /* 26px 相当 */
       font-family: 'Arial Black', Arial, Helvetica, sans-serif;
@@ -77,12 +76,13 @@
       border-top: solid 0px #e8e6da;
     }
 
-    /* 【スマホ時】画像を少し小さくする */
+    /* 【スマホ時】画像をスッキリ小さめの表示にする */
     .menu-item img {
       border: none;
-      width: 80%;
+      width: 80%;             /* 横幅 */
+      max-width: 160px;        /* 大きくなりすぎないように最大幅を制限 */
       height: auto;
-      flex-shrink: 0; /* 画像が潰れるのを防ぐ */
+      flex-shrink: 0;         /* 画像が潰れるのを防ぐ */
     }
 
     .menu-text {
@@ -115,6 +115,7 @@
       }
       
       .main {
+        max-width: 500px;          /* 💡 画像を大きくするため、全体の幅も少しだけ広げました */
         background-color: #ffffff; /* コンテンツ部分を白く浮かび上がらせる */
         padding: 30px;             /* 枠内の余白 */
         border-radius: 8px;        /* 緩やかな角丸 */
@@ -124,22 +125,23 @@
       /* 【PC時】横並び（元のスタイル）に戻す */
       .menu-item {
         flex-direction: row;  /* 左右（横）に並べる */
-        align-items: flex-start;
+        align-items: center;  /* 💡 テキストと画像の高さを中央で揃えて綺麗に見せる */
         text-align: left;     /* テキストは左詰めに */
-        gap: 12px;
+        gap: 16px;            /* 💡 画像が大きくなるので、隙間を少し広げました */
       }
 
-      /* 【PC時】画像サイズを元に戻す */
+      /* 【PC時】画像を大きめの表示に変更 */
       .menu-item img {
-        width: 160px;
+        width: 100px;         /* 10pxから100pxに大幅変更し、大きめの表示にしました */
+        max-width: none;      /* スマホ用の制限を解除 */
         height: auto;
-        /* ★動くスピードの指定：指定の秒数をかけて滑らかに変化させる */
+        /* 動くスピードの指定：指定の秒数をかけて滑らかに変化させる */
         transition: transform 0.3s ease;
       }
 
-      /* ★カーソルが乗った（hover）時の指定：画像を拡大または縮小する */
+      /* カーソルが乗った（hover）時の指定：少しだけフワッと大きくする */
       .menu-item img:hover {
-        transform: scale(0.86);
+        transform: scale(1.05);
       }
     }
   </style>
