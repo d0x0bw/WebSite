@@ -139,7 +139,7 @@
         // 「前へ」ボタンを生成
         const prevBtn = document.createElement('div');
         prevBtn.className = 'pop-nav prev';
-        prevBtn.innerHTML = '&#10094;';
+        prevBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:40%; height:40%;"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
         prevBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation(); 
@@ -152,7 +152,7 @@
         // 「次へ」ボタンを生成
         const nextBtn = document.createElement('div');
         nextBtn.className = 'pop-nav next';
-        nextBtn.innerHTML = '&#10095;';
+        nextBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:40%; height:40%;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
         nextBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation(); 

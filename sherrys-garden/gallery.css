@@ -168,20 +168,45 @@ img {
 }
 .pop-img-wrap img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-/* 💡 左右ナビゲーションボタン（絶対位置指定で左右の端に完全固定） */
+/* 💡 左右ナビゲーションボタン（丸みを持たせたデザイン） */
 .pop-nav {
-  position: absolute; /* 絶対位置指定 */
-  top: 0;
-  width: 12%; height: 100%; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: rgba(255, 255, 255, 0.3); font-size: 3.5rem; font-family: sans-serif;
-  transition: color 0.3s, background-color 0.3s; user-select: none; z-index: 2100;
+  position: absolute;
+  top: 50%;                 /* ◀ 画面の上下中央に配置 */
+  transform: translateY(-50%); /* ◀ 縦位置のズレを綺麗に補正 */
+  width: 60px;              /* ◀ ボタンの横幅 */
+  height: 90px;             /* ◀ ボタンの縦幅 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7); /* ◀ 最初から矢印を少し見えやすく */
+  font-size: 2.2rem;         /* ◀ ボタンに収まるよう文字サイズを調整 */
+  font-family: sans-serif;
+  background-color: rgba(0, 0, 0, 0.3); /* ◀ うっすら黒い半透明の背景 */
+  user-select: none;
+  z-index: 2100;
+  transition: var(--transition-smooth);
 }
 
-/* それぞれを左端、右端に固定 */
-.pop-nav.prev { left: 0; }
-.pop-nav.next { right: 0; }
+/* 💡 左ボタン：左端にくっつけて、右側だけを丸くする */
+.pop-nav.prev { 
+  left: 0; 
+  border-radius: 0 45px 45px 0; 
+  padding-right: 8px; /* ◀ 矢印の位置を微調整 */
+}
 
-.pop-nav:hover { color: rgba(255, 255, 255, 0.9); background-color: rgba(255, 255, 255, 0.05); }
+/* 💡 右ボタン：右端にくっつけて、左側だけを丸くする */
+.pop-nav.next { 
+  right: 0; 
+  border-radius: 45px 0 0 45px; 
+  padding-left: 8px; /* ◀ 矢印の位置を微調整 */
+}
+
+/* ホバーした時に少し明るく、内側に浮き上がらせる */
+.pop-nav:hover { 
+  color: #fff; 
+  background-color: rgba(164, 138, 92, 0.8); /* ◀ ブランドのアクセントカラーに変える場合 */
+}
 
 @media (max-width: 768px) {
   .pop-img-wrap { max-width: 80%; }
