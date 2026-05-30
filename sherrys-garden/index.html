@@ -15,11 +15,17 @@
   <input type="checkbox" id="menu-btn-check">
   <label for="menu-btn-check" class="menu-btn"><span></span></label>
 
-  <nav class="menu-content">
+<nav class="menu-content">
     <ul>
       <li><a href="index.html">Home</a></li>
       <li><a href="#about">About</a></li>
-      <li><a href="#gallery">Gallery</a></li>
+      <li class="has-sub-menu">
+        <a href="#gallery" class="sub-menu-toggle">Gallery</a>
+        <ul class="sub-menu">
+          <li><a href="gallery1.html">Gallery1</a></li>
+          <li><a href="gallery2.html">Gallery2</a></li>
+        </ul>
+      </li>
       <li><a href="#profile">Profile</a></li>
       <li><a href="#link">Link</a></li>
     </ul>
@@ -180,17 +186,28 @@
       }
     });
 
+// メニューリンクをクリックした時の制御
     menuLinks.forEach(link => {
-      link.addEventListener('click', () => { 
+      link.addEventListener('click', (e) => {
+        // 💡 スマホ環境かつ、サブメニューを持つ「Gallery」自体のクリックならメニューを閉じない
+        if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) {
+          // 通常の画面遷移（#galleryへの移動）を防ぎたい場合は e.preventDefault(); を有効にしてください
+          return; 
+        }
+        
+        // それ以外の通常のリンクならメニューを閉じる
         menuCheck.checked = false; 
         document.body.style.overflow = ''; 
       });
     });
 
-    menuBg.addEventListener('click', () => { 
-      menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
-    });
+    // 背景クリック時は確実に閉じる
+    if (menuBg) {
+      menuBg.addEventListener('click', () => { 
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    }
 
 // --- トップへ戻るボタンの制御 ---
 const goTopBtn = document.querySelector('.gotop');

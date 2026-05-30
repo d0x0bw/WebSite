@@ -12,7 +12,14 @@
   --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-html, body {
+html {
+  /* 💡 モーダル開閉時に画面が左右にガタつくのを防ぐ */
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  scroll-padding-top: 95px; 
+}
+
+body {
   overflow-x: hidden;
   width: 100%;
   margin: 0;
@@ -22,9 +29,12 @@ html, body {
   font-family: var(--font-serif);
   color: var(--text-color);
   line-height: 1.7;
-  scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
-  scroll-padding-top: 95px; 
+}
+
+/* 💡 スクロールロック用の共通クラス */
+body.is-locked {
+  overflow: hidden;
 }
 
 *, *::before, *::after {
@@ -106,7 +116,6 @@ img {
   #menu-btn-check:checked ~ .menu-content ul li { opacity: 1; transform: translateY(0); }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(1) { transition-delay: 0.1s; }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(2) { transition-delay: 0.15s; }
-  #menu-btn-check:checked ~ .menu-content ul li:nth-child(3) { transition-delay: 0.2s; }
 
   .menu-content ul li a { display: block; padding: 20px 25px; font-size: 1.2rem; border-bottom: 1px solid var(--border-color); }
 }
@@ -143,7 +152,7 @@ img {
 .thumb-label:hover img { transform: scale(1.05); }
 
 /* ============================================================
-   4. 拡大モーダル（配置を絶対位置指定に修正）
+   4. 拡大モーダル
    ============================================================ */
 .pop-check { display: none; }
 
@@ -151,67 +160,73 @@ img {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(0, 0, 0, 0.9); backdrop-filter: blur(8px);
   z-index: 2000;
-  
-  /* 💡 FlexBoxによる中央寄せに変更し、左右ボタンは完全に除外して計算させます */
   display: flex; justify-content: center; align-items: center;
-  
   opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s;
 }
 
-/* チェックが入れば拡大表示 */
 .pop-check:checked ~ .pop-overlay { opacity: 1; visibility: visible; }
 
-/* 💡 画像を綺麗にど真ん中に固定する設定 */
 .pop-img-wrap {
   max-width: 75%; max-height: 85vh; display: flex; justify-content: center; align-items: center;
   cursor: pointer; margin: auto;
 }
 .pop-img-wrap img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-/* 💡 左右ナビゲーションボタン（丸みを持たせたデザイン） */
+.v-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.v-item {
+  aspect-ratio: 1 / 2 !important;
+}
+
+/* 左右ナビゲーションボタン */
 .pop-nav {
   position: absolute;
-  top: 50%;                 /* ◀ 画面の上下中央に配置 */
-  transform: translateY(-50%); /* ◀ 縦位置のズレを綺麗に補正 */
-  width: 60px;              /* ◀ ボタンの横幅 */
-  height: 90px;             /* ◀ ボタンの縦幅 */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.7); /* ◀ 最初から矢印を少し見えやすく */
-  font-size: 2.2rem;         /* ◀ ボタンに収まるよう文字サイズを調整 */
-  font-family: sans-serif;
-  background-color: rgba(0, 0, 0, 0.3); /* ◀ うっすら黒い半透明の背景 */
+  color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(0, 0, 0, 0.3);
   user-select: none;
   z-index: 2100;
   transition: var(--transition-smooth);
 }
 
-/* 💡 左ボタン：左端にくっつけて、右側だけを丸くする */
+/* 💡 内側のSVG矢印のサイズをCSSで制御 */
+.pop-nav svg {
+  width: 40%;
+  height: 40%;
+}
+
 .pop-nav.prev { 
   left: 0; 
   border-radius: 0 45px 45px 0; 
-  padding-right: 8px; /* ◀ 矢印の位置を微調整 */
+  padding-right: 8px;
 }
 
-/* 💡 右ボタン：右端にくっつけて、左側だけを丸くする */
 .pop-nav.next { 
   right: 0; 
   border-radius: 45px 0 0 45px; 
-  padding-left: 8px; /* ◀ 矢印の位置を微調整 */
+  padding-left: 8px;
 }
 
-/* ホバーした時に少し明るく、内側に浮き上がらせる */
 .pop-nav:hover { 
   color: #fff; 
-  background-color: rgba(164, 138, 92, 0.8); /* ◀ ブランドのアクセントカラーに変える場合 */
+  background-color: rgba(164, 138, 92, 0.8);
 }
 
 @media (max-width: 768px) {
   .pop-img-wrap { max-width: 80%; }
-  .pop-nav { width: 15%; font-size: 2.5rem; color: rgba(255, 255, 255, 0.6); }
-  .pop-nav:hover { background-color: transparent; }
+  .pop-nav { width: 15%; height: 70px; }
+  .pop-nav.prev { border-radius: 0 35px 35px 0; }
+  .pop-nav.next { border-radius: 35px 0 0 35px; }
+  .pop-nav:hover { background-color: rgba(0, 0, 0, 0.3); } /* スマホでの誤タップ時の色変化を抑制 */
 }
 
 /* ============================================================
