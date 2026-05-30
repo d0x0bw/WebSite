@@ -229,7 +229,7 @@ img {
   position: relative;
 }
 
-/* 💡 親のフレックス（横並び）の影響を完全に断ち切る */
+/* 親のフレックス（横並び）の影響を完全に断ち切る */
 .menu-content ul li .sub-menu {
   display: block !important; 
   background-color: rgba(0, 0, 0, 0.03); /* スマホ時は背景を少し暗くして区別 */
@@ -238,14 +238,14 @@ img {
   width: 100%;
 }
 
-/* 💡 サブメニュー内のliも完全に縦積み（100%幅）にする */
+/* サブメニュー内のliも完全に縦積み（100%幅）にする */
 .menu-content ul li .sub-menu li {
   display: block !important;
   width: 100% !important;
   margin: 0 !important;
 }
 
-/* 💡 スマホ用サブメニューのリンク（元のスタイルを完全に上書き） */
+/* スマホ用サブメニューのリンク（元のスタイルを完全に上書き） */
 .menu-content ul li .sub-menu li a {
   display: block !important;
   width: 100% !important;
@@ -315,7 +315,7 @@ img {
   }
 }
 
-/* 💡 スマホのメニュー表示時のフワッとするアニメーション用微調整 */
+/* スマホのメニュー表示時のフワッとするアニメーション用微調整 */
 @media (max-width: 768px) {
   .menu-content ul li .sub-menu li {
     opacity: 1 !important;
@@ -360,26 +360,31 @@ img {
   object-fit: cover;
   opacity: 0; /* 初期状態はすべて非表示 */
   
-  /* アニメーションの設定：21秒かけてループ再生 */
-  animation: fadeSlider 21s infinite;
+  /* アニメーションの設定：24秒かけてループ再生 */
+  animation: fadeSlider 24s infinite;
 }
 
 /* --- 時間差（ディレイ）の設定 ---
-   全体の時間を 21秒 とした場合の設定 */
+   全体の時間を 24秒 とした場合の設定 */
 
 /* 1枚目：ディレイなし */
 .main-image-wrapper img:nth-child(1) {
   animation-delay: 0s;
 }
 
-/* 2枚目：7秒遅らせてスタート */
+/* 2枚目：6秒遅らせてスタート */
 .main-image-wrapper img:nth-child(2) {
-  animation-delay: 7s;
+  animation-delay: 6s;
 }
 
-/* 3枚目：14秒遅らせてスタート */
+/* 3枚目：12秒遅らせてスタート */
 .main-image-wrapper img:nth-child(3) {
-  animation-delay: 14s;
+  animation-delay: 12s;
+}
+
+/* 4枚目：18秒遅らせてスタート */
+.main-image-wrapper img:nth-child(4) {
+  animation-delay: 18s;
 }
 
 /* --- フェードイン・アウトのアニメーション（3枚用） ---
