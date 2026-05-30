@@ -236,6 +236,8 @@ img {
 .btn-wrapper { display: inline-block; }
 .btn { display: inline-block; padding: 12px 40px; background: var(--accent-color); color: #fff !important; border-radius: 25px; font-size: 0.9rem; font-weight: bold; }
 .btn:hover { background: var(--text-color); transform: translateY(-3px); }
+.btn-home { display: inline-block; padding: 12px 40px; background: var(--text-color); color: #fff !important; border-radius: 25px; font-size: 0.9rem; font-weight: bold; }
+.btn-home:hover { background: var(--accent-color); transform: translateY(-3px); }
 
 .footer { background: var(--text-color); color: rgba(255,255,255,0.6); padding: 30px; margin-top: 60px; font-size: 0.8rem; }
 
