@@ -34,19 +34,51 @@
       <div class="gallery-grid">
 
         <div class="gallery-item">
-          <img src="./Photo thumb/th photo 1.jpg" data-full="./Photo/photo 1.jpg" alt="Gallery 1" class="thumb-img">
+          <input type="checkbox" id="pop1" class="pop-check">
+          <label for="pop1" class="thumb-label">
+            <img src="./Photo thumb/th photo 1.jpg" alt="Gallery 1">
+          </label>
+          <div class="pop-overlay">
+            <label for="pop1" class="pop-img-wrap">
+              <img src="./Photo/photo 1.jpg" alt="Gallery 1" class="full-img">
+            </label>
+          </div>
         </div>
 
         <div class="gallery-item">
-          <img src="./Photo thumb/th photo 2.jpg" data-full="./Photo/photo 2.jpg" alt="Gallery 2" class="thumb-img">
+          <input type="checkbox" id="pop2" class="pop-check">
+          <label for="pop2" class="thumb-label">
+            <img src="./Photo thumb/th photo 2.jpg" alt="Gallery 2">
+          </label>
+          <div class="pop-overlay">
+            <label for="pop2" class="pop-img-wrap">
+              <img src="./Photo/photo 2.jpg" alt="Gallery 2" class="full-img">
+            </label>
+          </div>
         </div>
 
         <div class="gallery-item">
-          <img src="./Photo thumb/th photo 3.jpg" data-full="./Photo/photo 3.jpg" alt="Gallery 3" class="thumb-img">
+          <input type="checkbox" id="pop3" class="pop-check">
+          <label for="pop3" class="thumb-label">
+            <img src="./Photo thumb/th photo 3.jpg" alt="Gallery 3">
+          </label>
+          <div class="pop-overlay">
+            <label for="pop3" class="pop-img-wrap">
+              <img src="./Photo/photo 3.jpg" alt="Gallery 3" class="full-img">
+            </label>
+          </div>
         </div>
 
         <div class="gallery-item">
-          <img src="./Photo thumb/th photo 4.jpg" data-full="./Photo/photo 4.jpg" alt="Gallery 4" class="thumb-img">
+          <input type="checkbox" id="pop4" class="pop-check">
+          <label for="pop4" class="thumb-label">
+            <img src="./Photo thumb/th photo 4.jpg" alt="Gallery 4">
+          </label>
+          <div class="pop-overlay">
+            <label for="pop4" class="pop-img-wrap">
+              <img src="./Photo/photo 4.jpg" alt="Gallery 4" class="full-img">
+            </label>
+          </div>
         </div>
 
       </div>
@@ -58,14 +90,6 @@
       </div>
     </section>
   </main>
-
-  <div id="custom-lightbox" class="pop-overlay">
-    <div class="pop-nav prev">&#10094;</div>
-    <div class="pop-img-wrap">
-      <img id="lightbox-img" src="" alt="拡大画像">
-    </div>
-    <div class="pop-nav next">&#10095;</div>
-  </div>
 
   <footer class="footer">
     <p>&copy; 2026 SHERRY's GARDEN・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
@@ -101,60 +125,77 @@
       });
     }
 
-    // --- ✨ 新・確実なギャラリー拡大＆スライド機能 ---
+    // --- ✨ スライド機能＆クリック開閉のバグ修正版スクリプト ---
     document.addEventListener('DOMContentLoaded', () => {
-      const thumbs = Array.from(document.querySelectorAll('.thumb-img'));
-      const lightbox = document.getElementById('custom-lightbox');
-      const lightboxImg = document.getElementById('lightbox-img');
-      const prevBtn = lightbox.querySelector('.pop-nav.prev');
-      const nextBtn = lightbox.querySelector('.pop-nav.next');
-      let currentIndex = 0;
+      const popChecks = Array.from(document.querySelectorAll('.pop-check'));
+      
+      popChecks.forEach((check, index) => {
+        const overlay = check.parentElement.querySelector('.pop-overlay');
+        if (!overlay) return;
 
-      // 拡大画面を開く関数
-      function openLightbox(index) {
-        currentIndex = index;
-        lightboxImg.src = thumbs[currentIndex].getAttribute('data-full');
-        lightbox.classList.add('is-active');
-        document.body.style.overflow = 'hidden'; // 背後のスクロールを防ぐ
-      }
+        const prevIndex = (index - 1 + popChecks.length) % popChecks.length;
+        const nextIndex = (index + 1) % popChecks.length;
 
-      // 拡大画面を閉じる関数
-      function closeLightbox() {
-        lightbox.classList.remove('is-active');
-        document.body.style.overflow = '';
-      }
+        // 「前へ」ボタンを生成
+        const prevBtn = document.createElement('div');
+        prevBtn.className = 'pop-nav prev';
+        prevBtn.innerHTML = '&#10094;';
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation(); 
+          check.checked = false;
+          popChecks[prevIndex].checked = true;
+          toggleBodyScroll();
+        });
+        overlay.appendChild(prevBtn);
 
-      // 次の画像へスライド
-      function showNext() {
-        currentIndex = (currentIndex + 1) % thumbs.length;
-        lightboxImg.src = thumbs[currentIndex].getAttribute('data-full');
-      }
+        // 「次へ」ボタンを生成
+        const nextBtn = document.createElement('div');
+        nextBtn.className = 'pop-nav next';
+        nextBtn.innerHTML = '&#10095;';
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation(); 
+          check.checked = false;
+          popChecks[nextIndex].checked = true;
+          toggleBodyScroll();
+        });
+        overlay.appendChild(nextBtn);
 
-      // 前の画像へスライド
-      function showPrev() {
-        currentIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
-        lightboxImg.src = thumbs[currentIndex].getAttribute('data-full');
-      }
+        // 💡 修正ポイント
+        // 「画像そのもの」がクリックされた時だけ、閉じないようにブロックします。
+        // これにより、画像の外側の黒い背景（label）をクリックした時は正常に閉じるようになります。
+        const img = overlay.querySelector('.full-img');
+        if (img) {
+          img.addEventListener('click', (e) => {
+            e.stopPropagation(); // ◀ 画像クリックのときだけ親（外枠）への連鎖を止める
+          });
+        }
 
-      // サムネイルクリックイベント
-      thumbs.forEach((thumb, index) => {
-        thumb.addEventListener('click', () => openLightbox(index));
+        // チェックボックス変化時にスクロールを制御
+        check.addEventListener('change', toggleBodyScroll);
       });
 
-      // ナビゲーションボタンのイベント（スマホのタップ・PCのクリック共通）
-      nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
-      prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+      function toggleBodyScroll() {
+        const anyOpen = popChecks.some(c => c.checked);
+        document.body.style.overflow = anyOpen ? 'hidden' : '';
+      }
 
-      // 背景部分（画像の枠外）をクリックしたら閉じる
-      lightbox.addEventListener('click', closeLightbox);
-      lightboxImg.addEventListener('click', (e) => e.stopPropagation()); // 画像クリックでは閉じない
-
-      // キーボード操作
+      // キーボード操作（左右矢印でスライド、Escで閉じる）
       document.addEventListener('keydown', (e) => {
-        if (!lightbox.classList.contains('is-active')) return;
-        if (e.key === 'ArrowRight') showNext();
-        if (e.key === 'ArrowLeft') showPrev();
-        if (e.key === 'Escape') closeLightbox();
+        const activeIndex = popChecks.findIndex(c => c.checked);
+        if (activeIndex === -1) return;
+
+        if (e.key === 'ArrowRight') {
+          popChecks[activeIndex].checked = false;
+          popChecks[(activeIndex + 1) % popChecks.length].checked = true;
+        } else if (e.key === 'ArrowLeft') {
+          popChecks[activeIndex].checked = false;
+          popChecks[(activeIndex - 1 + popChecks.length) % popChecks.length].checked = true;
+        } else if (e.key === 'Escape') {
+          popChecks[activeIndex].checked = false;
+        }
+        toggleBodyScroll();
       });
     });
   </script>
