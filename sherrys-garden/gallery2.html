@@ -411,7 +411,7 @@
     <p>&copy; 2026 SHERRY's GARDEN・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
   </footer>
 
-  <a href="#" class="gotop" aria-label=\"トップへ戻る\"><span class=\"arrow\"></span></a>
+  <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
   <script>
     const menuCheck = document.getElementById('menu-btn-check');
@@ -463,14 +463,6 @@
         const overlay = check.nextElementSibling;
         if (!overlay || !overlay.classList.contains('pop-overlay')) return;
 
-        // 【重要】中の画像やラベルをクリックした時に拡大が閉じちゃうHTML標準の挙動をキャンセル
-        overlay.addEventListener('click', (e) => {
-          if (e.target.tagName === 'IMG' || e.target.closest('label')) {
-            e.preventDefault();  
-            e.stopPropagation(); 
-          }
-        });
-
         // 前の画像・次の画像のインデックスを計算（ループ設定）
         const prevIndex = (index - 1 + popChecks.length) % popChecks.length;
         const nextIndex = (index + 1) % popChecks.length;
@@ -480,8 +472,7 @@
         prevBtn.className = 'pop-nav prev';
         prevBtn.innerHTML = '&#10094;'; 
         prevBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation(); 
+          e.stopPropagation(); // 親（黒背景）のクリックイベントをブロック
           check.checked = false; 
           popChecks[prevIndex].checked = true; 
         });
@@ -492,12 +483,43 @@
         nextBtn.className = 'pop-nav next';
         nextBtn.innerHTML = '&#10095;'; 
         nextBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation(); 
+          e.stopPropagation(); // 親（黒背景）のクリックイベントをブロック
           check.checked = false; 
           popChecks[nextIndex].checked = true; 
         });
         overlay.appendChild(nextBtn);
+
+        // 中央の画像（またはそれを囲むlabel）をクリックした時は閉じずに維持する
+        const centerLabel = overlay.querySelector('label');
+        if (centerLabel) {
+          centerLabel.addEventListener('click', (e) => {
+            e.stopPropagation(); // 親（黒背景）の「閉じる」処理に流さない
+          });
+        }
+      });
+
+      // --- PC用：キーボードの左右矢印キー（← / →）でのスライド機能 ---
+      document.addEventListener('keydown', (e) => {
+        // 現在拡大表示されている（チェックが入っている）インデックスを探す
+        const activeIndex = popChecks.findIndex(check => check.checked);
+        
+        // 拡大されている画像がない場合は何もしない
+        if (activeIndex === -1) return;
+
+        if (e.key === 'ArrowLeft') {
+          // 左矢印キーが押されたら「前へ」
+          const prevIndex = (activeIndex - 1 + popChecks.length) % popChecks.length;
+          popChecks[activeIndex].checked = false;
+          popChecks[prevIndex].checked = true;
+        } else if (e.key === 'ArrowRight') {
+          // 右矢印キーが押されたら「次へ」
+          const nextIndex = (activeIndex + 1) % popChecks.length;
+          popChecks[activeIndex].checked = false;
+          popChecks[nextIndex].checked = true;
+        } else if (e.key === 'Escape') {
+          // Escapeキーが押されたら閉じる
+          popChecks[activeIndex].checked = false;
+        }
       });
     });
   </script>

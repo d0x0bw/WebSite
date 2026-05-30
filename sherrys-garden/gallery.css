@@ -303,7 +303,8 @@ img {
 }
 
 /* ============================================================
-   4. セクション共通・About ============================================================ */
+   4. セクション共通・About 
+   ============================================================ */
 section {
   scroll-margin-top: 95px;
   padding: 60px 0;
@@ -515,7 +516,7 @@ section {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 3000;         /* 1枚目の特別指定より前面に配置するため3000に強化 */
+  z-index: 3000;         /* 前面に配置 */
   color: rgba(255, 255, 255, 0.2); 
   font-size: 2.5rem;
   font-family: sans-serif;
