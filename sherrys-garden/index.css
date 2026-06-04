@@ -1,47 +1,52 @@
 /* ============================================================
    1. 基本設定・変数
    ============================================================ */
+/* :root はサイト全体で使い回す色やフォントを「変数」として定義する場所です */
 :root {
-  --bg-color: #f9f8f2;
-  --text-color: #333333;
-  --text-muted: #777777;
-  --accent-color: #a48a5c;
-  --card-bg: #ffffff;
-  --border-color: #eeeeee;
-  --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
-  --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  --bg-color: #f9f8f2;         /* 背景色（少しクリーム色） */
+  --text-color: #333333;       /* メインの文字色（濃いグレー） */
+  --text-muted: #777777;       /* サブの文字色（薄めのグレー） */
+  --accent-color: #a48a5c;     /* アクセントカラー（上品なゴールド系） */
+  --card-bg: #ffffff;          /* カード系の背景色（白） */
+  --border-color: #eeeeee;     /* 線の色 */
+  --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif; /* 明朝体の設定 */
+  --transition-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* なめらかなアニメーションの共通設定 */
 }
 
-/* 横揺れ徹底防止 */
+/* ブラウザのデフォルトの余白を消し、横揺れ（スマホ等で横にはみ出る現象）を防止する設定 */
 html, body {
-  overflow-x: hidden;
+  overflow-x: hidden;          /* 横方向のはみ出しを隠す */
   width: 100%;
   margin: 0;
   padding: 0;
-  overscroll-behavior-x: none;
+  overscroll-behavior-x: none; /* 横方向のバウンス（跳ね返り）効果を無効化 */
   background-color: var(--bg-color);
   font-family: var(--font-serif);
   color: var(--text-color);
-  line-height: 1.7;
-  scroll-behavior: smooth;
+  line-height: 1.7;            /* 行間を少し広くして読みやすく */
+  scroll-behavior: smooth;     /* ページ内リンクで移動する際、スルッとスクロールさせる */
   -webkit-font-smoothing: antialiased;
-  scroll-padding-top: 95px; 
+  scroll-padding-top: 95px;    /* ヘッダーが追従する分、ページ内ジャンプ時に上部に余白を持たせる */
 }
 
+/* 全ての要素に対して、ボーダーや余白を幅の計算に含める（レイアウト崩れ防止） */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* リンクの下線を消し、マウスオーバー時にふわっと色が変わるようにする */
 a {
   text-decoration: none;
   color: inherit;
   transition: var(--transition-smooth);
 }
 
+/* リストの黒丸を消す */
 ul { list-style: none; }
 
+/* 画像が親要素からはみ出ないようにしつつ、比率を保つ設定 */
 img {
   max-width: 100%;
   height: auto;
@@ -51,42 +56,44 @@ img {
 /* ============================================================
    2. ヘッダー & メニュー
    ============================================================ */
+/* ヘッダー全体の設定（常に画面上部に固定する） */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex;               /* 横並びにする */
+  justify-content: space-between; /* 両端に要素を配置（ロゴとメニュー） */
+  align-items: center;         /* 縦の中央揃え */
   padding: 0 5%;
   height: 75px;
-  background-color: rgba(249, 248, 242, 0.95);
-  backdrop-filter: blur(5px);
-  box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-  position: sticky;
+  background-color: rgba(249, 248, 242, 0.95); /* 少し透ける背景色 */
+  backdrop-filter: blur(5px);  /* すりガラスのように後ろをぼかす */
+  box-shadow: 0 2px 20px rgba(0,0,0,0.05); /* 軽い影をつける */
+  position: sticky;            /* スクロールしても上部に張り付く設定 */
   top: 0;
-  z-index: 1000;
+  z-index: 1000;               /* 他の要素より手前（上）に表示する */
 }
 
 .logo {
   font-size: 1.8rem;
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 2px;         /* 文字の間隔を広げる */
 }
 
 .logo a:hover { color: var(--accent-color); }
 
+/* メニューの開閉判定用チェックボックス自体は画面に見えないように消す */
 #menu-btn-check { display: none; }
 
-/* PC時はボタン自体を完全に消去 */
+/* PC時はハンバーガーメニューのボタン自体を完全に消去 */
 .menu-btn { display: none; }
 
-/* --- スマホ向けメニュー設定 --- */
+/* --- スマホ向けメニュー設定 (画面幅が768px以下のとき適用) --- */
 @media (max-width: 768px) {
   .header {
-    position: static;
+    position: static;          /* スマホ時はヘッダーの追従を解除 */
     background-color: var(--bg-color);
     box-shadow: none;
   }
 
-  /* HTML側で外に出したため、親に関係なく確実に右上固定されます */
+  /* ハンバーガーメニューのボタンを右上に固定配置 */
   .menu-btn {
     position: fixed;
     top: 12px;
@@ -96,14 +103,15 @@ img {
     width: 50px;
     justify-content: center;
     align-items: center;
-    z-index: 1100;
+    z-index: 1100;             /* メニュー本体よりさらに手前にする */
     cursor: pointer;
     background-color: rgba(249, 248, 242, 0.8);
     backdrop-filter: blur(4px);
-    border-radius: 50%;
+    border-radius: 50%;        /* 丸いボタンにする */
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   }
 
+  /* ハンバーガーメニューの3本線の設定 */
   .menu-btn span, .menu-btn span::before, .menu-btn span::after {
     content: '';
     display: block;
@@ -114,81 +122,91 @@ img {
     transition: var(--transition-smooth);
   }
 
+  /* 上下の線を配置 */
   .menu-btn span::before { bottom: 8px; }
   .menu-btn span::after { top: 8px; }
 
-  #menu-btn-check:checked + .menu-btn span { background-color: transparent; }
+  /* メニューが開いた時（チェックON）の線の動き（バツ印を作る） */
+  #menu-btn-check:checked + .menu-btn span { background-color: transparent; } /* 真ん中の線を消す */
   #menu-btn-check:checked + .menu-btn span::before { bottom: 0; transform: rotate(45deg); }
   #menu-btn-check:checked + .menu-btn span::after { top: 0; transform: rotate(-45deg); }
 
+  /* メニューを開いたときの暗い背景（画面全体を覆う） */
   .menu-background {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1010;
-    opacity: 0;
-    visibility: hidden;
+    opacity: 0;                /* 初期状態は透明 */
+    visibility: hidden;        /* クリックできないように隠す */
     transition: opacity 0.4s ease, visibility 0.4s;
   }
 
+  /* メニュー開で背景を表示 */
   #menu-btn-check:checked ~ .menu-background {
     opacity: 1;
     visibility: visible;
   }
 
+  /* スマホの引き出しメニュー本体（画面の右外に隠しておく） */
   .menu-content {
     position: fixed;
     top: 0;
-    right: -100%;
+    right: -100%;              /* 右に見切れた状態にしておく */
     width: 300px;
-    height: 100vh;
+    height: 100vh;             /* 画面いっぱいの高さ */
     background-color: var(--card-bg);
     z-index: 1050;
     padding: 100px 20px 40px;
-    overflow-y: auto;
+    overflow-y: auto;          /* 項目が多い場合はスクロール可能に */
     overflow-x: hidden;
     box-shadow: -10px 0 30px rgba(0,0,0,0.1);
     transition: right 0.5s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.5s;
     visibility: hidden;
   }
 
+  /* メニュー開でメニューをスライドイン */
   #menu-btn-check:checked ~ .menu-content {
-    right: 0;
+    right: 0;                  /* 画面内に持ってくる */
     visibility: visible;
   }
 
+  /* メニューの各項目のアニメーション（下からふんわり現れる） */
   .menu-content ul li {
     opacity: 0;
     transform: translateY(20px);
     transition: var(--transition-smooth);
   }
 
+  /* メニュー開で項目を表示 */
   #menu-btn-check:checked ~ .menu-content ul li {
     opacity: 1;
     transform: translateY(0);
   }
 
+  /* 各項目が順番に現れるように遅延（ディレイ）をかける */
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(1) { transition-delay: 0.1s; }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(2) { transition-delay: 0.15s; }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(3) { transition-delay: 0.2s; }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(4) { transition-delay: 0.25s; }
   #menu-btn-check:checked ~ .menu-content ul li:nth-child(5) { transition-delay: 0.3s; }
 
+  /* スマホ用メニューのリンク装飾 */
   .menu-content ul li a {
     display: block;
     padding: 20px 25px;
     font-size: 1.2rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color); /* 下線で区切る */
   }
 }
 
-/* --- PC向けメニュー設定 --- */
+/* --- PC向けメニュー設定 (画面幅が769px以上のとき適用) --- */
 @media (min-width: 769px) {
-  /* PCでは丸ボタン表示を絶対にさせない設定 */
+  /* PCでは丸いハンバーガーボタンと暗い背景は不要なので隠す */
   .menu-btn { display: none !important; } 
   .menu-background { display: none; }
   
-  /* PCナビゲーションを正しくヘッダーの右側に配置 */
+  /* PCナビゲーションをヘッダーの右側に配置（隠さない） */
   .menu-content {
     position: static;
     width: auto;
@@ -200,7 +218,7 @@ img {
     overflow: visible;
   }
   
-  .menu-content ul { display: flex; align-items: center; }
+  .menu-content ul { display: flex; align-items: center; } /* 項目を横並びに */
   .menu-content ul li { margin-left: 30px; opacity: 1; transform: none; }
   .menu-content ul li a {
     font-size: 1rem;
@@ -209,15 +227,17 @@ img {
     position: relative;
     border-bottom: none;
   }
+  
+  /* PCメニューのマウスオーバー時の下線アニメーション（真ん中から伸びる） */
   .menu-content ul li a::after {
     content: '';
     position: absolute;
     bottom: 0; left: 0; width: 100%; height: 1px;
     background-color: var(--accent-color);
-    transform: scaleX(0);
+    transform: scaleX(0);      /* 最初は横幅0で見えない状態 */
     transition: transform 0.3s ease;
   }
-  .menu-content ul li a:hover::after { transform: scaleX(1); }
+  .menu-content ul li a:hover::after { transform: scaleX(1); } /* ホバーで線を引く */
 }
 
 
@@ -226,96 +246,97 @@ img {
    ============================================================ */
 /* --- 共通・スマホ向けの初期設定 --- */
 .menu-content ul li.has-sub-menu {
-  position: relative;
+  position: relative; /* サブメニューを位置指定する際の基準にする */
 }
 
-/* 親のフレックス（横並び）の影響を完全に断ち切る */
+/* スマホではサブメニューを親の下に縦積みし、少し暗くして階層を表現 */
 .menu-content ul li .sub-menu {
   display: block !important; 
-  background-color: rgba(0, 0, 0, 0.03); /* スマホ時は背景を少し暗くして区別 */
+  background-color: rgba(0, 0, 0, 0.03);
   padding-left: 0 !important;
   margin: 0 !important;
   width: 100%;
 }
 
-/* サブメニュー内のliも完全に縦積み（100%幅）にする */
 .menu-content ul li .sub-menu li {
   display: block !important;
   width: 100% !important;
   margin: 0 !important;
 }
 
-/* スマホ用サブメニューのリンク（元のスタイルを完全に上書き） */
+/* スマホ用サブメニューのリンク文字設定（字下げで子項目だとわかりやすく） */
 .menu-content ul li .sub-menu li a {
   display: block !important;
   width: 100% !important;
   font-size: 1.05rem !important;
-  padding: 15px 25px 15px 50px !important; /* 左側を多めに空けて字下げ表現 */
+  padding: 15px 25px 15px 50px !important; /* 左の余白を大きくして字下げ */
   color: var(--text-muted) !important;
   border-bottom: 1px solid var(--border-color) !important;
-  text-align: left !important; /* スマホ時は左寄せ */
+  text-align: left !important;
 }
 
 /* --- PC向け（769px以上）のドロップダウン制御 --- */
 @media (min-width: 769px) {
+  /* PCでのサブメニューの見た目（吹き出しのようなドロップダウン） */
   .menu-content ul li .sub-menu {
     position: absolute !important;
-    top: 100% !important;
-    left: 50% !important;
-    transform: translateX(-50%) translateY(10px) !important; /* 最初は少し下に下げておく */
-    width: 150px !important; /* メニューの横幅を固定 */
+    top: 100% !important;      /* 親項目の真下 */
+    left: 50% !important;      /* 中央揃えの準備 */
+    transform: translateX(-50%) translateY(10px) !important; /* 中央に配置し、最初は少し下に下げておく */
+    width: 150px !important;
     background-color: var(--card-bg) !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
     border-radius: 6px !important;
     padding: 8px 0 !important;
-    opacity: 0;
+    opacity: 0;                /* 初期状態は見えない */
     visibility: hidden;
     transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.3s;
     z-index: 10 !important;
   }
 
-  /* 上部の小さな三角形（吹き出しのツノ） */
+  /* ドロップダウン上部の小さな三角形（吹き出しのツノ） */
   .menu-content ul li .sub-menu::before {
     content: '';
     position: absolute;
     top: -6px;
     left: 50%;
-    transform: translateX(-50%) rotate(45deg);
+    transform: translateX(-50%) rotate(45deg); /* 四角形を45度回して三角を作る */
     width: 12px;
     height: 12px;
     background-color: var(--card-bg);
   }
 
-  /* 親のGallery(li)にホバーしたらサブメニューを表示 */
+  /* 親項目（Galleryなど）にマウスが乗ったらサブメニューを表示（上にスライド） */
   .menu-content ul li.has-sub-menu:hover .sub-menu {
     opacity: 1 !important;
     visibility: visible !important;
-    transform: translateX(-50%) translateY(0) !important; /* 定位置にスライドイン */
+    transform: translateX(-50%) translateY(0) !important; /* 定位置へ戻る */
   }
 
-  /* PC用サブメニューのリンク文字装飾（元のスタイルを完全に上書き） */
+  /* PC用サブメニュー内のリンク装飾 */
   .menu-content ul li .sub-menu li a {
     display: block !important;
-    padding: 10px 15px !important; /* 上下のパディングをスッキリ均等に */
+    padding: 10px 15px !important;
     font-size: 0.9rem !important;
     color: var(--text-color) !important;
-    text-align: center !important; /* PCでは中央寄せ */
-    border-bottom: none !important; /* PCでは区切り線を消す */
+    text-align: center !important;
+    border-bottom: none !important;
     transition: var(--transition-smooth);
   }
 
+  /* ホバー時に背景と文字色を変える */
   .menu-content ul li .sub-menu li a:hover {
     background-color: var(--bg-color) !important;
     color: var(--accent-color) !important;
   }
 
-  /* PCではサブメニュー内の下線アニメーションを完全に無効化 */
+  /* PCではサブメニュー内に下線アニメーションを出さない */
   .menu-content ul li .sub-menu li a::after {
     display: none !important;
   }
 }
 
-/* スマホのメニュー表示時のフワッとするアニメーション用微調整 */
+/* スマホのメニュー表示時のフワッとするアニメーション用微調整（サブメニューが遅れないように） */
 @media (max-width: 768px) {
   .menu-content ul li .sub-menu li {
     opacity: 1 !important;
@@ -327,99 +348,89 @@ img {
 /* ============================================================
    3. コンテンツ
    ============================================================ */
+/* サイト中央のメインエリア幅と余白の設定 */
 .content {
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 0 auto;              /* 左右中央寄せ */
   padding: 40px 24px;
   text-align: center;
   overflow: hidden;
 }
 
+/* スライダー全体の枠 */
 .main-image {
   width: 100%;
   margin-bottom: 40px;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: hidden;            /* 丸角からはみ出た部分を隠す */
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-/* 親要素を相対配置にし、高さを固定（アスペクト比を維持） */
+/* スライダーの縦横比（16:9）を固定する親要素 */
 .main-image-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
 }
 
-/* 画像をすべて重ね合わせる */
+/* 画像フェードスライダーの心臓部。画像を同じ場所に重ね合わせる */
 .main-image-wrapper img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0; /* 初期状態はすべて非表示 */
+  object-fit: cover;           /* 比率を保ちながら枠いっぱいに埋める */
+  opacity: 0;                  /* 初期状態はすべて非表示 */
   
-  /* アニメーションの設定：24秒かけてループ再生 */
+  /* アニメーションの設定：24秒かけてfadeSliderを実行し、無限(infinite)に繰り返す */
   animation: fadeSlider 24s infinite;
 }
 
-/* --- 時間差（ディレイ）の設定 ---
-   全体の時間を 24秒 とした場合の設定 */
-
-/* 1枚目：ディレイなし */
-.main-image-wrapper img:nth-child(1) {
-  animation-delay: 0s;
-}
-
+/* --- 時間差（ディレイ）の設定（4枚の画像を順番に出すため） --- */
+/* 1枚目：すぐにスタート */
+.main-image-wrapper img:nth-child(1) { animation-delay: 0s; }
 /* 2枚目：6秒遅らせてスタート */
-.main-image-wrapper img:nth-child(2) {
-  animation-delay: 6s;
-}
-
+.main-image-wrapper img:nth-child(2) { animation-delay: 6s; }
 /* 3枚目：12秒遅らせてスタート */
-.main-image-wrapper img:nth-child(3) {
-  animation-delay: 12s;
-}
-
+.main-image-wrapper img:nth-child(3) { animation-delay: 12s; }
 /* 4枚目：18秒遅らせてスタート */
-.main-image-wrapper img:nth-child(4) {
-  animation-delay: 18s;
-}
+.main-image-wrapper img:nth-child(4) { animation-delay: 18s; }
 
-/* --- フェードイン・アウトのアニメーション（3枚用） ---
-   0%〜20%（最初の4秒弱）で表示され、そこからじわじわ消えていく計算 */
+/* --- フェードイン・アウトのアニメーション定義 --- */
 @keyframes fadeSlider {
   0% {
     opacity: 0;
-    transform: scale(1); /* ほんのりズームさせる場合 */
+    transform: scale(1);
   }
   5% {
-    opacity: 1; /* ふわっと表示 */
+    opacity: 1; /* 最初の少しの時間でフワッと表示される */
   }
   30% {
-    opacity: 1; /* 表示を維持 */
+    opacity: 1; /* そのまましばらく表示を維持 */
   }
   38% {
-    opacity: 0; /* ふわっと消える */
-    transform: scale(1.00); /* 消えながら縮小拡大する場合は値を増減 */
+    opacity: 0; /* 次の画像が出る頃にフワッと消える */
+    transform: scale(1.00); 
   }
   100% {
-    opacity: 0;
+    opacity: 0; /* 残りの時間は隠れたまま待機 */
   }
 }
 
+/* マウスオーバー時に少し画像を拡大する遊び心 */
 .main-image-wrapper img:hover { transform: scale(1.05); }
 
+/* --- 写真を使ったクリッピングテキスト（文字の形に画像を切り抜く） --- */
 .text {
   font-family: var(--font-serif);
-  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  font-size: clamp(2.2rem, 6vw, 4.5rem); /* 画面幅に応じて文字サイズを可変 */
   font-weight: bold;
-  color: rgba(0,0,0,0.1);
-  background-image: url('./Photo/top photo.jpg');
+  color: rgba(0,0,0,0.1);      /* ベースの文字色は透明に近い色にしておく */
+  background-image: url('./Photo/top photo.jpg'); /* 文字の背景に画像を敷く */
   background-size: cover;
   background-position: center;
-  -webkit-background-clip: text;
+  -webkit-background-clip: text; /* 背景を文字の形に切り抜く魔法のコード */
   background-clip: text;
   margin-bottom: 30px;
   letter-spacing: 6px;
@@ -428,6 +439,7 @@ img {
   word-wrap: break-word;
 }
 
+/* テキスト下の小さなラベル（since 2023 の部分） */
 .text span {
   display: block;
   font-size: clamp(0.8rem, 2vw, 1rem);
@@ -440,6 +452,7 @@ img {
   border-radius: 2px;
 }
 
+/* イントロダクション（猫たちと過ごす…）の文字設定 */
 .intro-text h1 {
   font-size: clamp(1.3rem, 4vw, 1.8rem);
   margin-bottom: 15px;
@@ -449,8 +462,10 @@ img {
 /* ============================================================
    4. セクション共通・About
    ============================================================ */
+/* 各セクション（About, Galleryなど）の共通余白と、ページ内リンクで飛んだ時のズレ防止 */
 section { scroll-margin-top: 95px; padding: 60px 0; }
 
+/* セクションのタイトル（下線付き） */
 .section-title {
   font-size: 1.8rem;
   margin-bottom: 40px;
@@ -459,15 +474,17 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   letter-spacing: 0.15em;
 }
 
+/* セクションタイトルの短い下線（疑似要素で作成） */
 .section-title::after {
   content: '';
   position: absolute;
   bottom: -10px; left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* 中央揃えにする */
   width: 30px; height: 2px;
   background-color: var(--accent-color);
 }
 
+/* Aboutセクションの画像と文章を横に並べる設定 */
 .feature-item {
   display: flex;
   align-items: center;
@@ -477,20 +494,22 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   margin: 40px auto 0;
 }
 
+/* 丸い画像の枠設定 */
 .feature-img {
-  flex: 0 0 160px;
+  flex: 0 0 160px; /* 横幅を160pxで固定 */
 }
 
 .feature-img img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1;         /* 正方形を保つ */
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: 50%;          /* 完全な丸にする */
   box-shadow: 0 8px 25px rgba(0,0,0,0.06);
 }
 
 .feature-text { flex: 1; text-align: left; }
 
+/* スマホ時は縦並びにして中央揃えにする */
 @media (max-width: 768px) {
   .feature-item { flex-direction: column; text-align: center; }
   .feature-img { flex: none; width: 60%; max-width: 160px; }
@@ -500,30 +519,33 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 /* ============================================================
    5. ギャラリー & モーダル
    ============================================================ */
+/* CSS Gridを使って画像を並べる設定（PCは4列） */
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(4, 1fr); /* 4列を均等幅(1fr)で配置 */
+  gap: 15px;                   /* 画像のすき間 */
 }
 
+/* スマホ時は2列に変更 */
 @media (max-width: 768px) {
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* 各画像アイテムの枠。1:1（正方形）に固定 */
 .gallery-item { aspect-ratio: 1/1; overflow: hidden; border-radius: 6px; }
 .gallery-item img { cursor: pointer; transition: 0.4s; width: 100%; height: 100%; object-fit: cover; }
-.gallery-item img:hover { transform: scale(1.08); }
+.gallery-item img:hover { transform: scale(1.08); } /* ホバーで少し拡大 */
 
+/* --- モーダル（ポップアップ）の仕組み（CSSのみで動作） --- */
+/* チェックボックス自体は隠す */
 .pop-check { display: none; }
 
+/* 拡大画像の後ろの黒い背景（初期状態は隠す） */
 .pop-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0; width: 100%; height: 100%;
   background-color: rgba(15, 15, 15, 0.95);
-  z-index: 2000;
+  z-index: 2000;               /* 最前面に表示 */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.4s ease, visibility 0.4s ease;
@@ -532,6 +554,7 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   align-items: center;
 }
 
+/* クリックして閉じるための領域（画面全体） */
 .pop-close-area {
   display: flex;
   justify-content: center;
@@ -541,10 +564,11 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   cursor: pointer;
 }
 
+/* 拡大画像自体の設定（初期状態は少し小さく、少し下にある） */
 .pop-overlay img {
   max-width: 90%;
   max-height: 85%;
-  object-fit: contain;
+  object-fit: contain;         /* はみ出さないように全体を表示 */
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   margin: auto;
   opacity: 0;
@@ -552,9 +576,11 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.pop-check:checked ~ .pop-overlay { opacity: 1; visibility: visible; }
-.pop-check:checked ~ .pop-overlay img { opacity: 1; transform: scale(1) translateY(0); }
+/* チェックボックスがON（クリックされた）時の処理 */
+.pop-check:checked ~ .pop-overlay { opacity: 1; visibility: visible; } /* 背景を表示 */
+.pop-check:checked ~ .pop-overlay img { opacity: 1; transform: scale(1) translateY(0); } /* 画像を元の大きさと位置に戻して表示 */
 
+/* 「More（もっと見る）」ボタンが配置されるグリッドの設定 */
 .v-grid {
   grid-template-columns: repeat(4, 1fr);
 }
@@ -563,12 +589,13 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   aspect-ratio: 1 / 2 !important;
 }
 
+/* 「More」ボタンのデザイン */
 .gallery-more-btn {
-  grid-column: 4; 
+  grid-column: 4;              /* グリッドの4列目に配置 */
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px dashed var(--accent-color);
+  border: 1px dashed var(--accent-color); /* 点線ボーダー */
   background-color: rgba(164, 138, 92, 0.03);
   border-radius: 6px;
   color: var(--accent-color);
@@ -580,12 +607,13 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 .gallery-more-btn:hover {
   background-color: var(--accent-color);
   color: #fff;
-  border-style: solid;
+  border-style: solid;         /* ホバー時は点線から実線に変える */
 }
 
+/* スマホ用「More」ボタン調整 */
 @media (max-width: 768px) {
   .gallery-more-btn {
-    grid-column: 1 / -1; 
+    grid-column: 1 / -1;       /* 1列目から最後まで（全幅）使う設定 */
     aspect-ratio: auto;
     padding: 15px 0;
     margin-top: 10px;
@@ -599,6 +627,7 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 /* ============================================================
    6. プロフィール (猫)
    ============================================================ */
+/* プロフィールの白いカードの枠 */
 .cat-profile {
   background: var(--card-bg);
   padding: 40px;
@@ -610,6 +639,7 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   margin-right: auto;
 }
 
+/* 画像と自己紹介文を横並びにする */
 .profile-header { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
 .profile-img { flex: 0 0 150px; }
 .profile-img img { border-radius: 10px; width: 100%; height: auto; }
@@ -617,17 +647,20 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 .cat-name { font-size: 1.6rem; border-bottom: 1.5px solid var(--accent-color); display: inline-block; }
 .cat-name span { font-size: 0.9rem; color: var(--text-muted); margin-left: 10px; }
 
+/* プロフィールの表（テーブル）のデザイン */
 .spec-table { width: 100%; border-collapse: collapse; text-align: left; }
 .spec-table th { background: #fafafa; padding: 12px; font-size: 0.8rem; width: 25%; }
 .spec-table td { padding: 12px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color); }
 
+/* スマホ時は縦並び＆テーブルを見やすく変更 */
 @media (max-width: 768px) {
   .profile-header { flex-direction: column; text-align: center; }
   .profile-summary { text-align: left; }
-  .spec-table, .spec-table th, .spec-table td { display: block; width: 100%; }
+  .spec-table, .spec-table th, .spec-table td { display: block; width: 100%; } /* セルをブロック要素にして縦に積む */
   .spec-table th { background: transparent; color: var(--accent-color); padding-bottom: 0; }
 }
 
+/* PC時で、プロフィールカードが2個以上あった場合、偶数番目は左右の配置を逆にする（ジグザグ配置） */
 @media (min-width: 769px) {
   .cat-profile:nth-of-type(even) .profile-header { flex-direction: row-reverse; }
   .cat-profile:nth-of-type(even) .profile-summary { text-align: right; }
@@ -636,71 +669,76 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
 /* ============================================================
    7. フッター & 各種ボタン
    ============================================================ */
+/* X(Twitter)などのリンクボタンを横並びにする */
 .link-buttons { display: flex; justify-content: center; gap: 20px; }
 .btn {
   padding: 10px 30px;
   border: 1px solid var(--text-color);
-  border-radius: 25px;
+  border-radius: 25px;         /* カプセル型の丸いボタン */
   font-size: 0.9rem;
   font-weight: bold;
 }
+/* ホバー時は色を反転させて、少し上に浮くアニメーション */
 .btn:hover { background: var(--text-color); color: #fff; transform: translateY(-3px); }
 
+/* フッターの黒い帯の設定 */
 .footer { background: var(--text-color); color: rgba(255,255,255,0.6); padding: 30px; margin-top: 60px; font-size: 0.8rem; }
 
-/* --- トップへ戻るボタン（初期状態は非表示） --- */
-/* --- トップへ戻るボタン --- */
+/* ============================================================
+   トップへ戻るボタン
+   ============================================================ */
 .gotop {
-  position: fixed; 
+  position: fixed;             /* 画面の右下に固定 */
   right: 20px; 
   bottom: 20px;
   width: 45px; 
   height: 45px; 
   background: rgba(51,51,51,0.8);
-  border-radius: 50%; 
+  border-radius: 50%;          /* 丸くする */
   display: flex; 
   justify-content: center; 
   align-items: center;
   z-index: 900; 
   
-  /* ★【JSオフ（初期状態）の設定】 */
-  /* 最初から通常通り表示（不透明・クリック可能） */
+  /* 【JSオフ（初期状態）の設定】 
+     JSが使えない環境でもボタンが使えるよう、最初から表示させておく設定 */
   opacity: 1;             
   visibility: visible;    
   pointer-events: auto;   
   transform: translateY(0);
   
-  /* フェードイン・アウトのアニメーション */
+  /* フワッと現れる/消えるためのアニメーション設定 */
   transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* ★【JSオンの時の制御用クラス】 */
-/* JSが読み込まれたら、このクラスを付与して「非表示状態」に */
+/* 【JSオンの時の制御用クラス（非表示状態）】 */
+/* JSが実行された瞬間にこのクラスがつき、最初は画面から見えなくなる */
 .gotop.js-hidden {
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
-  transform: translateY(15px); /* 単位(px)を補完 */
+  pointer-events: none;        /* 透明な時はクリックできないようにする */
+  transform: translateY(15px); /* 少し下にずらしておく */
 }
 
-/* スクロールされたら、このクラスを付けて出現させる */
+/* スクロールされたら、このクラスがついて画面に現れる */
 .gotop.is-show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateY(0);
+  transform: translateY(0);    /* 定位置に戻る */
 }
 
 .gotop:hover { 
   background: #000; 
-  transform: translateY(-5px); 
+  transform: translateY(-5px); /* ホバーで少し浮き上がる */
 }
 
+/* ボタンの中にある上向きの「くの字」矢印を作る */
 .arrow { 
   width: 8px; 
   height: 8px; 
-  border-top: 2px solid #fff; 
-  border-right: 2px solid #fff; 
-  transform: rotate(-45deg); 
-  margin-top: 4px; 
+  border-top: 2px solid #fff;  /* 上の線 */
+  border-right: 2px solid #fff; /* 右の線 */
+  transform: rotate(-45deg);   /* 45度回して上向きの矢印にする */
+  margin-top: 4px;             /* 見た目の微調整 */
 }
