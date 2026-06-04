@@ -180,35 +180,34 @@
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
   <script>
+    /* メニュー関連の要素を取得 */
     const menuCheck = document.getElementById('menu-btn-check');
     const menuLinks = document.querySelectorAll('.menu-content a');
     const menuBg = document.querySelector('.menu-background');
 
-    // --- メニュー開閉時にスクロールを制御 ---
+    // 1. スマホのメニューを開いた時に、背景がスクロールしないようにロックする
     menuCheck.addEventListener('change', () => {
       if (menuCheck.checked) {
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden'; // スクロール禁止
       } else {
-        document.body.style.overflow = '';
+        document.body.style.overflow = '';       // スクロール許可
       }
     });
 
-// メニューリンクをクリックした時の制御
+    // 2. メニュー内のリンクをクリックした時の動き
     menuLinks.forEach(link => {
       link.addEventListener('click', (e) => {
-        // スマホ環境かつ、サブメニューを持つ「Gallery」自体のクリックならメニューを閉じない
+        // スマホ画面かつ「Gallery」などの親メニューの場合は、そのままサブメニューを開くために処理を中断
         if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) {
-          // 通常の画面遷移（#galleryへの移動）を防ぎたい場合は e.preventDefault(); を有効に
           return; 
         }
-        
-        // それ以外の通常のリンクならメニューを閉じる
+        // それ以外のリンク（ページ移動）ならメニューを閉じる
         menuCheck.checked = false; 
         document.body.style.overflow = ''; 
       });
     });
 
-    // 背景クリック時は確実に閉じる
+    // 3. 暗い背景部分をクリックしたら確実にメニューを閉じる
     if (menuBg) {
       menuBg.addEventListener('click', () => { 
         menuCheck.checked = false; 
@@ -216,26 +215,28 @@
       });
     }
 
-// --- トップへ戻るボタンの制御 ---
-const goTopBtn = document.querySelector('.gotop');
+    // 4. トップへ戻るボタンの表示・非表示の切り替え
+    const goTopBtn = document.querySelector('.gotop');
 
-// ★JSが有効な場合、即座に非表示用のクラスを付与する
-if (goTopBtn) {
-  goTopBtn.classList.add('js-hidden');
-}
+    // JSが動いている場合は、初期状態を「非表示」にする（JSオフの環境に配慮した設計）
+    if (goTopBtn) {
+      goTopBtn.classList.add('js-hidden');
+    }
 
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 200) {
-    // 200px以上スクロールしたら、非表示クラスを消して、表示クラスをつける
-    goTopBtn.classList.remove('js-hidden');
-    goTopBtn.classList.add('is-show');
-  } else {
-    // 上部に戻ったら、表示クラスを消して、再び非表示クラスをつける
-    goTopBtn.classList.add('js-hidden');
-    goTopBtn.classList.remove('is-show');
-  }
-});
-// 1. 画像のファイル名リスト（Photoフォルダ内にあるのファイル名に合わせて変更）
+    window.addEventListener('scroll', () => {
+      // 画面が200px以上下にスクロールされたらボタンを表示
+      if (window.scrollY > 200) {
+        goTopBtn.classList.remove('js-hidden');
+        goTopBtn.classList.add('is-show');
+      } else {
+        // 200px未満（一番上付近）ならボタンを隠す
+        goTopBtn.classList.add('js-hidden');
+        goTopBtn.classList.remove('is-show');
+      }
+    });
+
+    // 5. ギャラリー画像をランダムで8枚選んで表示する処理
+    // ① 表示させたい画像のファイル名をすべてリストアップ
 const photoFiles = [
   "photo 1.jpg",
   "photo 2.jpg",
@@ -294,53 +295,53 @@ const photoFiles = [
   "photo 65.jpg"
 ];
 
-// 2. 配列をランダムにシャッフルする関数（フィッシャー・イェーツのシャッフル）
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+    // ② 配列の順番をバラバラにする関数（シャッフル）
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
 
-// 3. ランダム表示を実行する処理
-function renderRandomGallery() {
-  const galleryContainer = document.getElementById('random-gallery');
-  if (!galleryContainer) return;
+    // ③ 実際にランダムに画像を表示する関数
+    function renderRandomGallery() {
+      const galleryContainer = document.getElementById('random-gallery');
+      if (!galleryContainer) return; // ギャラリーエリアがないページでは何もしない
 
-  // ★JSが有効な場合、HTMLに最初から書いてある固定の8枚を一旦クリアする
-  galleryContainer.innerHTML = '';
+      // HTMLに手書きしてあったデフォルトの8枚を消す
+      galleryContainer.innerHTML = '';
 
-  // リストをシャッフル
-  const shuffledPhotos = shuffleArray([...photoFiles]);
+      // リストをシャッフルする
+      const shuffledPhotos = shuffleArray([...photoFiles]);
 
-  // シャッフルした配列から、先頭の8つの要素だけを切り出す
-  const selectedPhotos = shuffledPhotos.slice(0, 8);
+      // シャッフルした中から最初の8枚だけを取り出す
+      const selectedPhotos = shuffledPhotos.slice(0, 8);
 
-  // 切り出した8枚だけでHTMLを生成して挿入
-  selectedPhotos.forEach((fileName, index) => {
-    const popId = `pop-rand-${index}`; // 重複しない一意のID
-    
-    const itemHtml = `
-      <div class="gallery-item">
-        <input type="checkbox" id="${popId}" class="pop-check">
-        <label for="${popId}">
-          <img src="./Photo thumb/th ${fileName}" alt="Gallery ${index + 1}" loading="lazy">
-        </label>
-        <div class="pop-overlay">
-          <label for="${popId}" class="pop-close-area">
-            <img src="./Photo/${fileName}" alt="Gallery ${index + 1} 拡大">
-          </label>
-        </div>
-      </div>
-    `;
-    
-    galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
-  });
-}
+      // 選ばれた8枚のHTMLブロックを作成して画面に追加する
+      selectedPhotos.forEach((fileName, index) => {
+        const popId = `pop-rand-${index}`; // ポップアップ用のIDが重複しないようにする
+        
+        const itemHtml = `
+          <div class="gallery-item">
+            <input type="checkbox" id="${popId}" class="pop-check">
+            <label for="${popId}">
+              <img src="./Photo thumb/th ${fileName}" alt="Gallery ${index + 1}">
+            </label>
+            <div class="pop-overlay">
+              <label for="${popId}" class="pop-close-area">
+                <img src="./Photo/${fileName}" alt="Gallery ${index + 1} 拡大">
+              </label>
+            </div>
+          </div>
+        `;
+        // 作成したHTMLをギャラリーエリアの末尾に挿入
+        galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
+      });
+    }
 
-// ページ読み込み時に実行
-document.addEventListener('DOMContentLoaded', renderRandomGallery);
+    // ページ（HTML）の読み込みが完了した瞬間に上記のランダム表示処理を実行する
+    document.addEventListener('DOMContentLoaded', renderRandomGallery);
   </script>
 
 </body>
