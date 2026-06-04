@@ -499,6 +499,11 @@ section { scroll-margin-top: 95px; padding: 60px 0; }
   flex: 0 0 160px; /* 横幅を160pxで固定 */
 }
 
+/* マウスが乗ったときの処理 */
+.feature-img img:hover { 
+  transform: scale(1.02); 
+}
+
 .feature-img img {
   width: 100%;
   aspect-ratio: 1 / 1;         /* 正方形を保つ */
