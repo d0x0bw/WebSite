@@ -9,28 +9,25 @@
        1. 全体の基本設定（ベースレイアウト）
        ========================================= */
     * { 
-      box-sizing: border-box; /* paddingやborderを含めて幅を計算する設定 */
+      box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
     }
     
     body {
-      font-family: sans-serif; /* デフォルトのシステムフォント（読み込みが最速） */
-      height: 100vh;           /* 古いブラウザ用のフォールバック */
-      height: 100dvh;          /* ✨ スマホのアドレスバーによる画面下部の見切れを防ぐ最新の指定 */
+      font-family: sans-serif; 
+      height: 100vh;           
+      height: 100dvh;          
       display: flex;
-      flex-direction: column;  /* ヘッダーとメインコンテンツを縦に並べる */
-      overflow: hidden;        /* 画面全体の不要なスクロールを隠す */
+      flex-direction: column;  
+      overflow: hidden;        
+      background: #181a1b;     /* ✨追加：透過した際に背後が白くならないよう全体の背景をダークに統一 */
     }
 
-    /* 【重要】状態管理用のチェックボックスとラジオボタン
-      画面上には表示しませんが、これらが「チェックされているか」でCSSを切り替えます
-    */
     #menu-toggle,
     .genre-radio { 
       display: none; 
     }
-
 
     /* =========================================
        2. ヘッダー部分（上部のジャンル選択エリア）
@@ -39,21 +36,19 @@
       background: #333;
       padding: 10px;
       display: flex;
-      justify-content: space-between; /* 左右に要素を振り分ける */
+      justify-content: space-between; 
       align-items: center;
       z-index: 100;
-      flex-shrink: 0; /* ヘッダーが潰れないようにする */
+      flex-shrink: 0; 
     }
     
-    /* ジャンルボタンを横並びにするコンテナ */
     .genre-links {
-      overflow-x: auto; /* スマホなどで横幅がはみ出た場合は横スクロール可能に */
+      overflow-x: auto; 
       white-space: nowrap;
-      -webkit-overflow-scrolling: touch; /* スマホでのスクロールを滑らかに */
+      -webkit-overflow-scrolling: touch; 
       flex: 1;
     }
 
-    /* 各ジャンルボタンのデザイン */
     .genre-links label {
       display: inline-block;
       color: white;
@@ -63,13 +58,12 @@
       background: #555;
       border-radius: 4px;
       cursor: pointer;
-      transition: background 0.3s ease; /* ホバー時の色変化をフワッとさせる */
+      transition: background 0.3s ease; 
     }
     .genre-links label:hover {
       background: #666;
     }
 
-    /* 選択中のジャンルボタンの色を青色（#007BFF）にする設定 */
     #radio-home:checked ~ header .genre-links label[for="radio-home"],
     #radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
     #radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
@@ -80,7 +74,6 @@
       background: #007BFF;
     }
 
-    /* スマホ表示用の三本線（ハンバーガー）ボタン：PCでは非表示 */
     .burger-btn {
       display: none;
       flex-direction: column;
@@ -100,7 +93,6 @@
       transition: all 0.3s ease;
     }
 
-
     /* =========================================
        3. メインレイアウト（サイドバー ＋ 本文）
        ========================================= */
@@ -108,28 +100,19 @@
       display: flex;
       flex: 1;
       position: relative;
-      overflow: hidden; /* コンテナ外への要素のはみ出しを防ぐ */
+      overflow: hidden; 
     }
 
-    /* --- サイドバー（メニュー） --- */
     nav {
       width: 250px;
       background: #333;
       border-right: 1px solid #ddd;
-      overflow-y: auto; /* メニューが多い場合は縦スクロール可能に */
+      overflow-y: auto; 
     }
     
-    /* ジャンルごとのメニューリスト（初期状態は非表示） */
-    .menu-list {
-      display: none;
-    }
+    .menu-list { display: none; }
+    .mobile-genre-title { display: none; }
 
-    /* スマホ専用のメニュータイトル（PCでは非表示） */
-    .mobile-genre-title {
-      display: none;
-    }
-
-    /* ラジオボタンの状態に応じて、該当するメニューリストを表示する */
     #radio-genreA:checked ~ .container nav .list-genreA,
     #radio-genreB:checked ~ .container nav .list-genreB,
     #radio-genreC:checked ~ .container nav .list-genreC,
@@ -139,24 +122,11 @@
       display: block;
     }
 
-    /* HOME選択時はサイドバー（nav）自体を完全に消し、本文を広く使う */
-    #radio-home:checked ~ .container nav {
-      display: none;
-    }
-    /* スマホ表示時、HOME選択時はハンバーガーボタンも不要なので消す */
-    #radio-home:checked ~ header .burger-btn {
-      display: none;
-    }
+    #radio-home:checked ~ .container nav { display: none; }
+    #radio-home:checked ~ header .burger-btn { display: none; }
+    #radio-home:checked ~ .container main .content-box { display: none; }
+    #radio-home:checked ~ .container main #default-content { display: block; }
 
-    /* JSオフ対策：HOME選択時は、強制的に「ようこそ」画面に戻す */
-    #radio-home:checked ~ .container main .content-box {
-      display: none;
-    }
-    #radio-home:checked ~ .container main #default-content {
-      display: block;
-    }
-
-    /* メニュー内のリンク（作品A-1など）のデザイン */
     nav a {
       display: block;
       color: #fff;
@@ -166,18 +136,16 @@
     }
     nav a:hover { background: #666; }
 
-    /* --- 本文エリア（右側） --- */
     main {
       flex: 1;
       padding: 20px;
-      overflow-y: auto; /* 本文が長い場合は縦スクロール可能に */
+      overflow-y: auto; 
       position: relative;
       z-index: 1;
       color: #ffffe4;
-      background: #181a1b;
+      background: transparent; /* bodyの背景色を使うため透明に */
     }
 
-    /* 各作品のコンテンツボックス */
     .content-box {
       display: none;
       position: absolute;
@@ -191,10 +159,9 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    #default-content { display: block; } /* 初期表示は「ようこそ」画面 */
-    .content-box:target { display: block; } /* リンクをクリックされたコンテンツを表示 */
+    #default-content { display: block; } 
+    .content-box:target { display: block; } 
     main:has(.content-box:target) #default-content { display: none; }
-
 
     /* =========================================
        4. フッター
@@ -211,63 +178,72 @@
     footer a { color: #fff; }
     footer a:hover { color: #e0e0e0; }
 
-    /* スマホでメニューを開いた時の背景の黒い半透明シート（PCでは非表示） */
     .menu-overlay { display: none; }
 
-
     /* =========================================
-       5. 作品内のコンテンツレイアウト（PC向け基本設定）
+       5. 作品内のコンテンツレイアウト
        ========================================= */
     .work-section { margin-bottom: 40px; }
-    
-    .work-section img {
-      border-radius: 8px;
-      object-fit: cover;
-      width: 100%;
-    }
-    .work-section p {
-      line-height: 1.6; 
-      color: #ffffe4;
-    }
+    .work-section img { border-radius: 8px; object-fit: cover; width: 100%; }
+    .work-section p { line-height: 1.6; color: #ffffe4; }
 
     .layout-wide img { max-height: 300px; margin-bottom: 15px; }
-
-    .layout-img-left {
-      display: flex; gap: 20px; align-items: flex-start;
-    }
+    .layout-img-left { display: flex; gap: 20px; align-items: flex-start; }
     .layout-img-left img { width: 50%; max-width: 400px; }
     .layout-img-left p { flex: 1; } 
 
-    .layout-img-right {
-      display: flex; flex-direction: row-reverse; gap: 20px; align-items: flex-start;
-    }
+    .layout-img-right { display: flex; flex-direction: row-reverse; gap: 20px; align-items: flex-start; }
     .layout-img-right img { width: 50%; max-width: 400px; }
     .layout-img-right p { flex: 1; }
 
-
     /* =========================================
-       6. 📲 レスポンシブ対応：スマホ表示（画面幅 768px 以下）
+       6. 📲 レスポンシブ対応：スマホ表示
        ========================================= */
     @media (max-width: 768px) {
-      /* 上部のジャンルリンクバーを完全に非表示にする */
       .genre-links { display: none; }
 
-      /* スマホ時はどの状態であっても常にバーガーボタンを表示する */
+      /* ✨ スマホ用の透過ヘッダー（すりガラス風） */
+      header {
+        position: absolute; /* 本文の上に浮かせる */
+        top: 0; left: 0; right: 0;
+        background: rgba(24, 26, 27, 0.8); /* ダーク系の半透明 */
+        backdrop-filter: blur(8px);        /* ぼかし効果 */
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* うっすら境界線 */
+      }
+
+      /* ✨ スマホ用の透過フッター（すりガラス風） */
+      footer {
+        position: absolute; /* 本文の上に浮かせる */
+        bottom: 0; left: 0; right: 0;
+        background: rgba(24, 26, 27, 0.8);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      /* ✨ 本文がヘッダーとフッターの下に隠れきらないように余白を追加 */
+      main {
+        padding-top: 60px;
+        padding-bottom: 60px;
+      }
+
       .burger-btn { 
         display: flex; 
-        margin-left: auto; /* ✨ ジャンルが消えても、ボタンを右端に固定して画面外にはみ出すのを防ぐ */
+        margin-left: auto; 
       }
       #radio-home:checked ~ header .burger-btn { display: flex; }
 
-      /* サイドバーを画面外（左側）に隠しておく */
       nav {
-        position: absolute; top: 0; bottom: 0; left: -260px; /* ✨ メニュー幅に合わせてピッタリ隠れるように数値を修正 */
+        position: absolute; top: 0; bottom: 0; left: -260px; 
         z-index: 95; box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-        transition: left 0.3s ease; /* スライドするアニメーション */
-        width: 260px; /* アコーディオンで見やすくなるよう少し幅を広げて調整 */
+        transition: left 0.3s ease; 
+        width: 260px; 
+        /* ✨ メニュー内の文字が透過ヘッダー/フッターに被らないよう余白追加 */
+        padding-top: 50px;
+        padding-bottom: 50px;
       }
 
-      /* 半透明の黒いシートを設定 */
       .menu-overlay {
         display: block; position: absolute;
         top: 0; right: 0; bottom: 0; left: 0;
@@ -276,28 +252,16 @@
         transition: opacity 0.3s ease; cursor: pointer;
       }
 
-      /* メニューボタン（チェックボックス）がオンになったら、サイドバーを引き出す */
       #menu-toggle:checked ~ .container nav { left: 0; }
-      /* 同時に黒いシートを表示する */
-      #menu-toggle:checked ~ .container .menu-overlay {
-        opacity: 1; pointer-events: auto;
-      }
+      #menu-toggle:checked ~ .container .menu-overlay { opacity: 1; pointer-events: auto; }
 
-      /* ハンバーガーボタンを「×」マークに変形させるアニメーション */
       #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-      /* ─── スマホ用アコーディオンメニューの制御 ─── */
-      .menu-list {
-        display: block !important;
-      }
-      /* HOME時でもサイドバーを非表示にしない */
-      #radio-home:checked ~ .container nav {
-        display: block;
-      }
+      .menu-list { display: block !important; }
+      #radio-home:checked ~ .container nav { display: block; }
 
-      /* ジャンルのタイトル見出しをスマホ時のみ表示 */
       .mobile-genre-title {
         display: block;
         background: #222;
@@ -309,50 +273,29 @@
         border-top: 1px solid #444;
         cursor: pointer;
       }
-      /* HOME用の特別デザイン */
-      nav .mobile-home-btn {
-        background: #007BFF;
-        color: #fff;
-        border-top: none;
-      }
+      nav .mobile-home-btn { background: #007BFF; color: #fff; border-top: none; }
 
-      /* 初期状態では各ジャンルの作品リスト（リンク群）を閉じておく */
-      .menu-list a {
-        display: none;
-        background: #444;
-        padding-left: 30px; /* インデントを下げて階層構造をわかりやすく */
-        font-size: 14px;
-      }
+      .menu-list a { display: none; background: #444; padding-left: 30px; font-size: 14px; }
 
-      /* ラジオボタンがチェックされたジャンルの作品リストだけを展開する */
       #radio-genreA:checked ~ .container nav .list-genreA a,
       #radio-genreB:checked ~ .container nav .list-genreB a,
       #radio-genreC:checked ~ .container nav .list-genreC a,
       #radio-genreD:checked ~ .container nav .list-genreD a,
       #radio-genreE:checked ~ .container nav .list-genreE a,
-      #radio-genreF:checked ~ .container nav .list-genreF a {
-        display: block;
-      }
+      #radio-genreF:checked ~ .container nav .list-genreF a { display: block; }
 
-      /* 現在選択されているジャンルの見出しを目立たせる */
       #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
       #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
       #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
       #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
       #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
       #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
-        color: #fff;
-        background: #2b2b2b;
+        color: #fff; background: #2b2b2b;
       }
 
-      /* スマホ表示ではコンテンツの絶対配置を解除し、自然な並びにする */
       .content-box { position: static; }
-
-      /* スマホ表示では画像の左右配置をやめ、すべて縦並びにする */
       .layout-img-left, .layout-img-right { flex-direction: column; }
-      .layout-img-left img, .layout-img-right img {
-        width: 100%; max-width: 100%; margin-bottom: 15px;
-      }
+      .layout-img-left img, .layout-img-right img { width: 100%; max-width: 100%; margin-bottom: 15px; }
     }
   </style>
 </head>
@@ -387,7 +330,6 @@
 
     <nav>
       <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
-
       <div class="menu-list list-genreA">
         <label for="radio-genreA" class="mobile-genre-title">ジャンルA</label>
         <a href="#work1">作品 A-1</a>
@@ -447,6 +389,7 @@
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
+      
       <div id="work2" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 A-2：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-left">
@@ -459,18 +402,10 @@
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
-      <div id="work3" class="content-box">
-        <h2>作品 A-3</h2>
-        <p>ここに作品A-3の本文が入ります。</p>
-      </div>
-      <div id="work-b1" class="content-box">
-        <h2>作品 B-1</h2>
-        <p>ジャンルBの作品コンテンツです。</p>
-      </div>
-      <div id="work-b2" class="content-box">
-        <h2>作品 B-2</h2>
-        <p>ジャンルBの作品コンテンツです。</p>
-      </div>
+      
+      <div id="work3" class="content-box"><h2>作品 A-3</h2><p>ここに作品A-3の本文が入ります。</p></div>
+      <div id="work-b1" class="content-box"><h2>作品 B-1</h2><p>ジャンルBの作品コンテンツです。</p></div>
+      <div id="work-b2" class="content-box"><h2>作品 B-2</h2><p>ジャンルBの作品コンテンツです。</p></div>
       <div id="work-c1" class="content-box">
         <h2>作品 C-1</h2>
         <div class="work-section layout-wide">
@@ -478,6 +413,7 @@
           <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
         </div>
       </div>
+      
       <div id="work-d1" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 D-1：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-left">
@@ -490,6 +426,7 @@
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
+      
       <div id="work-d2" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 D-2：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-right">
@@ -502,22 +439,11 @@
           <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示。</p>
         </div>
       </div>
-      <div id="work-d3" class="content-box">
-        <h2>作品 D-3</h2>
-        <p>ここに作品D-3の本文が入ります。</p>
-      </div>
-      <div id="work-e1" class="content-box">
-        <h2>作品 E-1</h2>
-        <p>ジャンルEの作品コンテンツです。</p>
-      </div>
-      <div id="work-e2" class="content-box">
-        <h2>作品 E-2</h2>
-        <p>ジャンルEの作品コンテンツです。</p>
-      </div>
-      <div id="work-f1" class="content-box">
-        <h2>作品 F-1</h2>
-        <p>ジャンルFの作品コンテンツです。</p>
-      </div>
+      
+      <div id="work-d3" class="content-box"><h2>作品 D-3</h2><p>ここに作品D-3の本文が入ります。</p></div>
+      <div id="work-e1" class="content-box"><h2>作品 E-1</h2><p>ジャンルEの作品コンテンツです。</p></div>
+      <div id="work-e2" class="content-box"><h2>作品 E-2</h2><p>ジャンルEの作品コンテンツです。</p></div>
+      <div id="work-f1" class="content-box"><h2>作品 F-1</h2><p>ジャンルFの作品コンテンツです。</p></div>
     </main>
   </div>
 
@@ -532,24 +458,20 @@
       const genreRadios = document.querySelectorAll('.genre-radio');
       const mobileGenreTitles = document.querySelectorAll('.mobile-genre-title');
 
-      // 1. スマホ表示の時、メニューから作品を選んだら自動的にメニューを閉じる処理
       menuLinks.forEach(link => {
         link.addEventListener('click', () => {
-          menuToggle.checked = false; // スイッチをオフにしてメニューを引っ込める
+          menuToggle.checked = false; 
         });
       });
 
-      // 2. 上部のジャンル（またはスマホ内のジャンル見出し）を切り替えたら、読んでいた作品を閉じて最初の「ようこそ」画面に戻す処理
       genreRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-          window.location.hash = ''; // URL末尾の「#work1」などを消去して初期状態に戻す
+          window.location.hash = ''; 
         });
       });
 
-      // 3. スマホのアコーディオンを開いた時、自動的にメニュー内のスクロール位置を調整して見やすくする
       mobileGenreTitles.forEach(title => {
         title.addEventListener('click', () => {
-          // 少し遅らせて展開後の位置にスクロール
           setTimeout(() => {
             title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }, 50);
