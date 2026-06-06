@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>コンテンツレイアウト追加・JSオン/オフ両対応</title>
+  <title>テスト2 スタックレイアウト・JSオン/オフ両対応</title>
   <style>
     /* =========================================
        1. 全体の基本設定（ベースレイアウト）
@@ -15,13 +15,13 @@
     }
     
     body {
-      font-family: sans-serif; 
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; 
       height: 100vh;           
       height: 100dvh;          
       display: flex;
       flex-direction: column;  
       overflow: hidden;        
-      background: #181a1b;     /* ✨追加：透過した際に背後が白くならないよう全体の背景をダークに統一 */
+      background: #0f1115;     /* ✨洗練された超深海ダークブルー（漆黒より奥深い色合い） */
     }
 
     #menu-toggle,
@@ -33,13 +33,14 @@
        2. ヘッダー部分（上部のジャンル選択エリア）
        ========================================= */
     header {
-      background: #333;
-      padding: 10px;
+      background: #161920;     /* ✨ダークグレーから、わずかに青みを含んだ高級感ある色へ */
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between; 
       align-items: center;
       z-index: 100;
       flex-shrink: 0; 
+      border-bottom: 1px solid #222733; /* ✨うっすらと境界線をシャープに */
     }
     
     .genre-links {
@@ -51,19 +52,25 @@
 
     .genre-links label {
       display: inline-block;
-      color: white;
+      color: #94a3b8;          /* ✨目に優しいスタイリッシュなライトグレー */
       text-decoration: none;
-      padding: 8px 16px;
-      margin-right: 10px;
-      background: #555;
-      border-radius: 4px;
+      padding: 8px 18px;
+      margin-right: 12px;
+      background: #222733;     /* ✨ボタンのベースカラー */
+      border: 1px solid #2e3545;
+      border-radius: 6px;      /* ✨少し角丸を滑らかに */
       cursor: pointer;
-      transition: background 0.3s ease; 
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.25s ease; 
     }
     .genre-links label:hover {
-      background: #666;
+      background: #2e3545;
+      color: #fff;
+      border-color: #3b82f6;   /* ✨ホバー時にうっすらブルー */
     }
 
+    /* ✨ アクティブ（選択中）のグラデーションボタンデザイン */
     #radio-home:checked ~ header .genre-links label[for="radio-home"],
     #radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
     #radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
@@ -71,24 +78,27 @@
     #radio-genreD:checked ~ header .genre-links label[for="radio-genreD"],
     #radio-genreE:checked ~ header .genre-links label[for="radio-genreE"],
     #radio-genreF:checked ~ header .genre-links label[for="radio-genreF"] {
-      background: #007BFF;
+      background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); /* ✨美しいサイバーブルーの階調 */
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(0, 118, 255, 0.4); /* ✨ほんのり発光エフェクト */
     }
 
     .burger-btn {
       display: none;
       flex-direction: column;
       justify-content: space-between;
-      width: 30px;
-      height: 20px;
+      width: 26px;
+      height: 18px;
       cursor: pointer;
-      margin-left: 10px;
+      margin-left: 15px;
       z-index: 110;
     }
     .burger-btn span {
       display: block;
       width: 100%;
-      height: 3px;
-      background-color: white;
+      height: 2px;
+      background-color: #94a3b8;
       border-radius: 2px;
       transition: all 0.3s ease;
     }
@@ -104,9 +114,9 @@
     }
 
     nav {
-      width: 250px;
-      background: #333;
-      border-right: 1px solid #ddd;
+      width: 260px;
+      background: #12151c;     /* ✨メインコンテンツより1段階暗い色で引き締める */
+      border-right: 1px solid #1e2330;
       overflow-y: auto; 
     }
     
@@ -129,33 +139,49 @@
 
     nav a {
       display: block;
-      color: #fff;
-      padding: 15px 20px;
+      color: #94a3b8;
+      padding: 14px 24px;
       text-decoration: none;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #1e2330;
+      font-size: 14px;
+      transition: all 0.2s ease;
     }
-    nav a:hover { background: #666; }
+    nav a:hover { 
+      background: #1b202e; 
+      color: #00d2ff;          /* ✨ホバー時に鮮やかなブルーに変色 */
+      padding-left: 28px;      /* ✨リッチな左滑り込みエフェクト */
+    }
 
     main {
       flex: 1;
-      padding: 20px;
+      padding: 30px;           /* ✨余白を少し広げてモダンに */
       overflow-y: auto; 
       position: relative;
       z-index: 1;
-      color: #ffffe4;
-      background: transparent; /* bodyの背景色を使うため透明に */
+      color: #e2e8f0;          /* ✨完全な白ではなく、高級感のあるオフホワイト（フォントカラー） */
+      background: transparent; 
+    }
+
+    /* タイトル（h2）のスタイリング */
+    main h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      border-left: 4px solid #0076ff; /* ✨左側にクールなアクセントライン */
+      padding-left: 12px;
+      margin-bottom: 25px;
     }
 
     .content-box {
       display: none;
       position: absolute;
-      top: 20px; left: 20px; right: 20px;
-      animation: fadeIn 0.4s ease; 
+      top: 30px; left: 30px; right: 30px;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* ✨滑らかなアニメーション */
       padding-bottom: 40px;
     }
     
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -167,16 +193,21 @@
        4. フッター
        ========================================= */
     footer {
-      background: #333;
-      color: #ffffe4;
-      padding: 12px 20px;
+      background: #12151c;
+      color: #64748b;          /* ✨トーンを落としたスタイリッシュなグレー */
+      padding: 14px 20px;
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       flex-shrink: 0;
       z-index: 100;
+      border-top: 1px solid #1e2330;
     }
-    footer a { color: #fff; }
-    footer a:hover { color: #e0e0e0; }
+    footer a { 
+      color: #94a3b8; 
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: #00d2ff; }
 
     .menu-overlay { display: none; }
 
@@ -184,17 +215,37 @@
        5. 作品内のコンテンツレイアウト
        ========================================= */
     .work-section { margin-bottom: 40px; }
-    .work-section img { border-radius: 8px; object-fit: cover; width: 100%; }
-    .work-section p { line-height: 1.6; color: #ffffe4; }
+    .work-section img { 
+      border-radius: 8px; 
+      object-fit: cover; 
+      width: 100%; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* ✨画像に奥行きを与えるシャドウ */
+      border: 1px solid #222733;
+    }
+    .work-section p { 
+      line-height: 1.7; 
+      color: #cbd5e1; 
+      font-size: 15px;
+    }
+    .work-section strong {
+      color: #00d2ff;          /* ✨強調テキストをサイバーブルーにして視認性アップ */
+    }
 
-    .layout-wide img { max-height: 300px; margin-bottom: 15px; }
-    .layout-img-left { display: flex; gap: 20px; align-items: flex-start; }
-    .layout-img-left img { width: 50%; max-width: 400px; }
+    .layout-wide img { max-height: 320px; margin-bottom: 20px; }
+    .layout-img-left { display: flex; gap: 24px; align-items: flex-start; }
+    .layout-img-left img { width: 45%; max-width: 400px; }
     .layout-img-left p { flex: 1; } 
 
-    .layout-img-right { display: flex; flex-direction: row-reverse; gap: 20px; align-items: flex-start; }
-    .layout-img-right img { width: 50%; max-width: 400px; }
+    .layout-img-right { display: flex; flex-direction: row-reverse; gap: 24px; align-items: flex-start; }
+    .layout-img-right img { width: 45%; max-width: 400px; }
     .layout-img-right p { flex: 1; }
+
+    /* ✨区切り線のデザインをサイバーに */
+    hr {
+      margin: 35px 0; 
+      border: none; 
+      border-top: 1px dashed #222733 !important;
+    }
 
     /* =========================================
        6. 📲 レスポンシブ対応：スマホ表示
@@ -202,30 +253,37 @@
     @media (max-width: 768px) {
       .genre-links { display: none; }
 
-      /* ✨ スマホ用の透過ヘッダー（すりガラス風） */
+      /* ✨ スマホ用の透過ヘッダー（近未来的な高級ガラスエフェクト） */
       header {
-        position: absolute; /* 本文の上に浮かせる */
+        position: absolute; 
         top: 0; left: 0; right: 0;
-        background: rgba(24, 26, 27, 0.8); /* ダーク系の半透明 */
-        backdrop-filter: blur(8px);        /* ぼかし効果 */
-        -webkit-backdrop-filter: blur(8px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* うっすら境界線 */
+        background: rgba(15, 17, 21, 0.75); /* ✨ボディと同期した透過ダーク */
+        backdrop-filter: blur(12px);        /* ✨ぼかし量を強めて視認性向上 */
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
       }
 
-      /* ✨ スマホ用の透過フッター（すりガラス風） */
+      /* ✨ スマホ用の透過フッター */
       footer {
-        position: absolute; /* 本文の上に浮かせる */
+        position: absolute; 
         bottom: 0; left: 0; right: 0;
-        background: rgba(24, 26, 27, 0.8);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(15, 17, 21, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.03);
       }
 
-      /* ✨ 本文がヘッダーとフッターの下に隠れきらないように余白を追加 */
       main {
-        padding-top: 60px;
-        padding-bottom: 60px;
+        padding: 20px;
+        padding-top: 75px;    /* ✨ヘッダーに被らない調整 */
+        padding-bottom: 75px;  /* ✨フッターに被らない調整 */
+      }
+
+      .content-box {
+        top: 0; left: 0; right: 0;
+      }
+      main h2 {
+        font-size: 20px;
       }
 
       .burger-btn { 
@@ -235,19 +293,21 @@
       #radio-home:checked ~ header .burger-btn { display: flex; }
 
       nav {
-        position: absolute; top: 0; bottom: 0; left: -260px; 
-        z-index: 95; box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-        transition: left 0.3s ease; 
-        width: 260px; 
-        /* ✨ メニュー内の文字が透過ヘッダー/フッターに被らないよう余白追加 */
-        padding-top: 50px;
-        padding-bottom: 50px;
+        position: absolute; top: 0; bottom: 0; left: -270px; 
+        z-index: 95; 
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5); /* ✨影をリッチに */
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+        width: 270px; 
+        background: #12151c;
+        padding-top: 60px;
+        padding-bottom: 60px;
+        border-right: 1px solid #222733;
       }
 
       .menu-overlay {
         display: block; position: absolute;
         top: 0; right: 0; bottom: 0; left: 0;
-        background: rgba(0, 0, 0, 0.4); z-index: 90;
+        background: rgba(5, 6, 8, 0.6); z-index: 90;
         opacity: 0; pointer-events: none;
         transition: opacity 0.3s ease; cursor: pointer;
       }
@@ -255,27 +315,40 @@
       #menu-toggle:checked ~ .container nav { left: 0; }
       #menu-toggle:checked ~ .container .menu-overlay { opacity: 1; pointer-events: auto; }
 
+      /* ハンバーガーアニメーション時の色変化 */
+      #menu-toggle:checked ~ header .burger-btn span { background-color: #00d2ff; }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
-      #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
       .menu-list { display: block !important; }
       #radio-home:checked ~ .container nav { display: block; }
 
       .mobile-genre-title {
         display: block;
-        background: #222;
-        color: #aaa;
-        padding: 12px 15px;
+        background: #161920;
+        color: #64748b;
+        padding: 14px 20px;
         font-size: 14px;
-        font-weight: bold;
-        border-bottom: 1px solid #444;
-        border-top: 1px solid #444;
+        font-weight: 600;
+        border-bottom: 1px solid #1e2330;
+        border-top: 1px solid #1e2330;
         cursor: pointer;
+        transition: all 0.2s;
       }
-      nav .mobile-home-btn { background: #007BFF; color: #fff; border-top: none; }
+      nav .mobile-home-btn { 
+        background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); 
+        color: #fff; 
+        border: none; 
+      }
 
-      .menu-list a { display: none; background: #444; padding-left: 30px; font-size: 14px; }
+      .menu-list a { 
+        display: none; 
+        background: #191d26; 
+        padding-left: 35px; 
+        font-size: 14px; 
+        color: #94a3b8;
+      }
 
       #radio-genreA:checked ~ .container nav .list-genreA a,
       #radio-genreB:checked ~ .container nav .list-genreB a,
@@ -290,12 +363,13 @@
       #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
       #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
       #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
-        color: #fff; background: #2b2b2b;
+        color: #00d2ff; 
+        background: #1e2330;
       }
 
       .content-box { position: static; }
-      .layout-img-left, .layout-img-right { flex-direction: column; }
-      .layout-img-left img, .layout-img-right img { width: 100%; max-width: 100%; margin-bottom: 15px; }
+      .layout-img-left, .layout-img-right { flex-direction: column; gap: 15px; }
+      .layout-img-left img, .layout-img-right img { width: 100%; max-width: 100%; margin-bottom: 5px; }
     }
   </style>
 </head>
@@ -373,17 +447,17 @@
       </div>
 
       <div id="work1" class="content-box">
-        <h2 style="margin-bottom: 20px;">作品 A-1：コンテンツレイアウトのテスト</h2>
+        <h2>作品 A-1：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-wide">
           <img src="https://picsum.photos/seed/wide/800/300" alt="幅広のダミー画像" loading="lazy" decoding="async">
           <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
         </div>
-        <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
+        <hr>
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
-        <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
+        <hr>
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
@@ -391,12 +465,12 @@
       </div>
       
       <div id="work2" class="content-box">
-        <h2 style="margin-bottom: 20px;">作品 A-2：コンテンツレイアウトのテスト</h2>
+        <h2>作品 A-2：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
-        <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
+        <hr>
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
@@ -415,12 +489,12 @@
       </div>
       
       <div id="work-d1" class="content-box">
-        <h2 style="margin-bottom: 20px;">作品 D-1：コンテンツレイアウトのテスト</h2>
+        <h2>作品 D-1：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
-        <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
+        <hr>
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
@@ -428,12 +502,12 @@
       </div>
       
       <div id="work-d2" class="content-box">
-        <h2 style="margin-bottom: 20px;">作品 D-2：コンテンツレイアウトのテスト</h2>
+        <h2>作品 D-2：コンテンツレイアウトのテスト</h2>
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示。</p>
         </div>
-        <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
+        <hr>
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
           <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示。</p>
