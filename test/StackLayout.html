@@ -16,7 +16,8 @@
     
     body {
       font-family: sans-serif; /* デフォルトのシステムフォント（読み込みが最速） */
-      height: 100vh;           /* 画面の高さいっぱいに広げる */
+      height: 100vh;           /* 古いブラウザ用のフォールバック */
+      height: 100dvh;          /* ✨ スマホのアドレスバーによる画面下部の見切れを防ぐ最新の指定 */
       display: flex;
       flex-direction: column;  /* ヘッダーとメインコンテンツを縦に並べる */
       overflow: hidden;        /* 画面全体の不要なスクロールを隠す */
@@ -68,9 +69,7 @@
       background: #666;
     }
 
-    /* ✨ 選択中のジャンルボタンの色を青色（#007BFF）にする設定
-      （例：radio-homeがチェックされていたら、for="radio-home"のラベルを青くする）
-    */
+    /* 選択中のジャンルボタンの色を青色（#007BFF）にする設定 */
     #radio-home:checked ~ header .genre-links label[for="radio-home"],
     #radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
     #radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
@@ -130,9 +129,7 @@
       display: none;
     }
 
-    /* ✨ ラジオボタンの状態に応じて、該当するメニューリストを表示する
-      （JSを使わずにCSSだけで表示を切り替える仕組み）
-    */
+    /* ラジオボタンの状態に応じて、該当するメニューリストを表示する */
     #radio-genreA:checked ~ .container nav .list-genreA,
     #radio-genreB:checked ~ .container nav .list-genreB,
     #radio-genreC:checked ~ .container nav .list-genreC,
@@ -142,16 +139,16 @@
       display: block;
     }
 
-    /* ✨ HOME選択時はサイドバー（nav）自体を完全に消し、本文を広く使う */
+    /* HOME選択時はサイドバー（nav）自体を完全に消し、本文を広く使う */
     #radio-home:checked ~ .container nav {
       display: none;
     }
-    /* ✨ スマホ表示時、HOME選択時はハンバーガーボタンも不要なので消す */
+    /* スマホ表示時、HOME選択時はハンバーガーボタンも不要なので消す */
     #radio-home:checked ~ header .burger-btn {
       display: none;
     }
 
-    /* ✨ JSオフ対策：HOME選択時は、URLの履歴(#work1など)が残っていても強制的に「ようこそ」画面に戻す */
+    /* JSオフ対策：HOME選択時は、強制的に「ようこそ」画面に戻す */
     #radio-home:checked ~ .container main .content-box {
       display: none;
     }
@@ -180,30 +177,22 @@
       background: #181a1b;
     }
 
-    /* 各作品のコンテンツボックス
-      最初は display: none; で隠しておく
-    */
+    /* 各作品のコンテンツボックス */
     .content-box {
       display: none;
       position: absolute;
       top: 20px; left: 20px; right: 20px;
-      animation: fadeIn 0.4s ease; /* 表示される時にフワッと浮かび上がるアニメーション */
+      animation: fadeIn 0.4s ease; 
       padding-bottom: 40px;
     }
     
-    /* フワッと表示させるアニメーションの定義 */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ✨ URLの末尾（ハッシュタグ #work1 など）が一致したボックスだけを表示
-      これがJSなしで作品を切り替えられる最大の理由です（:target 疑似クラス）
-    */
     #default-content { display: block; } /* 初期表示は「ようこそ」画面 */
     .content-box:target { display: block; } /* リンクをクリックされたコンテンツを表示 */
-    
-    /* 何か作品が選ばれて表示されたら、最初の「ようこそ」画面は消す（:has 疑似クラス） */
     main:has(.content-box:target) #default-content { display: none; }
 
 
@@ -227,32 +216,28 @@
 
 
     /* =========================================
-       5. ✨ 作品内のコンテンツレイアウト（PC向け基本設定）
+       5. 作品内のコンテンツレイアウト（PC向け基本設定）
        ========================================= */
     .work-section { margin-bottom: 40px; }
     
-    /* 画像の基本設定（角丸にして、はみ出ないようにトリミング） */
     .work-section img {
       border-radius: 8px;
       object-fit: cover;
       width: 100%;
     }
     .work-section p {
-      line-height: 1.6; /* 文字の行間を少し広くして読みやすくする */
+      line-height: 1.6; 
       color: #ffffe4;
     }
 
-    /* レイアウト1: 幅広画像の下に文字 */
     .layout-wide img { max-height: 300px; margin-bottom: 15px; }
 
-    /* レイアウト2: 画像を左、文字を右に横並び（Flexbox） */
     .layout-img-left {
       display: flex; gap: 20px; align-items: flex-start;
     }
     .layout-img-left img { width: 50%; max-width: 400px; }
-    .layout-img-left p { flex: 1; } /* 残りの幅を文字エリアにする */
+    .layout-img-left p { flex: 1; } 
 
-    /* レイアウト3: 画像を右、文字を左に横並び（row-reverseで順番を逆転） */
     .layout-img-right {
       display: flex; flex-direction: row-reverse; gap: 20px; align-items: flex-start;
     }
@@ -268,12 +253,15 @@
       .genre-links { display: none; }
 
       /* スマホ時はどの状態であっても常にバーガーボタンを表示する */
-      .burger-btn { display: flex; }
+      .burger-btn { 
+        display: flex; 
+        margin-left: auto; /* ✨ ジャンルが消えても、ボタンを右端に固定して画面外にはみ出すのを防ぐ */
+      }
       #radio-home:checked ~ header .burger-btn { display: flex; }
 
       /* サイドバーを画面外（左側）に隠しておく */
       nav {
-        position: absolute; top: 0; bottom: 0; left: -250px;
+        position: absolute; top: 0; bottom: 0; left: -260px; /* ✨ メニュー幅に合わせてピッタリ隠れるように数値を修正 */
         z-index: 95; box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         transition: left 0.3s ease; /* スライドするアニメーション */
         width: 260px; /* アコーディオンで見やすくなるよう少し幅を広げて調整 */
@@ -301,7 +289,6 @@
       #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
       /* ─── スマホ用アコーディオンメニューの制御 ─── */
-      /* スマホ時は、PCのラジオボタンによる非表示設定を解除し、全ジャンルを縦に並べる */
       .menu-list {
         display: block !important;
       }
@@ -337,7 +324,7 @@
         font-size: 14px;
       }
 
-      /* ✨ ラジオボタンがチェックされたジャンルの作品リスト（リンク群）だけを展開する */
+      /* ラジオボタンがチェックされたジャンルの作品リストだけを展開する */
       #radio-genreA:checked ~ .container nav .list-genreA a,
       #radio-genreB:checked ~ .container nav .list-genreB a,
       #radio-genreC:checked ~ .container nav .list-genreC a,
@@ -347,7 +334,7 @@
         display: block;
       }
 
-      /* 現在選択されているジャンルの見出しを目立たせる（文字を白くする） */
+      /* 現在選択されているジャンルの見出しを目立たせる */
       #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
       #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
       #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
@@ -361,7 +348,7 @@
       /* スマホ表示ではコンテンツの絶対配置を解除し、自然な並びにする */
       .content-box { position: static; }
 
-      /* スマホ表示では画像の左右配置をやめ、すべて「画像が上、文字が下」の縦並びにする */
+      /* スマホ表示では画像の左右配置をやめ、すべて縦並びにする */
       .layout-img-left, .layout-img-right { flex-direction: column; }
       .layout-img-left img, .layout-img-right img {
         width: 100%; max-width: 100%; margin-bottom: 15px;
@@ -438,7 +425,7 @@
         <h2>ジャンルの選択</h2>
         <div class="content-section layout-wide">
           <p>
-            <strong>ジャンルを選び、メニューから作品を選択してください。</strong><br>
+            <strong>上のジャンルを選び、メニューから作品を選択してください。</strong><br>
           </p>
         </div>
       </div>
@@ -559,7 +546,7 @@
         });
       });
 
-      // ✨ 追加のJS処理：スマホのアコーディオンを開いた時、自動的にメニュー内のスクロール位置を調整して見やすくする（オプション）
+      // 3. スマホのアコーディオンを開いた時、自動的にメニュー内のスクロール位置を調整して見やすくする
       mobileGenreTitles.forEach(title => {
         title.addEventListener('click', () => {
           // 少し遅らせて展開後の位置にスクロール
