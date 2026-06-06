@@ -125,6 +125,11 @@
       display: none;
     }
 
+    /* スマホ専用のメニュータイトル（PCでは非表示） */
+    .mobile-genre-title {
+      display: none;
+    }
+
     /* ✨ ラジオボタンの状態に応じて、該当するメニューリストを表示する
       （JSを使わずにCSSだけで表示を切り替える仕組み）
     */
@@ -259,13 +264,19 @@
        6. 📲 レスポンシブ対応：スマホ表示（画面幅 768px 以下）
        ========================================= */
     @media (max-width: 768px) {
-      .burger-btn { display: flex; } /* ハンバーガーボタンを表示 */
+      /* 上部のジャンルリンクバーを完全に非表示にする */
+      .genre-links { display: none; }
+
+      /* スマホ時はどの状態であっても常にバーガーボタンを表示する */
+      .burger-btn { display: flex; }
+      #radio-home:checked ~ header .burger-btn { display: flex; }
 
       /* サイドバーを画面外（左側）に隠しておく */
       nav {
         position: absolute; top: 0; bottom: 0; left: -250px;
         z-index: 95; box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         transition: left 0.3s ease; /* スライドするアニメーション */
+        width: 260px; /* アコーディオンで見やすくなるよう少し幅を広げて調整 */
       }
 
       /* 半透明の黒いシートを設定 */
@@ -289,10 +300,68 @@
       #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
+      /* ─── スマホ用アコーディオンメニューの制御 ─── */
+      /* スマホ時は、PCのラジオボタンによる非表示設定を解除し、全ジャンルを縦に並べる */
+      .menu-list {
+        display: block !important;
+      }
+      /* HOME時でもサイドバーを非表示にしない */
+      #radio-home:checked ~ .container nav {
+        display: block;
+      }
+
+      /* ジャンルのタイトル見出しをスマホ時のみ表示 */
+      .mobile-genre-title {
+        display: block;
+        background: #222;
+        color: #aaa;
+        padding: 12px 15px;
+        font-size: 14px;
+        font-weight: bold;
+        border-bottom: 1px solid #444;
+        border-top: 1px solid #444;
+        cursor: pointer;
+      }
+      /* HOME用の特別デザイン */
+      nav .mobile-home-btn {
+        background: #007BFF;
+        color: #fff;
+        border-top: none;
+      }
+
+      /* 初期状態では各ジャンルの作品リスト（リンク群）を閉じておく */
+      .menu-list a {
+        display: none;
+        background: #444;
+        padding-left: 30px; /* インデントを下げて階層構造をわかりやすく */
+        font-size: 14px;
+      }
+
+      /* ✨ ラジオボタンがチェックされたジャンルの作品リスト（リンク群）だけを展開する */
+      #radio-genreA:checked ~ .container nav .list-genreA a,
+      #radio-genreB:checked ~ .container nav .list-genreB a,
+      #radio-genreC:checked ~ .container nav .list-genreC a,
+      #radio-genreD:checked ~ .container nav .list-genreD a,
+      #radio-genreE:checked ~ .container nav .list-genreE a,
+      #radio-genreF:checked ~ .container nav .list-genreF a {
+        display: block;
+      }
+
+      /* 現在選択されているジャンルの見出しを目立たせる（文字を白くする） */
+      #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
+      #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
+      #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
+      #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
+      #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
+      #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
+        color: #fff;
+        background: #2b2b2b;
+      }
+
       /* スマホ表示ではコンテンツの絶対配置を解除し、自然な並びにする */
       .content-box { position: static; }
 
-      /* ✨ スマホ表示では画像の左右配置をやめ、すべて「画像が上、文字が下」の縦並びにする */
+      /* スマホ表示では画像の左右配置をやめ、すべて「画像が上、文字が下」の縦並びにする */
       .layout-img-left, .layout-img-right { flex-direction: column; }
       .layout-img-left img, .layout-img-right img {
         width: 100%; max-width: 100%; margin-bottom: 15px;
@@ -330,202 +399,138 @@
     <label for="menu-toggle" class="menu-overlay"></label>
 
     <nav>
+      <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
+
       <div class="menu-list list-genreA">
+        <label for="radio-genreA" class="mobile-genre-title">ジャンルA</label>
         <a href="#work1">作品 A-1</a>
         <a href="#work2">作品 A-2</a>
         <a href="#work3">作品 A-3</a>
       </div>
       <div class="menu-list list-genreB">
+        <label for="radio-genreB" class="mobile-genre-title">ジャンルB</label>
         <a href="#work-b1">作品 B-1</a>
         <a href="#work-b2">作品 B-2</a>
       </div>
       <div class="menu-list list-genreC">
+        <label for="radio-genreC" class="mobile-genre-title">ジャンルC</label>
         <a href="#work-c1">作品 C-1</a>
       </div>
       <div class="menu-list list-genreD">
+        <label for="radio-genreD" class="mobile-genre-title">ジャンルD</label>
         <a href="#work-d1">作品 D-1</a>
         <a href="#work-d2">作品 D-2</a>
         <a href="#work-d3">作品 D-3</a>
       </div>
       <div class="menu-list list-genreE">
+        <label for="radio-genreE" class="mobile-genre-title">ジャンルE</label>
         <a href="#work-e1">作品 E-1</a>
         <a href="#work-e2">作品 E-2</a>
       </div>
       <div class="menu-list list-genreF">
+        <label for="radio-genreF" class="mobile-genre-title">ジャンルF</label>
         <a href="#work-f1">作品 F-1</a>
       </div>
     </nav>
 
     <main>
       <div id="default-content" class="content-box">
-        <h2>ジャンルの選択】</h2>
+        <h2>ジャンルの選択</h2>
         <div class="content-section layout-wide">
           <p>
-            <strong>上のジャンルを選び、メニューから作品を選択してください。</strong><br>
+            <strong>ジャンルを選び、メニューから作品を選択してください。</strong><br>
           </p>
         </div>
       </div>
 
-<!-- ジャンルA 作品 A-1 -->
       <div id="work1" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 A-1：コンテンツレイアウトのテスト</h2>
-        
         <div class="work-section layout-wide">
           <img src="https://picsum.photos/seed/wide/800/300" alt="幅広のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【幅広画像の下に文字】</strong><br>
-            このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。
-          </p>
+          <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
         </div>
-        
         <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
-        
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の右に文字】</strong><br>
-            PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。
-          </p>
+          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
-        
         <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
-        
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の左に文字】</strong><br>
-            PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。
-          </p>
+          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
-<!-- ジャンルA 作品 A-1ここまで -->
-
-<!-- ジャンルA 作品 A-2ここから -->
       <div id="work2" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 A-2：コンテンツレイアウトのテスト</h2>
-
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の右に文字】</strong><br>
-            PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。
-          </p>
+          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
- 
         <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
-        
- 
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の左に文字】</strong><br>
-            PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。
-          </p>
+          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
-
-<!-- ジャンルA 作品 A-3ここから -->
       <div id="work3" class="content-box">
         <h2>作品 A-3</h2>
         <p>ここに作品A-3の本文が入ります。</p>
       </div>
-
-<!-- ジャンルB 作品 B-1ここから -->
       <div id="work-b1" class="content-box">
         <h2>作品 B-1</h2>
         <p>ジャンルBの作品コンテンツです。</p>
       </div>
-
-<!-- ジャンルB 作品 B-2ここから -->
       <div id="work-b2" class="content-box">
         <h2>作品 B-2</h2>
         <p>ジャンルBの作品コンテンツです。</p>
       </div>
-
-<!-- ジャンルC 作品 C-1ここから -->
       <div id="work-c1" class="content-box">
         <h2>作品 C-1</h2>
         <div class="work-section layout-wide">
           <img src="./image/00.jpg" alt="幅広の画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【幅広画像の下に文字】</strong><br>
-            このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。
-          </p>
+          <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
         </div>
       </div>
-
-<!-- ジャンルD 作品 D-1ここから -->
       <div id="work-d1" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 D-1：コンテンツレイアウトのテスト</h2>
-        
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の右に文字】</strong><br>
-            PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。
-          </p>
+          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
         </div>
-        
         <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
-        
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の左に文字】</strong><br>
-            PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。
-          </p>
+          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
-
-<!-- ジャンルD 作品 D-2ここから -->
       <div id="work-d2" class="content-box">
         <h2 style="margin-bottom: 20px;">作品 D-2：コンテンツレイアウトのテスト</h2>
-
         <div class="work-section layout-img-right">
           <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の左に文字】</strong><br>
-            PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示。
-          </p>
+          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示。</p>
         </div>
-
         <hr style="margin:30px 0; border:none; border-top:1px dashed #ccc;">
-
         <div class="work-section layout-img-left">
           <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p>
-            <strong>【画像の右に文字】</strong><br>
-            PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示。
-          </p>
+          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示。</p>
         </div>
-
       </div>
-
-<!-- ジャンルD 作品 D-3ここから -->
       <div id="work-d3" class="content-box">
         <h2>作品 D-3</h2>
         <p>ここに作品D-3の本文が入ります。</p>
       </div>
-
-<!-- ジャンルE 作品 E-1ここから -->
       <div id="work-e1" class="content-box">
         <h2>作品 E-1</h2>
         <p>ジャンルEの作品コンテンツです。</p>
       </div>
-
-<!-- ジャンルE 作品 E-2ここから -->
       <div id="work-e2" class="content-box">
         <h2>作品 E-2</h2>
         <p>ジャンルEの作品コンテンツです。</p>
       </div>
-
-<!-- ジャンルF 作品 F-1ここから -->
       <div id="work-f1" class="content-box">
         <h2>作品 F-1</h2>
         <p>ジャンルFの作品コンテンツです。</p>
       </div>
-
-
     </main>
   </div>
 
@@ -535,10 +540,10 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 操作するHTMLの要素を取得
-      const menuToggle = document.getElementById('menu-toggle'); // スマホメニューの開閉スイッチ
-      const menuLinks = document.querySelectorAll('nav a');      // メニュー内のリンクすべて
-      const genreRadios = document.querySelectorAll('.genre-radio'); // ジャンル選択のラジオボタンすべて
+      const menuToggle = document.getElementById('menu-toggle');
+      const menuLinks = document.querySelectorAll('nav a');
+      const genreRadios = document.querySelectorAll('.genre-radio');
+      const mobileGenreTitles = document.querySelectorAll('.mobile-genre-title');
 
       // 1. スマホ表示の時、メニューから作品を選んだら自動的にメニューを閉じる処理
       menuLinks.forEach(link => {
@@ -547,10 +552,20 @@
         });
       });
 
-      // 2. 上部のジャンルを切り替えたら、読んでいた作品を閉じて最初の「ようこそ」画面に戻す処理
+      // 2. 上部のジャンル（またはスマホ内のジャンル見出し）を切り替えたら、読んでいた作品を閉じて最初の「ようこそ」画面に戻す処理
       genreRadios.forEach(radio => {
         radio.addEventListener('change', () => {
           window.location.hash = ''; // URL末尾の「#work1」などを消去して初期状態に戻す
+        });
+      });
+
+      // ✨ 追加のJS処理：スマホのアコーディオンを開いた時、自動的にメニュー内のスクロール位置を調整して見やすくする（オプション）
+      mobileGenreTitles.forEach(title => {
+        title.addEventListener('click', () => {
+          // 少し遅らせて展開後の位置にスクロール
+          setTimeout(() => {
+            title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 50);
         });
       });
     });
