@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スクリプトなし・フレーム風レイアウト（自動閉じる対応）</title>
+  <style>
+    /* 全体のリセットと基本配置 */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 画面全体のスクロールを防ぐ */
+    }
+
+    /* バーガーメニュー開閉用の隠しチェックボックス */
+    #menu-toggle {
+      display: none;
+    }
+
+    /* 【新規】メニューの外側をタップして閉じるための透明カバー（PCでは非表示） */
+    .menu-overlay {
+      display: none;
+    }
+
+    /* 1. ヘッダー（ジャンル・横スクロール） */
+    header {
+      background: #333;
+      padding: 10px;
+      display: flex; /* バーガーボタンを右端に寄せるためflex化 */
+      justify-content: space-between;
+      align-items: center;
+      position: sticky; /* ヘッダーを最上部に固定 */
+      top: 0;
+      z-index: 100;
+    }
+    
+    /* ジャンルリンクのコンテナ */
+    .genre-links {
+      overflow-x: auto; /* 横スクロールを許可 */
+      white-space: nowrap; /* 改行を防ぐ */
+      -webkit-overflow-scrolling: touch; /* スマホで滑らかに */
+      flex: 1;
+    }
+    .genre-links a {
+      display: inline-block;
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      margin-right: 10px;
+      background: #555;
+      border-radius: 4px;
+    }
+
+    /* バーガーボタンのスタイル（PCでは非表示） */
+    .burger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .burger-btn span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background-color: white;
+      border-radius: 2px;
+      transition: all 0.3s ease; /* アニメーション用 */
+    }
+
+    /* 2. 下部レイアウト（左メニュー + メイン） */
+    .container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* 左メニュー（作品リスト・縦スクロール） */
+    nav {
+      width: 250px;
+      background: #f4f4f4;
+      border-right: 1px solid #ddd;
+      overflow-y: auto; /* 縦スクロールを許可 */
+      padding: 10px;
+    }
+    nav a {
+      display: block;
+      color: #333;
+      padding: 10px;
+      text-decoration: none;
+      border-bottom: 1px solid #eee;
+    }
+    nav a:hover { background: #e0e0e0; }
+
+    /* メイン（作品表示エリア） */
+    main {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto; /* 縦スクロールを許可 */
+      position: relative;
+    }
+
+    /* 3. iframeの代わり（:target によるコンテンツ切り替え） */
+    .content-box {
+      display: none; /* 初期状態はすべて非表示 */
+      position: absolute;
+      top: 20px; left: 20px; right: 20px;
+    }
+    /* 初期表示（何も選択されていない時） */
+    #default-content { display: block; }
+
+    /* リンクがクリックされてURLの末尾（#ID）と一致したコンテンツだけを表示 */
+    .content-box:target { display: block; }
+    /* 何かが選択されたら、初期表示を消す */
+    main:has(:target) #default-content { display: none; }
+
+
+    /* ========================================================
+       📲 レスポンシブ対応：画面幅 768px 以下の設定
+       ======================================================== */
+    @media (max-width: 768px) {
+      /* バーガーボタンを表示 */
+      .burger-btn {
+        display: flex;
+        z-index: 110; /* オーバーレイより前面に配置 */
+      }
+
+      /* 左メニューを「ドロワー（引き出し）」に変更 */
+      nav {
+        position: fixed;
+        top: 56px; /* ヘッダーの高さ分（目安）下げる */
+        left: -250px; /* 通常時は画面の左外に隠す */
+        width: 250px;
+        height: calc(100vh - 56px); /* 画面一杯からヘッダー分を引く */
+        z-index: 95; /* オーバーレイ（90）より前面にする */
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+        transition: left 0.3s ease; /* スライドのアニメーション */
+      }
+
+      /* 🔥【新規】メニューが開いたとき、画面全体を覆う「閉じボタン」になるカバー */
+      .menu-overlay {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 56px);
+        background: rgba(0, 0, 0, 0.4); /* 背景をうっすら暗くする（不要なら透明 rgba(0,0,0,0) に） */
+        z-index: 90;
+        opacity: 0;
+        pointer-events: none; /* 通常時はクリックをすり抜ける */
+        transition: opacity 0.3s ease;
+      }
+
+      /* 🔥 魔法のCSS：チェックボックスがONの時の挙動 */
+      /* 1. メニューをスライドイン */
+      #menu-toggle:checked ~ .container nav {
+        left: 0;
+      }
+      /* 2. カバー（オーバーレイ）を表示し、クリックできるようにする */
+      #menu-toggle:checked ~ .menu-overlay {
+        opacity: 1;
+        pointer-events: auto; /* クリックを受け付けるようにする */
+      }
+
+      /* バーガーボタンのアニメーション（☰ から ✕ へ変化） */
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+      }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(2) {
+        opacity: 0;
+      }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+      }
+
+      /* スマホではコンテンツの絶対配置を解除して綺麗に収める */
+      .content-box {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <input type="checkbox" id="menu-toggle">
+
+  <label for="menu-toggle" class="menu-overlay"></label>
+
+  <header>
+    <div class="genre-links">
+      <a href="#genre1-menu">ジャンルA</a>
+      <a href="#genre2-menu">ジャンルB</a>
+      <a href="#genre3-menu">ジャンルC</a>
+      <a href="#genre4-menu">ジャンルD（長くなってもスクロール）</a>
+    </div>
+    
+    <label for="menu-toggle" class="burger-btn">
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+  </header>
+
+  <div class="container">
+    <nav>
+      <a href="#work1">作品 A-1</a>
+      <a href="#work2">作品 A-2</a>
+      <a href="#work3">作品 A-3（作品数が増えても...）</a>
+      <script>for(let i=4;i<=20;i++) document.write(`<a href="#work${i}">作品 A-${i}</a>`)</script>
+    </nav>
+
+    <main>
+      <div id="default-content" class="content-box">
+        <h2>ようこそ</h2>
+        <p>上のジャンルを選び、右上のメニュー（📱スマホ時）から作品を選択してください。</p>
+      </div>
+
+      <div id="work1" class="content-box">
+        <h2>作品 A-1</h2>
+        <p>ここに作品A-1の本文が入ります。iframeを使わずにCSSだけで切り替わっています。</p>
+      </div>
+
+      <div id="work2" class="content-box">
+        <h2>作品 A-2</h2>
+        <p>ここに作品A-2の本文が入ります。スクリプト（JS）も一切動いていません。</p>
+      </div>
+
+      <div id="work3" class="content-box">
+        <h2>作品 A-3</h2>
+        <p>ここに作品A-3の本文が入ります。メインエリア内も個別に縦スクロールが可能です。</p>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
