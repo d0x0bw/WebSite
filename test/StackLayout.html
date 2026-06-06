@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スクリプトなし・フレーム風レイアウト（完全修正版）</title>
+  <title>スクリプトなし・フレーム風レイアウト（フッター固定版）</title>
   <style>
     /* 全体のリセットと基本配置 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,7 +20,7 @@
       display: none;
     }
 
-    /* メニューの外側をタップして閉じるための透明カバー（PCでは非表示） */
+    /* メッセージの外側をタップして閉じるための透明カバー（PCでは非表示） */
     .menu-overlay {
       display: none;
     }
@@ -88,7 +88,7 @@
       padding: 10px;
     }
 
-    /* 【変更】メニュー内のリンク要素を内包するコンテナ */
+    /* メニュー内のリンク要素を内包するコンテナ */
     .nav-item {
       position: relative; /* 子要素のlabelを重ねる基準 */
       border-bottom: 1px solid #eee;
@@ -101,7 +101,7 @@
     }
     .nav-item a:hover { background: #e0e0e0; }
 
-    /* 【新規】リンクと同じサイズで重なる、メニューを閉じるためのラベル（PCでは無効化） */
+    /* リンクと同じサイズで重なる、メニューを閉じるためのラベル（PCでは無効化） */
     .nav-item .close-trigger {
       display: none;
     }
@@ -124,6 +124,18 @@
     .content-box:target { display: block; }
     main:has(:target) #default-content { display: none; }
 
+    /* 4. 固定フッター（ヘッダーと同じ色 #333） */
+    footer {
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 14px;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+
 
     /* ========================================================
        📲 レスポンシブ対応：画面幅 768px 以下の設定
@@ -134,12 +146,13 @@
         z-index: 110;
       }
 
+      /* スマホ時はヘッダーとフッターに挟まれた領域いっぱいに広げる */
       nav {
         position: fixed;
-        top: 56px;
+        top: 56px; /* ヘッダーの高さ分下げる */
         left: -250px;
         width: 250px;
-        height: calc(100vh - 56px);
+        height: calc(100vh - 56px - 45px); /* 🔥100vhからヘッダーとフッターの分を引く */
         z-index: 95;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         transition: left 0.3s ease;
@@ -162,7 +175,10 @@
       .menu-overlay {
         display: block;
         position: fixed;
-        top: 56px; left: 0; width: 100%; height: calc(100vh - 56px);
+        top: 56px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 56px - 45px); /* 暗幕もヘッダーとフッターの間に収める */
         background: rgba(0, 0, 0, 0.4);
         z-index: 90;
         opacity: 0;
@@ -260,6 +276,10 @@
       </div>
     </main>
   </div>
+
+  <footer>
+    <p>&copy; 2026 スクリプトなしサイト. All Rights Reserved.</p>
+  </footer>
 
 </body>
 </html>
