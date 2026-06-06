@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スクリプトなし・フレーム風レイアウト（フッター固定版）</title>
+  <title>自動クローズ機能付き・フレーム風レイアウト</title>
   <style>
     /* 全体のリセットと基本配置 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #333;
       font-family: sans-serif;
+      background: #333;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* 画面全体のスクロールを防ぐ */
+      overflow: hidden;
     }
 
     /* バーガーメニュー開閉用の隠しチェックボックス */
@@ -21,12 +21,7 @@
       display: none;
     }
 
-    /* メッセージの外側をタップして閉じるための透明カバー（PCでは非表示） */
-    .menu-overlay {
-      display: none;
-    }
-
-    /* 1. ヘッダー（ジャンル・横スクロール） */
+    /* 1. ヘッダー */
     header {
       background: #333;
       padding: 10px;
@@ -63,6 +58,7 @@
       height: 20px;
       cursor: pointer;
       margin-left: 10px;
+      z-index: 110;
     }
     .burger-btn span {
       display: block;
@@ -78,6 +74,7 @@
       display: flex;
       flex: 1;
       overflow: hidden;
+      position: relative;
     }
 
     /* 左メニュー */
@@ -86,34 +83,24 @@
       background: #f4f4f4;
       border-right: 1px solid #ddd;
       overflow-y: auto;
-      padding: 10px;
     }
-
-    /* メニュー内のリンク要素を内包するコンテナ */
-    .nav-item {
-      position: relative; /* 子要素のlabelを重ねる基準 */
-      border-bottom: 1px solid #eee;
-    }
-    .nav-item a {
+    nav a {
       display: block;
       color: #333;
-      padding: 10px;
+      padding: 15px 20px;
       text-decoration: none;
+      border-bottom: 1px solid #eee;
     }
-    .nav-item a:hover { background: #e0e0e0; }
-
-    /* リンクと同じサイズで重なる、メニューを閉じるためのラベル（PCでは無効化） */
-    .nav-item .close-trigger {
-      display: none;
-    }
+    nav a:hover { background: #e0e0e0; }
 
     /* メイン（作品表示エリア） */
     main {
       flex: 1;
-      background: #fff;
       padding: 20px;
       overflow-y: auto;
       position: relative;
+      z-index: 1;
+      background: #fff;
     }
 
     /* 3. :target によるコンテンツ切り替え */
@@ -121,12 +108,19 @@
       display: none;
       position: absolute;
       top: 20px; left: 20px; right: 20px;
+      animation: fadeIn 0.4s ease;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 初期表示の設定と :target の制御 */
     #default-content { display: block; }
     .content-box:target { display: block; }
-    main:has(:target) #default-content { display: none; }
+    main:has(.content-box:target) #default-content { display: none; }
 
-    /* 4. 固定フッター（ヘッダーと同じ色 #333） */
+    /* 4. 固定フッター */
     footer {
       background: #333;
       color: white;
@@ -138,49 +132,37 @@
       z-index: 100;
     }
 
+    /* オーバーレイ（PCでは非表示） */
+    .menu-overlay {
+      display: none;
+    }
 
     /* ========================================================
-       📲 レスポンシブ対応：画面幅 768px 以下の設定
+       📲 レスポンシブ対応：画面幅 768px 以下
        ======================================================== */
     @media (max-width: 768px) {
       .burger-btn {
         display: flex;
-        z-index: 110;
       }
 
-      /* スマホ時はヘッダーとフッターに挟まれた領域いっぱいに広げる */
       nav {
         position: fixed;
-        top: 56px; /* ヘッダーの高さ分下げる */
+        top: 56px;
         left: -250px;
         width: 250px;
-        height: calc(100vh - 56px - 45px); /* 🔥100vhからヘッダーとフッターの分を引く */
+        height: calc(100vh - 56px - 45px);
         z-index: 95;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         transition: left 0.3s ease;
       }
 
-      /* スマホ時のみ、作品リンクの上に「閉じる用ラベル」を透明にして重ねる */
-      .nav-item .close-trigger {
-        display: block;
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 2; /* リンク（aタグ）より前面に置く */
-        cursor: pointer;
-      }
-      .nav-item a {
-        position: relative;
-        z-index: 1; /* labelの裏に配置 */
-      }
-
-      /* 背景の暗幕（メニュー外をタップして閉じる用） */
       .menu-overlay {
         display: block;
         position: fixed;
         top: 56px;
         left: 0;
         width: 100%;
-        height: calc(100vh - 56px - 45px); /* 暗幕もヘッダーとフッターの間に収める */
+        height: calc(100vh - 56px - 45px);
         background: rgba(0, 0, 0, 0.4);
         z-index: 90;
         opacity: 0;
@@ -188,20 +170,22 @@
         transition: opacity 0.3s ease;
       }
 
-      /* 魔法のCSS：チェックボックスON時の挙動 */
+      /* 🔥 チェックボックスON時の挙動（メニュー開く＆暗幕有効化） */
       #menu-toggle:checked ~ .container nav { left: 0; }
       #menu-toggle:checked ~ .menu-overlay {
         opacity: 1;
         pointer-events: auto;
       }
 
-      /* バーガーボタン変形 */
+      /* 🔥 チェックボックスON時のバーガーボタン変形（✖になる） */
       #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
+      /* スマホ時は position:absolute を解除してスクロールしやすくする */
       .content-box {
         position: static;
+        margin-bottom: 20px;
       }
     }
   </style>
@@ -210,14 +194,11 @@
 
   <input type="checkbox" id="menu-toggle">
 
-  <label for="menu-toggle" class="menu-overlay"></label>
-
   <header>
     <div class="genre-links">
       <a href="#genre1-menu">ジャンルA</a>
       <a href="#genre2-menu">ジャンルB</a>
       <a href="#genre3-menu">ジャンルC</a>
-      <a href="#genre4-menu">ジャンルD</a>
     </div>
     
     <label for="menu-toggle" class="burger-btn">
@@ -227,33 +208,15 @@
     </label>
   </header>
 
+  <label for="menu-toggle" class="menu-overlay"></label>
+
   <div class="container">
     <nav>
-      <div class="nav-item">
-        <label for="menu-toggle" class="close-trigger"></label>
-        <a href="#work1">作品 A-1</a>
-      </div>
-      
-      <div class="nav-item">
-        <label for="menu-toggle" class="close-trigger"></label>
-        <a href="#work2">作品 A-2</a>
-      </div>
-      
-      <div class="nav-item">
-        <label for="menu-toggle" class="close-trigger"></label>
-        <a href="#work3">作品 A-3</a>
-      </div>
-
-      <script>
-        for(let i=4; i<=20; i++) {
-          document.write(`
-            <div class="nav-item">
-              <label for="menu-toggle" class="close-trigger"></label>
-              <a href="#work${i}">作品 A-${i}</a>
-            </div>
-          `);
-        }
-      </script>
+      <a href="#work1">作品 A-1</a>
+      <a href="#work2">作品 A-2</a>
+      <a href="#work3">作品 A-3</a>
+      <a href="#work4">作品 A-4</a>
+      <a href="#work5">作品 A-5</a>
     </nav>
 
     <main>
@@ -264,24 +227,49 @@
 
       <div id="work1" class="content-box">
         <h2>作品 A-1</h2>
-        <p>ここに作品A-1の本文が入ります。</p>
+        <p>作品のリンクをタップすると、自動的にメニューがスッと閉じる</p>
       </div>
 
       <div id="work2" class="content-box">
         <h2>作品 A-2</h2>
-        <p>ここに作品A-2の本文が入ります。</p>
+        <p>バグなく綺麗に動作します。</p>
       </div>
 
       <div id="work3" class="content-box">
         <h2>作品 A-3</h2>
         <p>ここに作品A-3の本文が入ります。</p>
       </div>
+      
+      <div id="work4" class="content-box">
+        <h2>作品 A-4</h2>
+        <p>作品A-4の本文です。</p>
+      </div>
+      
+      <div id="work5" class="content-box">
+        <h2>作品 A-5</h2>
+        <p>作品A-5の本文です。</p>
+      </div>
     </main>
   </div>
 
   <footer>
-    <p>&copy; 2026 スクリプトなしサイト. All Rights Reserved.</p>
+    <p>&copy; 2026 快適なスマホ操作サイト. All Rights Reserved.</p>
   </footer>
+
+  <script>
+    // navの中にあるすべてのリンク(<a>タグ)を取得
+    const menuLinks = document.querySelectorAll('nav a');
+    // メニュー開閉用のチェックボックスを取得
+    const menuToggle = document.getElementById('menu-toggle');
+
+    // それぞれのリンクに対して「クリックされた時の動作」を設定
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        // チェックボックスのチェックを外す（＝メニューを閉じる）
+        menuToggle.checked = false;
+      });
+    });
+  </script>
 
 </body>
 </html>
