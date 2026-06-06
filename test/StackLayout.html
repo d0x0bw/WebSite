@@ -3,23 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>自動クローズ機能付き・フレーム風レイアウト</title>
+  <title>JSオン/オフ両対応・フレーム風レイアウト</title>
   <style>
-    /* 全体のリセットと基本配置 */
+    /* =========================================
+       ベースレイアウト（JSオフでも完璧に動作するCSS）
+       ========================================= */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: sans-serif;
-      background: #333;
       height: 100vh;
       display: flex;
-      flex-direction: column;
+      flex-direction: column; /* 縦並びのレイアウト */
       overflow: hidden;
     }
 
     /* バーガーメニュー開閉用の隠しチェックボックス */
-    #menu-toggle {
-      display: none;
-    }
+    #menu-toggle { display: none; }
 
     /* 1. ヘッダー */
     header {
@@ -28,9 +27,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky;
-      top: 0;
       z-index: 100;
+      flex-shrink: 0; /* ヘッダーが潰れないようにする */
     }
     
     .genre-links {
@@ -49,7 +47,7 @@
       border-radius: 4px;
     }
 
-    /* バーガーボタンのスタイル */
+    /* バーガーボタン */
     .burger-btn {
       display: none;
       flex-direction: column;
@@ -69,12 +67,12 @@
       transition: all 0.3s ease;
     }
 
-    /* 2. 下部レイアウト（左メニュー + メイン） */
+    /* 2. 下部レイアウト（ヘッダーとフッターの間） */
     .container {
       display: flex;
-      flex: 1;
+      flex: 1; /* 残りの高さをすべて埋める */
+      position: relative; /* メニューと暗幕の配置基準 */
       overflow: hidden;
-      position: relative;
     }
 
     /* 左メニュー */
@@ -115,7 +113,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 初期表示の設定と :target の制御 */
     #default-content { display: block; }
     .content-box:target { display: block; }
     main:has(.content-box:target) #default-content { display: none; }
@@ -127,62 +124,51 @@
       padding: 12px 20px;
       text-align: center;
       font-size: 14px;
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
       z-index: 100;
     }
 
-    /* オーバーレイ（PCでは非表示） */
-    .menu-overlay {
-      display: none;
-    }
-
-    /* ========================================================
-       📲 レスポンシブ対応：画面幅 768px 以下
-       ======================================================== */
+    /* =========================================
+       📲 レスポンシブ対応：スマホ表示（画面幅 768px 以下）
+       ========================================= */
     @media (max-width: 768px) {
-      .burger-btn {
-        display: flex;
-      }
+      .burger-btn { display: flex; }
 
+      /* スマホ時のメニュー枠 */
       nav {
-        position: fixed;
-        top: 56px;
+        position: absolute; /* .container を基準に絶対配置 */
+        top: 0; bottom: 0; /* 高さを自動調整 */
         left: -250px;
-        width: 250px;
-        height: calc(100vh - 56px - 45px);
         z-index: 95;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         transition: left 0.3s ease;
       }
 
+      /* 🔥 暗幕（JSオフ時もタップで閉じるための label） */
       .menu-overlay {
         display: block;
-        position: fixed;
-        top: 56px;
-        left: 0;
-        width: 100%;
-        height: calc(100vh - 56px - 45px);
+        position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
         background: rgba(0, 0, 0, 0.4);
         z-index: 90;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
+        cursor: pointer;
       }
 
-      /* 🔥 チェックボックスON時の挙動（メニュー開く＆暗幕有効化） */
+      /* チェックボックスON時：メニュー開く＆暗幕表示 */
       #menu-toggle:checked ~ .container nav { left: 0; }
-      #menu-toggle:checked ~ .menu-overlay {
+      #menu-toggle:checked ~ .container .menu-overlay {
         opacity: 1;
         pointer-events: auto;
       }
 
-      /* 🔥 チェックボックスON時のバーガーボタン変形（✖になる） */
+      /* バーガーボタンの✖アニメーション */
       #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
       #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
 
-      /* スマホ時は position:absolute を解除してスクロールしやすくする */
       .content-box {
         position: static;
         margin-bottom: 20px;
@@ -196,12 +182,12 @@
 
   <header>
     <div class="genre-links">
-      <a href="#genre1-menu">ジャンルA</a>
-      <a href="#genre2-menu">ジャンルB</a>
-      <a href="#genre3-menu">ジャンルC</a>
-      <a href="#genre1-menu">ジャンルD</a>
-      <a href="#genre2-menu">ジャンルE</a>
-      <a href="#genre3-menu">ジャンルF</a>
+      <a href="#genre1">ジャンルA</a>
+      <a href="#genre2">ジャンルB</a>
+      <a href="#genre3">ジャンルC</a>
+      <a href="#genre4">ジャンルD</a>
+      <a href="#genre5">ジャンルE</a>
+      <a href="#genre6">ジャンルF</a>
     </div>
     
     <label for="menu-toggle" class="burger-btn">
@@ -211,20 +197,15 @@
     </label>
   </header>
 
-  <label for="menu-toggle" class="menu-overlay"></label>
-
   <div class="container">
+    <label for="menu-toggle" class="menu-overlay"></label>
+
     <nav>
       <a href="#work1">作品 A-1</a>
       <a href="#work2">作品 A-2</a>
       <a href="#work3">作品 A-3</a>
       <a href="#work4">作品 A-4</a>
       <a href="#work5">作品 A-5</a>
-      <a href="#work1">作品 A-6</a>
-      <a href="#work2">作品 A-7</a>
-      <a href="#work3">作品 A-8</a>
-      <a href="#work4">作品 A-9</a>
-      <a href="#work5">作品 A-10</a>
     </nav>
 
     <main>
@@ -235,17 +216,17 @@
 
       <div id="work1" class="content-box">
         <h2>作品 A-1</h2>
-        <p>作品のリンクをタップすると、自動的にメニューがスッと閉じる</p>
+        <p>JSオンの時はメニュータップで閉じ、JSオフの時は暗幕タップで閉じます！</p>
       </div>
 
       <div id="work2" class="content-box">
         <h2>作品 A-2</h2>
-        <p>バグなく綺麗に動作します。</p>
+        <p>ヘッダーの高さ計算もCSSのFlexboxに任せているため、レイアウト崩れもありません。</p>
       </div>
 
       <div id="work3" class="content-box">
         <h2>作品 A-3</h2>
-        <p>ここに作品A-3の本文が入ります。</p>
+        <p>プログレッシブ・エンハンスメントの完成です。</p>
       </div>
       
       <div id="work4" class="content-box">
@@ -261,20 +242,19 @@
   </div>
 
   <footer>
-    <p>&copy; 2026 快適なスマホ操作サイト. All Rights Reserved.</p>
+    <p>&copy; 2026 JSオン/オフ両対応サイト. All Rights Reserved.</p>
   </footer>
 
   <script>
-    // navの中にあるすべてのリンク(<a>タグ)を取得
-    const menuLinks = document.querySelectorAll('nav a');
-    // メニュー開閉用のチェックボックスを取得
-    const menuToggle = document.getElementById('menu-toggle');
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuLinks = document.querySelectorAll('nav a');
+      const menuToggle = document.getElementById('menu-toggle');
 
-    // それぞれのリンクに対して「クリックされた時の動作」を設定
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        // チェックボックスのチェックを外す（＝メニューを閉じる）
-        menuToggle.checked = false;
+      // リンクがクリックされたらチェックボックスを外す
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.checked = false;
+        });
       });
     });
   </script>
