@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>テスト2 スタックレイアウト・JSオン/オフ両対応</title>
+  <style>
+    /* =========================================
+       1. 全体の基本設定（ベースレイアウト）
+       ========================================= */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    body {
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; 
+      height: 100vh;           
+      height: 100dvh;          
+      display: flex;
+      flex-direction: column;  
+      overflow: hidden;        
+      background: #0f1115;     /* ✨洗練された超深海ダークブルー（漆黒より奥深い色合い） */
+    }
+
+    #menu-toggle,
+    .genre-radio { 
+      display: none; 
+    }
+
+    /* ===================================================
+       Firefox用の設定（ページ全体に適用する場合）
+       =============================================== */
+    html {
+      /* スクロールバーの太さを「細め」に指定 */
+      scrollbar-width: thin;
+      /* バーの色 / 背景色の順番で指定 */
+      scrollbar-color: #222733 #161920;
+    }
+
+    /* ===================================================
+       Chrome, Safari, Edge用の設定
+       =============================================== */
+    /* 1. スクロールバー全体の横幅（太さ） */
+      ::-webkit-scrollbar {
+      width: 8px;  /* 縦スクロールバーの太さ（通常12px〜16pxを8pxに） */
+      height: 8px; /* 横スクロールバーの太さ */
+    }
+
+    /* 2. 背景（トラック）の設定 */
+      ::-webkit-scrollbar-track {
+      background: #161920;
+    }
+
+    /* 3. 動くバー（つまみ）の設定 */
+      ::-webkit-scrollbar-thumb {
+      background: #222733;
+      border-radius: 4px; /* 角を丸くしてスタイリッシュに */
+    }
+
+    /* 4. バーの上にマウスを乗せたときの色（少し明るくして操作しやすく） */
+      ::-webkit-scrollbar-thumb:hover {
+      background: #323a4b; 
+    }
+
+
+    /* =========================================
+       2. ヘッダー部分（上部のジャンル選択エリア）
+       ========================================= */
+    header {
+      background: #161920;     /* ダークグレーから、わずかに青みを含んだ高級感ある色へ */
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between; 
+      align-items: center;
+      z-index: 100;
+      flex-shrink: 0; 
+      border-bottom: 1px solid #222733; /* うっすらと境界線をシャープに */
+    }
+    
+    .genre-links {
+      overflow-x: auto; 
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch; 
+      flex: 1;
+    }
+
+    .genre-links label {
+      display: inline-block;
+      color: #94a3b8;          /* 目に優しいスタイリッシュなライトグレー */
+      text-decoration: none;
+      padding: 8px 18px;
+      margin-right: 12px;
+      background: #222733;     /* ボタンのベースカラー */
+      border: 1px solid #2e3545;
+      border-radius: 6px;      /* 少し角丸を滑らかに */
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.25s ease; 
+    }
+    .genre-links label:hover {
+      background: #2e3545;
+      color: #fff;
+      border-color: #3b82f6;   /* ホバー時にうっすらブルー */
+    }
+
+    /* アクティブ（選択中）のグラデーションボタンデザイン */
+    #radio-home:checked ~ header .genre-links label[for="radio-home"],
+    #radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
+    #radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
+    #radio-genreC:checked ~ header .genre-links label[for="radio-genreC"],
+    #radio-genreD:checked ~ header .genre-links label[for="radio-genreD"],
+    #radio-genreE:checked ~ header .genre-links label[for="radio-genreE"],
+    #radio-genreF:checked ~ header .genre-links label[for="radio-genreF"] {
+      background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); /* 美しいサイバーブルーの階調 */
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(0, 118, 255, 0.4); /* ほんのり発光エフェクト */
+    }
+
+    .burger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 18px;
+      cursor: pointer;
+      margin-left: 15px;
+      z-index: 110;
+    }
+    .burger-btn span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background-color: #94a3b8;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* =========================================
+       3. メインレイアウト（サイドバー ＋ 本文）
+       ========================================= */
+    .container {
+      display: flex;
+      flex: 1;
+      position: relative;
+      overflow: hidden; 
+    }
+
+    nav {
+      width: 260px;
+      background: #12151c;     /* メインコンテンツより1段階暗い色で引き締める */
+      border-right: 1px solid #1e2330;
+      overflow-y: auto; 
+    }
+    
+    .menu-list { display: none; }
+    .mobile-genre-title { display: none; }
+
+    #radio-genreA:checked ~ .container nav .list-genreA,
+    #radio-genreB:checked ~ .container nav .list-genreB,
+    #radio-genreC:checked ~ .container nav .list-genreC,
+    #radio-genreD:checked ~ .container nav .list-genreD,
+    #radio-genreE:checked ~ .container nav .list-genreE,
+    #radio-genreF:checked ~ .container nav .list-genreF {
+      display: block;
+    }
+
+    #radio-home:checked ~ .container nav { display: none; }
+    #radio-home:checked ~ header .burger-btn { display: none; }
+    #radio-home:checked ~ .container main .content-box { display: none; }
+    #radio-home:checked ~ .container main #default-content { display: block; }
+
+    nav a {
+      display: block;
+      color: #94a3b8;
+      padding: 14px 24px;
+      text-decoration: none;
+      border-bottom: 1px solid #1e2330;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    nav a:hover { 
+      background: #1b202e; 
+      color: #00d2ff;          /* ホバー時に鮮やかなブルーに変色 */
+      padding-left: 28px;      /* リッチな左滑り込みエフェクト */
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;           /* 余白を少し広げてモダンに */
+      overflow-y: auto; 
+      position: relative;
+      z-index: 1;
+      color: #e2e8f0;          /* 完全な白ではなく、高級感のあるオフホワイト（フォントカラー） */
+      background: transparent; 
+    }
+
+    /* タイトル（h2）のスタイリング */
+    main h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #ffffff;
+      border-left: 4px solid #0076ff; /* 左側にクールなアクセントライン */
+      padding-left: 12px;
+      margin-bottom: 25px;
+    }
+
+    .content-box {
+      display: none;
+      position: absolute;
+      top: 30px; left: 30px; right: 30px;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* 滑らかなアニメーション */
+      padding-bottom: 40px;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #default-content { display: block; } 
+    .content-box:target { display: block; } 
+    main:has(.content-box:target) #default-content { display: none; }
+
+    /* =========================================
+       4. フッター
+       ========================================= */
+    footer {
+      background: #12151c;
+      color: #64748b;          /* トーンを落としたスタイリッシュなグレー */
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 13px;
+      flex-shrink: 0;
+      z-index: 100;
+      border-top: 1px solid #1e2330;
+    }
+    footer a { 
+      color: #94a3b8; 
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: #00d2ff; }
+
+    .menu-overlay { display: none; }
+
+    /* =========================================
+       5. 作品内のコンテンツレイアウト
+       ========================================= */
+    .work-section { margin-bottom: 40px; }
+    .work-section img { 
+      border-radius: 8px; 
+      object-fit: cover; 
+      width: 100%; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* 画像に奥行きを与えるシャドウ */
+      border: 1px solid #222733;
+    }
+    .work-section p { 
+      line-height: 1.7; 
+      color: #cbd5e1; 
+      font-size: 15px;
+    }
+    .work-section strong {
+      color: #00d2ff;          /* 強調テキストをサイバーブルーにして視認性アップ */
+    }
+
+    .layout-wide img { max-height: 1080px; margin-bottom: 20px; }
+    .layout-img-left { display: flex; gap: 24px; align-items: flex-start; }
+    .layout-img-left img { width: 45%; max-width: 600px; }
+    .layout-img-left p { flex: 1; } 
+
+    .layout-img-right { display: flex; flex-direction: row-reverse; gap: 24px; align-items: flex-start; }
+    .layout-img-right img { width: 45%; max-width: 600px; }
+    .layout-img-right p { flex: 1; }
+
+    /* 区切り線のデザインをサイバーに */
+    hr {
+      margin: 35px 0; 
+      border: none; 
+      border-top: 1px dashed #222733 !important;
+    }
+
+    /* =========================================
+       6. 📲 レスポンシブ対応：スマホ表示
+       ========================================= */
+    @media (max-width: 768px) {
+      .genre-links { display: none; }
+
+      /* スマホ用の透過ヘッダー（近未来的な高級ガラスエフェクト） */
+      header {
+        position: absolute; 
+        top: 0; left: 0; right: 0;
+        background: rgba(15, 17, 21, 0.75); /* ボディと同期した透過ダーク */
+        backdrop-filter: blur(12px);        /* ぼかし量を強めて視認性向上 */
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+      }
+
+      /* スマホ用の透過フッター */
+      footer {
+        position: absolute; 
+        bottom: 0; left: 0; right: 0;
+        background: rgba(15, 17, 21, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      main {
+        padding: 20px;
+        padding-top: 75px;    /* ヘッダーに被らない調整 */
+        padding-bottom: 75px;  /* フッターに被らない調整 */
+      }
+
+      .content-box {
+        top: 0; left: 0; right: 0;
+      }
+      main h2 {
+        font-size: 20px;
+      }
+
+      .burger-btn { 
+        display: flex; 
+        margin-left: auto; 
+      }
+      #radio-home:checked ~ header .burger-btn { display: flex; }
+
+      nav {
+        position: absolute; top: 0; bottom: 0; left: -270px; 
+        z-index: 95; 
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5); /* 影をリッチに */
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+        width: 270px; 
+        background: #12151c;
+        padding-top: 60px;
+        padding-bottom: 60px;
+        border-right: 1px solid #222733;
+      }
+
+      .menu-overlay {
+        display: block; position: absolute;
+        top: 0; right: 0; bottom: 0; left: 0;
+        background: rgba(5, 6, 8, 0.6); z-index: 90;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.3s ease; cursor: pointer;
+      }
+
+      #menu-toggle:checked ~ .container nav { left: 0; }
+      #menu-toggle:checked ~ .container .menu-overlay { opacity: 1; pointer-events: auto; }
+
+      /* ハンバーガーアニメーション時の色変化 */
+      #menu-toggle:checked ~ header .burger-btn span { background-color: #00d2ff; }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
+      #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+      .menu-list { display: block !important; }
+      #radio-home:checked ~ .container nav { display: block; }
+
+      .mobile-genre-title {
+        display: block;
+        background: #161920;
+        color: #64748b;
+        padding: 14px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        border-bottom: 1px solid #1e2330;
+        border-top: 1px solid #1e2330;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      nav .mobile-home-btn { 
+        background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); 
+        color: #fff; 
+        border: none; 
+      }
+
+      .menu-list a { 
+        display: none; 
+        background: #191d26; 
+        padding-left: 35px; 
+        font-size: 14px; 
+        color: #94a3b8;
+      }
+
+      #radio-genreA:checked ~ .container nav .list-genreA a,
+      #radio-genreB:checked ~ .container nav .list-genreB a,
+      #radio-genreC:checked ~ .container nav .list-genreC a,
+      #radio-genreD:checked ~ .container nav .list-genreD a,
+      #radio-genreE:checked ~ .container nav .list-genreE a,
+      #radio-genreF:checked ~ .container nav .list-genreF a { display: block; }
+
+      #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
+      #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
+      #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
+      #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
+      #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
+      #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
+        color: #00d2ff; 
+        background: #1e2330;
+      }
+
+      .content-box { position: static; }
+      .layout-img-left, .layout-img-right { flex-direction: column; gap: 15px; }
+      .layout-img-left img, .layout-img-right img { width: 100%; max-width: 100%; margin-bottom: 5px; }
+    }
+
+/* =========================================
+       ✨追加：サイドメニューのサブリンク（考察用）
+       ========================================= */
+    nav a.sub-link {
+      padding-left: 40px; /* 少し深くインデントして階層を表現 */
+      font-size: 13px;    /* フォントサイズを少し小さく */
+      color: #64748b;
+      border-bottom: none; /* サブリンク間の境界線を消す（お好みで） */
+    }
+    nav a.sub-link:hover {
+      padding-left: 44px;
+      color: #00d2ff;
+    }
+
+    /* スマホ版のサブリンクの余白調整 */
+    @media (max-width: 768px) {
+      .menu-list a.sub-link {
+        padding-left: 50px;
+      }
+    }
+
+    /* =========================================
+       ✨修正・追加：コンテンツ表示切り替えの仕組み
+       ========================================= */
+    /* ↓ 既存の .content-box:target { display: block; } を以下のように書き換えます */
+    .content-box:target,
+    .content-box:has(:target) { 
+      display: block; 
+    } 
+    
+    /* ↓ 既存の main:has(...) #default-content { display: none; } を以下のように書き換えます */
+    main:has(:target) #default-content { 
+    display: none; 
+    }
+
+
+    /* 考察セクションに飛んだ際、上部ヘッダーにタイトルが隠れないようにする余白 */
+    .consideration-section {
+      scroll-margin-top: 80px; 
+    }
+
+
+    /* =========================================
+       ✨追加：サイバーブルーの上へ戻るボタン
+       ========================================= */
+    .page-top-btn {
+      position: fixed;
+      right: 30px;
+      bottom: 60px; /* フッター（約45px）に被らない絶妙な高さ */
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(0, 118, 255, 0.5);
+      z-index: 99;
+      cursor: pointer;
+      opacity: 0;           /* 初期状態は非表示（JSで制御） */
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+    }
+
+    /* ボタンがアクティブ（表示状態）のとき */
+    .page-top-btn.is-active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* 初期状態（非表示）のときは少し下に下げておき、ふわっと浮き上がる演出に */
+    .page-top-btn:not(.is-active) {
+      transform: translateY(15px);
+    }
+
+    /* ホバー時に発光感を強化 */
+    .page-top-btn:hover {
+      box-shadow: 0 0 22px rgba(0, 210, 255, 0.8);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* 矢印（↑）のデザイン */
+    .page-top-btn .arrow {
+      display: block;
+      width: 12px;
+      height: 12px;
+      border-top: 3px solid #ffffff;
+      border-left: 3px solid #ffffff;
+      transform: translateY(2px) rotate(45deg); /* クールなシャープアロー */
+    }
+
+    /* 📲 スマホ表示（レスポンシブ）の微調整 */
+    @media (max-width: 768px) {
+      .page-top-btn {
+        right: 20px;
+        bottom: 70px; /* スマホ用透過フッターの上に綺麗に収まる位置 */
+        width: 44px;
+        height: 44px;
+      }
+      .page-top-btn .arrow {
+        width: 10px;
+        height: 10px;
+        border-top: 2.5px solid #ffffff;
+        border-left: 2.5px solid #ffffff;
+      }
+    }
+
+  </style>
+
+  </head>
+</head>
+<body>
+
+  <input type="radio" name="genre" id="radio-home" class="genre-radio" checked>
+  <input type="radio" name="genre" id="radio-genreA" class="genre-radio">
+  <input type="radio" name="genre" id="radio-genreB" class="genre-radio">
+  <input type="radio" name="genre" id="radio-genreC" class="genre-radio">
+  <input type="radio" name="genre" id="radio-genreD" class="genre-radio">
+  <input type="radio" name="genre" id="radio-genreE" class="genre-radio">
+  <input type="radio" name="genre" id="radio-genreF" class="genre-radio">
+  <input type="checkbox" id="menu-toggle">
+
+  <header>
+    <div class="genre-links">
+      <label for="radio-home" class="genre-btn">HOME</label>
+      <label for="radio-genreA" class="genre-btn">ジャンルA</label>
+      <label for="radio-genreB" class="genre-btn">ジャンルB</label>
+      <label for="radio-genreC" class="genre-btn">ジャンルC</label>
+      <label for="radio-genreD" class="genre-btn">ジャンルD</label>
+      <label for="radio-genreE" class="genre-btn">ジャンルE</label>
+      <label for="radio-genreF" class="genre-btn">ジャンルF</label>
+    </div>
+    <label for="menu-toggle" class="burger-btn">
+      <span></span><span></span><span></span>
+    </label>
+  </header>
+
+  <div class="container">
+    <label for="menu-toggle" class="menu-overlay"></label>
+
+    <nav>
+      <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
+      <div class="menu-list list-genreA">
+        <label for="radio-genreA" class="mobile-genre-title">ジャンルA</label>
+        <a href="#work1">星を追う子ども</a>
+        <a href="#cons1" class="sub-link">・作品紹介</a>
+        <a href="#cons2" class="sub-link">・考察</a>
+        <a href="#cons3" class="sub-link">・まとめ</a>
+        <a href="#work2">作品 A-2</a>
+        <a href="#work3">作品 A-3</a>
+      </div>
+      <div class="menu-list list-genreB">
+        <label for="radio-genreB" class="mobile-genre-title">ジャンルB</label>
+        <a href="#work-b1">作品 B-1</a>
+        <a href="#work-b2">作品 B-2</a>
+      </div>
+      <div class="menu-list list-genreC">
+        <label for="radio-genreC" class="mobile-genre-title">ジャンルC</label>
+        <a href="#work-c1">作品 C-1</a>
+      </div>
+      <div class="menu-list list-genreD">
+        <label for="radio-genreD" class="mobile-genre-title">ジャンルD</label>
+        <a href="#work-d1">作品 D-1</a>
+        <a href="#work-d2">作品 D-2</a>
+      </div>
+      <div class="menu-list list-genreE">
+        <label for="radio-genreE" class="mobile-genre-title">ジャンルE</label>
+        <a href="#work-e1">作品 E-1</a>
+        <a href="#work-e2">作品 E-2</a>
+      </div>
+      <div class="menu-list list-genreF">
+        <label for="radio-genreF" class="mobile-genre-title">ジャンルF</label>
+        <a href="#work-f1">作品 F-1</a>
+      </div>
+    </nav>
+
+    <main>
+      <div id="default-content" class="content-box">
+        <h2>ジャンルの選択</h2>
+        <div class="content-section layout-wide">
+          <p>
+            <strong>ジャンルを選び、メニューから作品を選択してください。</strong><br>
+          </p>
+        </div>
+      </div>
+
+      <div id="work1" class="content-box">
+        <h1>星を追う子ども</h1>
+        <div class="work-section layout-wide">
+          <img src="./img/hoshi01.png" alt="星を追う子ども タイトル" loading="lazy" decoding="async">
+          <p>Children who Chase Lost Voices from Deep Below</p>
+        </div>
+        <hr>
+        <div id="cons1" class="consideration-section work-section layout-wide">
+          <h2>・作品紹介</h2>
+
+          <p>
+          🎬 作品概要<br>
+          ・公開日：2011年5月7日<br>
+          ・監督・原作・脚本：新海誠<br>
+          ・音楽：天門<br>
+          ・主題歌：熊木杏里「Hello Goodbye & Hello」<br>
+          ・制作会社：コミックス・ウェーブ・フィルム
+          </p><br><br>
+
+          <p>
+          📖 あらすじ<br>
+          　山間の町で母と暮らす少女アスナは、父の形見である鉱石ラジオから流れる不思議なメロディが忘れられずにいました。ある日、彼女は地下世界「アガルタ」からやってきた少年シュンと出会い、心を通わせます。しかし、シュンは突然姿を消してしまいます。
+          　シュンとの再会を願うアスナの前に、シュンと瓜二つの弟シン、そして亡き妻を蘇らせるためにアガルタを目指す学校の教師モリサキが現れます。それぞれの想いを胸に、3人は伝説の地下世界へと旅立ちます。
+          </p><br><br>
+
+          <p>
+          👥 主な登場人物とキャスト<br>
+
+          ・渡瀬 明日菜（アスナ） ／ 声：金元寿子<br>
+          　本作の主人公。しっかり者だが、心に孤独を抱える少女。<br><br>
+
+          ・シュン / シン ／ 声：入野自由（一人二役）<br>
+          　地下世界アガルタの民。シュンは地上でアスナと出会い、シンはその実の弟。<br><br>
+
+          ・森崎 竜司（モリサキ） ／ 声：井上和彦<br>
+          　アスナの学校に赴任してきた国語教師。目的のために手段を選ばない一面を持つ。<br>
+          </p><br><br>
+        </div>
+
+        <hr>
+        <div id="cons2" class="consideration-section work-section layout-wide">
+          <h2>・考察：キャラクターの心理と行動</h2> <p>登場人物たちの心理的変化や隠された動機、役割について(私なり)の解釈です。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./img/hoshi02.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【アスナの旅の真の目的】</strong><br>アスナがアガルタへ向かったのは、シュンの復活を純粋に望んだからではなく、自身の根底にある「寂しさ」や「シュンの死」という現実から逃避するためであったと考えられる。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./img/hoshi03.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【アスナの成長と受容】</strong><br>ミミとの別れ(の直後に亡くなる)や崖のシーンでの絶望を通じて、アスナは自分の弱さや本当の望みに気づく。最も直視したくなかった「寂しさ」という本心や「大切な人の死」を受け入れ、シンと共に大声で泣くことで、人間らしさを取り戻した。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./img/hoshi04.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【シンの自立と人間性の回復】</strong><br>感情のない人形のように大人の言いなりになっていたシンも、初めて自分の意志で動き、兄の死を受け入れて涙を流したことで、自分らしい人生への第一歩を踏み出した。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./img/hoshi05.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【森崎先生との対比】</strong><br>森崎先生は、過去（失ったもの）にすがり、現実逃避を続ける「成長できない大人」の象徴として描かれている。目の前にある命を大切にできない彼の姿は、現実を受け入れたアスナやシンと対極に位置している。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./img/hoshi06.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【ミミの役割】</strong><br>ミミの死は単なる突然死ではなく、地上の空気による寿命が迫る中、迷えるアスナを正しい方向へ導くという役目を最後まで全うした結果であると推察される。</p>
+        </div>
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./img/hoshi07.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>【"深層の失われた声を追う"ことの体現】</strong><br>アスナの旅は、無自覚に抑圧していた「寂しい」という自身の心の声（失われた声）を見つけ出す旅であり、その声に気づいたからこそ、今を生きている母や日常を大切にする道を選べた。</p>
+        </div>
+          <hr>
+        <div id="cons3" class="consideration-section work-section layout-wide">
+          <h2>・まとめ</h2>
+          <p>
+          『星を追う子ども』は、「死」という残酷な現実や、自身の奥底にある「寂しさ」から逃避していた子どもたちが、葛藤の末にそれらを受け入れ、自立していく成長の物語です。<br>
+          物語は、「ないものにすがって現実から目を背ける大人（森崎先生）」と、「悲しみを受け入れ、今生きている人を大切にして生きる道を選ぶ子どもたち（アスナ・シン）」を対比させています。<br>
+          本作はただの冒険劇ではなく、自身の心の内側（深層）にある弱さと向き合い、困難な現実のなかで正しく生きる強さを獲得する過程を描いた奥深い作品です。
+          </p>
+        </div>
+        </div>
+
+      
+      <div id="work2" class="content-box">
+        <h2>作品 A-2：コンテンツレイアウトのテスト</h2>
+        <div class="work-section layout-img-left">
+          <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の右に文字】</strong><br>画像左側テキスト右。</p>
+        </div>
+        <hr>
+        <div class="work-section layout-img-right">
+          <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の左に文字】</strong><br>画像右側テキスト左。</p>
+        </div>
+      </div>
+
+      
+      <div id="work3" class="content-box">
+        <h2>作品 A-3</h2><p>ここに作品A-3の本文が入ります。</p>
+      </div>
+
+      <div id="work-b1" class="content-box">
+        <h2>作品 B-1</h2>
+          <div class="work-section layout-wide">
+          <img src="./images/4.jpg" alt="横幅のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【幅広画像の下に文字】</strong><br>横幅画像表示。</p>
+        </div>
+        <hr>
+        <div class="work-section layout-wide">
+          <img src="./images/3.jpg" alt="横幅のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【幅広画像の下に文字】</strong><br>横幅画像表示</p>
+        </div>
+      </div>
+
+      <div id="work-b2" class="content-box">
+        <h2>作品 B-2</h2>
+         <div class="work-section layout-img-left">
+          <img src="./images/2.jpg" alt="左配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の右に文字】</strong><br>画像左側テキスト右。</p>
+        </div>
+        <hr>
+        <div class="work-section layout-img-right">
+          <img src="./images/1.jpg" alt="右配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の左に文字】</strong><br>画像右側テキスト左。</p>
+        </div>
+      </div>
+
+      <div id="work-c1" class="content-box">
+        <h2>作品 C-1</h2>
+        <div class="work-section layout-wide">
+          <img src="./image/00.jpg" alt="横幅画像" loading="lazy" decoding="async">
+          <p><strong>【幅広画像の下に文字】</strong><br>横幅画像。</p>
+        </div>
+      </div>
+      
+      <div id="work-d1" class="content-box"><h2>作品 D-3</h2><p>ここに作品D-3の本文が入ります。</p></div>
+      <div id="work-d2" class="content-box"><h2>作品 D-3</h2><p>ここに作品D-3の本文が入ります。</p></div>
+      <div id="work-e1" class="content-box"><h2>作品 E-1</h2><p>ジャンルEの作品コンテンツです。</p></div>
+      <div id="work-e2" class="content-box"><h2>作品 E-2</h2><p>ジャンルEの作品コンテンツです。</p></div>
+      <div id="work-f1" class="content-box"><h2>作品 F-1</h2><p>ジャンルFの作品コンテンツです。</p></div>
+
+      <a href="#" id="page-top-btn" class="page-top-btn" aria-label="上へ戻る">
+      <span class="arrow"></span>
+    </a>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; <a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mainContent = document.querySelector('main');
+      const pageTopBtn = document.getElementById('page-top-btn');
+
+      // 1. main要素のスクロールを監視してボタンを表示/非表示
+      mainContent.addEventListener('scroll', () => {
+        if (mainContent.scrollTop > 200) { // 200px以上スクロールしたら表示
+          pageTopBtn.classList.add('is-active');
+        } else {
+          pageTopBtn.classList.remove('is-active');
+        }
+      });
+
+      // 2. ボタンクリック時にスムーズに最上部へスクロール
+      pageTopBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // JSオン時はaタグのデフォルト挙動（#）をキャンセル
+        mainContent.scrollTo({
+          top: 0,
+          behavior: 'smooth' // なめらかなスクロール
+        });
+      });
+      const menuToggle = document.getElementById('menu-toggle');
+      const menuLinks = document.querySelectorAll('nav a');
+      const genreRadios = document.querySelectorAll('.genre-radio');
+      const mobileGenreTitles = document.querySelectorAll('.mobile-genre-title');
+
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.checked = false; 
+        });
+      });
+
+      genreRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          window.location.hash = ''; 
+        });
+      });
+
+      mobileGenreTitles.forEach(title => {
+        title.addEventListener('click', () => {
+          setTimeout(() => {
+            title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 50);
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
