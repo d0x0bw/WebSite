@@ -21,7 +21,7 @@
       display: flex;
       flex-direction: column;  
       overflow: hidden;        
-      background: #0f1115;     /* ✨洗練された超深海ダークブルー（漆黒より奥深い色合い） */
+      background: #0f1115;     /* ダークブルー */
     }
 
     #menu-toggle,
@@ -69,7 +69,7 @@
        2. ヘッダー部分（上部のジャンル選択エリア）
        ========================================= */
     header {
-      background: #161920;     /* ダークグレーから、わずかに青みを含んだ高級感ある色へ */
+      background: #161920;     /* ダークグレーから、わずかに青みを含んだ色へ */
       padding: 12px 20px;
       display: flex;
       justify-content: space-between; 
@@ -88,7 +88,7 @@
 
     .genre-links label {
       display: inline-block;
-      color: #94a3b8;          /* 目に優しいスタイリッシュなライトグレー */
+      color: #94a3b8;          /* 目に優しいライトグレー */
       text-decoration: none;
       padding: 8px 18px;
       margin-right: 12px;
@@ -114,7 +114,7 @@
     #radio-genreD:checked ~ header .genre-links label[for="radio-genreD"],
     #radio-genreE:checked ~ header .genre-links label[for="radio-genreE"],
     #radio-genreF:checked ~ header .genre-links label[for="radio-genreF"] {
-      background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); /* 美しいサイバーブルーの階調 */
+      background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%); /* サイバーブルーの階調 */
       color: #ffffff;
       border-color: transparent;
       box-shadow: 0 0 12px rgba(0, 118, 255, 0.4); /* ほんのり発光エフェクト */
@@ -185,16 +185,16 @@
     nav a:hover { 
       background: #1b202e; 
       color: #00d2ff;          /* ホバー時に鮮やかなブルーに変色 */
-      padding-left: 28px;      /* リッチな左滑り込みエフェクト */
+      padding-left: 28px;      /* 左滑り込みエフェクト */
     }
 
     main {
       flex: 1;
-      padding: 30px;           /* 余白を少し広げてモダンに */
+      padding: 30px;           /* 余白を少し広げる */
       overflow-y: auto; 
       position: relative;
       z-index: 1;
-      color: #e2e8f0;          /* 完全な白ではなく、高級感のあるオフホワイト（フォントカラー） */
+      color: #e2e8f0;          /* 完全な白ではなく、オフホワイト（フォントカラー） */
       background: transparent; 
     }
 
@@ -203,7 +203,7 @@
       font-size: 22px;
       font-weight: 600;
       color: #ffffff;
-      border-left: 4px solid #0076ff; /* 左側にクールなアクセントライン */
+      border-left: 4px solid #0076ff; /* 左側にアクセントライン */
       padding-left: 12px;
       margin-bottom: 25px;
     }
@@ -230,7 +230,7 @@
        ========================================= */
     footer {
       background: #12151c;
-      color: #64748b;          /* トーンを落としたスタイリッシュなグレー */
+      color: #64748b;          /* トーンを落としたグレー */
       padding: 14px 20px;
       text-align: center;
       font-size: 13px;
@@ -284,12 +284,12 @@
     }
 
     /* =========================================
-       6. 📲 レスポンシブ対応：スマホ表示
+       6. レスポンシブ対応：スマホ表示
        ========================================= */
     @media (max-width: 768px) {
       .genre-links { display: none; }
 
-      /* スマホ用の透過ヘッダー（近未来的な高級ガラスエフェクト） */
+      /* スマホ用の透過ヘッダー（ガラスエフェクト） */
       header {
         position: absolute; 
         top: 0; left: 0; right: 0;
@@ -409,13 +409,13 @@
     }
 
 /* =========================================
-       ✨追加：サイドメニューのサブリンク（考察用）
+       追加：サイドメニューのサブリンク（考察用）
        ========================================= */
     nav a.sub-link {
       padding-left: 40px; /* 少し深くインデントして階層を表現 */
       font-size: 13px;    /* フォントサイズを少し小さく */
       color: #64748b;
-      border-bottom: none; /* サブリンク間の境界線を消す（お好みで） */
+      border-bottom: none; /* サブリンク間の境界線を消す */
     }
     nav a.sub-link:hover {
       padding-left: 44px;
@@ -430,15 +430,15 @@
     }
 
     /* =========================================
-       ✨修正・追加：コンテンツ表示切り替えの仕組み
+       修正・追加：コンテンツ表示切り替えの仕組み
        ========================================= */
-    /* ↓ 既存の .content-box:target { display: block; } を以下のように書き換えます */
+    /* ↓ 既存の .content-box:target { display: block; } を以下のように書き換え */
     .content-box:target,
     .content-box:has(:target) { 
       display: block; 
     } 
     
-    /* ↓ 既存の main:has(...) #default-content { display: none; } を以下のように書き換えます */
+    /* ↓ 既存の main:has(...) #default-content { display: none; } を以下のように書き換え */
     main:has(:target) #default-content { 
     display: none; 
     }
@@ -451,12 +451,12 @@
 
 
     /* =========================================
-       ✨追加：サイバーブルーの上へ戻るボタン
+       追加：サイバーブルーの上へ戻るボタン
        ========================================= */
     .page-top-btn {
       position: fixed;
       right: 30px;
-      bottom: 60px; /* フッター（約45px）に被らない絶妙な高さ */
+      bottom: 60px; /* フッター（約45px）に被らない高さ */
       width: 48px;
       height: 48px;
       background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%);
@@ -480,7 +480,7 @@
       transform: translateY(0);
     }
 
-    /* 初期状態（非表示）のときは少し下に下げておき、ふわっと浮き上がる演出に */
+    /* 初期状態（非表示）のときは少し下に下げておき、ふわっと浮き上がる */
     .page-top-btn:not(.is-active) {
       transform: translateY(15px);
     }
@@ -498,10 +498,10 @@
       height: 12px;
       border-top: 3px solid #ffffff;
       border-left: 3px solid #ffffff;
-      transform: translateY(2px) rotate(45deg); /* クールなシャープアロー */
+      transform: translateY(2px) rotate(45deg); /* シャープアロー */
     }
 
-    /* 📲 スマホ表示（レスポンシブ）の微調整 */
+    /* スマホ表示（レスポンシブ）の微調整 */
     @media (max-width: 768px) {
       .page-top-btn {
         right: 20px;
@@ -599,7 +599,7 @@
       <div id="work1" class="content-box">
         <h1>星を追う子ども</h1>
         <div class="work-section layout-wide">
-          <img src="./img/hoshi01.png" alt="星を追う子ども タイトル" loading="lazy" decoding="async">
+          <img src="./img/hoshi01.jpg" alt="星を追う子ども タイトル" loading="lazy" decoding="async">
           <p>Children who Chase Lost Voices from Deep Below</p>
         </div>
         <hr>
@@ -640,27 +640,27 @@
           <h2>・考察：キャラクターの心理と行動</h2> <p>登場人物たちの心理的変化や隠された動機、役割について(私なり)の解釈です。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi02.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi02.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【アスナの旅の真の目的】</strong><br>アスナがアガルタへ向かったのは、シュンの復活を純粋に望んだからではなく、自身の根底にある「寂しさ」や「シュンの死」という現実から逃避するためであったと考えられる。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi03.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi03.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【アスナの成長と受容】</strong><br>ミミとの別れ(の直後に亡くなる)や崖のシーンでの絶望を通じて、アスナは自分の弱さや本当の望みに気づく。最も直視したくなかった「寂しさ」という本心や「大切な人の死」を受け入れ、シンと共に大声で泣くことで、人間らしさを取り戻した。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi04.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi04.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【シンの自立と人間性の回復】</strong><br>感情のない人形のように大人の言いなりになっていたシンも、初めて自分の意志で動き、兄の死を受け入れて涙を流したことで、自分らしい人生への第一歩を踏み出した。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi05.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi05.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【森崎先生との対比】</strong><br>森崎先生は、過去（失ったもの）にすがり、現実逃避を続ける「成長できない大人」の象徴として描かれている。目の前にある命を大切にできない彼の姿は、現実を受け入れたアスナやシンと対極に位置している。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi06.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi06.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【ミミの役割】</strong><br>ミミの死は単なる突然死ではなく、地上の空気による寿命が迫る中、迷えるアスナを正しい方向へ導くという役目を最後まで全うした結果であると推察される。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi07.png" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi07.jpg" alt="考察用の画像" loading="lazy" decoding="async">
           <p><strong>【"深層の失われた声を追う"ことの体現】</strong><br>アスナの旅は、無自覚に抑圧していた「寂しい」という自身の心の声（失われた声）を見つけ出す旅であり、その声に気づいたからこそ、今を生きている母や日常を大切にする道を選べた。</p>
         </div>
           <hr>
