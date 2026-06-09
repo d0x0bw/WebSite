@@ -180,14 +180,19 @@
 
       <div id="work-b1" class="content-box">
         <h2>作品 B-1</h2>
-          <div class="work-section layout-wide">
-          <img src="./images/4.jpg" alt="横幅のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【幅広画像の下に文字】</strong><br>横幅画像表示。</p>
+        <div class="work-section layout-wide">
+          <img src="https://picsum.photos/seed/wide/800/300" alt="幅広のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
         </div>
         <hr>
-        <div class="work-section layout-wide">
-          <img src="./images/3.jpg" alt="横幅のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【幅広画像の下に文字】</strong><br>横幅画像表示</p>
+        <div class="work-section layout-img-left">
+          <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
+        </div>
+        <hr>
+        <div class="work-section layout-img-right">
+          <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
+          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
         </div>
       </div>
 
