@@ -20,8 +20,8 @@
   <header>
     <div class="genre-links">
       <label for="radio-home" class="genre-btn">HOME</label>
-      <label for="radio-genreA" class="genre-btn">ジャンルA</label>
-      <label for="radio-genreB" class="genre-btn">ジャンルB</label>
+      <label for="radio-genreA" class="genre-btn">アニメ</label>
+      <label for="radio-genreB" class="genre-btn">S F</label>
       <label for="radio-genreC" class="genre-btn">ジャンルC</label>
       <label for="radio-genreD" class="genre-btn">ジャンルD</label>
       <label for="radio-genreE" class="genre-btn">ジャンルE</label>
@@ -38,7 +38,7 @@
     <nav>
       <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
       <div class="menu-list list-genreA">
-        <label for="radio-genreA" class="mobile-genre-title">ジャンルA</label>
+        <label for="radio-genreA" class="mobile-genre-title">アニメ</label>
         <a href="#work1">星を追う子ども</a>
         <a href="#cons1" class="sub-link">・作品紹介</a>
         <a href="#cons2" class="sub-link">・考察</a>
@@ -47,8 +47,8 @@
         <a href="#work3">作品 A-3</a>
       </div>
       <div class="menu-list list-genreB">
-        <label for="radio-genreB" class="mobile-genre-title">ジャンルB</label>
-        <a href="#work-b1">作品 B-1</a>
+        <label for="radio-genreB" class="mobile-genre-title">S F</label>
+        <a href="#work-b1">2001年 宇宙の旅</a>
         <a href="#work-b2">作品 B-2</a>
       </div>
       <div class="menu-list list-genreC">
@@ -178,35 +178,354 @@
         <h2>作品 A-3</h2><p>ここに作品A-3の本文が入ります。</p>
       </div>
 
-      <div id="work-b1" class="content-box">
-        <h2>作品 B-1</h2>
-        <div class="work-section layout-wide">
-          <img src="https://picsum.photos/seed/wide/800/300" alt="幅広のダミー画像" decoding="async">
-          <p><strong>【幅広画像の下に文字】</strong><br>このセクションでは、横幅いっぱいの画像を表示し、その下にテキストが続きます。</p>
-        </div>
-        <hr>
-        <div class="work-section layout-img-left">
-          <img src="https://picsum.photos/seed/left/400/300" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【画像の右に文字】</strong><br>PCなどの広い画面では、画像が左側に配置され、テキストがその右側に回り込むように表示されます。</p>
-        </div>
-        <hr>
-        <div class="work-section layout-img-right">
-          <img src="https://picsum.photos/seed/right/400/300" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【画像の左に文字】</strong><br>PCではCSSの `flex-direction: row-reverse;` を使って、HTMLの記述順を逆転させて表示しています。</p>
-        </div>
-      </div>
 
-      <div id="work-b2" class="content-box">
-        <h2>作品 B-2</h2>
-         <div class="work-section layout-img-left">
-          <img src="./img/00.jpg" alt="左配置のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【画像の右に文字】</strong><br>画像左側テキスト右。</p>
+
+      <div id="work-b1" class="content-box">
+        <h1>2001年 宇宙の旅</h1>
+        <div class="work-section layout-wide">
+          <img src="./2001/title.jpg" alt="幅広のダミー画像" decoding="async">
+          <p>2001: A Space Odyssey</p>
         </div>
         <hr>
-        <div class="work-section layout-img-right">
-          <img src="./img/01.jpg" alt="右配置のダミー画像" loading="lazy" decoding="async">
-          <p><strong>【画像の左に文字】</strong><br>画像右側テキスト左。</p>
+        <div id="cons1" class="consideration-section work-section layout-wide">
+          <h2>・作品紹介</h2>
+
+          <p>
+          🎬 作品概要<br>
+          ・公開日1968年4月11日(日本)<br>
+          ・監督・制作：スタンリー・キューブリック<br>
+          ・脚本：スタンリー・キューブリック、アーサー・C・クラーク<br>
+          ・原作：アーサー・C・クラーク<br>
+          </p><br><br>
+
+          <p>
+          📖 あらすじ<br>
+          　人類の夜明けから宇宙の深淵までを描く、映画史に燦然と輝くSFの金字塔。<br>
+          400万年前、謎の黒い石板「モノリス」に触れた猿人は、道具（武器）を覚えてヒトへと進化した。
+          そして時は流れ、月面で再びモノリスが発掘される。
+          その石板が放つ謎の電波の先を突き止めるため、有人宇宙船ディスカバリー号は木星へと旅立つ。
+          しかし、船を管理する最高性能の人工知能「HAL9000」が、乗組員に対して反乱を起こし始める。
+          </p>
         </div>
+        <hr>
+
+
+        <div id="cons2" class="consideration-section work-section layout-wide">
+          <h2>📌 Part1.『人類の夜明け（THE DAWN OF MAN)』</h2>
+          <img src="./2001/1.jpg" alt="人類の夜明け">
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/1-1.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 1. 飢えと恐怖に怯える猿人たち</strong><br>
+          数百万年前の荒涼としたアフリカの大地。そこには、まだ直立歩行もできず、言語も持たないヒトの祖先（猿人）が暮らしていました。
+          彼らの生活は過酷そのものでした。<br>
+          </p>
+        </div>
+
+        <div class="consideration-section work-section card-grid-3">
+        <div class="card-item">
+        <img src="./2001/1-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>食糧難:<br>目の前にはバクなどの草食動物がいるにもかかわらず、捕え方を知らないため、干からびた草をかじるしかありません。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/1-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>外敵の恐怖:<br>武器を持たないため、肉食獣（ヒョウ）の格好の餌食となり、夜は暗い洞窟の奥で怯えながら身を寄せ合っていました。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/1-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>縄張り争い:<br>貴重な水場を巡って別の猿人のグループと遭遇しても、
+          お互いに大声を上げて威嚇し合うだけで、根本的な解決はできず、常に飢えと渇きに苦しんでいました。</p>
+        </div>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/1-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 2. 「モノリス」の出現</strong><br>
+          ある朝、目が覚めた猿人たちは異常な事態に気づき、パニックに陥ります。洞窟のすぐ目の前に、
+          周囲の自然物とは明らかに異なる、完璧な直線と直角で構成された漆黒の四角い石碑「モノリス」が直立していたのです。
+          猿人たちは最初、恐怖から大騒ぎして飛び跳ねますが、徐々に好奇心が勝り、恐る恐る近づいていきます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/1-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          そして、リーダー格の猿人が恐る恐る手を伸ばし、その滑らかな表面に触れました。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/1-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>その瞬間、昇ってきた太陽と月、そしてモノリスが宇宙の配列のように一直線に重なります。
+          モノリスは何も語りませんが、それに触れた猿人たちの脳裏には、何らかの「知性」が植え付けられました。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/1-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 3. 「道具（武器）」の発見と進化</strong><br>
+          モノリスが消え去った後（または去った後）、リーダーの猿人（劇中での役名は「月を見つめるもの」）が、
+          打ち捨てられた動物の巨大な骨の山を眺めていました。
+          その時、彼の脳裏にモノリスの記憶と、何かが結びつきます。
+          彼は1本の太い骨を手に取り、試しに目の前の骨の山に叩きつけました。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section card-grid-3">
+        <div class="card-item">
+        <img src="./2001/1-8b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p> コツン、と叩く。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/1-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>次はもっと強く叩く。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/1-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>ついに、動物の頭蓋骨を粉々に粉砕する。</p>
+        </div>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/1-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 4. 初めての「殺戮」と縄張り</strong><br>武器を手に入れた猿人たちの生活は激変します。
+          彼らは骨を使って動物を狩り、生肉を貪り食うことで、飢えから解放されました。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/1-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          そして再び、水場を巡って対立する別のグループと対峙します。
+          相手のグループはいつも通り大声で威嚇してきますが、武器を持つリーダーの猿人は躊躇なく踏み込み、
+          相手のリーダーの頭を骨で殴りつけ、撲殺しました。
+          死体を囲み、歓喜の声を上げる猿人たち。彼らは水場を支配し、地球の覇者としての第一歩を踏み出したのです。 
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/1-13.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 5. 映画史上最も有名なジャンプカット</strong><br>
+          興奮の絶頂に達したリーダーの猿人は、手にした武器（骨）を高く空へと放り投げます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/1-14.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          骨は回転しながら青空へ昇っていき、画面の最高点に達したその瞬間、カメラは数百万年の時を一瞬で飛び越え（ジャンプカット）、
+           宇宙空間を静かに飛行する人工衛星（または宇宙兵器）の姿へと切り替わります。
+          こうして、人類のテクノロジーの歴史が「一本の骨」から始まったことを示し、物語は現代（2001年）へと移っていきます。
+          </p>
+        </div>
+
+
+<hr>
+
+
+        <div id="cons2" class="consideration-section work-section layout-wide">
+          <h2>📌 Part2.『月に人類が居住可能になった時代』</h2>
+          <img src="./2001/2.jpg" alt="月に人類が居住可能になった時代">
+          <p>Part 1の原始的な世界から一転、クラシック音楽『美しく青きドナウ』に乗せて、
+          人類が宇宙へと進出したハイテクで優雅な2001年の世界が描かれます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-1.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 1. 宇宙への優雅な旅（スペース・シャトル）</strong><br>
+          数百万年の時を超え、人類は宇宙空間に生活圏を広げていました。
+          アメリカ宇宙評議会の議長であるヘイウッド・フロイド博士は、 ある「極秘任務」を帯びて、
+          地球から月面基地へと向かう民間のスペース・シャトル（パンアメリカン航空）に乗っていました。
+          無重力空間の機内では、ハイテクな世界が淡々と、しかし美しく描写されます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section card-grid-3">
+        <div class="card-item">
+        <img src="./2001/2-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>ペンが空間にプカプカと浮遊している。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/2-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>スチュワーデスがマジックテープの靴を履き、壁や天井を歩いて移動する。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/2-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>フロイド博士は、座席の液晶モニターで映画を観ながら眠りについている。</p>
+        </div>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/2-4b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>シャトルは、ゆっくりと回転する巨大な車輪型の宇宙ステーションへと到着します。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 2. 宇宙ステーションでの「嘘」と「緊迫感」</strong><br>
+          宇宙ステーションに到着したフロイド博士は、次の月行きの便を待つ間、地球の家族とテレビ電話（ビデオフォン）で会話を交わします。
+          その後、ステーション内のラウンジで、旧知の仲であるソ連（※公開当時の冷戦体制を反映）の科学者たちと偶然再会します。 
+          ソ連の科学者たちは、フロイド博士が向かおうとしている月面の「クラビウス基地」で、最近おかしな噂が流れていると問い詰めます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section card-grid-3">
+        <div class="card-item">
+        <img src="./2001/2-5b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>* 「クラビウス基地が完全閉鎖され、通信も途絶えている」<br>
+          * 「謎の疫病が発生したという噂は本当か？」<br></p>
+        </div>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/2-5c.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          しかし、フロイド博士は国家機密を守るため、大人の外交辞令と愛想笑いで巧みに話をはぐらかし、 真相を隠したまま月へと旅立ちます。
+          「疫病」というのは、月面での重大な発見を隠蔽するためのアメリカ政府の嘘（カモフラージュ）だったのです。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 3. 月面基地への到着</strong><br>
+          フロイド博士を乗せた球体型の月着陸船は、月のクレーター内にある「クラビウス基地」へと着陸します。
+          基地のドームが左右に開き、着陸船が地下へと格納されていく様子が、緻密な特撮で描かれます。
+          そこは、人間が地球上と変わらないスーツ姿で歩き、食事をし、会議を行うことができる、完全に居住可能となった人工的な都市でした。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/2-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong> 4. 秘密会議と「TMA-1」の真相</strong><br>
+          フロイド博士が出席した基地の重要会議で、月面で起きた本当の事件が明かされます。
+          数ヶ月前、月の「クラビウス・クレーター」の地中で、強力な磁気異常が検出されました。
+           そこを掘り返してみたところ、地下数メートルから、
+          人工的に作られたとしか思えない漆黒の四角い石碑（モノリス）が発掘されたのです。
+          科学者たちはこれを「TMA-1（Tycho Magnetic Anomaly-1：ティコ磁気異常1号）」と名付けました。
+          このモノリスは、人類が誕生するはるか昔、400万年前に意図的に月面に埋められたものでした。
+          つまり、「地球外の知的生命体が実在する決定的な証拠」だったのです。
+          世間がパニックになるのを防ぐため、疫病という嘘で基地を隔離していたのでした。
+          </p>
+        </div>
+
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>5. 月面での遭遇と「目覚まし時計」</strong><br>
+          フロイド博士一行は、防護宇宙服を着用し、月面移動車（ムーン・バス）に乗って発掘現場のクレーターへと向かいます。
+          移動車の中では、宇宙食のサンドイッチを食べながら、他愛のない世間話が交わされます。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/2-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          夜の月面に掘られた深い穴の底。照明に照らされ、静かにそびえ立つモノリス（TMA-1）の前に、博士たちは降り立ちます。 
+          それはPart 1で猿人たちの前に現れたものと全く同じ、完璧なプロポーションを持つ黒い石碑でした。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          フロイド博士が恐る恐る近づき、宇宙服の手袋越しにその滑らかな表面に触れます。数百万年前に猿人が触れたように。
+          人類の知性がついに月まで到達したことを記念し、博士たちはモノリスをバックに並んで記念写真を撮ろうとします。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/2-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          カメラを構えたその瞬間、何億年もの間、夜の闇に隠れていたモノリスに、初めて太陽の光（朝日の光）が差し込みました。
+          すると突如、宇宙服のヘルメット内に「ピーーーーーー！」という耳を劈（つんざ）くような強烈な高周波の信号音が鳴り響きます。
+          博士たちはあまりの激痛に頭を抱えてうずくまります。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/2-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>
+          モノリスは太陽の光を浴びたことで起動し、地球を飛び出した人類が月に到達したことを告げる「目覚まし時計（センサー）」として、
+          遥か彼方の木星に向けて強力な電波を発信したのです。
+          物語は、この信号の謎を追う第3部『木星ミッション編』へと繋がっていきます。
+          </p>
+        </div>
+
+<hr>
+
+
+        <div id="cons2" class="consideration-section work-section layout-wide">
+          <h2>📌 Part3.『木星探査計画　18ヶ月後（JUPITER MISSION）』</h2>
+          <img src="./2001/3-1.jpg" alt="木星探査計画　18ヶ月後">
+          <p>本作で最も長いパートであり、人類最高峰のテクノロジーである宇宙船ディスカバリー号を舞台に、
+          人間と人工知能（AI）の息詰まる心理戦と死闘が描かれます。<br>
+          </p>
+        </div>
+
+        <div class="consideration-section work-section layout-img-left">
+          <img src="./2001/3-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p><strong>1. ディスカバリー号の退屈な日常</strong><br>
+          月面のモノリスが木星に向けて謎の信号を発信してから18ヶ月後の2001年。
+           全長数十メートルに及ぶ巨大な宇宙船「ディスカバリー号」は、その信号の謎を解き明かすため、木星へと向かって航行していました。
+          船内の乗組員は5人の人間と、1基のAIでした。
+          </p>
+        </div>
+
+        <div class="consideration-section work-section card-grid-3">
+        <div class="card-item">
+        <img src="./2001/3-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>起きている人間: デイヴィッド・ボーマン船長、フランク・プール飛行士の2名。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/3-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>眠っている人間: 木星に到着してから活動するため、人工冬眠（コールドスリープ）カプセルの中で眠る3名の科学者。</p>
+        </div>
+
+        <div class="card-item">
+        <img src="./2001/3-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+        <p>HAL 9000: 船の全システムを管理する、最高性能の人工知能（通称ハル）。赤いカメラの目と、穏やかで知的な男性の声で人間と対話します。</p>
+        </div>
+        </div>
+
+        <div class="consideration-section work-section layout-img-right">
+          <img src="./2001/3-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <p>木星までは気の遠くなるような時間がかかります。
+          ボーマンとプールは、人工重力を生み出すために回転する巨大な円形の船室内で、ランニングをしたり、 チェスをしたり、スケッチをしたり、
+          地球からのビデオレターを見たりして、極めて淡々とした退屈なルーティンをこなしていました。
+          </p>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
 
       <div id="work-c1" class="content-box">
