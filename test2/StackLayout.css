@@ -63,7 +63,7 @@
        ========================================= */
     header {
       background: #161920;     /* ダークグレーから、わずかに青みを含んだ色へ */
-      padding: 12px 20px;
+      padding: 12px 20px 12px 20px; /* (上12px / 右20px / 下120px / 左20px) */
       display: flex;
       justify-content: space-between; 
       align-items: center;
@@ -143,7 +143,7 @@
     }
 
     nav {
-      width: 260px;
+      width: 300px;
       background: #12151c;     /* メインコンテンツより1段階暗い色で引き締める */
       border-right: 1px solid #1e2330;
       overflow-y: auto; 
@@ -437,6 +437,10 @@
         font-size: 14px; 
         color: #94a3b8;
       }
+/* ▼ 追加：未選択ジャンルのアコーディオンボタン（▼）も隠す ▼ */
+      .menu-list .toggle-icon {
+        display: none;
+      }
 
       #radio-genreA:checked ~ .container nav .list-genreA a,
       #radio-genreB:checked ~ .container nav .list-genreB a,
@@ -445,14 +449,13 @@
       #radio-genreE:checked ~ .container nav .list-genreE a,
       #radio-genreF:checked ~ .container nav .list-genreF a { display: block; }
 
-      #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
-      #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
-      #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
-      #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
-      #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
-      #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
-        color: #00d2ff; 
-        background: #1e2330;
+      #radio-genreA:checked ~ .container nav .list-genreA .toggle-icon,
+      #radio-genreB:checked ~ .container nav .list-genreB .toggle-icon,
+      #radio-genreC:checked ~ .container nav .list-genreC .toggle-icon,
+      #radio-genreD:checked ~ .container nav .list-genreD .toggle-icon,
+      #radio-genreE:checked ~ .container nav .list-genreE .toggle-icon,
+      #radio-genreF:checked ~ .container nav .list-genreF .toggle-icon { 
+        display: flex; 
       }
 
       .content-box { position: static; }
@@ -464,7 +467,7 @@
        追加：サイドメニューのサブリンク（考察用）
        ========================================= */
     nav a.sub-link {
-      padding-left: 40px; /* 少し深くインデントして階層を表現 */
+      padding-left: 30px; /* 少し深くインデントして階層を表現 */
       font-size: 13px;    /* フォントサイズを少し小さく */
       color: #64748b;
       border-bottom: none; /* サブリンク間の境界線を消す */
@@ -480,6 +483,70 @@
         padding-left: 50px;
       }
     }
+
+
+/* =========================================
+   JSオフ対応：CSSのみのアコーディオン
+   ========================================= */
+/* グループ全体を相対配置にして、ボタンを右端に固定 */
+.nav-item-wrap {
+  position: relative;
+}
+
+/* メインリンクの設定（右側にアイコン用の余白を確保） */
+.nav-item-wrap .main-link {
+  padding-right: 50px; 
+}
+
+/* アコーディオン用のチェックボックス本体は隠す */
+.sub-toggle {
+  display: none;
+}
+
+/* 開閉用の▼アイコン（ラベル）の設定 */
+.toggle-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 45px;
+  height: 49px; /* aタグの高さ（padding + font-size等）に合わせる */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #1e2330; /* リンクとボタンの間にうっすら区切り線を引く */
+  transition: background 0.2s ease;
+}
+
+.toggle-icon:hover {
+  background: #1b202e; /* ホバー時の色変化 */
+}
+
+/* ▼アイコンの図形描画 */
+.toggle-icon::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: translateY(-2px) rotate(45deg);
+  transition: all 0.3s ease;
+}
+
+/* ▼ アニメーション：チェック時（開いた時）に上を向いて青く光る */
+.sub-toggle:checked ~ .toggle-icon::after {
+  transform: translateY(2px) rotate(225deg);
+  border-color: #00d2ff;
+}
+
+/* ▼ サブリンクの表示切り替え */
+.sub-link-group {
+  display: none; /* 初期状態は非表示 */
+}
+
+.sub-toggle:checked ~ .sub-link-group {
+  display: block; /* チェックが入ったら表示 */
+}
 
     /* =========================================
        修正・追加：コンテンツ表示切り替えの仕組み
