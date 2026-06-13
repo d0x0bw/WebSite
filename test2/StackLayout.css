@@ -143,7 +143,7 @@
     }
 
     nav {
-      width: 300px;
+      width: 320px;
       background: #12151c;     /* メインコンテンツより1段階暗い色で引き締める */
       border-right: 1px solid #1e2330;
       overflow-y: auto; 
