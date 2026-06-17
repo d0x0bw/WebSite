@@ -28,20 +28,83 @@
 
     /* リンクのスタイル */
     a {
-      color: #0088aa;
+      color: #f39801;
       font-size: 1.234rem; /* 14px 相当 */
       text-decoration: none;
       transition: color 0.2s ease; /* 滑らかな変化 */
     }
     a:hover {
-      color: #ff6600;
+      color: #29a7e1;
     }
+
+.btn {
+  display: inline-block;
+  border: 2px solid;
+  position: relative;
+  background: none;
+  color: #614f38;
+  overflow: hidden;
+  border: 0px solid #614f38;
+  padding: 0.6rem 1.0rem 0.6rem 2.4rem;
+  transition: all .3s;
+  border-radius: 4px;
+
+
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    display: block;
+    top: 50%;
+  }
+
+  &:before {
+    width: 7px;
+    height: 7px;
+    left: 0.4rem;
+    border-top: solid 2px #fff;
+    border-right: solid 2px #fff;
+    z-index: 2;
+    transform: translateY(-50%) rotate(45deg);
+    transition: all .3s;
+  }
+
+  &:after {
+    left: -2rem;
+    background: #f39801;
+    z-index: 1;
+    width: 3.8rem;
+    height: 130%;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: all .5s;
+  }
+
+  span {
+    transition: all .3s;
+    z-index: 3;
+  }
+
+  &:hover {
+    span {
+      position: relative;
+      color: #fff;
+    }
+
+    &:after {
+      right: 0;
+      width: 120%;
+      border-radius: 0;
+    }
+  }
+}
 
     /* ヘッダー部分 */
     .head h1 {
       font-size: 1.625rem; /* 26px 相当 */
       font-family: 'Arial Black', Arial, Helvetica, sans-serif;
       text-align: center;
+      color: #29a7e1;
       margin-top: 3px;
       margin-bottom: 8px;
     }
@@ -73,7 +136,7 @@
       gap: 8px;               /* 画像と文字の間隔 */
       margin-bottom: 20px;
       padding-top: 12px;
-      border-top: solid 0px #e8e6da;
+      border-top: solid 1px #e8e6da;
     }
 
     /* 【スマホ時】画像をスッキリ小さめの表示にする */
@@ -88,6 +151,11 @@
     }
 
     .menu-text {
+      font-size: 0.75rem;
+    }
+
+    .menu-text p {
+      padding-left: 12px;
       font-size: 0.75rem;
     }
 
@@ -106,7 +174,7 @@
       border-top: solid 0px #e8e6da;
     }
     .copy a   {
-      color: #ff6600;
+      color: #f39801;
       font-size: 0.625rem;
     }
     .copy a:hover   {
@@ -172,8 +240,8 @@
           <img src="icon.png" alt="SHERRY's GARDEN">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./sherrys-garden/index.html">SHERRY's GARDEN</a></div>
-          何気なく撮りためた写真を公開しています。
+          <div class="menu-title"><a href="./sherrys-garden/index.html" class="btn"><span>SHERRY's GARDEN<i class="arrow"></span></a></div>
+          <p>何気なく撮りためた写真を公開しています。</p>
         </div>
       </li>
 
@@ -182,8 +250,8 @@
           <img src="icon4.png" alt="TEST PAGE">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./test/index.html">TEST PAGE</a></div>
-          作成中テストページ1
+          <div class="menu-title"><a href="./test/index.html" class="btn"><span>TEST PAGE</span></a></div>
+          <p>作成中テストページ1</p>
         </div>
       </li>
 
@@ -192,8 +260,8 @@
           <img src="test.png" alt="TEST PAGE 2">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./test2/StackLayout.html">TEST PAGE2</a></div>
-          作成中テストページ2
+          <div class="menu-title"><a href="./test2/StackLayout.html" class="btn"><span>TEST PAGE2</span></a></div>
+          <p>作成中テストページ2</p>
         </div>
       </li>
 
@@ -202,8 +270,8 @@
           <img src="test.png" alt="TEST PAGE 3">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./test2/3columns.html">TEST PAGE3</a></div>
-          作成中テストページ3
+          <div class="menu-title"><a href="./test2/3columns.html" class="btn"><span>TEST PAGE3</span></a></div>
+          <p>作成中テストページ3</p>
         </div>
       </li>
 
