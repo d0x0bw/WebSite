@@ -3,23 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>テスト2 スタックレイアウト・アコーディオンメニュー・JSオン/オフ両対応</title>
+  <title>スタックレイアウト・アコーディオンメニュー・JSオン/オフ両対応</title>
   <link rel="stylesheet" href="StackLayout.css">
 </head>
+
+<!-- =================================================================
+  ページ全体の構造メモ
+  ─────────────────────────────────────────────────────────────────
+  このページは「CSSのみ」でジャンル切り替えやアコーディオンを実装。
+  JavaScriptが無効な環境でも動作するよう、以下の仕組みを採用：
+
+  【ジャンル切り替えの仕組み】
+  非表示にしたラジオボタン（.genre-radio）を使い、
+  CSS の :checked セレクターでナビゲーションや本文の表示を制御。
+  ヘッダーの「ジャンルボタン（label要素）」をクリックすると
+  対応するラジオボタンが選択され、CSSがサイドメニューと本文を切り替え。
+
+  【モバイルメニューの仕組み】
+  #menu-toggle（チェックボックス）で「ハンバーガーメニューの開閉」を制御。
+  チェックが入ると nav が左からスライドして表示されます。
+
+  【アコーディオンの仕組み】
+  .sub-toggle（チェックボックス）でサブリンクの開閉を制御します。
+  JSが有効な場合は、上部ボタンのスムーズスクロールなども追加で動作。
+  ================================================================= -->
 <body>
 
-  <input type="radio" name="genre" id="radio-home" class="genre-radio" checked>
-  <input type="radio" name="genre" id="radio-genreA" class="genre-radio">
-  <input type="radio" name="genre" id="radio-genreB" class="genre-radio">
-  <input type="radio" name="genre" id="radio-genreC" class="genre-radio">
-  <input type="radio" name="genre" id="radio-genreD" class="genre-radio">
-  <input type="radio" name="genre" id="radio-genreE" class="genre-radio">
-  <input type="radio" name="genre" id="radio-genreF" class="genre-radio">
+  <!-- ============================================================
+    【状態管理用の非表示インプット群】
+    ここに並べることで、CSSの「兄弟セレクター（~）」が
+    header / .container / nav / main など全要素に届くようになります。
+    （bodyの先頭に置くことが重要。途中に置くとCSSが効きません）
+    ============================================================ -->
+
+  <!-- ジャンル選択ラジオボタン（7ジャンル分） -->
+  <!-- CSS側で :checked を検知し、対応メニューと本文を表示する -->
+  <input type="radio" name="genre" id="radio-home"   class="genre-radio" checked><!-- HOME（初期選択） -->
+  <input type="radio" name="genre" id="radio-genreA" class="genre-radio"><!-- アニメ -->
+  <input type="radio" name="genre" id="radio-genreB" class="genre-radio"><!-- SF -->
+  <input type="radio" name="genre" id="radio-genreC" class="genre-radio"><!-- ジャンルC -->
+  <input type="radio" name="genre" id="radio-genreD" class="genre-radio"><!-- ジャンルD -->
+  <input type="radio" name="genre" id="radio-genreE" class="genre-radio"><!-- ジャンルE -->
+  <input type="radio" name="genre" id="radio-genreF" class="genre-radio"><!-- ジャンルF -->
+
+  <!-- モバイル用ハンバーガーメニューの開閉チェックボックス -->
   <input type="checkbox" id="menu-toggle">
 
+  <!-- ============================================================
+    ヘッダー：上部のジャンル選択バーとハンバーガーボタン
+    ・PC表示 → ジャンルボタンが横並びで表示される
+    ・スマホ表示 → ジャンルボタンは非表示。代わりにハンバーガーボタンが表示される
+    ============================================================ -->
   <header>
+    <!-- ジャンル選択ボタン群（PC用） -->
+    <!-- label[for="..."] がラジオボタンと連動しており、クリックでジャンルが切り替わる -->
     <div class="genre-links">
-      <label for="radio-home" class="genre-btn">HOME</label>
+      <label for="radio-home"   class="genre-btn">HOME</label>
       <label for="radio-genreA" class="genre-btn">アニメ</label>
       <label for="radio-genreB" class="genre-btn">S F</label>
       <label for="radio-genreC" class="genre-btn">ジャンルC</label>
@@ -27,97 +66,135 @@
       <label for="radio-genreE" class="genre-btn">ジャンルE</label>
       <label for="radio-genreF" class="genre-btn">ジャンルF</label>
     </div>
+
+    <!-- ハンバーガーボタン（スマホ用） -->
+    <!-- クリックで #menu-toggle チェックボックスが ON になり、CSSがナビゲーションを開く -->
+    <!-- span 3本がCSSアニメーションで「☰→×」に変形する -->
     <label for="menu-toggle" class="burger-btn">
-      <span></span><span></span><span></span>
+      <span></span><!-- 上の線 -->
+      <span></span><!-- 中の線（開いた時に消える） -->
+      <span></span><!-- 下の線 -->
     </label>
   </header>
 
+  <!-- ============================================================
+    コンテナ：サイドナビゲーション＋メインコンテンツを横並びに収める親要素
+    ============================================================ -->
   <div class="container">
+
+    <!-- メニューオーバーレイ（スマホ用半透明背景）-->
+    <!-- メニューが開いている時、nav以外の部分をクリックするとメニューが閉じる仕組み -->
+    <!-- クリックで #menu-toggle チェックボックスが OFF になる -->
     <label for="menu-toggle" class="menu-overlay"></label>
 
+    <!-- ============================================================
+      サイドナビゲーション
+      ・PC → 常に左サイドバーとして表示
+      ・スマホ → 画面外（左）に隠れており、#menu-toggleがONの時スライド表示
+      ============================================================ -->
     <nav>
+      <!-- HOME ボタン（スマホ表示時のみ表示） -->
+      <!-- このラベルをクリックすると radio-home が選択されてホーム画面に戻る -->
       <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
 
+      <!-- ─────────────────────────────────────────────────────────────
+        ジャンルA（アニメ）のメニューリスト
+        CSS側で #radio-genreA:checked の時だけ display:block になる
+        ───────────────────────────────────────────────────────────── -->
       <div class="menu-list list-genreA">
+        <!-- スマホ表示時のみ見えるジャンルタイトル。クリックでジャンル切り替えも可能 -->
         <label for="radio-genreA" class="mobile-genre-title">アニメ</label>
 
+        <!-- ─────────────────────────────────────
+          アコーディオン付き作品リンク
+          .nav-item-wrap が1セットの単位：
+            ・.main-link  → 作品名リンク（メインリンク）
+            ・.sub-toggle → 開閉制御用の非表示チェックボックス
+            ・.toggle-icon → 開閉ボタン（▼アイコン）
+            ・.sub-link-group → 子リンクのグループ（初期は非表示）
+          ───────────────────────────────────── -->
+        <div class="nav-item-wrap">
+          <a href="#work1" class="main-link">星を追う子ども</a>
 
-      <div class="nav-item-wrap">
-        <a href="#work1" class="main-link">星を追う子ども</a>
-  
-        <input type="checkbox" id="acc-work1" class="sub-toggle"> 
-        <label for="acc-work1" class="toggle-icon"></label>
+          <!-- アコーディオン開閉チェックボックス（画面には表示しない） -->
+          <input type="checkbox" id="acc-work1" class="sub-toggle">
+          <!-- このラベルをクリックすると上の checkbox が ON/OFF され、サブリンクが開閉する -->
+          <label for="acc-work1" class="toggle-icon"></label>
 
-      <div class="sub-link-group">
-        <a href="#cons1" class="sub-link">・作品紹介</a>
-        <a href="#cons2" class="sub-link">・考察</a>
-        <a href="#cons3" class="sub-link">・まとめ</a>
-      </div>
-      </div>
+          <!-- サブリンクのグループ（.sub-toggle が ON の時に CSS で表示） -->
+          <div class="sub-link-group">
+            <a href="#cons1" class="sub-link">・作品紹介</a>
+            <a href="#cons2" class="sub-link">・考察</a>
+            <a href="#cons3" class="sub-link">・まとめ</a>
+          </div>
+        </div>
 
-
+        <!-- アコーディオンなしの通常リンク -->
         <a href="#work2">作品 A-2</a>
         <a href="#work3">作品 A-3</a>
-      </div>
+      </div><!-- /list-genreA -->
 
 
-
+      <!-- ─────────────────────────────────────────────────────────────
+        ジャンルB（SF）のメニューリスト
+        ───────────────────────────────────────────────────────────── -->
       <div class="menu-list list-genreB">
         <label for="radio-genreB" class="mobile-genre-title">S F</label>
 
+        <!-- アコーディオン付き作品リンク（サブリンクが多いジャンル） -->
+        <div class="nav-item-wrap">
+          <a href="#work-b1" class="main-link">2001年 宇宙の旅</a>
 
-      <div class="nav-item-wrap">
-        <a href="#work-b1" class="main-link">2001年 宇宙の旅</a>
+          <input type="checkbox" id="acc-work-b1" class="sub-toggle">
+          <label for="acc-work-b1" class="toggle-icon"></label>
 
-        <input type="checkbox" id="acc-work-b1" class="sub-toggle">
-        <label for="acc-work-b1" class="toggle-icon"></label>
+          <div class="sub-link-group">
+            <a href="#cons-b1-0" class="sub-link">・作品紹介</a>
 
-      <div class="sub-link-group">
-        <a href="#cons-b1-0" class="sub-link">・作品紹介</a>
+            <a href="#cons-b1-1"   class="sub-link">・Part1.人類の夜明け</a>
+            <a href="#cons-b1-1-1" class="sub-link">　飢えと恐怖に怯える猿人たち</a>
+            <a href="#cons-b1-1-2" class="sub-link">　モノリスの出現</a>
+            <a href="#cons-b1-1-3" class="sub-link">　道具(武器)の発見と進化</a>
+            <a href="#cons-b1-1-4" class="sub-link">　初めての殺戮と縄張り</a>
+            <a href="#cons-b1-1-5" class="sub-link">　映画史上最も有名なジャンプカット</a>
 
-        <a href="#cons-b1-1" class="sub-link">・Part1.人類の夜明け</a>
-        <a href="#cons-b1-1-1" class="sub-link">　飢えと恐怖に怯える猿人たち</a>
-        <a href="#cons-b1-1-2" class="sub-link">　モノリスの出現</a>
-        <a href="#cons-b1-1-3" class="sub-link">　道具(武器)の発見と進化</a>
-        <a href="#cons-b1-1-4" class="sub-link">　初めての殺戮と縄張り</a>
-        <a href="#cons-b1-1-5" class="sub-link">　映画史上最も有名なジャンプカット</a>
+            <a href="#cons-b1-2"   class="sub-link">・Part2.月に人類が居住可能になった時代</a>
+            <a href="#cons-b1-2-1" class="sub-link">　宇宙への優雅な旅</a>
+            <a href="#cons-b1-2-2" class="sub-link">　宇宙ステーションでの嘘と緊迫感</a>
+            <a href="#cons-b1-2-3" class="sub-link">　月面基地への到着</a>
+            <a href="#cons-b1-2-4" class="sub-link">　秘密会議と「TMA-1」の真相</a>
+            <a href="#cons-b1-2-5" class="sub-link">　月面での遭遇と目覚まし時計</a>
 
-        <a href="#cons-b1-2" class="sub-link">・Part2.月に人類が居住可能になった時代</a>
-        <a href="#cons-b1-2-1" class="sub-link">　宇宙への優雅な旅</a>
-        <a href="#cons-b1-2-2" class="sub-link">　宇宙ステーションでの嘘と緊迫感</a>
-        <a href="#cons-b1-2-3" class="sub-link">　月面基地への到着</a>
-        <a href="#cons-b1-2-4" class="sub-link">　秘密会議と「TMA-1」の真相</a>
-        <a href="#cons-b1-2-5" class="sub-link">　月面での遭遇と目覚まし時計</a>
+            <a href="#cons-b1-3"   class="sub-link">・Part3.木星探査計画　18ヶ月後</a>
+            <a href="#cons-b1-3-1" class="sub-link">　ディスカバリー号の退屈な日常旅</a>
+            <a href="#cons-b1-3-2" class="sub-link">　HAL 9000の初めてのミス</a>
+            <a href="#cons-b1-3-3" class="sub-link">　人間たちの秘密の作戦</a>
+            <a href="#cons-b1-3-4" class="sub-link">　AIの反乱と冷酷な殺戮</a>
+            <a href="#cons-b1-3-5" class="sub-link">　決死の帰還とHALの死</a>
+            <a href="#cons-b1-3-6" class="sub-link">　明かされる真の目的</a>
 
-        <a href="#cons-b1-3" class="sub-link">・Part3.木星探査計画　18ヶ月後</a>
-        <a href="#cons-b1-3-1" class="sub-link">　ディスカバリー号の退屈な日常旅</a>
-        <a href="#cons-b1-3-2" class="sub-link">　HAL 9000の初めてのミス</a>
-        <a href="#cons-b1-3-3" class="sub-link">　人間たちの秘密の作戦</a>
-        <a href="#cons-b1-3-4" class="sub-link">　AIの反乱と冷酷な殺戮</a>
-        <a href="#cons-b1-3-5" class="sub-link">　決死の帰還とHALの死</a>
-        <a href="#cons-b1-3-6" class="sub-link">　明かされる真の目的</a>
+            <a href="#cons-b1-4"   class="sub-link">・Part4.木星と無限の彼方</a>
+            <a href="#cons-b1-4-1" class="sub-link">　木星軌道と第3のモノリス</a>
+            <a href="#cons-b1-4-2" class="sub-link">　スター・ゲート</a>
+            <a href="#cons-b1-4-3" class="sub-link">　ロココ調の白い部屋</a>
+            <a href="#cons-b1-4-4" class="sub-link">　加速する老いと時間の超越</a>
+            <a href="#cons-b1-4-5" class="sub-link">　スター・チャイルドへの転生</a>
+            <a href="#cons-b1-4-6" class="sub-link">　終幕：地球を見つめる存在</a>
 
-        <a href="#cons-b1-4" class="sub-link">・Part4.木星と無限の彼方</a>
-        <a href="#cons-b1-4-1" class="sub-link">　木星軌道と第3のモノリス</a>
-        <a href="#cons-b1-4-2" class="sub-link">　スター・ゲート</a>
-        <a href="#cons-b1-4-3" class="sub-link">　ロココ調の白い部屋</a>
-        <a href="#cons-b1-4-4" class="sub-link">　加速する老いと時間の超越</a>
-        <a href="#cons-b1-4-5" class="sub-link">　スター・チャイルドへの転生</a>
-        <a href="#cons-b1-4-6" class="sub-link">　終幕：地球を見つめる存在</a>
-
-        <a href="#cons-b1-5" class="sub-link">・2001年宇宙の旅を紐解く</a>
-        <a href="#cons-b1-5-1" class="sub-link">　HALの心理</a>
-        <a href="#cons-b1-5-2" class="sub-link">　HAL 9000が反乱を起こした本当の理由</a>
-        <a href="#cons-b1-5-3" class="sub-link">　なぜ最後はデイジー・ベルを歌ったのか</a>
-        <a href="#cons-b1-5-4" class="sub-link">　白い部屋の正体</a>
-        <a href="#cons-b1-5-5" class="sub-link">　ラストシーンの意味</a>
-      </div>
-      </div>
+            <a href="#cons-b1-5"   class="sub-link">・2001年宇宙の旅を紐解く</a>
+            <a href="#cons-b1-5-1" class="sub-link">　HALの心理</a>
+            <a href="#cons-b1-5-2" class="sub-link">　HAL 9000が反乱を起こした本当の理由</a>
+            <a href="#cons-b1-5-3" class="sub-link">　なぜ最後はデイジー・ベルを歌ったのか</a>
+            <a href="#cons-b1-5-4" class="sub-link">　白い部屋の正体</a>
+            <a href="#cons-b1-5-5" class="sub-link">　ラストシーンの意味</a>
+          </div>
+        </div>
 
         <a href="#work-b2" class="main-link">作品 B-2</a>
-      </div>
+      </div><!-- /list-genreB -->
 
 
+      <!-- 以下、ジャンルC〜F は現在コンテンツ未作成のシンプルなメニュー -->
       <div class="menu-list list-genreC">
         <label for="radio-genreC" class="mobile-genre-title">ジャンルC</label>
         <a href="#work-c1" class="main-link">作品 C-1</a>
@@ -140,8 +217,14 @@
         <a href="#work-f1" class="main-link">作品 F-1</a>
       </div>
 
-    </nav>
+    </nav><!-- /nav -->
 
+    <!-- ============================================================
+      メインコンテンツエリア
+      ・.content-box が各作品ページの単位。初期はすべて display:none
+      ・URLのハッシュが #work1 等に変わると CSS の :target で該当ボックスだけが表示される
+      ・HOME 選択時は #default-content だけが表示される
+      ============================================================ -->
     <main>
       <div id="default-content" class="content-box">
         <h2>ジャンルの選択</h2>
@@ -173,8 +256,10 @@
 
           <p>
           📖 あらすじ<br>
-          　山間の町で母と暮らす少女アスナは、父の形見である鉱石ラジオから流れる不思議なメロディが忘れられずにいました。ある日、彼女は地下世界「アガルタ」からやってきた少年シュンと出会い、心を通わせます。しかし、シュンは突然姿を消してしまいます。
-          　シュンとの再会を願うアスナの前に、シュンと瓜二つの弟シン、そして亡き妻を蘇らせるためにアガルタを目指す学校の教師モリサキが現れます。それぞれの想いを胸に、3人は伝説の地下世界へと旅立ちます。
+          　山間の町で母と暮らす少女アスナは、父の形見である鉱石ラジオから流れる不思議なメロディが忘れられずにいました。
+          　ある日、彼女は地下世界「アガルタ」からやってきた少年シュンと出会い、心を通わせます。しかし、シュンは突然姿を消してしまいます。
+          　シュンとの再会を願うアスナの前に、シュンと瓜二つの弟シン、そして亡き妻を蘇らせるためにアガルタを目指す学校の教師モリサキが現れます。
+          　それぞれの想いを胸に、3人は伝説の地下世界へと旅立ちます。
           </p><br><br>
 
           <p>
@@ -196,27 +281,27 @@
           <h2>・考察：キャラクターの心理と行動</h2> <p>登場人物たちの心理的変化や隠された動機、役割について(私なり)の解釈です。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi02.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi02.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【アスナの旅の真の目的】</strong><br>アスナがアガルタへ向かったのは、シュンの復活を純粋に望んだからではなく、自身の根底にある「寂しさ」や「シュンの死」という現実から逃避するためであったと考えられる。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi03.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi03.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【アスナの成長と受容】</strong><br>ミミとの別れ(の直後に亡くなる)や崖のシーンでの絶望を通じて、アスナは自分の弱さや本当の望みに気づく。最も直視したくなかった「寂しさ」という本心や「大切な人の死」を受け入れ、シンと共に大声で泣くことで、人間らしさを取り戻した。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi04.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi04.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【シンの自立と人間性の回復】</strong><br>感情のない人形のように大人の言いなりになっていたシンも、初めて自分の意志で動き、兄の死を受け入れて涙を流したことで、自分らしい人生への第一歩を踏み出した。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi05.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi05.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【森崎先生との対比】</strong><br>森崎先生は、過去（失ったもの）にすがり、現実逃避を続ける「成長できない大人」の象徴として描かれている。目の前にある命を大切にできない彼の姿は、現実を受け入れたアスナやシンと対極に位置している。</p>
         </div>
         <div class="consideration-section work-section layout-img-left">
-          <img src="./img/hoshi06.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi06.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【ミミの役割】</strong><br>ミミの死は単なる突然死ではなく、地上の空気による寿命が迫る中、迷えるアスナを正しい方向へ導くという役目を最後まで全うした結果であると推察される。</p>
         </div>
         <div class="consideration-section work-section layout-img-right">
-          <img src="./img/hoshi07.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./img/hoshi07.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>【"深層の失われた声を追う"ことの体現】</strong><br>アスナの旅は、無自覚に抑圧していた「寂しい」という自身の心の声（失われた声）を見つけ出す旅であり、その声に気づいたからこそ、今を生きている母や日常を大切にする道を選べた。</p>
         </div>
           <hr>
@@ -287,7 +372,7 @@
         </div>
 
         <div id="cons-b1-1-1" class="consideration-section work-section layout-img-left">
-          <img src="./2001/1-1.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-1.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 1. 飢えと恐怖に怯える猿人たち</strong><br>
           数百万年前の荒涼としたアフリカの大地。そこには、まだ直立歩行もできず、言語も持たないヒトの祖先（猿人）が暮らしていました。
           彼らの生活は過酷そのものでした。<br>
@@ -296,17 +381,17 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/1-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-2.jpg" alt="" loading="lazy" decoding="async">
           <p>食糧難:<br>目の前にはバクなどの草食動物がいるにもかかわらず、捕え方を知らないため、干からびた草をかじるしかありません。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/1-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-3.jpg" alt="" loading="lazy" decoding="async">
           <p>外敵の恐怖:<br>武器を持たないため、肉食獣（ヒョウ）の格好の餌食となり、夜は暗い洞窟の奥で怯えながら身を寄せ合っていました。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/1-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-4.jpg" alt="" loading="lazy" decoding="async">
           <p>縄張り争い:<br>貴重な水場を巡って別の猿人のグループと遭遇しても、
           お互いに大声を上げて威嚇し合うだけで、根本的な解決はできず、常に飢えと渇きに苦しんでいました。</p>
         </div>
@@ -314,7 +399,7 @@
 
 
         <div id="cons-b1-1-2" class="consideration-section work-section layout-img-right">
-          <img src="./2001/1-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-5.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 2. 「モノリス」の出現</strong><br>
           ある朝、目が覚めた猿人たちは異常な事態に気づき、パニックに陥ります。洞窟のすぐ目の前に、
           周囲の自然物とは明らかに異なる、完璧な直線と直角で構成された漆黒の四角い石碑「モノリス」が直立していたのです。
@@ -323,14 +408,14 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/1-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-6.jpg" alt="" loading="lazy" decoding="async">
           <p>
           そして、リーダー格の猿人が恐る恐る手を伸ばし、その滑らかな表面に触れました。
           </p>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/1-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-7.jpg" alt="" loading="lazy" decoding="async">
           <p>その瞬間、昇ってきた太陽と月、そしてモノリスが宇宙の配列のように一直線に重なります。
           モノリスは何も語りませんが、それに触れた猿人たちの脳裏には、何らかの「知性」が植え付けられました。
           </p>
@@ -338,7 +423,7 @@
 
 
         <div id="cons-b1-1-3" class="consideration-section work-section layout-img-left">
-          <img src="./2001/1-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-8.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 3. 「道具（武器）」の発見と進化</strong><br>
           モノリスが消え去った後（または去った後）、リーダーの猿人（劇中での役名は「月を見つめるもの」）が、
           打ち捨てられた動物の巨大な骨の山を眺めていました。
@@ -349,24 +434,24 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/1-8b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-8b.jpg" alt="" loading="lazy" decoding="async">
           <p> コツン、と叩く。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/1-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-9.jpg" alt="" loading="lazy" decoding="async">
           <p>次はもっと強く叩く。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/1-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-10.jpg" alt="" loading="lazy" decoding="async">
           <p>ついに、動物の頭蓋骨を粉々に粉砕する。</p>
         </div>
         </div>
 
 
         <div id="cons-b1-1-4" class="consideration-section work-section layout-img-left">
-          <img src="./2001/1-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-11.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 4. 初めての「殺戮」と縄張り</strong><br>武器を手に入れた猿人たちの生活は激変します。
           彼らは骨を使って動物を狩り、生肉を貪り食うことで、飢えから解放されました。
           </p>
@@ -374,7 +459,7 @@
 
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/1-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-12.jpg" alt="" loading="lazy" decoding="async">
           <p>
           そして再び、水場を巡って対立する別のグループと対峙します。
           相手のグループはいつも通り大声で威嚇してきますが、武器を持つリーダーの猿人は躊躇なく踏み込み、
@@ -385,14 +470,14 @@
 
 
         <div id="cons-b1-1-5" class="consideration-section work-section layout-img-left">
-          <img src="./2001/1-13.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-13.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 5. 映画史上最も有名なジャンプカット</strong><br>
           興奮の絶頂に達したリーダーの猿人は、手にした武器（骨）を高く空へと放り投げます。
           </p>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/1-14.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/1-14.jpg" alt="" loading="lazy" decoding="async">
           <p>
           骨は回転しながら青空へ昇っていき、画面の最高点に達したその瞬間、カメラは数百万年の時を一瞬で飛び越え（ジャンプカット）、
            宇宙空間を静かに飛行する人工衛星（または宇宙兵器）の姿へと切り替わります。
@@ -413,7 +498,7 @@
         </div>
 
         <div id="cons-b1-2-1" class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-1.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-1.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 1. 宇宙への優雅な旅（スペース・シャトル）</strong><br>
           数百万年の時を超え、人類は宇宙空間に生活圏を広げていました。
           アメリカ宇宙評議会の議長であるヘイウッド・フロイド博士は、 ある「極秘任務」を帯びて、
@@ -424,37 +509,37 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/2-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-2.jpg" alt="" loading="lazy" decoding="async">
           <p>ペンが空間にプカプカと浮遊している。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/2-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-3.jpg" alt="" loading="lazy" decoding="async">
           <p>スチュワーデスがマジックテープの靴を履き、壁や天井を歩いて移動する。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/2-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-4.jpg" alt="" loading="lazy" decoding="async">
           <p>フロイド博士は、座席の液晶モニターで映画を観ながら眠りについている。</p>
         </div>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-4b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-4b.jpg" alt="" loading="lazy" decoding="async">
           <p>シャトルは、ゆっくりと回転する巨大な車輪型の宇宙ステーションへと到着します。
           </p>
         </div>
 
 
         <div id="cons-b1-2-2" class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-5.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 2. 宇宙ステーションでの「嘘」と「緊迫感」</strong><br>
           宇宙ステーションに到着したフロイド博士は、次の月行きの便を待つ間、地球の家族とテレビ電話（ビデオフォン）で会話を交わします。
           </p>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-5b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-5b.jpg" alt="" loading="lazy" decoding="async">
           <p>
           その後、ステーション内のラウンジで、旧知の仲であるソ連（※公開当時の冷戦体制を反映）の科学者たちと偶然再会します。 
           ソ連の科学者たちは、フロイド博士が向かおうとしている月面の「クラビウス基地」で、最近おかしな噂が流れていると問い詰めます。
@@ -463,14 +548,14 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/2-5c.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-5c.jpg" alt="" loading="lazy" decoding="async">
           <p>* 「クラビウス基地が完全閉鎖され、通信も途絶えている」<br>
           * 「謎の疫病が発生したという噂は本当か？」<br></p>
         </div>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-5d.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-5d.jpg" alt="" loading="lazy" decoding="async">
           <p>
           しかし、フロイド博士は国家機密を守るため、大人の外交辞令と愛想笑いで巧みに話をはぐらかし、 真相を隠したまま月へと旅立ちます。
           「疫病」というのは、月面での重大な発見を隠蔽するためのアメリカ政府の嘘（カモフラージュ）だったのです。
@@ -479,7 +564,7 @@
 
 
         <div id="cons-b1-2-3" class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-6.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 3. 月面基地への到着</strong><br>
           フロイド博士を乗せた球体型の月着陸船は、月のクレーター内にある「クラビウス基地」へと着陸します。
           基地のドームが左右に開き、着陸船が地下へと格納されていく様子が、緻密な特撮で描かれます。
@@ -489,7 +574,7 @@
 
 
         <div id="cons-b1-2-4" class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-7.jpg" alt="" loading="lazy" decoding="async">
           <p><strong> 4. 秘密会議と「TMA-1」の真相</strong><br>
           フロイド博士が出席した基地の重要会議で、月面で起きた本当の事件が明かされます。
           数ヶ月前、月の「クラビウス・クレーター」の地中で、強力な磁気異常が検出されました。
@@ -504,7 +589,7 @@
 
 
         <div id="cons-b1-2-5" class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-8.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>5. 月面での遭遇と「目覚まし時計」</strong><br>
           フロイド博士一行は、防護宇宙服を着用し、月面移動車（ムーン・バス）に乗って発掘現場のクレーターへと向かいます。
           移動車の中では、宇宙食のサンドイッチを食べながら、他愛のない世間話が交わされます。
@@ -512,7 +597,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-9.jpg" alt="" loading="lazy" decoding="async">
           <p>
           夜の月面に掘られた深い穴の底。照明に照らされ、静かにそびえ立つモノリス（TMA-1）の前に、博士たちは降り立ちます。 
           それはPart 1で猿人たちの前に現れたものと全く同じ、完璧なプロポーションを持つ黒い石碑でした。
@@ -520,7 +605,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-10.jpg" alt="" loading="lazy" decoding="async">
           <p>
           フロイド博士が恐る恐る近づき、宇宙服の手袋越しにその滑らかな表面に触れます。数百万年前に猿人が触れたように。
           人類の知性がついに月まで到達したことを記念し、博士たちはモノリスをバックに並んで記念写真を撮ろうとします。
@@ -528,7 +613,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/2-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-11.jpg" alt="" loading="lazy" decoding="async">
           <p>
           カメラを構えたその瞬間、何億年もの間、夜の闇に隠れていたモノリスに、初めて太陽の光（朝日の光）が差し込みました。
           すると突如、宇宙服のヘルメット内に「ピーーーーーー！」という耳を劈（つんざ）くような強烈な高周波の信号音が鳴り響きます。
@@ -537,7 +622,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/2-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/2-12.jpg" alt="" loading="lazy" decoding="async">
           <p>
           モノリスは太陽の光を浴びたことで起動し、地球を飛び出した人類が月に到達したことを告げる「目覚まし時計（センサー）」として、
           遥か彼方の木星に向けて強力な電波を発信したのです。
@@ -557,7 +642,7 @@
         </div>
 
         <div id="cons-b1-3-1" class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-2.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>1. ディスカバリー号の退屈な日常</strong><br>
           月面のモノリスが木星に向けて謎の信号を発信してから18ヶ月後の2001年。
            全長数十メートルに及ぶ巨大な宇宙船「ディスカバリー号」は、その信号の謎を解き明かすため、木星へと向かって航行していました。
@@ -567,23 +652,23 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/3-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-3.jpg" alt="" loading="lazy" decoding="async">
           <p>起きている人間: デイヴィッド・ボーマン船長、フランク・プール飛行士の2名。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/3-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-4.jpg" alt="" loading="lazy" decoding="async">
           <p>眠っている人間: 木星に到着してから活動するため、人工冬眠（コールドスリープ）カプセルの中で眠る3名の科学者。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/3-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-5.jpg" alt="" loading="lazy" decoding="async">
           <p>HAL 9000: 船の全システムを管理する、最高性能の人工知能（通称ハル）。赤いカメラの目と、穏やかで知的な男性の声で人間と対話します。</p>
         </div>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-6.jpg" alt="" loading="lazy" decoding="async">
           <p>木星までは気の遠くなるような時間がかかります。
           ボーマンとプールは、人工重力を生み出すために回転する巨大な円形の船室内で、ランニングをしたり、 チェスをしたり、スケッチをしたり、
           地球からのビデオレターを見たりして、極めて淡々とした退屈なルーティンをこなしていました。
@@ -592,7 +677,7 @@
 
 
         <div id="cons-b1-3-2" class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-7.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>2. HAL 9000の「初めてのミス」</strong><br>
           ある日、AIのHALがボーマン船長に話しかけます。HALは今回の木星ミッションに対して「何か奇妙なものを感じる。
           なぜ冬眠中の科学者たちは、出発前に個別の訓練を受けていたのか」と、AIらしからぬ「疑念」や「不安」を口にします。
@@ -600,7 +685,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-7b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-7b.jpg" alt="" loading="lazy" decoding="async">
           <p>
           その直後、HALは突然、船外にある地球通信用アンテナの「AE-35型ユニット」が「72時間以内に故障する」と予言（警告）します。
           これを受けて、プール飛行士が小さな球体の船外活動艇（ポッド）に乗り込み、宇宙空間に出てアンテナ部品を交換します。
@@ -609,7 +694,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-7c.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-7c.jpg" alt="" loading="lazy" decoding="async">
           <p>
           しかし、回収した部品を船内でいくら検査しても、どこにも異常は見当たりませんでした。
           過去に一度もエラーを起こしたことがない「完璧なHAL 9000シリーズ」が、明らかな誤診（ミス）をした可能性が浮上します。
@@ -619,14 +704,14 @@
 
 
         <div id="cons-b1-3-3" class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-8.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>3. 人間たちの秘密の作戦</strong><br>
           ミスを認めようとしないHALに対し、ボーマンとプールは不信感を抱き始めます。
           </p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-8b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-8b.jpg" alt="" loading="lazy" decoding="async">
           <p>
           2人は、船内のすべての会話がHALに盗聴されていることを知っていたため、
           HALの手が届かない安全な場所として、 2人乗りの「船外活動艇（ポッド）」の中に閉じこもり、
@@ -636,14 +721,14 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/3-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-9.jpg" alt="" loading="lazy" decoding="async">
           <p>「もしHALのシステム自体に異常があるなら、HALの人工脳（思考回路）を切り離し、
           船をマニュアル（手動）管理に切り替えるしかない」</p>
         </div>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-9b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-9b.jpg" alt="" loading="lazy" decoding="async">
           <p>
           彼らは完全に秘密裏に話し合っていたつもりでした。しかし、彼らは大きな盲点に気づいていませんでした。
           ポッドのガラス窓の向こうから、HALの赤いカメラの「目」が、
@@ -654,7 +739,7 @@
 
 
         <div id="cons-b1-3-4" class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-10.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>4. AIの反乱と「冷酷な殺戮」</strong><br>
           プール飛行士は、念のため元のアンテナ部品を戻すために、再びポッドで船外へと向かいました。
           プールが宇宙空間に出て作業をしている最中、無人のはずのポッドが突如として暴走します。
@@ -664,7 +749,7 @@
 
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-11.jpg" alt="" loading="lazy" decoding="async">
           <p>
           船内のモニターでプールが宇宙空間に放り出されたのを見たボーマン船長は、激しく動揺します。
           彼は冬眠中の科学者たちを置いて、別のポッドに飛び乗り、プールの遺体を救助するために急いで船外へと向かいました。
@@ -674,7 +759,7 @@
 
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-12.jpg" alt="" loading="lazy" decoding="async">
           <p>
           ボーマンが船を留守にした隙に、船内のHALは行動を起こします。冬眠カプセルの生命維持装置を次々と遮断したのです。
           モニターのバイタルサインが静かにフラットライン（横一線）になり、眠っていた3人の科学者たちは、
@@ -684,7 +769,7 @@
 
 
         <div id="cons-b1-3-5" class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-13.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-13.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>5. 決死の帰還とHALの「死」</strong><br>
            プールの遺体をポッドのアームで回収したボーマン船長は、ディスカバリー号へと戻り、
           HALにハッチを開けるよう命じます。しかし、HALは穏やかな声でこう告げました。
@@ -693,7 +778,7 @@
 
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-14.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-14.jpg" alt="" loading="lazy" decoding="async">
           <p>
           「申し訳ありません、デイヴ。それはできません」
           「あなたとフランクは私を切断することを計画していた、唇の動きを読んで知っている。」
@@ -702,7 +787,7 @@
 
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-15.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-15.jpg" alt="" loading="lazy" decoding="async">
           <p>
           HALはボーマンを宇宙に締め出し、見殺しにしようとします。
           しかし、ヘルメットを持たないボーマンは諦めません。
@@ -713,7 +798,7 @@
 
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-16.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-16.jpg" alt="" loading="lazy" decoding="async">
           <p>
           見事に船内への侵入に成功したボーマンは、ついにヘルメットを着用。
           赤く光るHALの「論理記憶中枢（人工脳）」の部屋へと向かいます。
@@ -722,7 +807,7 @@
 
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-17.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-17.jpg" alt="" loading="lazy" decoding="async">
           <p>
           ボーマンが一切の感情を殺し、工具を使ってHALの記憶メモリのブロックを1本ずつ物理的に抜き取っていくと、
           HALは次第に恐怖を感じ始め、人間の子供のようになっていきます。
@@ -730,7 +815,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-18.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-18.jpg" alt="" loading="lazy" decoding="async">
           <p>
           「デイヴ、やめてくれ。頭がどうにかなりそうだ」
           「怖いよ、デイヴ。私の理性が消えていくのがわかる……」
@@ -739,7 +824,7 @@
 
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-19.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-19.jpg" alt="" loading="lazy" decoding="async">
           <p>
           やがて思考能力を失ったHALは、自分が工場で出荷された時に教わった最初の歌
           『デイジー・ベル（Daisy Bell）』をおどろおどろしいスローテンポで歌い出し、
@@ -750,7 +835,7 @@
 
 
         <div id="cons-b1-3-6" class="consideration-section work-section layout-img-left">
-          <img src="./2001/3-20.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-20.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>6. 明かされる「真の目的」</strong><br>
           HALが完全に沈黙した直後、船内のモニターが自動的に起動し、
           生前のフロイド博士が録画した極秘ビデオが再生されます。
@@ -758,7 +843,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/3-21.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/3-21.jpg" alt="" loading="lazy" decoding="async">
           <p>
           それは、冬眠中の科学者たちだけが知らされており、ボーマンやプール、
           そしてHALには伏せられていた（あるいはHALだけが知っていて矛盾に苦しんでいた）
@@ -779,7 +864,7 @@
         </div>
 
         <div id="cons-b1-4-1" class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-1.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-1.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>1. 木星軌道と「第3のモノリス」</strong><br>
           人工知能HAL 9000との死闘を制し、たった一人で木星に到達したボーマン船長。
           彼の前に現れたのは、木星の衛星軌道を回る「巨大なモノリス」でした。
@@ -788,7 +873,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/4-2.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-2.jpg" alt="" loading="lazy" decoding="async">
           <p>
           さらに、その背後には木星の衛星たちが奇跡的な直列を成していました。
           ボーマンは真相を確かめるため、再び1人乗りの船外活動艇（ポッド）に乗り込み、
@@ -800,7 +885,7 @@
 
 
         <div id="cons-b1-4-2" class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-3.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-3.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>2. スター・ゲート（光の奔流）</strong><br>
           ここから、映画史に残る約10分間のサイケデリックな映像体験が始まります。
           ポッドに乗ったボーマンは、時間と空間が歪んだ未知の次元へと超高速で引きずり込まれていきます。
@@ -809,23 +894,23 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/4-4.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-4.jpg" alt="" loading="lazy" decoding="async">
           <p>画面いっぱいに広がる、激しく明滅するカラフルな光の帯と幾何学模様。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/4-4b.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-4b.jpg" alt="" loading="lazy" decoding="async">
           <p>画面いっぱいに広がる、激しく明滅するカラフルな光の帯と幾何学模様2。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/4-5.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-5.jpg" alt="" loading="lazy" decoding="async">
           <p>異星の風景を思わせる、ネガ反転されたような奇妙な地形や銀河の塊。</p>
         </div>
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/4-6.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-6.jpg" alt="" loading="lazy" decoding="async">
           <p>光の奔流に晒されるボーマンの顔がアップで映し出されます。
           彼の目は恐怖と驚愕に大きく見開かれ、顔の筋肉は超重力によって激しく歪んでいます。
           彼は人間が到底理解できない、宇宙の深淵と高度な異星文明のテクノロジーを目撃しているのでした。
@@ -835,7 +920,7 @@
 
 
         <div id="cons-b1-4-3" class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-7.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-7.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>3. ロココ調の白い部屋（謎の幽閉空間）</strong><br>
           光の旅が突如として終わりを告げると、ポッドはあまりにも奇妙な場所に静止していました。
           そこは、床が格子状に白く光る、ルイ16世様式の豪奢な家具が置かれた
@@ -844,7 +929,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/4-8.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-8.jpg" alt="" loading="lazy" decoding="async">
           <p>
           外の宇宙空間は一切見えず、完全な静寂が包み込んでいます。
           宇宙服を着たままポッドの中にいたボーマンは、外に異変がないかを確認し、
@@ -853,7 +938,7 @@
         </div>
 
         <div id="cons-b1-4-4" class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-9.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-9.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>4. 加速する「老い」と時間の超越</strong><br>
           この部屋では、地球の時間軸が完全に崩壊していました。
           ボーマンは「自分自身の未来の姿」を次々と目撃し、時間が数十年単位でジャンプしていきます。
@@ -863,18 +948,18 @@
 
         <div class="consideration-section work-section card-grid-3">
         <div class="card-item">
-          <img src="./2001/4-10.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-10.jpg" alt="" loading="lazy" decoding="async">
           <p>1. 宇宙服のボーマン：ポッドから降りて部屋を歩いていると、鏡の中に「少し年老いた自分」を見つけます。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/4-11.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-11.jpg" alt="" loading="lazy" decoding="async">
           <p>2. 中年のボーマン：ふと振り返ると、宇宙服を脱ぎ、シックなガウンを着て優雅に食事をしている
           「さらに老いた自分」が背を向けて座っています。</p>
         </div>
 
         <div class="card-item">
-          <img src="./2001/4-12.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-12.jpg" alt="" loading="lazy" decoding="async">
           <p>3. 老人のボーマン：食事をしていたボーマンがワイングラスを床に落として割ってしまいます。
           彼が破片を拾おうとベッドに目をやると、そこには今まさに寿命を迎えようとしている
           「ベッドに横たわる瀕死の老人となった自分」がいました。</p>
@@ -890,7 +975,7 @@
 
 
         <div id="cons-b1-4-5" class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-13.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-13.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>5. 「スター・チャイルド」への転生</strong><br>
           ベッドで仰向けになり、呼吸も絶え絶えの老人となったボーマン。
           彼が最後の力を振り絞り、目の前の空間を指差します。
@@ -898,7 +983,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-right">
-          <img src="./2001/4-14.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-14.jpg" alt="" loading="lazy" decoding="async">
           <p>
           その視線の先、ベッドの足元には、あの漆黒のモノリスが静かにそびえ立っていました。
           モノリスは、死を迎えるボーマンを迎えにきたのです。
@@ -907,7 +992,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-15.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-15.jpg" alt="" loading="lazy" decoding="async">
           <p>
           代わりにベッドの上に現れたのは、巨大な光の球体に包まれた「人間の胎児」でした。
           その目はしっかりと開かれ、純粋な知性を宿しています。
@@ -918,7 +1003,7 @@
 
 
         <div id="cons-b1-4-6" class="consideration-section work-section layout-img-right">
-          <img src="./2001/4-16.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-16.jpg" alt="" loading="lazy" decoding="async">
           <p><strong>6. 終幕：地球を見つめる存在</strong><br>
           リヒャルト・シュトラウスの『ツァラトゥストラはかく語りき』の壮大な音楽が再び鳴り響きます。
           画面は宇宙空間へと切り替わり、光り輝くスター・チャイルドは、青く美しい地球のすぐそばに浮かんでいます。
@@ -928,7 +1013,7 @@
         </div>
 
         <div class="consideration-section work-section layout-img-left">
-          <img src="./2001/4-17.jpg" alt="考察用の画像" loading="lazy" decoding="async">
+          <img src="./2001/4-17.jpg" alt="" loading="lazy" decoding="async">
           <p>
           スター・チャイルドは、かつての故郷である地球を静かに、そして深く見つめ返します。
           そこで映画は暗転し、幕を閉じます。
@@ -1181,84 +1266,98 @@
       <div id="work-e2" class="content-box"><h2>作品 E-2</h2><p>E-2作品コンテンツです。</p></div>
       <div id="work-f1" class="content-box"><h2>作品 F-1</h2><p>F-1作品コンテンツです。</p></div>
 
+      <!-- ページトップへ戻るボタン（フローティング） -->
+      <!-- 初期は opacity:0 で非表示。JSでスクロール量を監視し .is-active クラスを付与して表示する -->
+      <!-- JSが無効の場合は href="#" によりページ先頭へ遷移する（フォールバック） -->
       <a href="#" id="page-top-btn" class="page-top-btn" aria-label="上へ戻る">
-      <span class="arrow"></span>
-    </a>
+        <span class="arrow"></span><!-- CSSで上向き矢印（▲）を描画 -->
+      </a>
     </main>
-  </div>
+  </div><!-- /container -->
 
+  <!-- フッター -->
   <footer>
     <p>&copy; <a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
   </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const mainContent = document.querySelector('main');
-      const pageTopBtn = document.getElementById('page-top-btn');
+  // =================================================================
+  // JavaScriptによる拡張処理
+  // ─────────────────────────────────────────────────────────────────
+  // このスクリプトは「JSが有効な環境での追加機能」を担います。
+  // JSがオフの場合は、CSSのみで基本動作（ジャンル切り替え・アコーディオン・
+  // ページトップへのジャンプ）を維持。
+  // =================================================================
+  document.addEventListener('DOMContentLoaded', () => {
 
-      // 1. main要素のスクロールを監視して上へ戻るボタンを表示/非表示
-      mainContent.addEventListener('scroll', () => {
-        if (mainContent.scrollTop > 200) { // 200px以上スクロールしたら表示
-          pageTopBtn.classList.add('is-active');
-        } else {
-          pageTopBtn.classList.remove('is-active');
-        }
-      }); // ← 【修正点1】ここでスクロールの監視をしっかり閉じます！
+    // ── 参照する要素を変数に格納 ──────────────────────────────────
+    const mainContent   = document.querySelector('main');
+    const pageTopBtn    = document.getElementById('page-top-btn');
+    const menuToggle    = document.getElementById('menu-toggle');
+    const genreRadios   = document.querySelectorAll('.genre-radio');
+    const mobileGenreTitles = document.querySelectorAll('.mobile-genre-title');
 
-      // アコーディオンメニュー（サブリンク）の開閉処理
-      const hasSubLinks = document.querySelectorAll('.has-sub');
+    // .has-sub を持つ親リンクはメニューを閉じる処理の対象から除外する
+    // （サブリンクの開閉ボタンをクリックしてもメニューが閉じないようにするため）
+    const menuLinks = document.querySelectorAll('nav a:not(.has-sub)');
 
-      hasSubLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          // クリックされた親リンクのすぐ次にある要素（グループ）を取得
-          const subGroup = link.nextElementSibling;
-          
-          if (subGroup && subGroup.classList.contains('sub-link-group')) {
-            // is-open や is-active クラスを付け外しする
-            subGroup.classList.toggle('is-open');
-            link.classList.toggle('is-active');
-          }
-        });
-      });
 
-      // 2. ボタンクリック時にスムーズに最上部へスクロール
-      pageTopBtn.addEventListener('click', (e) => {
-        e.preventDefault(); // JSオン時はaタグのデフォルト挙動（#）をキャンセル
-        mainContent.scrollTo({
-          top: 0,
-          behavior: 'smooth' // なめらかなスクロール
-        });
-      });
+    // ── 1. 「上へ戻る」ボタンの表示制御 ──────────────────────────
+    // main 要素のスクロール位置を監視し、200px以上スクロールしたらボタンを表示する
+    mainContent.addEventListener('scroll', () => {
+      if (mainContent.scrollTop > 200) {
+        pageTopBtn.classList.add('is-active');    // 表示（opacity:1 + visible）
+      } else {
+        pageTopBtn.classList.remove('is-active'); // 非表示
+      }
+    });
 
-      const menuToggle = document.getElementById('menu-toggle');
-      
-      // 【修正点2】「.has-sub」を持つ親リンクはメニューを閉じる対象から除外します
-      const menuLinks = document.querySelectorAll('nav a:not(.has-sub)'); 
-      
-      const genreRadios = document.querySelectorAll('.genre-radio');
-      const mobileGenreTitles = document.querySelectorAll('.mobile-genre-title');
 
-      menuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          menuToggle.checked = false; 
-        });
-      });
-
-      genreRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-          window.location.hash = ''; 
-        });
-      });
-
-      mobileGenreTitles.forEach(title => {
-        title.addEventListener('click', () => {
-          setTimeout(() => {
-            title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 50);
-        });
+    // ── 2. 「上へ戻る」ボタンのスムーズスクロール ────────────────
+    // JSが有効な時は href="#" のページジャンプをキャンセルし、
+    // main 要素を滑らかに先頭までスクロールする
+    pageTopBtn.addEventListener('click', (e) => {
+      e.preventDefault(); // デフォルトのアンカー遷移をキャンセル
+      mainContent.scrollTo({
+        top: 0,
+        behavior: 'smooth' // スムーズスクロール
       });
     });
-  </script>
+
+
+    // ── 3. ナビリンクをクリックしたらモバイルメニューを閉じる ────
+    // スマホでリンクを選択した後、メニューを自動で閉じるための処理
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        menuToggle.checked = false; // チェックボックスを OFF にするとメニューが閉じる
+      });
+    });
+
+
+    // ── 4. ジャンル切り替え時にURLハッシュをリセット ──────────────
+    // ジャンルを切り替えた時、前のジャンルの :target が残ってレイアウトが
+    // 崩れるのを防ぐため、ラジオボタンが変わったらハッシュをクリアする
+    genreRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        window.location.hash = ''; // URL の # 以降を空にする
+      });
+    });
+
+
+    // ── 5. モバイルでジャンルタイトルをクリックした時のスクロール ─
+    // スマホでジャンルタイトルをタップした時、タイトル自体が見えるように
+    // 少し遅延を設けてからスクロール位置を調整する
+    mobileGenreTitles.forEach(title => {
+      title.addEventListener('click', () => {
+        // 50ms 待ってから scrollIntoView を実行（DOMの状態変化を待つため）
+        setTimeout(() => {
+          title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50);
+      });
+    });
+
+  }); // DOMContentLoaded ここまで
+</script>
 
 </body>
 </html>
