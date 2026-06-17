@@ -28,68 +28,69 @@
 
     /* リンクのスタイル */
     a {
-      color: #f39801;
-      font-size: 1.234rem; /* 14px 相当 */
+      color: #29a7e1;
+      font-size: 0.8rem; /* 12px 相当 */
       text-decoration: none;
       transition: color 0.2s ease; /* 滑らかな変化 */
     }
     a:hover {
-      color: #29a7e1;
+      color: #f39801;
     }
 
-.btn {
-  display: inline-block;
-  position: relative;
-  background: none;
-  color: #29a7e1;
-  overflow: hidden;
-  border: 0px solid #614f38;
-  padding: 0.6rem 1.0rem 0.6rem 2.4rem;
-  transition: all .3s;
-  border-radius: 4px;
-  z-index: 1; /* 基準のz-indexを設定 */
+    .btn {
+      display: inline-block;
+      position: relative;
+      background: none;
+      color: #29a7e1;
+      font-size: 1.2rem;
+      overflow: hidden;
+      border: 0px solid #614f38;
+      padding: 0.6rem 1.0rem 0.6rem 2.4rem;
+      transition: all .3s;
+      border-radius: 4px;
+      z-index: 1; /* 基準のz-indexを設定 */
 
-  &:before,
-  &:after {
-    content: "";
-    position: absolute;
-    display: block;
-    top: 50%;
-  }
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      display: block;
+      top: 50%;
+    }
 
-  &:before {
-    width: 7px;
-    height: 7px;
-    left: 0.4rem;
-    border-top: solid 2px #fff;
-    border-right: solid 2px #fff;
-    z-index: 3; /* 文字より前面、背景より前面 */
-    transform: translateY(-50%) rotate(45deg);
-    transition: all .3s;
-  }
+    &:before {
+      width: 7px;
+      height: 7px;
+      left: 0.4rem;
+      border-top: solid 2px #fff;
+      border-right: solid 2px #fff;
+      z-index: 3; /* 文字より前面、背景より前面 */
+      transform: translateY(-50%) rotate(45deg);
+      transition: all .3s;
+    }
 
   /* 初期状態の背景サークル */
-  &:after {
-    left: -2rem;
-    background: #f39801;
-    z-index: 2; /* 文字の後ろ、ボタン背景の前 */
-    width: 3.8rem;
-    height: 130%;
-    border-radius: 50%;
-    transform: translateY(-50%);
-    transition: all .4s ease-in-out; /* 変化を少し滑らかに */
-  }
+    &:after {
+      left: -2rem;
+      background: #f39801;
+      z-index: 2; /* 文字の後ろ、ボタン背景の前 */
+      width: 3.8rem;
+      height: 130%;
+      border-radius: 50%;
+      transform: translateY(-50%);
+      transition: all .4s ease-in-out; /* 変化を少し滑らかに */
+    }
 
   span {
-    position: relative; /* z-indexを有効にするため必要 */
-    transition: all .3s;
-    z-index: 3; /* 背景（z-index: 2）より上に配置 */
-  }
+      position: relative; /* z-indexを有効にするため必要 */
+      transition: all .3s;
+      z-index: 3; /* 背景（z-index: 2）より上に配置 */
+    }
 
   /* PCでのホバー時、およびスマホでのタップ時（is-active）の挙動 */
-  &:hover,
-  &.is-active {
-    color: #fff; /* 全体の文字色を白に */
+    &:hover,
+    &.is-active {
+      color: #fff; /* 全体の文字色を白に */
     
     span {
       color: #fff;
@@ -265,7 +266,8 @@
           <img src="icon5.png" alt="TEST PAGE 2">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./test2/StackLayout.html" class="btn"><span>TEST PAGE2</span></a></div>
+          <div class="menu-title"><a href="./test2/StackLayout.html" class="btn"><span>TEST PAGE2 CyberBlue</span></a></div>
+          <div class="menu-title"><a href="./test2/StackLayoutNaturalGarden.html">TEST PAGE2 NaturalColor</a></div>
           <p>作成中テストページ2</p>
         </div>
       </li>
