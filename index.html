@@ -39,7 +39,6 @@
 
 .btn {
   display: inline-block;
-  border: 2px solid;
   position: relative;
   background: none;
   color: #29a7e1;
@@ -48,7 +47,7 @@
   padding: 0.6rem 1.0rem 0.6rem 2.4rem;
   transition: all .3s;
   border-radius: 4px;
-
+  z-index: 1; /* 基準のz-indexを設定 */
 
   &:before,
   &:after {
@@ -64,36 +63,42 @@
     left: 0.4rem;
     border-top: solid 2px #fff;
     border-right: solid 2px #fff;
-    z-index: 2;
+    z-index: 3; /* 文字より前面、背景より前面 */
     transform: translateY(-50%) rotate(45deg);
     transition: all .3s;
   }
 
+  /* 初期状態の背景サークル */
   &:after {
     left: -2rem;
     background: #f39801;
-    z-index: 1;
+    z-index: 2; /* 文字の後ろ、ボタン背景の前 */
     width: 3.8rem;
     height: 130%;
     border-radius: 50%;
     transform: translateY(-50%);
-    transition: all .5s;
+    transition: all .4s ease-in-out; /* 変化を少し滑らかに */
   }
 
   span {
+    position: relative; /* z-indexを有効にするため必要 */
     transition: all .3s;
-    z-index: 3;
+    z-index: 3; /* 背景（z-index: 2）より上に配置 */
   }
 
-  &:hover {
+  /* PCでのホバー時、およびスマホでのタップ時（is-active）の挙動 */
+  &:hover,
+  &.is-active {
+    color: #fff; /* 全体の文字色を白に */
+    
     span {
-      position: relative;
       color: #fff;
     }
 
     &:after {
-      right: 0;
-      width: 120%;
+      left: 0;
+      width: 100%; /* 横幅いっぱいに広げる */
+      height: 100%;
       border-radius: 0;
     }
   }
@@ -283,6 +288,24 @@
   </footer>
 
 </div>
-
+<script>
+  document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+      // 一度リンクの即時遷移をキャンセル
+      e.preventDefault();
+      
+      const targetUrl = this.getAttribute('href');
+      
+      // クラスを付与してCSSアニメーションをトリガーする
+      this.classList.add('is-active');
+      
+      // アニメーションが完了する時間（400ミリ秒）待ってからページ遷移
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 400); 
+    });
+  });
+</script>
+</body>
 </body>
 </html>
