@@ -221,6 +221,16 @@ main {
   background: transparent;
 }
 
+main a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+main a:hover {
+  color: #f39801;
+  text-decoration: none;
+}
+
 /* h2 見出しスタイル（左にアクセントライン付き） */
 main h2 {
   font-size: 22px;
