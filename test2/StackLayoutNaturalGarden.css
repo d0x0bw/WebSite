@@ -1,0 +1,734 @@
+
+/* =================================================================
+   StackLayout.css
+   ─────────────────────────────────────────────────────────────────
+   【このファイルの構成】
+   1.  全体の基本設定（リセット・body・スクロールバー）
+   2.  ヘッダー（上部ジャンル選択エリア）
+   3.  メインレイアウト（サイドナビ＋本文エリア）
+   4.  フッター
+   5.  作品コンテンツのレイアウト（画像配置・カードグリッド等）
+   6.  サイドメニュー：サブリンク（階層ナビ）
+   7.  アコーディオン（CSSのみ・JS不要で動作）
+   8.  コンテンツ表示切り替え（:target を使った表示制御）
+   9.  上へ戻るボタン
+   10. レスポンシブ対応（スマホ：768px以下）
+   ================================================================= */
+
+
+/* =================================================================
+   1. 全体の基本設定
+   ================================================================= */
+
+/* --- リセット：すべての要素でボックスサイズを統一し、余白をゼロに --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- body：ページ全体を縦方向の Flexbox にして「ヘッダー・中身・フッター」を縦積みにする --- */
+body {
+  font-family: 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', 'Helvetica Neue', Arial, sans-serif; 
+  height: 100vh;
+  height: 100dvh;         /* モバイルでアドレスバーが出た場合も正確な高さにする（dvh） */
+  display: flex;
+  flex-direction: column; /* header / .container / footer を縦に並べる */
+  overflow: hidden;       /* body 自体はスクロールさせず、内部の main をスクロールさせる */
+  background: #fcfaf2;     /* 温かみのあるアイボリー（生成り色） */
+  color: #3a352a;          /* 柔らかなダークブラウン（黒を避けてマイルドに） */
+}
+
+/* --- 状態管理用のラジオ・チェックボックスは画面に表示しない --- */
+/* これらは CSS の :checked セレクターで UI を制御するための「状態スイッチ」として使う */
+#menu-toggle,
+.genre-radio {
+  display: none;
+}
+
+
+/* --- スクロールバーのデザイン（Firefox 用） --- */
+html {
+  scrollbar-width: thin;             /* スクロールバーを細くする */
+  scrollbar-color: #cbd5e1 #f1f5f9; 
+}
+
+/* --- スクロールバーのデザイン（Chrome・Safari・Edge 用） --- */
+::-webkit-scrollbar {
+  width: 8px;  /* 縦スクロールバーの太さ */
+  height: 8px; /* 横スクロールバーの太さ */
+}
+::-webkit-scrollbar-track {
+  background: #161920: #f4f1e6; /* スクロールバーの背景 */
+}
+::-webkit-scrollbar-thumb {
+  background: #d1c9b3; /* バー（つまみ）の色 */
+  border-radius: 4px;  /* 角丸でスタイリッシュに */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b5ac94; /* ホバー時に少し明るくして操作しやすく */
+}
+
+
+/* =================================================================
+   2. ヘッダー（上部のジャンル選択エリア）
+   ================================================================= */
+
+header {
+  background: #f5f2e9; /* 少し濃いめのナチュラルベージュ */
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between; /* ジャンルボタン群とハンバーガーボタンを左右に配置 */
+  align-items: center;
+  z-index: 100;
+  flex-shrink: 0;                 /* body の flex の中で高さが縮まないようにする */
+  border-bottom: 2px dashed #e3dec9;
+}
+
+/* ジャンルボタンを横並びで並べるラッパー。はみ出した場合は横スクロール可能にする */
+.genre-links {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch; /* iOS でモメンタムスクロールを有効化 */
+  flex: 1;
+}
+
+/* ジャンルボタン（label 要素）の基本スタイル */
+.genre-links label {
+  display: inline-block;
+  color: #6b6353;
+  text-decoration: none;
+  padding: 8px 18px;
+  margin-right: 12px;
+  background: #ffffff;
+  border: 1px solid #e3dec9;
+  border-radius: 20px; /* コロンとしたカプセル型の角丸 */
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+.genre-links label:hover {
+  background: #d1c8a3;
+  color: #3a352a;
+  border-color: #baa685;
+}
+
+/* 選択中のジャンルボタン：CSS の :checked 兄弟セレクター（~）で対応ラベルを光らせる */
+/* radio-home が checked → label[for="radio-home"] にグラデーションを適用、のように機能する */
+#radio-home:checked   ~ header .genre-links label[for="radio-home"],
+#radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
+#radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
+#radio-genreC:checked ~ header .genre-links label[for="radio-genreC"],
+#radio-genreD:checked ~ header .genre-links label[for="radio-genreD"],
+#radio-genreE:checked ~ header .genre-links label[for="radio-genreE"],
+#radio-genreF:checked ~ header .genre-links label[for="radio-genreF"] {
+  background: #607d6b; /* 植物を連想させる優しいグリーン */
+  color: #ffffff;
+  border-color: #607d6b;
+  box-shadow: 0 3px 8px rgba(96, 125, 107, 0.3);
+}
+
+/* ハンバーガーボタン本体（PCでは非表示。スマホ用） */
+.burger-btn {
+  display: none;        /* PC では非表示。スマホ用メディアクエリで display:flex にする */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 26px;
+  height: 18px;
+  cursor: pointer;
+  margin-left: 15px;
+  z-index: 110;
+}
+/* ハンバーガーの3本線 */
+.burger-btn span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #94a3b8;
+  border-radius: 2px;
+  transition: all 0.3s ease; /* 開閉時のアニメーション（スマホ用メディアクエリで使用） */
+}
+
+
+/* =================================================================
+   3. メインレイアウト（サイドナビ＋コンテンツの横並びエリア）
+   ================================================================= */
+
+/* .container はヘッダーとフッターの間の「中身全体」を占める Flex コンテナ */
+.container {
+  display: flex;
+  flex: 1;           /* body の残りの高さをすべて使う */
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── サイドナビゲーション ─────────────────────────────────────── */
+nav {
+  width: 320px;
+  background: #fcfaf2; /* 本文と同じアイボリー */
+  border-right: 1px solid #ebdccb; /* ほんのりピンクベージュの細線 */
+  overflow-y: auto; /* ナビが長くなった場合のみスクロール可能にする */
+}
+
+/* 各ジャンルのメニューリストは初期状態で非表示 */
+/* CSS の :checked セレクターで対応ジャンルだけを表示する */
+.menu-list        { display: none; }
+.mobile-genre-title { display: none; } /* スマホ用タイトルも初期は非表示 */
+
+/* 選択中のジャンルに対応するメニューリストだけを表示 */
+#radio-genreA:checked ~ .container nav .list-genreA,
+#radio-genreB:checked ~ .container nav .list-genreB,
+#radio-genreC:checked ~ .container nav .list-genreC,
+#radio-genreD:checked ~ .container nav .list-genreD,
+#radio-genreE:checked ~ .container nav .list-genreE,
+#radio-genreF:checked ~ .container nav .list-genreF {
+  display: block;
+}
+
+/* HOME 選択時はサイドナビ自体を非表示にする（ホーム画面にメニューは不要） */
+#radio-home:checked ~ .container nav       { display: none; }
+#radio-home:checked ~ header .burger-btn   { display: none; }
+/* ↑ HOME 時はハンバーガーボタンも不要なので非表示 */
+
+/* HOME 選択時、すべての .content-box を非表示にして #default-content だけを表示 */
+#radio-home:checked ~ .container main .content-box { display: none; }
+#radio-home:checked ~ .container main #default-content { display: block; }
+
+/* ナビリンクの基本スタイル */
+nav a {
+  display: block;
+  color: #6b6353;
+  padding: 14px 24px;
+  text-decoration: none;
+  border-bottom: 1px solid #ebdccb;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+nav a:hover {
+  background: #607d6b;
+  color: #ffffff;
+  padding-left: 28px; /* ホバーで左にスライドするエフェクト */
+}
+
+/* ── メインコンテンツエリア ──────────────────────────────────── */
+main {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;  /* コンテンツが長い場合はここだけスクロールする */
+  position: relative;
+  z-index: 1;
+  color: #6b6353;    /* 完全な白ではなくオフホワイト */
+  background: transparent;
+}
+
+/* h2 見出しスタイル（左にアクセントライン付き） */
+main h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #6b6353;
+  border-left: 4px solid #0076ff; /* 左側にアクセントライン */
+  padding-left: 12px;
+  margin-bottom: 25px;
+}
+
+/* .content-box：各作品ページの表示単位 */
+/* 初期は display:none。URLハッシュが一致した時だけ表示される（下記 :target を参照） */
+.content-box {
+  display: none;
+  position: absolute;
+  top: 30px; left: 30px; right: 30px;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* 表示時にふわっと浮き上がる */
+  padding-bottom: 40px;
+}
+
+/* フェードインアニメーション（.content-box が表示された時に適用） */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ホーム画面（ジャンル未選択時）はデフォルトで表示 */
+#default-content { display: block; }
+
+
+/* =================================================================
+   4. フッター
+   ================================================================= */
+
+footer {
+  background: #f5f2e9;
+  color: #94a3b8;
+  padding: 14px 20px;
+  text-align: center;
+  font-size: 13px;
+  flex-shrink: 0; /* body の flex の中で高さが縮まないように固定 */
+  z-index: 100;
+  border-top: 1px solid #e3dec9;
+}
+footer a {
+  color: #6b6353;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+footer a:hover { color: #00d2ff; }
+
+/* メニューオーバーレイ（スマホでメニューが開いた時の背景幕）PC では非表示 */
+.menu-overlay { display: none; }
+
+
+/* =================================================================
+   5. 作品コンテンツのレイアウト
+   ================================================================= */
+
+/* 各セクションの下余白 */
+.work-section { margin-bottom: 40px; }
+
+/* セクション内の画像共通スタイル */
+.work-section img {
+  border-radius: 8px;
+  object-fit: cover;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid #222733;
+}
+
+/* セクション内の本文 */
+.work-section p {
+  line-height: 1.7;
+  color: #6b6353;
+  font-size: 15px;
+}
+
+/* strong（太字）テキストを強調 */
+.work-section strong {
+  color: #6b6353;
+}
+
+/* レイアウト：画像を横幅いっぱいに表示（縦積み） */
+.layout-wide img { max-height: 1080px; margin-bottom: 20px; }
+
+/* レイアウト：左に画像、右にテキスト */
+.layout-img-left               { display: flex; gap: 24px; align-items: flex-start; }
+.layout-img-left img           { width: 50%; max-width: 960px; }
+.layout-img-left p             { flex: 1; }
+
+/* レイアウト：右に画像、左にテキスト */
+.layout-img-right              { display: flex; flex-direction: row-reverse; gap: 24px; align-items: flex-start; }
+.layout-img-right img          { width: 50%; max-width: 960px; }
+.layout-img-right p            { flex: 1; }
+
+/* 区切り線（dashed ラインでサイバー感を演出） */
+hr {
+  margin: 35px 0;
+  border: none;
+  border-top: 1px dashed #222733 !important;
+}
+
+/* ── 3カラム カードグリッドレイアウト ─────────────────────────── */
+.card-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 均等に3列 */
+  gap: 20px;
+  align-items: stretch; /* 全カードの高さを揃える */
+}
+
+.card-item {
+  background: #ffffff;
+  border: 1px solid #ebdccb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* カード内の画像：高さを固定して3枚の見た目を揃える */
+.card-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  box-shadow: none; /* .work-section img のシャドウをリセット */
+  border: none;
+}
+
+/* カード内のテキスト：テキスト量が違ってもカード下端が揃うように flex:1 */
+.card-item p {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6b6353;
+}
+
+/* スマホ：カードを1列縦積みに変更 */
+@media (max-width: 768px) {
+  .card-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .card-item img {
+    height: auto;
+    max-height: 250px;
+  }
+}
+
+
+/* =================================================================
+   6. サイドメニュー：サブリンク（階層の深いナビゲーション）
+   ================================================================= */
+
+/* 親リンクよりも深くインデントして階層を視覚的に表現 */
+nav a.sub-link {
+  padding-left: 30px;
+  font-size: 13px;
+  color: #64748b;
+  border-bottom: none; /* サブリンク間の区切り線は省略してすっきりさせる */
+}
+nav a.sub-link:hover {
+  background: #d1c8a3;
+  padding-left: 44px;
+  color: #6b6353;
+}
+
+/* スマホ：インデントを深くして階層をさらに明確に */
+@media (max-width: 768px) {
+  .menu-list a.sub-link {
+    padding-left: 50px;
+  }
+}
+
+
+/* =================================================================
+   7. アコーディオン（CSSのみ・JSオフでも動作する開閉メニュー）
+   ─────────────────────────────────────────────────────────────────
+   仕組み：
+   .nav-item-wrap の中に .sub-toggle（非表示チェックボックス）を置く。
+   .toggle-icon（▼ラベル）をクリックすると checkbox が ON/OFF になり、
+   CSS の :checked ~ .sub-link-group で子リンクが表示/非表示を切り替える。
+   ================================================================= */
+
+/* グループ全体を相対配置（▼ボタンを右端に絶対配置するため） */
+.nav-item-wrap {
+  position: relative;
+}
+
+/* メインリンク（作品タイトル）：右に▼ボタン分の余白を確保 */
+.nav-item-wrap .main-link {
+  padding-right: 50px;
+}
+
+/* アコーディオン開閉用のチェックボックス：画面には表示しない */
+.sub-toggle {
+  display: none;
+}
+
+/* ▼アイコン（クリック可能なラベル）：メインリンクの右端に絶対配置 */
+.toggle-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 45px;
+  height: 49px; /* a タグの高さに合わせて調整 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid #ebdccb; /* リンクとの視覚的な区切り線 */
+  transition: background 0.2s ease;
+}
+.toggle-icon:hover {
+  background: #4a6153;
+}
+
+/* ▼アイコン本体（CSS で三角形を描画） */
+.toggle-icon::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: translateY(-2px) rotate(45deg); /* 通常時：下向き▼ */
+  transition: all 0.3s ease;
+}
+
+/* アコーディオンが開いた時：▼が▲に回転し、ブルーに光る */
+.sub-toggle:checked ~ .toggle-icon::after {
+  transform: translateY(2px) rotate(225deg);
+  border-color: #00d2ff;
+}
+
+/* サブリンクグループは初期状態で非表示 */
+.sub-link-group {
+  display: none;
+}
+
+/* .sub-toggle が ON（:checked）の時だけサブリンクグループを表示 */
+.sub-toggle:checked ~ .sub-link-group {
+  display: block;
+}
+
+
+/* =================================================================
+   8. コンテンツ表示切り替え（:target と :has を使った仕組み）
+   ─────────────────────────────────────────────────────────────────
+   仕組み：
+   ・URLのハッシュ（例：#work1）が変わると、CSS の :target が一致する
+     要素を特定し、その .content-box だけを表示する。
+   ・考察セクションなど .content-box の「子孫」が :target になった場合も
+     :has(:target) で親 .content-box を表示できるようにしている。
+   ================================================================= */
+
+/* :target（直接）または子孫が :target の場合も .content-box を表示 */
+.content-box:target,
+.content-box:has(:target) {
+  display: block;
+}
+
+/* いずれかの :target がある場合は、ホーム画面（#default-content）を非表示 */
+main:has(:target) #default-content {
+  display: none;
+}
+
+/* 考察セクションへ直接リンクした時、ヘッダーにコンテンツが隠れないように
+   スクロールのオフセットを確保する */
+.consideration-section {
+  scroll-margin-top: 80px;
+}
+
+
+/* =================================================================
+   9. 上へ戻るボタン（フローティング・サイバーブルー）
+   ─────────────────────────────────────────────────────────────────
+   ・初期は opacity:0 + visibility:hidden で非表示。
+   ・JS がスクロールを監視し、200px 以上で .is-active クラスを付与 → 表示。
+   ・JS がオフの場合は href="#" によりページ先頭へジャンプするだけ（フォールバック）。
+   ================================================================= */
+
+.page-top-btn {
+  position: fixed;
+  right: 30px;
+  bottom: 60px;    /* フッター（約45px）に被らない位置 */
+  width: 48px;
+  height: 48px;
+  background: #607d6b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(96, 125, 107, 0.3);
+  z-index: 99;
+  cursor: pointer;
+  opacity: 0;            /* 初期は非表示 */
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+/* JS から .is-active クラスが付いた時に表示 */
+.page-top-btn.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* 非表示時は少し下にずらしておき、表示時にふわっと浮き上がるエフェクト */
+.page-top-btn:not(.is-active) {
+  transform: translateY(15px);
+}
+
+/* ホバー時に発光感を強化し、わずかに拡大 */
+.page-top-btn:hover {
+  background: #4a6153;
+  box-shadow: 0 0 22px rgba(74, 97, 83, 0.4);
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* 矢印（↑）の図形（CSS で描画） */
+.page-top-btn .arrow {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+  transform: translateY(2px) rotate(45deg); /* 上向き矢印 */
+}
+
+/* スマホ：サイズを少し小さく・位置を調整 */
+@media (max-width: 768px) {
+  .page-top-btn {
+    right: 20px;
+    bottom: 70px;
+    width: 44px;
+    height: 44px;
+  }
+  .page-top-btn .arrow {
+    width: 10px;
+    height: 10px;
+    border-top: 2.5px solid #ffffff;
+    border-left: 2.5px solid #ffffff;
+  }
+}
+
+
+/* =================================================================
+   10. レスポンシブ対応（スマホ：768px以下）
+   ─────────────────────────────────────────────────────────────────
+   スマホでは以下のように挙動が変わります：
+   ・ヘッダーのジャンルボタン → 非表示
+   ・ハンバーガーボタン → 表示
+   ・サイドナビ → 画面外（左）に隠れ、メニューON時にスライドイン
+   ・ヘッダー・フッター → 半透明で画面に固定（ガラスエフェクト）
+   ・メニューリストのジャンル見出し → 表示（アコーディオン状に展開）
+   ================================================================= */
+
+@media (max-width: 768px) {
+
+  /* PCのジャンル選択ボタン群は不要なので非表示 */
+  .genre-links { display: none; }
+
+  /* ── ヘッダー：透過ガラス風に変更（画面上部に固定） ── */
+  header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: rgba(214, 205, 176, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  /* ── フッター：透過ガラス風に変更（画面下部に固定） ── */
+  footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(245, 242, 233, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  /* main：ヘッダーとフッターの固定領域に被らないよう上下に余白を確保 */
+  main {
+    padding: 20px;
+    padding-top: 75px;   /* ヘッダーの高さ分 */
+    padding-bottom: 75px; /* フッターの高さ分 */
+  }
+
+  /* スマホでは .content-box を position:static に戻してフローに乗せる */
+  .content-box {
+    top: 0; left: 0; right: 0;
+  }
+  main h2 { font-size: 20px; }
+
+  /* ハンバーガーボタンを表示（PC では display:none） */
+  .burger-btn {
+    display: flex;
+    margin-left: auto;
+  }
+  /* HOME 選択時もスマホではハンバーガーボタンを表示 */
+  #radio-home:checked ~ header .burger-btn { display: flex; }
+
+  /* ── サイドナビ：画面外左にスライドして待機 ── */
+  nav {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -270px;         /* 初期は画面外（左）に隠す */
+    z-index: 95;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* スライドアニメーション */
+    width: 270px;
+    background:;
+    padding-top: 60px;
+    padding-bottom: 60px;
+    border-right: 1px solid #222733;
+  }
+
+  /* ── オーバーレイ（ナビ背景の暗幕）── */
+  .menu-overlay {
+    display: block;
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(5, 6, 8, 0.6);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none; /* 非表示時はクリックを通過させる */
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+
+  /* #menu-toggle が ON の時：ナビを画面内にスライドイン＋オーバーレイを表示 */
+  #menu-toggle:checked ~ .container nav          { left: 0; }
+  #menu-toggle:checked ~ .container .menu-overlay { opacity: 1; pointer-events: auto; }
+
+  /* ハンバーガーアニメーション：チェック時に「☰→×」に変形し青く光る */
+  #menu-toggle:checked ~ header .burger-btn span              { background-color: #00d2ff; }
+  #menu-toggle:checked ~ header .burger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  #menu-toggle:checked ~ header .burger-btn span:nth-child(2) { opacity: 0; }
+  #menu-toggle:checked ~ header .burger-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* スマホではすべてのジャンルメニューを強制表示（アコーディオン風に全展開） */
+  .menu-list { display: block !important; }
+
+  /* HOME 選択時もスマホでは nav を表示（ハンバーガーで開けるように） */
+  #radio-home:checked ~ .container nav { display: block; }
+
+  /* ジャンル見出し（.mobile-genre-title）をスマホで表示 */
+  .mobile-genre-title {
+    display: block;
+    color: #6b6353;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid #e3dec9;
+    border-top: 1px solid #e3dec9;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  /* HOME ボタンはブルーグラデーションで目立たせる */
+  nav .mobile-home-btn {
+    background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%);
+    color: #fff;
+    border: none;
+  }
+
+  /* 未選択ジャンルのリンクは非表示（選択中ジャンルだけ表示） */
+  .menu-list a {
+    display: none;
+    padding-left: 35px;
+    font-size: 14px;
+    color: #6b6353;
+  }
+
+  /* 未選択ジャンルのアコーディオン▼ボタンも非表示 */
+  .menu-list .toggle-icon {
+    display: none;
+  }
+
+  /* 選択中のジャンルのリンク・▼ボタンは表示 */
+  #radio-genreA:checked ~ .container nav .list-genreA a,
+  #radio-genreB:checked ~ .container nav .list-genreB a,
+  #radio-genreC:checked ~ .container nav .list-genreC a,
+  #radio-genreD:checked ~ .container nav .list-genreD a,
+  #radio-genreE:checked ~ .container nav .list-genreE a,
+  #radio-genreF:checked ~ .container nav .list-genreF a { display: block; }
+
+  #radio-genreA:checked ~ .container nav .list-genreA .toggle-icon,
+  #radio-genreB:checked ~ .container nav .list-genreB .toggle-icon,
+  #radio-genreC:checked ~ .container nav .list-genreC .toggle-icon,
+  #radio-genreD:checked ~ .container nav .list-genreD .toggle-icon,
+  #radio-genreE:checked ~ .container nav .list-genreE .toggle-icon,
+  #radio-genreF:checked ~ .container nav .list-genreF .toggle-icon { display: flex; }
+
+  /* スマホでは .content-box を position:static に戻してフローに乗せる */
+  .content-box { position: static; }
+
+  /* 画像左右レイアウトはスマホで縦積みに変更 */
+  .layout-img-left,
+  .layout-img-right            { flex-direction: column; gap: 15px; }
+  .layout-img-left img,
+  .layout-img-right img        { width: 100%; max-width: 100%; margin-bottom: 5px; }
+
+} /* @media (max-width: 768px) ここまで */
