@@ -289,20 +289,40 @@
 
 </div>
 <script>
+  // 1. ボタン（.btn）のクリックイベントを設定
   document.querySelectorAll('.btn').forEach(button => {
     button.addEventListener('click', function(e) {
-      // 一度リンクの即時遷移をキャンセル
       e.preventDefault();
-      
       const targetUrl = this.getAttribute('href');
       
-      // クラスを付与してCSSアニメーションをトリガーする
       this.classList.add('is-active');
       
-      // アニメーションが完了する時間（400ミリ秒）待ってからページ遷移
       setTimeout(() => {
         window.location.href = targetUrl;
       }, 400); 
+    });
+  });
+
+  // 2. 【追加】画像（.menu-item img）のクリックイベントを設定
+  document.querySelectorAll('.menu-item img').forEach(img => {
+    img.addEventListener('click', function(e) {
+      // 一度画像のリンク遷移をキャンセル
+      e.preventDefault();
+      
+      // 同じリスト（.menu-item）の中にあるボタン（.btn）を探す
+      const menuItem = this.closest('.menu-item');
+      const targetButton = menuItem.querySelector('.btn');
+      const targetUrl = targetButton.getAttribute('href');
+      
+      if (targetButton) {
+        // ボタンにクラスを付与して、文字の背景アニメーションを発火させる
+        targetButton.classList.add('is-active');
+      }
+      
+      // アニメーション完了後にページ遷移
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 400);
     });
   });
 </script>
