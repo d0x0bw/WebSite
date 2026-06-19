@@ -334,12 +334,12 @@ hr {
   border-top: 1px dashed #222733 !important;
 }
 
-/* ── 3カラム カードグリッドレイアウト ─────────────────────────── */
-.card-grid-3 {
+/* ── 汎用カードグリッドレイアウト ─────────────────────────── */
+/* 1. 【基本設定】一番広い画面（横幅1401px以上）では「5列」 */
+.card-grid-flexible {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 均等に3列 */
-  gap: 20px;
-  align-items: stretch; /* 全カードの高さを揃える */
+grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
 }
 
 .card-item {
@@ -353,7 +353,7 @@ hr {
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* カード内の画像：高さを固定して3枚の見た目を揃える */
+/* カード内の画像：高さを固定して見た目を揃える */
 .card-item img {
   width: 100%;
   height: 180px;
@@ -370,18 +370,6 @@ hr {
   font-size: 14px;
   line-height: 1.6;
   color: #cbd5e1;
-}
-
-/* スマホ：カードを1列縦積みに変更 */
-@media (max-width: 768px) {
-  .card-grid-3 {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .card-item img {
-    height: auto;
-    max-height: 250px;
-  }
 }
 
 
