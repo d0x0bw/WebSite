@@ -334,12 +334,15 @@ hr {
   border-top: 1px dashed #222733 !important;
 }
 
-/* ── 汎用カードグリッドレイアウト ─────────────────────────── */
-/* 1. 【基本設定】一番広い画面（横幅1401px以上）では「5列」 */
+/* ── カードグリッドレイアウト ─────────────────────────── */
+/* ── レスポンシブ対応・段階的カードグリッド ────────────────────── */
 .card-grid-flexible {
-  display: grid;
+display: grid;
+gap: 20px;
+align-items: stretch; /* カードの高さを揃える */
+/* 1マスの最小幅を「180px」、最大幅を「1fr(均等)」として、入るだけの列数を自動計算 */
+/* ただし、最大でも5列までに制限する */
 grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
 }
 
 .card-item {
@@ -727,5 +730,18 @@ main:has(:target) #default-content {
   .layout-img-right            { flex-direction: column; gap: 15px; }
   .layout-img-left img,
   .layout-img-right img        { width: 100%; max-width: 100%; margin-bottom: 5px; }
+
+
+/* ── カードグリッド追加設定 ────────────────────── */
+  /* スマートフォンでは強制的に「1列(縦積み)」にする */
+  .card-grid-flexible {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .card-item img {
+    height: auto !important;
+    max-height: 360px !important;
+  }
 
 } /* @media (max-width: 768px) ここまで */
