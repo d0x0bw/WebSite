@@ -54,8 +54,8 @@ html {
 
 /* --- スクロールバーのデザイン（Chrome・Safari・Edge 用） --- */
 ::-webkit-scrollbar {
-  width: 8px;  /* 縦スクロールバーの太さ */
-  height: 8px; /* 横スクロールバーの太さ */
+  width: 2px;  /* 縦スクロールバーの太さ */
+  height: 2px; /* 横スクロールバーの太さ */
 }
 ::-webkit-scrollbar-track {
   background: #161920; /* トラック（背景部分）の色 */
