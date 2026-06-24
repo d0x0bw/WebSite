@@ -266,6 +266,11 @@
     }
 
 
+    /* バーガーメニュー用チェックボックスを常に非表示（全画面サイズ共通） */
+    .burger-checkbox {
+        display: none;
+    }
+
     /* ==========================================================================
        4. 固有機能パーツ（改良版・CSSのみのLightboxギャラリー）
        ========================================================================== */
@@ -475,41 +480,99 @@
             display: block;
         }
 
-        /* スマホ用三本線メニューボタンの土台（丸い白ボタン） */
-        .menu-btn {
+        /* ===============================================
+           ハンバーガーメニュー5本線（具材）の共通スタイル
+           =============================================== */
+        /* ボタン全体のスタイル */
+        .burger-menu {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            height: 44px;
-            width: 44px;
-            justify-content: center;
-            align-items: center;
+            top: 18px;
+            right: 16px;
             z-index: 99;
-            background: #fff;
+            background: none;
             border-radius: 50%;
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 44px;
+            height: 44px;
+            border: none;
             cursor: pointer;
+            padding: 0;
         }
 
-        /* ハンバーガーメニューの三本線をCSSで描画 */
-        .menu-btn span, .menu-btn span::before, .menu-btn span::after {
-            content: '';
+        /* 隠しチェックボックスは見えないようにする */
+        .burger-checkbox {
+            display: none;
+        }
+
+        /* 5本線の共通設定 */
+        .burger-menu span {
             display: block;
-            height: 3px;
-            width: 22px;
-            border-radius: 3px;
-            background: #595037;
             position: absolute;
-            transition: all 0.3s ease;
+            width: 36px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .menu-btn span::before { bottom: 8px; }
-        .menu-btn span::after { top: 8px; }
 
-        /* ボタンがチェック（オープン状態）された時の三本線⇒×印へのトランスフォーム */
-        #menu-btn-check:checked ~ .menu-btn span { background: rgba(255, 255, 255, 0); }
-        #menu-btn-check:checked ~ .menu-btn span::before { bottom: 0; transform: rotate(45deg); }
-        #menu-btn-check:checked ~ .menu-btn span::after { top: 0; transform: rotate(-45deg); }
+        /* ==========================================
+           通常時の配置（ハンバーガーの形を再現）
+           ========================================== */
+        /* 🍔 1本目：上のバンズ */
+        .burger-menu span:nth-child(1) {
+            height: 15px;
+            border-radius: 12px 12px 1px 3px;
+            background-color: #D28546;
+            top: 3px;
+        }
+        /* 🥬 2本目：レタス（緑） */
+        .burger-menu span:nth-child(2) { height: 3px; border-radius: 2px; background-color: #2ECC71; top: 22px; transform: translateY(-5px); width: 34px; }
+        /* 🍅 3本目：トマト（赤） */
+        .burger-menu span:nth-child(3) { height: 4px; border-radius: 2px; background-color: #E74C3C; top: 20px; width: 32px; }
+        /* 🥩 4本目：パティ（茶） */
+        .burger-menu span:nth-child(4) { height: 4px; border-radius: 2px; background-color: #5C3A21; top: 19px; transform: translateY(5px); width: 32px; }
+        /* 🍔 5本目：下のバンズ */
+        .burger-menu span:nth-child(5) {
+            height: 8px;
+            border-radius: 3px 3px 6px 6px;
+            background-color: #D28546;
+            bottom: 8px;
+        }
+
+        /* ==========================================
+           チェックが入ったときの動き
+           ========================================== */
+        /* 中身の具材（2, 3, 4番）は完全に消去 */
+        .burger-checkbox:checked + .burger-menu span:nth-child(2),
+        .burger-checkbox:checked + .burger-menu span:nth-child(3),
+        .burger-checkbox:checked + .burger-menu span:nth-child(4) {
+            opacity: 0 !important;
+            width: 0 !important;
+            transform: scale(0) !important;
+        }
+        /* 1本目：上のバンズ → パックマン上半分 → ×の1本目 */
+        .burger-checkbox:checked + .burger-menu span:nth-child(1) {
+            background-color: #FFD700;
+            animation: final-pacman-top 1.4s forwards;
+        }
+        /* 5本目：下のバンズ → パックマン下半分 → ×の2本目 */
+        .burger-checkbox:checked + .burger-menu span:nth-child(5) {
+            background-color: #FFD700;
+            animation: final-pacman-bottom 1.4s forwards;
+        }
+        /* --- 1本目（上）のアニメーション --- */
+        @keyframes final-pacman-top {
+            0%       { top: 6px;  height: 12px; border-radius: 12px 12px 3px 3px; transform: rotate(0deg); }
+            20%, 55% { top: 4px;  height: 18px; border-radius: 18px 18px 0 0;     transform: rotate(-25deg); }
+            75%, 100%{ top: 19px; height: 6px;  border-radius: 3px;               transform: rotate(135deg); }
+        }
+        /* --- 5本目（下）のアニメーション --- */
+        @keyframes final-pacman-bottom {
+            0%       { bottom: 6px;  height: 8px;  border-radius: 3px 3px 6px 6px; transform: rotate(0deg); }
+            20%, 55% { bottom: 4px;  height: 18px; border-radius: 0 0 18px 18px;   transform: rotate(25deg); }
+            75%, 100%{ bottom: 19px; height: 6px;  border-radius: 3px;             transform: rotate(45deg); }
+        }
         
         #menu-btn-check:checked ~ nav { left: 0; }
 
@@ -528,7 +591,7 @@
             font-size: 16px;
         }
 
-        .menu-btn {
+        .burger-menu {
             display: none;
         }
 
@@ -581,8 +644,14 @@
       <a href="index.html"><img src="images/logo.png" alt="Sherry's Garden"></a>
     </h1>
 
-    <input type="checkbox" id="menu-btn-check" style="display: none;">
-    <label for="menu-btn-check" class="menu-btn"><span></span></label>
+    <input type="checkbox" id="menu-btn-check" class="burger-checkbox">
+    <label for="menu-btn-check" class="burger-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
 
     <nav>
       <ul id="menubar">
