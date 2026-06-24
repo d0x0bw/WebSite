@@ -73,13 +73,35 @@
         display: flow-root;        /* 上部の隙間（マージンのはみ出し）を完全にシャットアウトする設定 */
     }
 
-    /* ロゴ画像（薄い影つき） */
+
+    /* ロゴ画像共通の設定 */
     header #logo img {
         width: 48px;
         position: fixed;
         left: 14px;
         top: 18px;
         filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.12));
+        transition: opacity 1.3s ease; /* ふわっと切り替えるアニメーション */
+    }
+
+    /* 通常時はlogo2を非表示にする */
+    header #logo .hover-logo {
+        opacity: 0;
+        pointer-events: none; /* 下にある通常ロゴのクリックを邪魔しない */
+    }
+
+    /* 通常時のlogo1を表示 */
+    header #logo .default-logo {
+        opacity: 1;
+    }
+    
+    /* カーソルが乗った（hover）ときの挙動 */
+    header #logo a:hover .default-logo {
+        opacity: 0; /* logo.png を透明にする */
+    }
+
+    header #logo a:hover .hover-logo {
+        opacity: 1; /* logo2.png を表示する */
     }
 
     /* メインメニュー（丸型ボタンの共通設定） */
@@ -491,7 +513,7 @@
             z-index: 99;
             background: none;
             border-radius: 50%;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -553,25 +575,25 @@
         }
         /* 1本目：上のバンズ → パックマン上半分 → ×の1本目 */
         .burger-checkbox:checked + .burger-menu span:nth-child(1) {
-            background-color: #FFD700;
+            background-color: #FFAE00;
             animation: final-pacman-top 1.4s forwards;
         }
         /* 5本目：下のバンズ → パックマン下半分 → ×の2本目 */
         .burger-checkbox:checked + .burger-menu span:nth-child(5) {
-            background-color: #FFD700;
+            background-color: #FFAE00;
             animation: final-pacman-bottom 1.4s forwards;
         }
         /* --- 1本目（上）のアニメーション --- */
         @keyframes final-pacman-top {
             0%       { top: 6px;  height: 12px; border-radius: 12px 12px 3px 3px; transform: rotate(0deg); }
-            20%, 55% { top: 4px;  height: 18px; border-radius: 18px 18px 0 0;     transform: rotate(-25deg); }
-            75%, 100%{ top: 19px; height: 6px;  border-radius: 3px;               transform: rotate(135deg); }
+            20%, 55% { top: 4px;  height: 18px; border-radius: 18px 18px 0 0;     transform: rotate(25deg); } /* 👈 -25deg から 25deg に変更 */
+            75%, 100%{ top: 19px; height: 6px;  border-radius: 3px;               transform: rotate(-45deg); } /* 👈 135deg から -45deg に変更（または 315deg） */
         }
         /* --- 5本目（下）のアニメーション --- */
         @keyframes final-pacman-bottom {
             0%       { bottom: 6px;  height: 8px;  border-radius: 3px 3px 6px 6px; transform: rotate(0deg); }
-            20%, 55% { bottom: 4px;  height: 18px; border-radius: 0 0 18px 18px;   transform: rotate(25deg); }
-            75%, 100%{ bottom: 19px; height: 6px;  border-radius: 3px;             transform: rotate(45deg); }
+            20%, 55% { bottom: 4px;  height: 18px; border-radius: 0 0 18px 18px;   transform: rotate(-25deg); } /* 👈 25deg から -25deg に変更 */
+            75%, 100%{ bottom: 19px; height: 6px;  border-radius: 3px;             transform: rotate(45deg); } /* 👈 45deg のままでOK、または「×」にするなら調整 */
         }
         
         #menu-btn-check:checked ~ nav { left: 0; }
@@ -641,7 +663,10 @@
 
   <header>
     <h1 id="logo">
-      <a href="index.html"><img src="images/logo.png" alt="Sherry's Garden"></a>
+      <a href="index.html">
+        <img src="images/logo.png" alt="Sherry's Garden" class="default-logo">
+        <img src="images/logo2.png" alt="Sherry's Garden" class="hover-logo">
+      </a>
     </h1>
 
     <input type="checkbox" id="menu-btn-check" class="burger-checkbox">
@@ -862,4 +887,18 @@
   <a href="#" id="gotop">TOP</a>
 
 </body>
+<script>
+  // メニュー内のすべてのリンク（aタグ）を取得
+  const menuLinks = document.querySelectorAll('#menubar a');
+  // メニューを開閉しているチェックボックスを取得
+  const menuCheck = document.getElementById('menu-btn-check');
+
+  // 各リンクがクリックされたときの処理
+  menuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      // チェックボックスのチェックを外す（メニューを閉じる）
+      menuCheck.checked = false;
+    });
+  });
+</script>
 </html>
