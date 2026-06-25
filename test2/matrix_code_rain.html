@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Code Rain - Single Stream Per Column</title>
+  <style>
+    /* =====================================================
+       リセット CSS & 基本レイアウト
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      flex: 1;
+    }
+
+    /* =====================================================
+       コントロールパネルの装飾
+    ===================================================== */
+    #controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 8px;
+      padding: 10px 20px;
+      backdrop-filter: blur(4px);
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #controls label { font-size: 12px; color: rgba(0, 255, 65, 0.7); letter-spacing: 0.05em; }
+
+    #controls input[type="range"] {
+      -webkit-appearance: none;
+      width: 80px; height: 3px;
+      background: rgba(0, 255, 65, 0.25);
+      border-radius: 2px; outline: none; cursor: pointer;
+    }
+    #controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px; height: 13px; border-radius: 50%; background: #00ff41; cursor: pointer;
+    }
+
+    #controls select, button {
+      background: transparent;
+      border: 1px solid rgba(0, 255, 65, 0.4);
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 12px; padding: 4px 10px; border-radius: 4px; cursor: pointer; outline: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button:hover { background: rgba(0, 255, 65, 0.1); border-color: rgba(0, 255, 65, 0.7); }
+    #controls select option { background: #001a00; color: #00ff41; }
+    .sep { width: 1px; height: 20px; background: rgba(0, 255, 65, 0.2); }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div id="controls" role="toolbar">
+  <button id="pauseBtn" onclick="togglePause()">一時停止</button>
+  <div class="sep"></div>
+  <label for="speed">速度</label>
+  <input type="range" id="speed" min="1" max="10" value="6" step="1">
+  <div class="sep"></div>
+  <label for="density">密度</label>
+  <input type="range" id="density" min="1" max="10" value="7" step="1">
+  <div class="sep"></div>
+  <label for="fontSize">サイズ</label>
+  <input type="range" id="fontSize" min="10" max="24" value="14" step="2">
+  <div class="sep"></div>
+  <label for="colorMode">色</label>
+  <select id="colorMode" onchange="applyColor()">
+    <option value="green">グリーン</option>
+    <option value="cyan">シアン</option>
+    <option value="red">レッド</option>
+    <option value="amber">アンバー</option>
+    <option value="white">ホワイト</option>
+    <option value="purple">パープル</option>
+  </select>
+</div>
+
+<script>
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ＠＃＄％＆＊＜＞［］｛｝＝±｜/￥￥？！';
+
+  const COLOR_MAP = {
+    green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)' },
+    cyan:   { head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', bg: 'rgba(0, 0, 5, 0.03)' },
+    red:    { head: '#ffffff', body: '#cc2200', glow: '#ff3c28', bg: 'rgba(5, 0, 0, 0.03)' },
+    amber:  { head: '#ffffff', body: '#cc8800', glow: '#ffaa00', bg: 'rgba(5, 3, 0, 0.03)' },
+    white:  { head: '#ffffff', body: '#999999', glow: '#ffffff', bg: 'rgba(0, 0, 0, 0.03)' },
+    purple: { head: '#ffffff', body: '#9b45e0', glow: '#c77dff', bg: 'rgba(2, 0, 5, 0.03)' },
+  };
+
+  let W, H, cols;
+  let columnsData = [];
+  let paused = false;
+  let currentColor = COLOR_MAP.green;
+  let fs = 14;
+
+  /* =====================================================
+     カタカナだけを左右反転する関数（前回から継続）
+  ===================================================== */
+  function drawChar(char, x, y) {
+    if (/^[ァ-ン]$/.test(char)) {
+      ctx.save();
+      ctx.translate(x + fs / 2, y);
+      ctx.scale(-1, 1);
+      ctx.fillText(char, -fs / 2, 0);
+      ctx.restore();
+    } else {
+      ctx.fillText(char, x, y);
+    }
+  }
+
+  /* =====================================================
+     Column クラス（1つの列を専属で管理する）
+     【重要】1つの列につき、光のヘッドは常に1つだけです
+  ===================================================== */
+  class Column {
+    constructor(colIndex) {
+      this.colIndex = colIndex;
+      this.reset(true);
+    }
+
+    reset(isInit) {
+      const densityVal = parseInt(document.getElementById('density').value) || 7;
+      
+      if (isInit) {
+        // 初回起動時は、画面全体にランダムにばらけさせる（最初から満たされている状態）
+        this.y = (Math.random() * (H / fs) * 1.5) - (H / fs);
+      } else {
+        // 下まで落ち切った後は、密度(density)に応じた「待機時間」を設定する
+        // Y座標を大きくマイナスにすることで、画面外で待機させ、前の残像が消えるのを待つ
+        const delayRows = 30 + ((10 - densityVal) * 15) + (Math.random() * 40);
+        this.y = -delayRows;
+      }
+
+      this.speed = Math.random() * 0.4 + 0.15; 
+      this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+    }
+
+    updateAndDraw(speedMultiplier) {
+      let oldRow = Math.floor(this.y);
+      this.y += this.speed * (speedMultiplier * 0.2);
+      let newRow = Math.floor(this.y);
+      const xPos = this.colIndex * fs;
+
+      // 行をまたいだ瞬間：古いマス目に残像をスタンプし、新しい文字を抽選
+      if (newRow > oldRow) {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = currentColor.body;
+        drawChar(this.char, xPos, (oldRow + 1) * fs);
+
+        this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+
+      // 画面内にいる場合のみ、最前線の発光ヘッドを描画
+      if (newRow >= 0 && newRow * fs <= H + fs) {
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = currentColor.glow;
+        ctx.fillStyle = currentColor.head;
+        drawChar(this.char, xPos, (newRow + 1) * fs);
+      }
+
+      // 完全に画面外（下）へ消えたら、列をリセットして上空で待機させる
+      if (newRow * fs > H) {
+        this.reset(false);
+      }
+    }
+  }
+
+  function applyColor() {
+    currentColor = COLOR_MAP[document.getElementById('colorMode').value] || COLOR_MAP.green;
+  }
+
+  /* =====================================================
+     初期化：画面の幅から列数を計算し、列の数だけ Column を作る
+  ===================================================== */
+  function init() {
+    fs = parseInt(document.getElementById('fontSize').value) || 14;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+
+    cols = Math.floor(W / fs);
+    
+    columnsData = [];
+    // 全ての列に対して、1つずつ管理オブジェクトを割り当てる
+    for (let i = 0; i < cols; i++) {
+      columnsData.push(new Column(i));
+    }
+
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function draw() {
+    requestAnimationFrame(draw);
+    if (paused) return;
+
+    const speedVal = parseInt(document.getElementById('speed').value) || 6;
+    const newFs = parseInt(document.getElementById('fontSize').value) || 14;
+
+    // 文字サイズが変わった時だけ全体を再計算（密度変更時はリセットしない）
+    if (newFs !== fs) {
+      init();
+      return;
+    }
+
+    // ゆっくりフェードアウトさせるための半透明の黒
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = currentColor.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.font = `${fs}px monospace`;
+
+    // 全ての列を更新
+    for (let i = 0; i < columnsData.length; i++) {
+      columnsData[i].updateAndDraw(speedVal);
+    }
+  }
+
+  function togglePause() {
+    paused = !paused;
+    document.getElementById('pauseBtn').textContent = paused ? '再 生' : '一時停止';
+  }
+
+  // イベントリスナー（文字サイズ変更とリサイズ時のみ画面をリセット）
+  window.addEventListener('resize', init);
+  document.getElementById('fontSize').addEventListener('change', init);
+
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+  });
+
+  init();
+  draw();
+</script>
+</body>
+</html>
