@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matrix Code Rain - Single Stream Per Column</title>
+  <title>Matrix Code Rain - Cinematic Intro</title>
   <style>
     /* =====================================================
        リセット CSS & 基本レイアウト
@@ -23,6 +23,7 @@
     canvas {
       display: block;
       flex: 1;
+      filter: blur(0.6px);
     }
 
     /* =====================================================
@@ -30,33 +31,65 @@
     ===================================================== */
     #controls {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 0;
+      left: 0;
+      right: 0;
       display: flex;
       align-items: center;
-      gap: 16px;
-      background: rgba(0, 0, 0, 0.85);
-      border: 1px solid rgba(0, 255, 65, 0.3);
-      border-radius: 8px;
-      padding: 10px 20px;
-      backdrop-filter: blur(4px);
-      flex-wrap: wrap;
-      justify-content: center;
+      gap: 0;
+      background: rgba(0, 0, 0, 0.90);
+      border-top: 1px solid rgba(0, 255, 65, 0.25);
+      padding: 0;
+      backdrop-filter: blur(6px);
       z-index: 10;
+      height: 48px;
     }
 
-    #controls label { font-size: 12px; color: rgba(0, 255, 65, 0.7); letter-spacing: 0.05em; }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      padding: 0 12px;
+      min-width: 0;
+    }
+
+    .ctrl-pause {
+      flex: 0 0 auto;
+      padding: 0 16px;
+      border-right: 1px solid rgba(0, 255, 65, 0.2);
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    #controls label {
+      font-size: 11px;
+      color: rgba(0, 255, 65, 0.6);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
     #controls input[type="range"] {
       -webkit-appearance: none;
-      width: 80px; height: 3px;
+      width: 100%;
+      min-width: 60px;
+      height: 3px;
       background: rgba(0, 255, 65, 0.25);
-      border-radius: 2px; outline: none; cursor: pointer;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      flex: 1;
     }
     #controls input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 13px; height: 13px; border-radius: 50%; background: #00ff41; cursor: pointer;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #00ff41;
+      cursor: pointer;
+      box-shadow: 0 0 6px #00ff41;
     }
 
     #controls select, button {
@@ -64,12 +97,55 @@
       border: 1px solid rgba(0, 255, 65, 0.4);
       color: #00ff41;
       font-family: 'Courier New', monospace;
-      font-size: 12px; padding: 4px 10px; border-radius: 4px; cursor: pointer; outline: none;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
       transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
     }
     button:hover { background: rgba(0, 255, 65, 0.1); border-color: rgba(0, 255, 65, 0.7); }
     #controls select option { background: #001a00; color: #00ff41; }
-    .sep { width: 1px; height: 20px; background: rgba(0, 255, 65, 0.2); }
+
+    .val-display {
+      font-size: 11px;
+      color: #00ff41;
+      min-width: 22px;
+      text-align: right;
+      flex-shrink: 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .sep {
+      width: 1px;
+      height: 28px;
+      background: rgba(0, 255, 65, 0.2);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 798px) {
+      #controls {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 8px 4px;
+        gap: 6px 0;
+      }
+      .ctrl-pause {
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        padding: 4px 12px 8px;
+      }
+      .ctrl-group {
+        flex: 1 1 40%;
+        padding: 2px 10px;
+      }
+      .sep { display: none; }
+      #controls input[type="range"] { min-width: 50px; }
+    }
   </style>
 </head>
 <body>
@@ -77,26 +153,51 @@
 <canvas id="matrix"></canvas>
 
 <div id="controls" role="toolbar">
-  <button id="pauseBtn" onclick="togglePause()">一時停止</button>
+  <div class="ctrl-pause">
+    <button id="pauseBtn" onclick="togglePause()">⏸</button>
+  </div>
   <div class="sep"></div>
-  <label for="speed">速度</label>
-  <input type="range" id="speed" min="1" max="10" value="6" step="1">
+  <div class="ctrl-group">
+    <label for="speed">速度</label>
+    <input type="range" id="speed" min="1" max="20" value="8" step="1" oninput="showVal(this)">
+    <span class="val-display" id="speed-val">8</span>
+  </div>
   <div class="sep"></div>
-  <label for="density">密度</label>
-  <input type="range" id="density" min="1" max="10" value="7" step="1">
+  <div class="ctrl-group">
+    <label for="density">密度</label>
+    <input type="range" id="density" min="1" max="10" value="8" step="1" oninput="showVal(this)">
+    <span class="val-display" id="density-val">8</span>
+  </div>
   <div class="sep"></div>
-  <label for="fontSize">サイズ</label>
-  <input type="range" id="fontSize" min="10" max="24" value="14" step="2">
+  <div class="ctrl-group">
+    <label for="fontSize">サイズ</label>
+    <input type="range" id="fontSize" min="6" max="40" value="14" step="1" oninput="showVal(this)">
+    <span class="val-display" id="fontSize-val">14</span>
+  </div>
   <div class="sep"></div>
-  <label for="colorMode">色</label>
-  <select id="colorMode" onchange="applyColor()">
-    <option value="green">グリーン</option>
-    <option value="cyan">シアン</option>
-    <option value="red">レッド</option>
-    <option value="amber">アンバー</option>
-    <option value="white">ホワイト</option>
-    <option value="purple">パープル</option>
-  </select>
+  <div class="ctrl-group">
+    <label for="trailLength">残像</label>
+    <input type="range" id="trailLength" min="1" max="20" value="16" step="1" oninput="showVal(this)">
+    <span class="val-display" id="trailLength-val">16</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="blurAmount">ぼかし</label>
+    <input type="range" id="blurAmount" min="0" max="3" value="0.6" step="0.1" oninput="showVal(this)">
+    <span class="val-display" id="blurAmount-val">0.6</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group" style="flex: 0 0 auto;">
+    <label for="colorMode">色</label>
+    <select id="colorMode" onchange="applyColor()">
+      <option value="green">グリーン</option>
+      <option value="cyan">シアン</option>
+      <option value="red">レッド</option>
+      <option value="amber">アンバー</option>
+      <option value="white">ホワイト</option>
+      <option value="purple">パープル</option>
+    </select>
+  </div>
 </div>
 
 <script>
@@ -120,11 +221,19 @@
   let currentColor = COLOR_MAP.green;
   let fs = 14;
 
-  /* =====================================================
-     カタカナだけを左右反転する関数（前回から継続）
-  ===================================================== */
+  let speedVal = 8;
+  let densityVal = 8;
+  let trailVal = 18;
+  let blurVal = 0.6;
+
+  // --- 演出用の変数 ---
+  let introPhase = 1;         // 1:真ん中のみ, 2:右追加, 3:通常通り
+  let hasPlayedIntro = false; // 一度演出が終わったらリサイズしてもスキップする用
+  let midIndex = 0;
+  let rightIndex = 0;
+
   function drawChar(char, x, y) {
-    if (/^[ァ-ン]$/.test(char)) {
+    if (char >= 'ァ' && char <= 'ン') {
       ctx.save();
       ctx.translate(x + fs / 2, y);
       ctx.scale(-1, 1);
@@ -135,29 +244,21 @@
     }
   }
 
-  /* =====================================================
-     Column クラス（1つの列を専属で管理する）
-     【重要】1つの列につき、光のヘッドは常に1つだけです
-  ===================================================== */
   class Column {
     constructor(colIndex) {
       this.colIndex = colIndex;
+      this.isActive = false; // ★追加：最初はすべて停止状態で生成
       this.reset(true);
     }
 
     reset(isInit) {
-      const densityVal = parseInt(document.getElementById('density').value) || 7;
-      
       if (isInit) {
-        // 初回起動時は、画面全体にランダムにばらけさせる（最初から満たされている状態）
-        this.y = (Math.random() * (H / fs) * 1.5) - (H / fs);
+        // 初期状態は画面上空（見えない位置）にランダム配置
+        this.y = -(Math.random() * (H / fs) * 1.5) - 2;
       } else {
-        // 下まで落ち切った後は、密度(density)に応じた「待機時間」を設定する
-        // Y座標を大きくマイナスにすることで、画面外で待機させ、前の残像が消えるのを待つ
         const delayRows = 30 + ((10 - densityVal) * 15) + (Math.random() * 40);
         this.y = -delayRows;
       }
-
       this.speed = Math.random() * 0.4 + 0.15; 
       this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
     }
@@ -168,24 +269,20 @@
       let newRow = Math.floor(this.y);
       const xPos = this.colIndex * fs;
 
-      // 行をまたいだ瞬間：古いマス目に残像をスタンプし、新しい文字を抽選
       if (newRow > oldRow) {
         ctx.shadowBlur = 0;
         ctx.fillStyle = currentColor.body;
         drawChar(this.char, xPos, (oldRow + 1) * fs);
+        ctx.shadowBlur = 12;
 
         this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
       }
 
-      // 画面内にいる場合のみ、最前線の発光ヘッドを描画
       if (newRow >= 0 && newRow * fs <= H + fs) {
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = currentColor.glow;
         ctx.fillStyle = currentColor.head;
         drawChar(this.char, xPos, (newRow + 1) * fs);
       }
 
-      // 完全に画面外（下）へ消えたら、列をリセットして上空で待機させる
       if (newRow * fs > H) {
         this.reset(false);
       }
@@ -196,22 +293,46 @@
     currentColor = COLOR_MAP[document.getElementById('colorMode').value] || COLOR_MAP.green;
   }
 
-  /* =====================================================
-     初期化：画面の幅から列数を計算し、列の数だけ Column を作る
-  ===================================================== */
   function init() {
     fs = parseInt(document.getElementById('fontSize').value) || 14;
+    speedVal = parseInt(document.getElementById('speed').value) || 8;
+    densityVal = parseInt(document.getElementById('density').value) || 8;
+    trailVal = parseInt(document.getElementById('trailLength').value) || 18;
+    blurVal = parseFloat(document.getElementById('blurAmount').value) || 0.6;
+
+    canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+
+    const controlsH = document.getElementById('controls').offsetHeight || 48;
     W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    H = canvas.height = window.innerHeight - controlsH;
 
     cols = Math.floor(W / fs);
-    
     columnsData = [];
-    // 全ての列に対して、1つずつ管理オブジェクトを割り当てる
+    
+    // 全列のインスタンスを作成（この時点では isActive = false）
     for (let i = 0; i < cols; i++) {
       columnsData.push(new Column(i));
     }
 
+    // --- 演出の初期化 ---
+    if (!hasPlayedIntro) {
+      // まだ演出を見ていない場合（初回ロード）
+      introPhase = 1;
+      midIndex = Math.floor(cols / 2);         // 画面中央の列番号
+      rightIndex = Math.floor(cols * 0.75);    // 画面右（75%）の列番号
+
+      // 中央の列だけ動かし、開始位置を画面一番上（0付近）にする
+      columnsData[midIndex].isActive = true;
+      columnsData[midIndex].y = -1;
+    } else {
+      // 既に演出が終わっている場合（リサイズ時など）は全列アクティブ
+      introPhase = 3;
+      for (let i = 0; i < cols; i++) {
+        columnsData[i].isActive = true;
+      }
+    }
+
+    // キャンバスを真っ黒にリセット
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, W, H);
   }
@@ -220,36 +341,76 @@
     requestAnimationFrame(draw);
     if (paused) return;
 
-    const speedVal = parseInt(document.getElementById('speed').value) || 6;
-    const newFs = parseInt(document.getElementById('fontSize').value) || 14;
-
-    // 文字サイズが変わった時だけ全体を再計算（密度変更時はリセットしない）
-    if (newFs !== fs) {
-      init();
-      return;
-    }
-
-    // ゆっくりフェードアウトさせるための半透明の黒
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = currentColor.bg;
+    const trailAlpha = (0.12 - (trailVal - 1) * (0.115 / 19)).toFixed(4);
+    const bgBase = currentColor.bg.replace(/[\d.]+\)$/, `${trailAlpha})`);
+    
+    ctx.fillStyle = bgBase;
     ctx.fillRect(0, 0, W, H);
 
     ctx.font = `${fs}px monospace`;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = currentColor.glow;
 
-    // 全ての列を更新
+    // =====================================================
+    // ★ 演出の進行管理
+    // =====================================================
+    if (introPhase === 1) {
+      // 真ん中の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ2へ
+      if (columnsData[midIndex].y * fs > H * 0.3) {
+        introPhase = 2;
+        columnsData[rightIndex].isActive = true;
+        columnsData[rightIndex].y = -1; // 右の列も一番上からスタート
+      }
+    } 
+    else if (introPhase === 2) {
+      // 右の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ3へ
+      if (columnsData[rightIndex].y * fs > H * 0.3) {
+        introPhase = 3;
+        hasPlayedIntro = true; // 演出完了フラグを立てる
+
+        // 残りの全列をアクティブにする
+        for (let i = 0; i < columnsData.length; i++) {
+          if (!columnsData[i].isActive) {
+            columnsData[i].isActive = true;
+          }
+        }
+      }
+    }
+
+    // =====================================================
+    // 描画処理（アクティブな列だけを更新）
+    // =====================================================
     for (let i = 0; i < columnsData.length; i++) {
-      columnsData[i].updateAndDraw(speedVal);
+      if (columnsData[i].isActive) {
+        columnsData[i].updateAndDraw(speedVal);
+      }
+    }
+
+    ctx.shadowBlur = 0;
+  }
+
+  function showVal(input) {
+    const val = parseFloat(input.value);
+    document.getElementById(input.id + '-val').textContent = input.value;
+    
+    if (input.id === 'speed') speedVal = val;
+    if (input.id === 'density') densityVal = val;
+    if (input.id === 'trailLength') trailVal = val;
+    if (input.id === 'blurAmount') {
+      blurVal = val;
+      canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+    }
+    if (input.id === 'fontSize') {
+      init();
     }
   }
 
   function togglePause() {
     paused = !paused;
-    document.getElementById('pauseBtn').textContent = paused ? '再 生' : '一時停止';
+    document.getElementById('pauseBtn').textContent = paused ? '▶' : '⏸';
   }
 
-  // イベントリスナー（文字サイズ変更とリサイズ時のみ画面をリセット）
   window.addEventListener('resize', init);
-  document.getElementById('fontSize').addEventListener('change', init);
 
   document.addEventListener('keydown', e => {
     if (e.code === 'Space') { e.preventDefault(); togglePause(); }
