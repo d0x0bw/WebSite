@@ -58,10 +58,11 @@
     .ctrl-pause {
       flex: 0 0 auto;
       padding: 0 16px;
-      border-right: 1px solid rgba(0, 255, 65, 0.2);
+      border-left: 1px solid rgba(0, 255, 65, 0.2);
       height: 100%;
       display: flex;
       align-items: center;
+      order: 999;
     }
 
     #controls label {
@@ -92,7 +93,7 @@
       box-shadow: 0 0 6px #00ff41;
     }
 
-    #controls select, button {
+    #controls select {
       background: transparent;
       border: 1px solid rgba(0, 255, 65, 0.4);
       color: #00ff41;
@@ -105,7 +106,59 @@
       transition: background 0.15s, border-color 0.15s;
       white-space: nowrap;
     }
-    button:hover { background: rgba(0, 255, 65, 0.1); border-color: rgba(0, 255, 65, 0.7); }
+
+    /* =====================================================
+       再生 / 一時停止ボタン（CSS描画）
+    ===================================================== */
+    #pauseBtn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2.5px solid #00ff41;
+      background: transparent;
+      cursor: pointer;
+      outline: none;
+      padding: 0;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(0, 255, 65, 0.5), inset 0 0 8px rgba(0, 255, 65, 0.05);
+      transition: box-shadow 0.15s;
+    }
+    #pauseBtn:hover {
+      box-shadow: 0 0 14px rgba(0, 255, 65, 0.8), inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    /* ── 一時停止アイコン（2本バー）── */
+    #pauseBtn::before,
+    #pauseBtn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 13px;
+      background: #00ff41;
+      border-radius: 1px;
+      transition: all 0.15s ease;
+    }
+    #pauseBtn::before { left: 10px; }
+    #pauseBtn::after  { right: 10px; }
+
+    /* ── 再生アイコン（三角形）── paused クラスで切り替え */
+    #pauseBtn.paused::before {
+      width: 0;
+      height: 0;
+      background: transparent;
+      border-style: solid;
+      border-width: 7px 0 7px 13px;
+      border-color: transparent transparent transparent #00ff41;
+      border-radius: 0;
+      left: 50%;
+      transform: translate(-40%, -50%);
+    }
+    #pauseBtn.paused::after {
+      display: none;
+    }
     #controls select option { background: #001a00; color: #00ff41; }
 
     .val-display {
@@ -128,16 +181,17 @@
       #controls {
         height: auto;
         flex-wrap: wrap;
-        padding: 8px 4px;
-        gap: 6px 0;
+        padding: 6px 4px;
+        gap: 4px 0;
+        align-items: center;
       }
       .ctrl-pause {
-        border-right: none;
-        border-bottom: 1px solid rgba(0, 255, 65, 0.2);
-        width: 100%;
-        height: auto;
-        justify-content: center;
-        padding: 4px 12px 8px;
+        order: 999;
+        border-left: 1px solid rgba(0, 255, 65, 0.2);
+        border-bottom: none;
+        height: 100%;
+        padding: 0 14px;
+        align-self: stretch;
       }
       .ctrl-group {
         flex: 1 1 40%;
@@ -153,9 +207,6 @@
 <canvas id="matrix"></canvas>
 
 <div id="controls" role="toolbar">
-  <div class="ctrl-pause">
-    <button id="pauseBtn" onclick="togglePause()">⏸</button>
-  </div>
   <div class="sep"></div>
   <div class="ctrl-group">
     <label for="speed">速度</label>
@@ -197,6 +248,9 @@
       <option value="white">ホワイト</option>
       <option value="purple">パープル</option>
     </select>
+  </div>
+  <div class="ctrl-pause">
+    <button id="pauseBtn" onclick="togglePause()" aria-label="再生/一時停止"></button>
   </div>
 </div>
 
@@ -407,7 +461,7 @@
 
   function togglePause() {
     paused = !paused;
-    document.getElementById('pauseBtn').textContent = paused ? '▶' : '⏸';
+    document.getElementById('pauseBtn').classList.toggle('paused', paused);
   }
 
   window.addEventListener('resize', init);
