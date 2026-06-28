@@ -17,6 +17,12 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      /* --- レスポンシブ対応：スマホ向け追加 --- */
+      height: 100dvh; /* スマホのURLバーを考慮した正確な高さ */
+      user-select: none; /* テキスト選択防止 */
+      -webkit-user-select: none;
+      touch-action: none; /* ピンチズームやスワイプ操作を無効化 */
+      /* --------------------------------------- */
       font-family: 'Noto Sans JP', sans-serif;
       overflow: hidden;
     }
@@ -50,7 +56,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 55%;
+      height: 58%;
       background-color: #2444ff;
     }
 
@@ -95,7 +101,7 @@
     .b11 { left: 540px; width: 40px;  height: 200px; }
     .b12 { left: 600px; width: 40px;  height: 265px; }
     .b13 { left: 0px; width: 640px;  height: 110px; }
-    .b14 { left: 200px; width: 205px;  height: 160px; }
+    .b14 { left: 200px; width: 205px;  height: 164px; }
     .b15 { left: 580px; width: 40px;  height: 140px; }
 
     /* ビルの窓（box-shadowを使ってドット状の光を配置） */
@@ -270,7 +276,7 @@
       background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
                   linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
       background-size: 100% 4px, 6px 100%;
-      z-index: 10;
+      z-index: 110;
       pointer-events: none;
     }
 
@@ -341,10 +347,9 @@
     </div>
 
     <div class="copyright">
-      &copy;2026 Ebitendon
+      <a href="../index.html">&copy;2026 Ebitendon</a>
     </div>
 
-    <!-- ここに暗転用の画面を追加 -->
     <div id="curse-screen" class="curse-screen">
       おきのどくですが<br>セーブデータはきえてしまいました
     </div>
@@ -378,11 +383,11 @@
         isAnimating = true;
         curseScreen.classList.add('show');
 
-        // 2秒後に暗転を解除してタイトルへ戻る
+        // 3秒後に暗転を解除してタイトルへ戻る
         setTimeout(() => {
           curseScreen.classList.remove('show');
           isAnimating = false;
-        }, 2000);
+        }, 3000);
       } else {
         // 「ちょうさ かいし」の場合
         const link = selectedItem.querySelector('a');
@@ -422,6 +427,23 @@
         executeMenu();
       });
     });
+
+    // ==========================================
+    // レスポンシブ用スケール調整処理
+    // ==========================================
+    function adjustScale() {
+      const gameWindow = document.querySelector('.game-window');
+      const baseWidth = 640;
+      const baseHeight = 480;
+      // 画面幅・高さに対して、95%のサイズになるように縮小・拡大
+      const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight) * 0.95;
+      
+      gameWindow.style.transform = `scale(${scale})`;
+      gameWindow.style.transformOrigin = 'center';
+    }
+
+    window.addEventListener('resize', adjustScale);
+    adjustScale(); // ロード時に即時実行
   </script>
 
 </body>
