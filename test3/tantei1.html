@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>パソコン探偵倶楽部　序章</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #111;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: "MS Gothic", "Hiragino Sans", sans-serif;
+    }
+
+    .game-window {
+      width: 512px;
+      height: 480px;
+      background-color: #000000;
+      border: 6px solid #ffffff;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen-top {
+      flex: 1;
+      background-color: #000044;
+      background-size: cover;
+      background-position: center;
+      image-rendering: pixelated;
+      position: relative;
+      border-bottom: 6px solid #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 2s ease;
+      opacity: 1;
+    }
+
+    .screen-bottom {
+      height: 180px;
+      display: flex;
+      background-color: #000000;
+      padding: 12px;
+    }
+
+    .command-box {
+      width: 40%;
+      border-right: 4px dashed #ffffff;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .command-item {
+      cursor: pointer;
+      padding: 2px 4px;
+      font-size: 16px;
+      letter-spacing: 2px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .command-item:hover::before,
+    .command-item.active::before {
+      content: "▶";
+      margin-right: 6px;
+      color: #ffff00;
+    }
+
+    .text-box {
+      width: 60%;
+      padding-left: 12px;
+      font-size: 16px;
+      line-height: 1.6;
+      letter-spacing: 1px;
+      word-break: break-all;
+      position: relative;
+    }
+
+    .text-box.waiting::after {
+      content: "▼";
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      animation: blink 0.8s infinite;
+      color: #ffff00;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-window">
+    <div class="scanlines"></div>
+
+    <div class="screen-top" id="bg-layer">
+    </div>
+
+    <div class="screen-bottom">
+      <div class="command-box" id="command-list"></div>
+      <div class="text-box" id="text-display"></div>
+    </div>
+  </div>
+
+  <script>
+    // ゲームの進行フラグ（状態管理）
+    const gameState = {
+      currentScene: "start",
+      flags: {
+        looked_around: false,
+        called_out: 0,
+        remembered: false
+      }
+    };
+
+    // シナリオデータ（重複定義を修正・call_outシーンを追加）
+    const scenario = {
+      "start": {
+        text: "……う、ううん……。$ここは……どこだ……？$頭がひどく痛む……。",
+        bg_color: "#050515",
+        bg_image: "url('1.jpg')",
+        commands: [
+          { label: "まわりをみる", target: "look_around" },
+          { label: "おもいだす",   target: "try_remember" },
+          { label: "こえをだす",   target: "call_out" }
+        ]
+      },
+
+      "look_around": {
+        text: "あたりは暗い……。$どうやら高い崖の下に$倒れているようだ。$……そばに海が見える。",
+        bg_color: "#1a2035",
+        bg_image: "url('2.jpg')",
+        setup: () => { gameState.flags.looked_around = true; },
+        commands: [
+          { label: "まわりをみる", target: "look_around_again" },
+          { label: "おもいだす",   target: "try_remember" },
+          { label: "こえをだす",   target: "call_out" }
+        ]
+      },
+
+      "look_around_again": {
+        text: "やはり見覚えのない場所だ。$なぜこんなところにいるのだろう……。",
+        bg_color: "#1a2035",
+        bg_image: "url('2.jpg')",
+        commands: [
+          { label: "おもいだす", target: "try_remember" },
+          { label: "こえをだす", target: "call_out" }
+        ]
+      },
+
+      // ★追加：call_outシーンが未定義だったため追加
+      "call_out": {
+        text: "「だ、誰かいませんか……！」$$……返事はない。$波の音だけが響いている。",
+        bg_color: "#050515",
+        bg_image: "url('1.jpg')",
+        setup: () => { gameState.flags.called_out++; },
+        commands: [
+          { label: "まわりをみる", target: "look_around" },
+          { label: "おもいだす",   target: "try_remember" },
+          { label: "こえをだす",   target: "call_out" }
+        ]
+      },
+
+      "try_remember": {
+        evaluate: () => {
+          if (gameState.flags.looked_around && gameState.flags.called_out >= 2) {
+            return "remember_success";
+          } else {
+            return "remember_fail";
+          }
+        }
+      },
+
+      "remember_fail": {
+        text: "ボ、　ボクは　誰だ……。$な、なにも 思い出せない……！$ボクは、……$誰だ？",
+        bg_color: "#221111",
+        bg_image: "url('3.jpg')",
+        commands: [
+          { label: "まわりをみる", target: "look_around" },
+          { label: "こえをだす",   target: "call_out" }
+        ]
+      },
+
+      "remember_success": {
+        text: "……そうだ！$ボクは、……$……いや、自分の名前すら思い出せない。$しかし、誰かが近づいてくる足音がする！",
+        bg_color: "#332211",
+        bg_image: "url('4.jpg')",
+        commands: [
+          { label: "きく",       target: "last_look" },
+          { label: "ふりむく",   target: "next_chapter" }
+        ]
+      },
+
+      "last_look": {
+        text: "おい！きみ、大丈夫か！",
+        bg_color: "#111111",
+        bg_image: "url('5.jpg')",
+        commands: [
+          { label: "ふりむく", target: "next_chapter" }
+        ]
+      },
+
+      "next_chapter": {
+        text: "あなたは ふたたび$気が遠くなっていくのを感じていた……。$……。$$第1章へつづく...",
+        bg_color: "#000000",
+        bg_image: "url('6.jpg')",
+        onComplete: () => {
+          // 全テキスト表示完了後にフェードアウト開始
+          setTimeout(() => {
+            bgLayer.style.transition = "opacity 3s ease";
+            bgLayer.style.opacity = 0;
+          }, 500); // 0.5秒待ってからフェード開始
+        },
+        commands: [
+          { label: "最初からやり直す", target: "reset" }
+        ]
+      }
+    };
+
+    // DOM要素の取得
+    const bgLayer    = document.getElementById("bg-layer");
+    const commandList = document.getElementById("command-list");
+    const textDisplay = document.getElementById("text-display");
+
+    let isTyping = false;
+    let textSegments = [];
+    let currentSegmentIndex = 0;
+
+    function loadScene(sceneId) {
+      if (sceneId === "reset") {
+        gameState.currentScene = "start";
+        gameState.flags.looked_around = false;
+        gameState.flags.called_out = 0;
+        gameState.flags.remembered = false;
+        loadScene("start");
+        return;
+      }
+
+      gameState.currentScene = sceneId;
+      const scene = scenario[sceneId];
+
+      // ★フェードアウトのリセット（新シーンに移るたびに opacity を戻す）
+      bgLayer.style.transition = "none";
+      bgLayer.style.opacity = 1;
+      // transitionを再有効化（次フレームで）
+      requestAnimationFrame(() => {
+        bgLayer.style.transition = "opacity 2s ease";
+      });
+
+      // セットアップ関数を先に実行
+      if (scene.setup) {
+        scene.setup();
+      }
+
+      // 評価関数（分岐条件）がある場合
+      if (scene.evaluate) {
+        const nextTarget = scene.evaluate();
+        loadScene(nextTarget);
+        return;
+      }
+
+      // 背景の変更
+      if (scene.bg_image) {
+        bgLayer.style.backgroundImage = scene.bg_image;
+        bgLayer.style.backgroundColor = "transparent";
+      } else if (scene.bg_color) {
+        bgLayer.style.backgroundImage = "none";
+        bgLayer.style.backgroundColor = scene.bg_color;
+      }
+
+      textSegments = scene.text.split("$");
+      currentSegmentIndex = 0;
+      commandList.innerHTML = "";
+
+      typeWriterEffect();
+    }
+
+    function typeWriterEffect() {
+      isTyping = true;
+      textDisplay.classList.remove("waiting");
+
+      const fullText = textSegments[currentSegmentIndex];
+      let currentText = "";
+      let charIndex = 0;
+
+      textDisplay.innerHTML = "";
+
+      if (fullText.length === 0) {
+        isTyping = false;
+        if (currentSegmentIndex < textSegments.length - 1) {
+          textDisplay.classList.add("waiting");
+        } else {
+          showCommands();
+        }
+        return;
+      }
+
+      const interval = setInterval(() => {
+        currentText += fullText[charIndex];
+        textDisplay.innerHTML = currentText.replace(/\n/g, "<br>");
+        charIndex++;
+
+        if (charIndex >= fullText.length) {
+          clearInterval(interval);
+          isTyping = false;
+
+          if (currentSegmentIndex < textSegments.length - 1) {
+            textDisplay.classList.add("waiting");
+          } else {
+            showCommands();
+          }
+        }
+      }, 50);
+    }
+
+    textDisplay.addEventListener("click", () => {
+      if (isTyping) return;
+
+      if (currentSegmentIndex < textSegments.length - 1) {
+        currentSegmentIndex++;
+        typeWriterEffect();
+      }
+    });
+
+    function showCommands() {
+      const scene = scenario[gameState.currentScene];
+      commandList.innerHTML = "";
+
+      // テキスト完了後のコールバック（フェードアウトなど）があれば実行
+      if (scene.onComplete) {
+        scene.onComplete();
+      }
+
+      scene.commands.forEach(cmd => {
+        const div = document.createElement("div");
+        div.className = "command-item";
+        div.innerText = cmd.label;
+        div.addEventListener("click", () => {
+          loadScene(cmd.target);
+        });
+        commandList.appendChild(div);
+      });
+    }
+
+    window.onload = function() {
+      loadScene("start");
+    };
+  </script>
+</body>
+</html>

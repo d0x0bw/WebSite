@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>パソコン探偵倶楽部 タイトル画面</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&display=swap" rel="stylesheet">
+  <style>
+    /* 全体のリセットと背景 */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Noto Sans JP', sans-serif;
+      overflow: hidden;
+    }
+
+    a {
+        color: #fff;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    a:hover {
+        color: #fff;
+        opacity: 0.8;
+    }
+
+    /* 画面（4:3比率） */
+    .game-window {
+      width: 640px;
+      height: 480px;
+      background-color: #3148ee;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ==========================================
+       背景
+       ========================================== */
+    .sky-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 55%;
+      background-color: #2444ff;
+    }
+
+    /* 月 */
+    .moon {
+      position: absolute;
+      top: 50px;
+      right: 90px;
+      width: 35px;
+      height: 35px;
+      background-color: #fce77d;
+      border-radius: 50%;
+    }
+
+    /* ビルのシルエット */
+    .buildings {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+    }
+
+    /* 共通のビルスタイル */
+    .building {
+      position: absolute;
+      bottom: 0;
+      background-color: #000;
+    }
+
+    /* 各ビルの配置と高さ */
+    .b1  { left: 0px;   width: 40px;  height: 240px; }
+    .b2  { left: 30px;  width: 30px;  height: 190px; }
+    .b3  { left: 55px;  width: 50px;  height: 150px; }
+    .b4  { left: 95px;  width: 65px;  height: 180px; }
+    .b5  { left: 180px; width: 40px;  height: 195px; }
+    .b6  { left: 240px; width: 45px;  height: 280px; }
+    .b7  { left: 280px; width: 40px;  height: 235px; }
+    .b8  { left: 340px; width: 50px;  height: 225px; }
+    .b9  { left: 405px; width: 50px;  height: 170px; }
+    .b10 { left: 480px; width: 55px;  height: 125px; }
+    .b11 { left: 540px; width: 40px;  height: 200px; }
+    .b12 { left: 600px; width: 40px;  height: 265px; }
+    .b13 { left: 0px; width: 640px;  height: 110px; }
+    .b14 { left: 200px; width: 205px;  height: 160px; }
+    .b15 { left: 580px; width: 40px;  height: 140px; }
+
+    /* ビルの窓（box-shadowを使ってドット状の光を配置） */
+    .b1::after {
+      content: ""; position: absolute; top: 15px; left: 8px; width: 5px; height: 6px; background: #fce77d;
+      box-shadow: 0 15px #fce77d, 12px 0 #fce77d, 12px 15px #fce77d, 0 35px #fce77d, 0 60px #fce77d, 0 80px #fce77d;
+    }
+    .b2::after {
+      content: ""; position: absolute; top: 15px; left: 8px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 0 15px #fce77d, 12px 0 #fce77d, 12px 15px #fce77d, 0 35px #fce77d;
+    }
+    .b3::after {
+      content: ""; position: absolute; top: 10px; left: 10px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 15px 0 #fce77d, 30px 0 #fce77d, 0 20px #fce77d, 30px 20px #fce77d, 15px 20px #fce77d;
+    }
+    .b4::after {
+      content: ""; position: absolute; top: 10px; left: 10px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 15px 0 #fce77d, 30px 0 #fce77d, 0 20px #fce77d, 30px 20px #fce77d, 15px 40px #fce77d;
+    }
+    .b5::after {
+      content: ""; position: absolute; top: 15px; left: 9px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 20px 0 #fce77d, 0 20px #fce77d, 20px 20px #fce77d, 0 40px #fce77d;
+    }
+    .b6::after {
+      content: ""; position: absolute; top: 15px; left: 12px; width: 5px; height: 7px; background: #fce77d;
+      box-shadow: 0 20px #fce77d, 16px 15px #fce77d, 0 40px #fce77d, 16px 60px #fce77d, 0 80px #fce77d;
+    }
+    .b7::after {
+      content: ""; position: absolute; top: 15px; left: 10px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 16px 0 #fce77d, 0 20px #fce77d, 16px 20px #fce77d, 16px 50px #fce77d;
+    }
+    .b8::after {
+      content: ""; position: absolute; top: 15px; left: 12px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 20px 0 #fce77d, 0 20px #fce77d, 20px 20px #fce77d, 0 40px #fce77d;
+    }
+    .b9::after {
+      content: ""; position: absolute; top: 10px; left: 10px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 20px 0 #fce77d, 30px 0 #fce77d, 30px 15px #fce77d;
+    }
+    .b10::after {
+      content: ""; position: absolute; top: 10px; left: 10px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 15px 0 #fce77d, 30px 0 #fce77d, 0 20px #fce77d, 30px 20px #fce77d, 15px 40px #fce77d;
+    }
+    .b11::after {
+      content: ""; position: absolute; top: 20px; left: 12px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 16px 0 #fce77d, 16px 25px #fce77d, 0 45px #fce77d;
+    }
+    .b12::after {
+      content: ""; position: absolute; top: 15px; left: 8px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 0 15px #fce77d, 12px 0 #fce77d, 12px 15px #fce77d, 0 35px #fce77d, 0 55px #fce77d, 16px 60px #fce77d, 0 80px #fce77d;
+    }
+    .b13::after {
+      content: ""; position: absolute; top: 15px; left: 160px; width: 4px; height: 6px; background: #fce77d;
+      box-shadow: 0 15px #fce77d, 12px 0 #fce77d, 12px 15px #fce77d;
+    }
+
+    .horizon-lines {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      width: 100%;
+      height: 30px;
+      background: repeating-linear-gradient(transparent, transparent 4px, #2444ff 4px, #2444ff 6px);
+      opacity: 0.7;
+    }
+
+    /* ==========================================
+       中央の黒帯とタイトルロゴ
+       ========================================== */
+    .title-container {
+      position: absolute;
+      top: 22%;
+      left: 0;
+      width: 100%;
+      background-color: none;
+      padding: 10px 0;
+      text-align: center;
+      border-bottom: 6px double #000;
+      box-shadow: 0 6px 0 #3148ee, 0 8px 0 #000, 0 8px 0 #000;
+    }
+
+    .title-container::after {
+      content: "";
+      position: absolute;
+      bottom: -14px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #000;
+    }
+
+    .main-title, .sub-title {
+      margin: 0;
+      padding: 0;
+      font-weight: bold;
+    }
+
+    /* 「パソコン」ロゴ */
+    .main-title {
+      font-size: 56px;
+      color: #de3b1b;
+      letter-spacing: 4px;
+      text-shadow: 
+        2px 2px 0 #ffaa00, 4px 4px 0 #ffaa00,
+        6px 6px 0 #000, 7px 7px 0 #000;
+    }
+
+    /* 「探偵倶楽部」ロゴ */
+    .sub-title {
+      font-size: 44px;
+      color: #de3b1b;
+      margin-top: 5px;
+      letter-spacing: 2px;
+      text-shadow: 
+        2px 2px 0 #ffcc00,
+        4px 4px 0 #000;
+    }
+
+    /* ==========================================
+       メニュー＆コピーライト
+       ========================================== */
+    .menu-section {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .menu-item {
+      color: #fff;
+      font-size: 16px;
+      letter-spacing: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-left: 45px;
+    }
+
+    /* カーソル 「▶」 */
+    .menu-item::before {
+      content: "▶";
+      position: absolute;
+      left: 0;
+      color: #fff;
+      visibility: hidden;
+      font-size: 22px;
+    }
+
+    .menu-item.active::before {
+      visibility: visible;
+    }
+
+    /* コピーライト */
+    .copyright {
+      position: absolute;
+      bottom: 35px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .scanlines {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ==========================================
+       暗転画面（セーブデータ消失演出用）
+       ========================================== */
+    .curse-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      letter-spacing: 2px;
+      line-height: 2;
+      text-align: center;
+      z-index: 100; /* 一番手前に表示 */
+      opacity: 0;   /* 初期状態は透明 */
+      pointer-events: none; /* 透明な時はクリック判定を無効化 */
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .curse-screen.show {
+      opacity: 1;
+      pointer-events: auto; /* 暗転時は裏側のクリックを防ぐ */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-window">
+    <div class="scanlines"></div>
+    <div class="sky-bg">
+      <div class="moon"></div>
+      <div class="horizon-lines"></div>
+      <div class="buildings">
+        <div class="building b1"></div>
+        <div class="building b2"></div>
+        <div class="building b3"></div>
+        <div class="building b4"></div>
+        <div class="building b5"></div>
+        <div class="building b6"></div>
+        <div class="building b7"></div>
+        <div class="building b8"></div>
+        <div class="building b9"></div>
+        <div class="building b10"></div>
+        <div class="building b11"></div>
+        <div class="building b12"></div>
+        <div class="building b13"></div>
+        <div class="building b14"></div>
+        <div class="building b15"></div>
+      </div>
+    </div>
+
+    <div class="title-container">
+      <h1 class="main-title">パソコン</h1>
+      <h2 class="sub-title">探偵倶楽部</h2>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-item active"><a href="tantei1.html">ちょうさ かいし</a></div>
+      <div class="menu-item">ちょうささいかい</div>
+    </div>
+
+    <div class="copyright">
+      &copy;2026 Ebitendon
+    </div>
+
+    <!-- ここに暗転用の画面を追加 -->
+    <div id="curse-screen" class="curse-screen">
+      おきのどくですが<br>セーブデータはきえてしまいました
+    </div>
+  </div>
+
+  <script>
+    const menuItems = document.querySelectorAll('.menu-item');
+    const curseScreen = document.getElementById('curse-screen');
+    let currentIndex = 0;
+    let isAnimating = false; // アニメーション中に操作を受け付けないためのフラグ
+
+    function updateMenu(index) {
+      if (isAnimating) return;
+      menuItems.forEach((item, idx) => {
+        if (idx === index) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+
+    function executeMenu() {
+      if (isAnimating) return;
+      
+      const selectedItem = menuItems[currentIndex];
+      const text = selectedItem.textContent.trim();
+
+      if (text === 'ちょうささいかい') {
+        // 暗転演出を開始
+        isAnimating = true;
+        curseScreen.classList.add('show');
+
+        // 2秒後に暗転を解除してタイトルへ戻る
+        setTimeout(() => {
+          curseScreen.classList.remove('show');
+          isAnimating = false;
+        }, 2000);
+      } else {
+        // 「ちょうさ かいし」の場合
+        const link = selectedItem.querySelector('a');
+        if (link) {
+          window.location.href = link.href;
+        }
+      }
+    }
+
+    // キーボード操作
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'Up') {
+        currentIndex = (currentIndex - 1 + menuItems.length) % menuItems.length;
+        updateMenu(currentIndex);
+      } else if (event.key === 'ArrowDown' || event.key === 'Down') {
+        currentIndex = (currentIndex + 1) % menuItems.length;
+        updateMenu(currentIndex);
+      } else if (event.key === 'Enter') {
+        executeMenu();
+      }
+    });
+
+    // マウスホバーおよびクリック操作
+    menuItems.forEach((item, index) => {
+      item.addEventListener('mouseenter', () => {
+        if (!isAnimating) {
+          currentIndex = index;
+          updateMenu(currentIndex);
+        }
+      });
+
+      // マウスクリック時の動作を追加
+      item.addEventListener('click', (event) => {
+        event.preventDefault(); // aタグによるデフォルトのリンク遷移を一旦無効化
+        currentIndex = index;
+        updateMenu(currentIndex);
+        executeMenu();
+      });
+    });
+  </script>
+
+</body>
+</html>
