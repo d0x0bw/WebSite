@@ -221,6 +221,39 @@
         4px 4px 0 #000;
     }
 
+    /* --- 追加：BGMコントロールボタンのスタイル --- */
+    .bgm-control-panel {
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .bgm-btn {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.4);
+      border: none;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: normal;
+      letter-spacing: 1px;
+      cursor: pointer;
+      position: relative;
+      z-index: 150;
+      transition: color 0.2s;
+    }
+    .bgm-btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .bgm-btn:active {
+      color: #ffaa00;
+    }
+    .bgm-btn.is-on {
+      color: rgba(252, 231, 125, 0.6);
+    }
+    .bgm-btn.is-on:hover {
+      color: #fce77d;
+    }
+    /* ------------------------------------------- */
+
     /* ==========================================
        メニュー＆コピーライト
        ========================================== */
@@ -262,7 +295,7 @@
     /* コピーライト */
     .copyright {
       position: absolute;
-      bottom: 35px;
+      bottom: 10px;
       width: 100%;
       text-align: center;
       color: #fff;
@@ -313,6 +346,8 @@
 </head>
 <body>
 
+  <audio id="bgm" src="bgm.mp3" loop></audio>
+
   <div class="game-window">
     <div class="scanlines"></div>
     <div class="sky-bg">
@@ -349,6 +384,14 @@
 
     <div class="copyright">
       <a href="../index.html">&copy;199X Nisemondo</a>
+      <div class="bgm-control-panel">
+        <button id="bgm-toggle-btn" class="bgm-btn">♪ BGM OFF</button>
+      </div>
+      <noscript>
+        <div style="margin-top:6px;">
+          <audio src="bgm.mp3" loop controls style="height:28px; width:150px; vertical-align:middle;"></audio>
+        </div>
+      </noscript>
     </div>
 
     <div id="curse-screen" class="curse-screen">
@@ -361,6 +404,31 @@
     const curseScreen = document.getElementById('curse-screen');
     let currentIndex = 0;
     let isAnimating = false; // アニメーション中に操作を受け付けないためのフラグ
+
+    /* --- 追加：JavaScriptによるBGMの再生・停止制御 --- */
+    const bgm = document.getElementById('bgm');
+    const bgmToggleBtn = document.getElementById('bgm-toggle-btn');
+
+    if (bgm && bgmToggleBtn) {
+      bgmToggleBtn.addEventListener('click', (event) => {
+        // ボタンクリック時のイベントが他の要素に干渉しないように制御
+        event.stopPropagation();
+
+        if (bgm.paused) {
+          bgm.play().then(() => {
+            bgmToggleBtn.textContent = '♪ BGM ON';
+            bgmToggleBtn.classList.add('is-on');
+          }).catch(err => {
+            console.error("BGMの再生に失敗しました:", err);
+          });
+        } else {
+          bgm.pause();
+          bgmToggleBtn.textContent = '♪ BGM OFF';
+          bgmToggleBtn.classList.remove('is-on');
+        }
+      });
+    }
+    /* ------------------------------------------------- */
 
     function updateMenu(index) {
       if (isAnimating) return;
@@ -407,6 +475,7 @@
         currentIndex = (currentIndex + 1) % menuItems.length;
         updateMenu(currentIndex);
       } else if (event.key === 'Enter') {
+        // もしBGMボタンにフォーカスが当たっている状態でのEnter誤爆を防ぐため、通常のメニューを実行
         executeMenu();
       }
     });
