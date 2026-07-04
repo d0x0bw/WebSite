@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INDEX　- d0x0bw -</title>
+  <title>INDEX - d0x0bw -</title>
 
   <link rel="icon" href="./icon/favicon.png" type="image/png">
 
@@ -24,7 +24,7 @@
 
     /* メインコンテナ（レスポンシブ対応） */
     .main {
-      max-width: 450px;
+      max-width: 1600px;
       margin: 0 auto;
       width: 100%; /* スマホ表示時は横幅いっぱいに */
     }
@@ -53,60 +53,60 @@
       border-radius: 4px;
       z-index: 1; /* 基準のz-indexを設定 */
 
-    &:before,
-    &:after {
-      content: "";
-      position: absolute;
-      display: block;
-      top: 50%;
-    }
+      &:before,
+      &:after {
+        content: "";
+        position: absolute;
+        display: block;
+        top: 50%;
+      }
 
-    &:before {
-      width: 7px;
-      height: 7px;
-      left: 0.4rem;
-      border-top: solid 2px #fff;
-      border-right: solid 2px #fff;
-      z-index: 3; /* 文字より前面、背景より前面 */
-      transform: translateY(-50%) rotate(45deg);
-      transition: all .3s;
-    }
+      &:before {
+        width: 7px;
+        height: 7px;
+        left: 0.4rem;
+        border-top: solid 2px #fff;
+        border-right: solid 2px #fff;
+        z-index: 3; /* 文字より前面、背景より前面 */
+        transform: translateY(-50%) rotate(45deg);
+        transition: all .3s;
+      }
 
-  /* 初期状態の背景サークル */
-    &:after {
-      left: -2rem;
-      background: #f39801;
-      z-index: 2; /* 文字の後ろ、ボタン背景の前 */
-      width: 3.8rem;
-      height: 130%;
-      border-radius: 50%;
-      transform: translateY(-50%);
-      transition: all .4s ease-in-out; /* 変化を少し滑らかに */
-    }
+      /* 初期状態の背景サークル */
+      &:after {
+        left: -2rem;
+        background: #f39801;
+        z-index: 2; /* 文字の後ろ、ボタン背景の前 */
+        width: 3.8rem;
+        height: 130%;
+        border-radius: 50%;
+        transform: translateY(-50%);
+        transition: all .4s ease-in-out; /* 変化を少し滑らかに */
+      }
 
-  span {
-      position: relative; /* z-indexを有効にするため必要 */
-      transition: all .3s;
-      z-index: 3; /* 背景（z-index: 2）より上に配置 */
-    }
+      span {
+        position: relative; /* z-indexを有効にするため必要 */
+        transition: all .3s;
+        z-index: 3; /* 背景（z-index: 2）より上に配置 */
+      }
 
-  /* PCでのホバー時、およびスマホでのタップ時（is-active）の挙動 */
-    &:hover,
-    &.is-active {
-      color: #fff; /* 全体の文字色を白に */
-    
-    span {
-      color: #fff;
-    }
+      /* PCでのホバー時、およびスマホでのタップ時（is-active）の挙動 */
+      &:hover,
+      &.is-active {
+        color: #fff; /* 全体の文字色を白に */
+      
+        span {
+          color: #fff;
+        }
 
-    &:after {
-      left: 0;
-      width: 100%; /* 横幅いっぱいに広げる */
-      height: 100%;
-      border-radius: 0;
+        &:after {
+          left: 0;
+          width: 100%; /* 横幅いっぱいに広げる */
+          height: 100%;
+          border-radius: 0;
+        }
+      }
     }
-  }
-}
 
     /* ヘッダー部分 */
     .head h1 {
@@ -130,33 +130,50 @@
       margin-top: 30px;
     }
 
+    /* カード状に並べるグリッド（スマホ：1列 / PCは下のmedia queryで複数列に） */
     .menu-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
     }
 
-    /* 【スマホ時】縦並びにして、中央に寄せる */
+    /* 各メニュー項目を「カード」として表示（スマホ表示時は横並び） */
     .menu-item {
       display: flex;
-      flex-direction: column; /* 上下（縦）に並べる */
-      align-items: center;    /* 中央揃え */
-      text-align: center;     /* テキストも中央揃え */
-      gap: 8px;               /* 画像と文字の間隔 */
-      margin-bottom: 20px;
-      padding-top: 12px;
-      border-top: solid 1px #e8e6da;
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
+      justify-content: flex-start;
+      gap: 16px;
+      background-color: #ffffff;
+      padding: 24px 18px;
+      margin-top: 0px;
+      border-radius: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
     }
 
-    /* 【スマホ時】画像をスッキリ小さめの表示にする */
+    /* カードにホバーした時にカード全体を少し浮き上げる */
+    .menu-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+    /* カード内の画像はコンパクトに */
     .menu-item img {
       border: none;
-      width: 80%;             /* 横幅 */
-      max-width: 120px;        /* 大きくなりすぎないように最大幅を制限 */
-      height: auto;
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
       flex-shrink: 0;         /* 画像が潰れるのを防ぐ */
-      filter:drop-shadow(5px 5px 5px #b2b2b2);
+      filter:drop-shadow(3px 3px 5px #d8d5c8);
+      transition: transform 0.3s ease;
+    }
 
+    .menu-item img:hover {
+      transform: scale(1.08);
     }
 
     .menu-text {
@@ -164,7 +181,6 @@
     }
 
     .menu-text p {
-      padding-left: 12px;
       font-size: 0.75rem;
     }
 
@@ -177,7 +193,7 @@
     .copy {
       font-size: 0.625rem; /* 10px 相当 */
       text-align: center;
-      margin-top: 16px;
+      margin-top: 24px;
       margin-bottom: 8px;
       padding-top: 14px;
       border-top: solid 0px #e8e6da;
@@ -192,43 +208,35 @@
     }
 
     /* === PC表示（画面幅が451px以上）のときの設定 === */
-    @media (min-width: 451px) {
+    @media (min-width: 550px) {
       body {
         display: flex;
         justify-content: center; /* 左右の中央揃え */
-        align-items: center;     /* 上下の中央揃え */
-        min-height: 100vh;       /* 画面全体の高さを基準にする */
+        align-items: top;     /* 上下の中央揃え */
+        min-height: auto;       /* 画面全体の高さを基準にする */
         background-color: #f9f8f2;
       }
       
       .main {
-        max-width: 500px;
-        background-color: #f5f5f5;
+        max-width: 1600px;
+        background-color: #f9f8f2;
         padding: 30px;             /* 枠内の余白 */
         border-radius: 8px;        /* 緩やかな角丸 */
         box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 綺麗な影をつける */
       }
 
-      /* 【PC時】横並び（元のスタイル）に戻す */
+      /* 【PC時】カードを複数列のグリッドに並べる */
+      .menu-list {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+      }
+
+      /* PC表示（複数列）のときは、元の縦並び・中央揃えに戻す */
       .menu-item {
-        flex-direction: row;  /* 左右（横）に並べる */
-        align-items: center;  /* 💡 テキストと画像の高さを中央で揃えて綺麗に見せる */
-        text-align: left;     /* テキストは左詰めに */
-        gap: 16px;            /* 💡 画像が大きくなるので、隙間を少し広げる */
-      }
-
-      /* 【PC時】画像を大きめの表示に変更 */
-      .menu-item img {
-        width: 100px;         /* 10pxから100pxに大幅変更し、大きめの表示に */
-        max-width: none;      /* スマホ用の制限を解除 */
-        height: auto;
-        /* 動くスピードの指定：指定の秒数をかけて滑らかに変化させる */
-        transition: transform 0.3s ease;
-      }
-
-      /* カーソルが乗った（hover）時の指定：少しだけフワッと大きくする */
-      .menu-item img:hover {
-        transform: scale(1.05);
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
       }
     }
   </style>
@@ -249,7 +257,7 @@
           <img src="./icon/icon.png" alt="SHERRY's GARDEN">
         </a>
         <div class="menu-text">
-          <div class="menu-title"><a href="./sherrys-garden/index.html" class="btn"><span>SHERRY's GARDEN<i class="arrow"></span></a></div>
+          <div class="menu-title"><a href="./sherrys-garden/index.html" class="btn"><span>SHERRY's GARDEN</span></a></div>
           <p>何気なく撮りためた写真を公開しています。</p>
         </div>
       </li>
@@ -330,6 +338,6 @@
     });
   });
 </script>
-</body>
+
 </body>
 </html>
