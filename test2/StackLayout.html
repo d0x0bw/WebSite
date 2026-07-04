@@ -104,32 +104,15 @@
       <!-- HOME ボタン（スマホ表示時のみ表示） -->
       <!-- このラベルをクリックすると radio-home が選択されてホーム画面に戻る -->
       <label for="radio-home" class="mobile-genre-title mobile-home-btn">HOME</label>
-
-      <!-- ─────────────────────────────────────────────────────────────
-        ジャンルA（アニメ）のメニューリスト
-        CSS側で #radio-genreA:checked の時だけ display:block になる
-        ───────────────────────────────────────────────────────────── -->
       <div class="menu-list list-genreA">
-        <!-- スマホ表示時のみ見えるジャンルタイトル。クリックでジャンル切り替えも可能 -->
         <label for="radio-genreA" class="mobile-genre-title">アニメ</label>
 
-        <!-- ─────────────────────────────────────
-          アコーディオン付き作品リンク
-          .nav-item-wrap が1セットの単位：
-            ・.main-link  → 作品名リンク（メインリンク）
-            ・.sub-toggle → 開閉制御用の非表示チェックボックス
-            ・.toggle-icon → 開閉ボタン（▼アイコン）
-            ・.sub-link-group → 子リンクのグループ（初期は非表示）
-          ───────────────────────────────────── -->
         <div class="nav-item-wrap">
           <a href="#work1" class="main-link">星を追う子ども</a>
 
-          <!-- アコーディオン開閉チェックボックス（画面には表示しない） -->
           <input type="checkbox" id="acc-work1" class="sub-toggle">
-          <!-- このラベルをクリックすると上の checkbox が ON/OFF され、サブリンクが開閉する -->
           <label for="acc-work1" class="toggle-icon"></label>
 
-          <!-- サブリンクのグループ（.sub-toggle が ON の時に CSS で表示） -->
           <div class="sub-link-group">
             <a href="#cons1" class="sub-link">・作品紹介</a>
             <a href="#cons2" class="sub-link">・考察</a>
@@ -137,19 +120,15 @@
           </div>
         </div>
 
-        <!-- アコーディオンなしの通常リンク -->
         <a href="#work2">INNOCENCE</a>
+
         <a href="#work3">もののけ姫</a>
+
       </div><!-- /list-genreA -->
 
-
-      <!-- ─────────────────────────────────────────────────────────────
-        ジャンルB（SF）のメニューリスト
-        ───────────────────────────────────────────────────────────── -->
       <div class="menu-list list-genreB">
         <label for="radio-genreB" class="mobile-genre-title">S F</label>
 
-        <!-- アコーディオン付き作品リンク（サブリンクが多いジャンル） -->
         <div class="nav-item-wrap">
           <a href="#work-b1" class="main-link">2001年 宇宙の旅</a>
 
@@ -158,38 +137,33 @@
 
           <div class="sub-link-group">
             <a href="#cons-b1-0" class="sub-link">・作品紹介</a>
-
-            <a href="#cons-b1-1"   class="sub-link">・Part1.人類の夜明け</a>
+            <a href="#cons-b1-1" class="sub-link">・Part1.人類の夜明け</a>
             <a href="#cons-b1-1-1" class="sub-link">　飢えと恐怖に怯える猿人たち</a>
             <a href="#cons-b1-1-2" class="sub-link">　モノリスの出現</a>
             <a href="#cons-b1-1-3" class="sub-link">　道具(武器)の発見と進化</a>
             <a href="#cons-b1-1-4" class="sub-link">　初めての殺戮と縄張り</a>
             <a href="#cons-b1-1-5" class="sub-link">　映画史上最も有名なジャンプカット</a>
-
-            <a href="#cons-b1-2"   class="sub-link">・Part2.月に人類が居住可能になった時代</a>
+            <a href="#cons-b1-2" class="sub-link">・Part2.月に人類が居住可能になった時代</a>
             <a href="#cons-b1-2-1" class="sub-link">　宇宙への優雅な旅</a>
             <a href="#cons-b1-2-2" class="sub-link">　宇宙ステーションでの嘘と緊迫感</a>
             <a href="#cons-b1-2-3" class="sub-link">　月面基地への到着</a>
             <a href="#cons-b1-2-4" class="sub-link">　秘密会議と「TMA-1」の真相</a>
             <a href="#cons-b1-2-5" class="sub-link">　月面での遭遇と目覚まし時計</a>
-
-            <a href="#cons-b1-3"   class="sub-link">・Part3.木星探査計画　18ヶ月後</a>
+            <a href="#cons-b1-3" class="sub-link">・Part3.木星探査計画　18ヶ月後</a>
             <a href="#cons-b1-3-1" class="sub-link">　ディスカバリー号の退屈な日常旅</a>
             <a href="#cons-b1-3-2" class="sub-link">　HAL 9000の初めてのミス</a>
             <a href="#cons-b1-3-3" class="sub-link">　人間たちの秘密の作戦</a>
             <a href="#cons-b1-3-4" class="sub-link">　AIの反乱と冷酷な殺戮</a>
             <a href="#cons-b1-3-5" class="sub-link">　決死の帰還とHALの死</a>
             <a href="#cons-b1-3-6" class="sub-link">　明かされる真の目的</a>
-
-            <a href="#cons-b1-4"   class="sub-link">・Part4.木星と無限の彼方</a>
+            <a href="#cons-b1-4" class="sub-link">・Part4.木星と無限の彼方</a>
             <a href="#cons-b1-4-1" class="sub-link">　木星軌道と第3のモノリス</a>
             <a href="#cons-b1-4-2" class="sub-link">　スター・ゲート</a>
             <a href="#cons-b1-4-3" class="sub-link">　ロココ調の白い部屋</a>
             <a href="#cons-b1-4-4" class="sub-link">　加速する老いと時間の超越</a>
             <a href="#cons-b1-4-5" class="sub-link">　スター・チャイルドへの転生</a>
             <a href="#cons-b1-4-6" class="sub-link">　終幕：地球を見つめる存在</a>
-
-            <a href="#cons-b1-5"   class="sub-link">・2001年宇宙の旅を紐解く</a>
+            <a href="#cons-b1-5" class="sub-link">・2001年宇宙の旅を紐解く</a>
             <a href="#cons-b1-5-1" class="sub-link">　HALの心理</a>
             <a href="#cons-b1-5-2" class="sub-link">　HAL 9000が反乱を起こした本当の理由</a>
             <a href="#cons-b1-5-3" class="sub-link">　なぜ最後はデイジー・ベルを歌ったのか</a>
@@ -206,8 +180,7 @@
 
           <div class="sub-link-group">
             <a href="#cons-b2-0" class="sub-link">・作品紹介</a>
-
-            <a href="#cons-b2-1"   class="sub-link">・【起】日常の違和感と真実への招待</a>
+            <a href="#cons-b2-1" class="sub-link">・【起】日常の違和感と真実への招待</a>
             <a href="#cons-b2-1-a1" class="sub-link">　ステップA：二重生活と強烈な「現実への違和感」</a>
             <a href="#cons-b2-1-a2" class="sub-link">　昼と夜の乖離（かいり）</a>
             <a href="#cons-b2-1-a3" class="sub-link">　精神を蝕む違和感</a>
@@ -219,8 +192,7 @@
             <a href="#cons-b2-1-c2" class="sub-link">　バグの摘出</a>
             <a href="#cons-b2-1-c3" class="sub-link">　モーフィアスとの対話</a>
             <a href="#cons-b2-1-c4" class="sub-link">　究極の二者択一（赤と青の薬）</a>
-
-            <a href="#cons-b2-2"   class="sub-link">・【承】現実世界の崩壊と過酷な訓練（第2幕前半：葛藤）</a>
+            <a href="#cons-b2-2" class="sub-link">・【承】現実世界の崩壊と過酷な訓練（第2幕前半：葛藤）</a>
             <a href="#cons-b2-2-a1" class="sub-link">　ステップA：カプセルからの「誕生」と現実の地獄</a>
             <a href="#cons-b2-2-a2" class="sub-link">　ディストピアでの目覚め</a>
             <a href="#cons-b2-2-a3" class="sub-link">　廃棄と救出</a>
@@ -234,8 +206,7 @@
             <a href="#cons-b2-2-c3" class="sub-link">　道場（ドージョー）での手合わせ</a>
             <a href="#cons-b2-2-c4" class="sub-link">　ジャンプ・プログラムの挫折</a>
             <a href="#cons-b2-2-c5" class="sub-link">　赤ドレスの女とエージェントの脅威</a>
-
-            <a href="#cons-b2-3"   class="sub-link">・【転】牙をむく宿敵と仲間の裏切り（第2幕後半：葛藤のピーク）</a>
+            <a href="#cons-b2-3" class="sub-link">・【転】牙をむく宿敵と仲間の裏切り（第2幕後半：葛藤のピーク）</a>
             <a href="#cons-b2-3-a1" class="sub-link">　ステップA：預言者（オラクル）の部屋と「スプーンの教え」</a>
             <a href="#cons-b2-3-a2" class="sub-link">　マトリックスの中の「生活感」</a>
             <a href="#cons-b2-3-a3" class="sub-link">　スプーンを曲げる少年（超常現象の真実）</a>
@@ -247,8 +218,7 @@
             <a href="#cons-b2-3-c1" class="sub-link">　ステップC：現実世界での暗殺と、辛うじての生還</a>
             <a href="#cons-b2-3-c2" class="sub-link">　コードを抜かれる恐怖</a>
             <a href="#cons-b2-3-c3" class="sub-link">　「彼が救世主なら奇跡が起きる」</a>
-
-            <a href="#cons-b2-4"   class="sub-link">・【結】死線を超えた覚醒と反撃</a>
+            <a href="#cons-b2-4" class="sub-link">・【結】死線を超えた覚醒と反撃</a>
             <a href="#cons-b2-4-a1" class="sub-link">　ステップA：覚悟のビル突入と「バレットタイム」</a>
             <a href="#cons-b2-4-a2" class="sub-link">　「救世主ではない」からこその選択</a>
             <a href="#cons-b2-4-a3" class="sub-link">　ロビーの銃撃戦（映画史に残る名シーン）</a>
@@ -263,41 +233,45 @@
             <a href="#cons-b2-4-c3" class="sub-link">　世界のコード化（完全なる覚醒）</a>
             <a href="#cons-b2-4-c4" class="sub-link">　スミスの消滅</a>
             <a href="#cons-b2-4-c5" class="sub-link">　エンディング：機械への宣戦布告</a>
-
             <a href="#cons-b2-5" class="sub-link">・マトリックスを紐解く</a>
             <a href="#cons-b2-5-1" class="sub-link">　【哲学】私たちは「水槽の脳」なのか？（シミュレーション仮説）</a>
             <a href="#cons-b2-5-2" class="sub-link">　【名前の秘密】アナグラムと神話の引用</a>
             <a href="#cons-b2-5-3" class="sub-link">　【選択のパラドックス】なぜオラクルは「救世主ではない」と言ったのか？</a>
             <a href="#cons-b2-5-4" class="sub-link">　【青い薬の誘惑】裏切り者サイファーは「悪」なのか？</a>
             <a href="#cons-b2-5-5" class="sub-link">　【仏教・東洋思想】「スプーンは存在しない」</a>
-
             <a href="#cons-b2-omake" class="sub-link">・おまけ</a>
           </div>
         </div>
 
       </div><!-- /list-genreB -->
 
-
-      <!-- 以下、ジャンルC〜F は現在コンテンツ未作成のシンプルなメニュー -->
       <div class="menu-list list-genreC">
         <label for="radio-genreC" class="mobile-genre-title">ジャンルC</label>
+
         <a href="#work-c1" class="main-link">作品 C-1</a>
-      </div>
+
+      </div><!-- /list-genreC -->
 
       <div class="menu-list list-genreD">
         <label for="radio-genreD" class="mobile-genre-title">ジャンルD</label>
+
         <a href="#work-d1" class="main-link">作品 D-1</a>
-      </div>
+
+      </div><!-- /list-genreD -->
 
       <div class="menu-list list-genreE">
         <label for="radio-genreE" class="mobile-genre-title">ジャンルE</label>
+
         <a href="#work-e1" class="main-link">作品 E-1</a>
-      </div>
+
+      </div><!-- /list-genreE -->
 
       <div class="menu-list list-genreF">
         <label for="radio-genreF" class="mobile-genre-title">ジャンルF</label>
+
         <a href="#work-f1" class="main-link">作品 F-1</a>
-      </div>
+
+      </div><!-- /list-genreF -->
 
     </nav><!-- /nav -->
 
@@ -307,8 +281,7 @@
       ・URLのハッシュが #work1 等に変わると CSS の :target で該当ボックスだけが表示される
       ・HOME 選択時は #default-content だけが表示される
       ============================================================ -->
-    <main>
-      <div id="default-content" class="content-box">
+    <main><div id="default-content" class="content-box">
         <h2>ジャンルの選択</h2>
         <div class="content-section layout-wide">
           <p>
@@ -324,8 +297,7 @@
         </div>
       </div>
 
-  <!-- work1 星を追う子ども ここから -->
-      <div id="work1" class="content-box">
+<div id="work1" class="content-box">
         <h1>星を追う子ども</h1>
         <div class="work-section layout-wide">
           <img src="./hoshi/hoshi01.jpg" alt="星を追う子ども" decoding="async">
@@ -340,7 +312,7 @@
           ・公開日：2011年5月7日<br>
           ・監督・原作・脚本：新海誠<br>
           ・音楽：天門<br>
-          ・主題歌：熊木杏里「Hello Goodbye & Hello」<br>
+          ・主題歌：熊木杏里「Hello Goodbye &amp; Hello」<br>
           ・制作会社：コミックス・ウェーブ・フィルム
           </p><br><br>
 
@@ -404,11 +376,8 @@
           </p>
         </div>
         </div>
-  <!-- work1 星を追う子ども ここまで -->
 
-
-  <!-- work2 イノセンス ここから -->
-      <div id="work2" class="content-box">
+<div id="work2" class="content-box">
         <h1>イノセンス</h1>
         <div class="work-section layout-wide">
           <img src="./innocence/innocence.jpg" alt="イノセンス" decoding="async">
@@ -418,21 +387,16 @@
           <img src="./innocence/innocence_01.jpg" alt="" loading="lazy" decoding="async">
         </div>
       </div>
-  <!-- work2 イノセンス ここまで -->
 
-  <!-- work3 もののけ姫 ここから -->
-      <div id="work3" class="content-box">
+<div id="work3" class="content-box">
         <h1>もののけ姫</h1>
         <div class="work-section layout-wide">
           <img src="./mononoke/mononoke.jpg" alt="もののけ姫" decoding="async">
         <p>Princess Mononoke</p>
         </div>
       </div>
-  <!-- work3 もののけ姫 ここまで -->
 
-
-  <!-- work-b1 2001年宇宙の旅 ここから -->
-      <div id="work-b1" class="content-box">
+<div id="work-b1" class="content-box">
         <h1>2001年 宇宙の旅</h1>
         <div class="work-section layout-wide">
           <img src="./2001/2001_title.jpg" alt="2001年 宇宙の旅" decoding="async">
@@ -1351,11 +1315,8 @@
           </p>
         </div>
       </div>
-  <!-- work-b1 2001年宇宙の旅 ここまで -->
 
-
-  <!-- work-b2 マトリックス ここから -->
-      <div id="work-b2" class="content-box">
+<div id="work-b2" class="content-box">
         <h1>マトリックス</h1>
         <div class="work-section layout-wide">
           <img src="./matrix/matrix_title.jpg" alt="マトリックス" decoding="async">
@@ -1427,8 +1388,8 @@
 
         <div id="cons-b2-1-a2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>昼と夜の乖離（かいり）</h4>
-          </p>
+          </p><h4>昼と夜の乖離（かいり）</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1447,8 +1408,8 @@
 <br>
         <div id="cons-b2-1-a3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>精神を蝕む違和感</h4>
-          </p>
+          </p><h4>精神を蝕む違和感</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_4.jpg" alt="" loading="lazy" decoding="async">
@@ -1468,8 +1429,8 @@
 
         <div id="cons-b2-1-b2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>画面に浮かぶ謎の文字列</h4>
-          </p>
+          </p><h4>画面に浮かぶ謎の文字列</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_5.jpg" alt="" loading="lazy" decoding="async">
@@ -1488,8 +1449,8 @@
 <br>
         <div id="cons-b2-1-b3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>トリニティとの出会い</h4>
-          </p>
+          </p><h4>トリニティとの出会い</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_6.jpg" alt="" loading="lazy" decoding="async">
@@ -1501,8 +1462,8 @@
 <br>
         <div id="cons-b2-1-b4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>エージェントによる最初の恐怖</h4>
-          </p>
+          </p><h4>エージェントによる最初の恐怖</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_7.jpg" alt="" loading="lazy" decoding="async">
@@ -1542,8 +1503,8 @@
 
         <div id="cons-b2-1-c2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>バグの摘出</h4>
-          </p>
+          </p><h4>バグの摘出</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_8.jpg" alt="" loading="lazy" decoding="async">
@@ -1560,8 +1521,8 @@
 <br>
         <div id="cons-b2-1-c3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>モーフィアスとの対話</h4>
-          </p>
+          </p><h4>モーフィアスとの対話</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_9.jpg" alt="" loading="lazy" decoding="async">
@@ -1573,8 +1534,8 @@
 <br>
         <div id="cons-b2-1-c4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>究極の二者択一（赤と青の薬💊）</h4>
-          </p>
+          </p><h4>究極の二者択一（赤と青の薬💊）</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_10.jpg" alt="" loading="lazy" decoding="async">
@@ -1583,7 +1544,7 @@
 
           * 🔵 青い薬：「ここで終わりだ。ベッドで目覚め、君は自分の信じたい現実を信じる」<br>
           * 🔴 赤い薬：「不思議の国に残り、私がウサギの穴の深さを見せよう」<br><br>
-        </div>
+        </p></div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_10b.jpg" alt="" loading="lazy" decoding="async">
           <p>
@@ -1620,8 +1581,8 @@
 
         <div id="cons-b2-2-a2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>ディストピアでの目覚め</h4>
-          </p>
+          </p><h4>ディストピアでの目覚め</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1643,8 +1604,8 @@
 <br>
         <div id="cons-b2-2-a3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>廃棄と救出</h4>
-          </p>
+          </p><h4>廃棄と救出</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_13.jpg" alt="" loading="lazy" decoding="async">
@@ -1657,8 +1618,8 @@
 
         <div id="cons-b2-2-a4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>肉体のリハビリ</h4>
-          </p>
+          </p><h4>肉体のリハビリ</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_14.jpg" alt="" loading="lazy" decoding="async">
@@ -1679,8 +1640,8 @@
 
         <div id="cons-b2-2-b2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>白い部屋（構造体／コンストラクト）</h4>
-          </p>
+          </p><h4>白い部屋（構造体／コンストラクト）</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_15.jpg" alt="" loading="lazy" decoding="async">
@@ -1692,8 +1653,8 @@
 <br>
         <div id="cons-b2-2-b3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>荒廃した地球（現実の砂漠）</h4>
-          </p>
+          </p><h4>荒廃した地球（現実の砂漠）</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_16.jpg" alt="" loading="lazy" decoding="async">
@@ -1711,8 +1672,8 @@
 <br>
         <div id="cons-b2-2-b4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>AIの反乱と生体バッテリー</h4>
-          </p>
+          </p><h4>AIの反乱と生体バッテリー</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_17.jpg" alt="" loading="lazy" decoding="async">
@@ -1741,8 +1702,8 @@
 
         <div id="cons-b2-2-c2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>データの直接ダウンロード</h4>
-          </p>
+          </p><h4>データの直接ダウンロード</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_18.jpg" alt="" loading="lazy" decoding="async">
@@ -1760,9 +1721,9 @@
 <br>
         <div id="cons-b2-2-c3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>道場（ドージョー）での手合わせ</h4>
+          </p><h4>道場（ドージョー）での手合わせ</h4>
           <img src="./matrix/matrix_19.jpg" alt="" loading="lazy" decoding="async">
-          </p>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_19b.jpg" alt="" loading="lazy" decoding="async">
@@ -1787,8 +1748,8 @@
 <br>
         <div id="cons-b2-2-c4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>ジャンプ・プログラムの挫折</h4>
-          </p>
+          </p><h4>ジャンプ・プログラムの挫折</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_20.jpg" alt="" loading="lazy" decoding="async">
@@ -1802,8 +1763,8 @@
 <br>
         <div id="cons-b2-2-c5" class="consideration-section work-section layout-wide">
           <p>
-          <h4>赤ドレスの女とエージェントの脅威</h4>
-          </p>
+          </p><h4>赤ドレスの女とエージェントの脅威</h4>
+          <p></p>
         </div>
         <div class="consideration-section work-section layout-img-left">
           <img src="./matrix/matrix_21.jpg" alt="" loading="lazy" decoding="async">
@@ -1854,8 +1815,8 @@
 <br>
         <div id="cons-b2-3-a2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>マトリックスの中の「生活感」</h4>
-          </p>
+          </p><h4>マトリックスの中の「生活感」</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1874,8 +1835,8 @@
 <br>
         <div id="cons-b2-3-a3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>スプーンを曲げる少年（超常現象の真実）</h4>
-          </p>
+          </p><h4>スプーンを曲げる少年（超常現象の真実）</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1902,8 +1863,8 @@
 <br>
         <div id="cons-b2-3-a4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>オラクルの残酷な預言</h4>
-          </p>
+          </p><h4>オラクルの残酷な預言</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1937,8 +1898,8 @@
 <br>
         <div id="cons-b2-3-b2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>黒猫のデジャヴ（システム書き換えのサイン）</h4>
-          </p>
+          </p><h4>黒猫のデジャヴ（システム書き換えのサイン）</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1959,8 +1920,8 @@
 <br>
         <div id="cons-b2-3-b3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>サイファーの裏切りがもたらした地獄</h4>
-          </p>
+          </p><h4>サイファーの裏切りがもたらした地獄</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -1981,8 +1942,8 @@
 <br>
         <div id="cons-b2-3-b4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>モーフィアスの自己犠牲</h4>
-          </p>
+          </p><h4>モーフィアスの自己犠牲</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2010,8 +1971,8 @@
 <br>
         <div id="cons-b2-3-c2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>コードを抜かれる恐怖</h4>
-          </p>
+          </p><h4>コードを抜かれる恐怖</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2032,8 +1993,8 @@
 <br>
         <div id="cons-b2-3-c3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>「彼が救世主なら奇跡が起きる」</h4>
-          </p>
+          </p><h4>「彼が救世主なら奇跡が起きる」</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2078,8 +2039,8 @@
 <br>
         <div id="cons-b2-4-a2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>「救世主ではない」からこその選択</h4>
-          </p>
+          </p><h4>「救世主ではない」からこその選択</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2109,9 +2070,9 @@
 <br>
         <div id="cons-b2-4-a3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>ロビーの銃撃戦（映画史に残る名シーン）</h4>
+          </p><h4>ロビーの銃撃戦（映画史に残る名シーン）</h4>
           <img src="./matrix/matrix_33.jpg" alt="" loading="lazy" decoding="async">
-          </p>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2131,8 +2092,8 @@
 <br>
         <div id="cons-b2-4-a4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>屋上の死闘と「銃弾避け」</h4>
-          </p>
+          </p><h4>屋上の死闘と「銃弾避け」</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2192,8 +2153,8 @@
 <br>
         <div id="cons-b2-4-a5" class="consideration-section work-section layout-wide">
           <p>
-          <h4>ヘリコプターを用いた救出劇</h4>
-          </p>
+          </p><h4>ヘリコプターを用いた救出劇</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2220,8 +2181,8 @@
 <br>
         <div id="cons-b2-4-b2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>逃げずに戦う選択</h4>
-          </p>
+          </p><h4>逃げずに戦う選択</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2246,8 +2207,8 @@
 <br>
         <div id="cons-b2-4-b3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>地下鉄ホームでの死闘</h4>
-          </p>
+          </p><h4>地下鉄ホームでの死闘</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2271,8 +2232,8 @@
 <br>
         <div id="cons-b2-4-b4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>胸を撃ち抜かれた救世主</h4>
-          </p>
+          </p><h4>胸を撃ち抜かれた救世主</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2310,8 +2271,8 @@
 <br>
         <div id="cons-b2-4-c2" class="consideration-section work-section layout-wide">
           <p>
-          <h4>トリニティの告白とキスの奇跡</h4>
-          </p>
+          </p><h4>トリニティの告白とキスの奇跡</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2342,8 +2303,8 @@
 <br>
         <div id="cons-b2-4-c3" class="consideration-section work-section layout-wide">
           <p>
-          <h4>世界のコード化（完全なる覚醒）</h4>
-          </p>
+          </p><h4>世界のコード化（完全なる覚醒）</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2370,8 +2331,8 @@
 <br>
         <div id="cons-b2-4-c4" class="consideration-section work-section layout-wide">
           <p>
-          <h4>スミスの消滅</h4>
-          </p>
+          </p><h4>スミスの消滅</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2395,8 +2356,8 @@
 <br>
         <div id="cons-b2-4-c5" class="consideration-section work-section layout-wide">
           <p>
-          <h4>エンディング：機械への宣戦布告</h4>
-          </p>
+          </p><h4>エンディング：機械への宣戦布告</h4>
+          <p></p>
         </div>
 
         <div class="consideration-section work-section layout-img-left">
@@ -2469,7 +2430,7 @@
           </p>
         </div>
 
-        <div id="cons-b2-5-1"  class="consideration-section work-section layout-wide">
+        <div id="cons-b2-5-1" class="consideration-section work-section layout-wide">
           <p><strong> 1. 【哲学】私たちは「水槽の脳」なのか？（シミュレーション仮説）</strong><br>
           本作の根底にあるのは、哲学者ルネ・デカルトの思想や、現代哲学の「水槽の脳（Brain in a vat）」という思考実験です。<br><br>
 
@@ -2488,7 +2449,7 @@
           </p>
         </div>
 
-        <div id="cons-b2-5-2"  class="consideration-section work-section layout-wide">
+        <div id="cons-b2-5-2" class="consideration-section work-section layout-wide">
           <p><strong>2. 【名前の秘密】アナグラムと神話の引用</strong><br>
           登場人物や乗り物の名前には、物語の結末や役割を示す高度な暗号（ダブル・ミーニング）が仕込まれています。<br><br>
  
@@ -2520,7 +2481,7 @@
           </p>
         </div>
 
-        <div id="cons-b2-5-3"  class="consideration-section work-section layout-wide">
+        <div id="cons-b2-5-3" class="consideration-section work-section layout-wide">
           <p><strong> 3. 【選択のパラドックス】なぜオラクルは「救世主ではない」と言ったのか？</strong><br>
           中盤、預言者オラクルはネオに「あなたは救世主ではない」と嘘（のように思える言葉）を告げます。
           ここには本作の最も深いメッセージが隠されています。<br><br>
@@ -2537,7 +2498,7 @@
         </div>
 
 
-        <div id="cons-b2-5-4"  class="consideration-section work-section layout-wide">
+        <div id="cons-b2-5-4" class="consideration-section work-section layout-wide">
           <p><strong> 4. 【青い薬の誘惑】裏切り者サイファーは「悪」なのか？</strong><br>
           ステーキの味を偽物と知りながら「マトリックスに戻りたい」と願ったサイファーの裏切りは、観客に重い問いを投げかけます。<br><br>
  
@@ -2553,7 +2514,7 @@
         </div>
 
 
-        <div id="cons-b2-5-5"  class="consideration-section work-section layout-wide">
+        <div id="cons-b2-5-5" class="consideration-section work-section layout-wide">
           <p><strong>5. 【仏教・東洋思想】「スプーンは存在しない」</strong><br>
           黒澤明監督の『生きる』や、カンフーアクションに代表されるように、本作には東洋の「禅」や「仏教（唯識思想）」の概念が強く流れています。<br><br>
  
@@ -2574,24 +2535,24 @@
         <div id="cons-b2-omake" class="consideration-section work-section layout-wide">
           <p><strong>おまけ</strong><br>
           マトリックスでおなじみのコードが雨のように降り注ぐマトリックス・コード(デジタル雨)です。<br>
-          👉 <a href="../test2/matrix_code_rain.html" target="_blank" rel="noopener noreferrer" class="matrix-link">MATRIX CODE RAIN</a>
+          👉 <a href="./matrix/matrix_code_rain.html" target="_blank" rel="noopener noreferrer" class="matrix-link">MATRIX CODE RAIN</a>
           </p>
         </div>
 
 
         </div>
-  <!-- work-b2 マトリックス ここまで -->
 
+<div id="work-c1" class="content-box"><h2>作品 C-1</h2><p>C-1作品コンテンツ</p></div>
 
-      <div id="work-c1" class="content-box"><h2>作品 C-1</h2><p>C-1作品コンテンツ</p></div>     
-      <div id="work-d1" class="content-box"><h2>作品 D-3</h2><p>D-1作品コンテンツ</p></div>
-      <div id="work-d2" class="content-box"><h2>作品 D-3</h2><p>D-2作品コンテンツ</p></div>
-      <div id="work-e1" class="content-box"><h2>作品 E-1</h2><p>E-1作品コンテンツです。</p></div>
-      <div id="work-e2" class="content-box"><h2>作品 E-2</h2><p>E-2作品コンテンツです。</p></div>
-      <div id="work-f1" class="content-box"><h2>作品 F-1</h2><p>F-1作品コンテンツです。</p></div>
+<div id="work-d1" class="content-box"><h2>作品 D-3</h2><p>D-1作品コンテンツ</p></div>
 
+<div id="work-d2" class="content-box"><h2>作品 D-3</h2><p>D-2作品コンテンツ</p></div>
 
-    </main>
+<div id="work-e1" class="content-box"><h2>作品 E-1</h2><p>E-1作品コンテンツです。</p></div>
+
+<div id="work-e2" class="content-box"><h2>作品 E-2</h2><p>E-2作品コンテンツです。</p></div>
+
+<div id="work-f1" class="content-box"><h2>作品 F-1</h2><p>F-1作品コンテンツです。</p></div></main>
   </div><!-- /container -->
 
   <!-- フッター -->
