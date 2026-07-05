@@ -545,10 +545,10 @@
            ========================================== */
         /* 🍔 1本目：上のバンズ */
         .burger-menu span:nth-child(1) {
-            height: 15px;
-            border-radius: 12px 12px 1px 3px;
+            height: 12px;
+            border-radius: 12px 12px 3px 3px;
             background-color: #D28546;
-            top: 3px;
+            top: 6px;
         }
         /* 🥬 2本目：レタス（緑） */
         .burger-menu span:nth-child(2) { height: 3px; border-radius: 2px; background-color: #2ECC71; top: 22px; transform: translateY(-5px); width: 34px; }
@@ -558,10 +558,10 @@
         .burger-menu span:nth-child(4) { height: 4px; border-radius: 2px; background-color: #5C3A21; top: 19px; transform: translateY(5px); width: 32px; }
         /* 🍔 5本目：下のバンズ */
         .burger-menu span:nth-child(5) {
-            height: 8px;
+            height: 6px;
             border-radius: 3px 3px 6px 6px;
             background-color: #D28546;
-            bottom: 8px;
+            bottom: 11px;
         }
 
         /* ==========================================
@@ -588,14 +588,14 @@
         /* --- 1本目（上）のアニメーション --- */
         @keyframes final-pacman-top {
             0%       { top: 6px;  height: 12px; border-radius: 12px 12px 3px 3px; transform: rotate(0deg); }
-            20%, 55% { top: 4px;  height: 18px; border-radius: 18px 18px 0 0;     transform: rotate(25deg); } /* 👈 -25deg から 25deg に変更 */
-            75%, 100%{ top: 19px; height: 6px;  border-radius: 3px;               transform: rotate(-45deg); } /* 👈 135deg から -45deg に変更（または 315deg） */
+            20%, 55% { top: 4px;  height: 18px; border-radius: 18px 18px 0 0;     transform: rotate(25deg); }
+            75%, 100%{ top: 19px; height: 6px;  border-radius: 3px;               transform: rotate(-405deg); }
         }
         /* --- 5本目（下）のアニメーション --- */
         @keyframes final-pacman-bottom {
             0%       { bottom: 6px;  height: 8px;  border-radius: 3px 3px 6px 6px; transform: rotate(0deg); }
-            20%, 55% { bottom: 4px;  height: 18px; border-radius: 0 0 18px 18px;   transform: rotate(-25deg); } /* 👈 25deg から -25deg に変更 */
-            75%, 100%{ bottom: 19px; height: 6px;  border-radius: 3px;             transform: rotate(45deg); } /* 👈 45deg のままでOK、または「×」にするなら調整 */
+            20%, 55% { bottom: 4px;  height: 18px; border-radius: 0 0 18px 18px;   transform: rotate(-25deg); }
+            75%, 100%{ bottom: 19px; height: 6px;  border-radius: 3px;             transform: rotate(45deg); }
         }
         
         #menu-btn-check:checked ~ nav { left: 0; }
