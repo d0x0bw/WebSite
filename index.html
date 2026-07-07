@@ -3,349 +3,350 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INDEX - d0x0bw -</title>
+  <title>SHERRY's GARDEN</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
 
-  <link rel="icon" href="./icon/favicon.png" type="image/png">
-
-  <style>
-    /* 全体のリセットと基本設定 */
-    * {
-      box-sizing: border-box;
-    }
-    
-    body {
-      margin: 0;
-      padding: 1rem;
-      background-color: #f9f8f2;
-      color: #614f38;
-      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-      line-height: 1.4;
-    }
-
-    /* メインコンテナ（レスポンシブ対応） */
-    .main {
-      max-width: 1600px;
-      margin: 0 auto;
-      width: 100%; /* スマホ表示時は横幅いっぱいに */
-    }
-
-    /* リンクのスタイル */
-    a {
-      color: #29a7e1;
-      font-size: 0.8rem; /* 12px 相当 */
-      text-decoration: none;
-      transition: color 0.2s ease; /* 滑らかな変化 */
-    }
-    a:hover {
-      color: #f39801;
-    }
-
-    .btn {
-      display: inline-block;
-      position: relative;
-      background: none;
-      color: #29a7e1;
-      font-size: 1.2rem;
-      overflow: hidden;
-      border: 0px solid #614f38;
-      padding: 0.6rem 1.0rem 0.6rem 2.4rem;
-      transition: all .3s;
-      border-radius: 4px;
-      z-index: 1; /* 基準のz-indexを設定 */
-
-      &:before,
-      &:after {
-        content: "";
-        position: absolute;
-        display: block;
-        top: 50%;
-      }
-
-      &:before {
-        width: 7px;
-        height: 7px;
-        left: 0.4rem;
-        border-top: solid 2px #fff;
-        border-right: solid 2px #fff;
-        z-index: 3; /* 文字より前面、背景より前面 */
-        transform: translateY(-50%) rotate(45deg);
-        transition: all .3s;
-      }
-
-      /* 初期状態の背景サークル */
-      &:after {
-        left: -2rem;
-        background: #f39801;
-        z-index: 2; /* 文字の後ろ、ボタン背景の前 */
-        width: 3.8rem;
-        height: 130%;
-        border-radius: 50%;
-        transform: translateY(-50%);
-        transition: all .4s ease-in-out; /* 変化を少し滑らかに */
-      }
-
-      span {
-        position: relative; /* z-indexを有効にするため必要 */
-        transition: all .3s;
-        z-index: 3; /* 背景（z-index: 2）より上に配置 */
-      }
-
-      /* PCでのホバー時、およびスマホでのタップ時（is-active）の挙動 */
-      &:hover,
-      &.is-active {
-        color: #fff; /* 全体の文字色を白に */
-      
-        span {
-          color: #fff;
-        }
-
-        &:after {
-          left: 0;
-          width: 100%; /* 横幅いっぱいに広げる */
-          height: 100%;
-          border-radius: 0;
-        }
-      }
-    }
-
-    /* ヘッダー部分 */
-    .head h1 {
-      font-size: 1.625rem; /* 26px 相当 */
-      font-family: 'Arial Black', Arial, Helvetica, sans-serif;
-      text-align: center;
-      color: #614f38;
-      margin-top: 3px;
-      margin-bottom: 8px;
-    }
-
-    .head p {
-      max-width: 350px;
-      margin-top: 0;
-      text-align: center;
-      font-size: 0.875rem; /* 14px 相当 */
-    }
-    /* 1文字ずつの色設定 */
-    .head h1 .color-1 { color: #ff5f5f; } /* 赤 */
-    .head h1 .color-2 { color: #ffbc00; } /* 黄 */
-    .head h1 .color-3 { color: #9ccc65; } /* 黄緑 */
-    .head h1 .color-4 { color: #29a7e1; } /* 水色 */
-    .head h1 .color-5 { color: #b39ddb; } /* 薄紫 */
-
-    /* メニュー部分（基本：スマホ表示のスタイル） */
-    .menu {
-      margin-top: 30px;
-    }
-
-    /* カード状に並べるグリッド（スマホ：1列 / PCは下のmedia queryで複数列に） */
-    .menu-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-    }
-
-    /* 各メニュー項目を「カード」として表示（スマホ表示時は横並び） */
-    .menu-item {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      text-align: left;
-      justify-content: flex-start;
-      gap: 16px;
-      background-color: #ffffff;
-      padding: 24px 18px;
-      margin-top: 0px;
-      border-radius: 14px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
-    }
-
-    /* カードにホバーした時にカード全体を少し浮き上げる */
-    .menu-item:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-    /* カード内の画像はコンパクトに */
-    .menu-item img {
-      border: none;
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-      flex-shrink: 0;         /* 画像が潰れるのを防ぐ */
-      filter:drop-shadow(3px 3px 5px #d8d5c8);
-      transition: transform 0.3s ease;
-    }
-
-    .menu-item img:hover {
-      transform: scale(1.08);
-    }
-
-    .menu-text {
-      font-size: 0.75rem;
-    }
-
-    .menu-text p {
-      font-size: 0.75rem;
-    }
-
-    .menu-title {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    /* フッター部分 */
-    .copy {
-      font-size: 0.625rem; /* 10px 相当 */
-      text-align: center;
-      margin-top: 24px;
-      margin-bottom: 8px;
-      padding-top: 14px;
-      border-top: solid 0px #e8e6da;
-    }
-    .copy a   {
-      color: #f39801;
-      font-size: 0.625rem;
-    }
-    .copy a:hover   {
-      color: #ff6600;
-      font-size: 0.625rem;
-    }
-
-    /* === PC表示（画面幅が451px以上）のときの設定 === */
-    @media (min-width: 550px) {
-      body {
-        display: flex;
-        justify-content: center; /* 左右の中央揃え */
-        align-items: top;     /* 上下の中央揃え */
-        min-height: auto;       /* 画面全体の高さを基準にする */
-        background-color: #f9f8f2;
-      }
-      
-      .main {
-        max-width: 1600px;
-        background-color: #f9f8f2;
-        padding: 30px;             /* 枠内の余白 */
-        border-radius: 8px;        /* 緩やかな角丸 */
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 綺麗な影をつける */
-      }
-
-      /* 【PC時】カードを複数列のグリッドに並べる */
-      .menu-list {
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 20px;
-      }
-
-      /* PC表示（複数列）のときは、元の縦並び・中央揃えに戻す */
-      .menu-item {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 8px;
-      }
-    }
-  </style>
 </head>
 <body>
 
-<div class="main">
-
-  <header class="head">
-    <h1 lang="en">
-      <span class="color-1">I</span><span class="color-2">N</span><span class="color-3">D</span><span class="color-4">E</span><span class="color-5">X</span> 🗂️
-    </h1>
+  <header class="header">
+    <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
   </header>
 
-  <main class="menu">
-    <ul class="menu-list">
-      
-      <li class="menu-item">
-        <a href="./sherrys-garden/index.html">
-          <img src="./icon/icon.png" alt="SHERRY's GARDEN">
-        </a>
-        <div class="menu-text">
-          <div class="menu-title"><a href="./sherrys-garden/index.html" class="btn"><span>SHERRY's GARDEN</span></a></div>
-          <p>何気なく撮りためた写真を公開しています📷</p>
-        </div>
+  <input type="checkbox" id="menu-btn-check">
+  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+
+<nav class="menu-content">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li class="has-sub-menu">
+        <a href="#gallery" class="sub-menu-toggle">Gallery</a>
+        <ul class="sub-menu">
+          <li><a href="gallery1.html">Gallery1</a></li>
+          <li><a href="gallery2.html">Gallery2</a></li>
+        </ul>
+      </li>
+      <li class="has-sub-menu">
+        <a href="#profile" class="sub-menu-toggle">Profile</a>
+        <ul class="sub-menu">
+          <li><a href="profile1.html">Profile1</a></li>
+        </ul>
       </li>
 
-      <li class="menu-item">
-        <a href="./test/index.html">
-          <img src="./icon/icon4.png" alt="TEST PAGE">
-        </a>
-        <div class="menu-text">
-          <div class="menu-title"><a href="./test/index.html" class="btn"><span>SHERRY's GARDEN Test ver.</span></a></div>
-          <p>ぼちぼち更新中🐈</p>
-        </div>
-      </li>
-
-      <li class="menu-item">
-        <a href="./test2/StackLayout.html">
-          <img src="./icon/icon5.png" alt="TEST PAGE 2">
-        </a>
-        <div class="menu-text">
-          <div class="menu-title"><a href="./test2/StackLayout.html" class="btn"><span>映画データベース風</span></a></div>
-          <p>更新中(テストページ2)🎥</p>
-        </div>
-      </li>
-
-      <li class="menu-item">
-        <a href="./test2/3columns.html">
-          <img src="./icon/icon6.png" alt="TEST PAGE 3">
-        </a>
-        <div class="menu-text">
-          <div class="menu-title"><a href="./test3/tantei.html" class="btn"><span>パソコン探偵倶楽部</span></a></div>
-          <p>遊び🎮</p>
-        </div>
-      </li>
-
+      <li><a href="#link">Link</a></li>
     </ul>
+  </nav>
+  <label for="menu-btn-check" class="menu-background"></label>
+
+  <main class="content">
+    <div class="main-image">
+      <div class="main-image-wrapper">
+        <img src="./Photo/top photo.jpg" alt="メインイメージ" title="シェリーとラム">
+        <img src="./Photo/top photo3.jpg" alt="メインイメージ" title="シェリーとラム">
+        <img src="./Photo/top photo4.jpg" alt="メインイメージ" title="シェリーとラム">
+        <img src="./Photo/top photo2.jpg" alt="メインイメージ" title="シェリーとラム">
+
+      </div>
+    </div>
+    
+    <div class="title-area">
+      <p class="text">SHERRY's GARDEN<span>since 2023</span></p>
+    </div>
+
+    <div class="intro-text">
+      <h1>猫たちと過ごす穏やかな時間</h1>
+      <p>May all living things be treated with love.🌞🌜️✨️</p>
+    </div>
+
+    <section id="about">
+      <h2 class="section-title">About</h2>
+      <div class="feature-item">
+        <div class="feature-img">
+          <img src="../icon/icon.png" alt="画像" title="ラム" loading="lazy">
+        </div>
+        <div class="feature-text">
+          <h3>Concept</h3>
+          <p>何気なく撮りためた写真たち。<br>それらを一つの形にしたいという想いから。<br>このプライベートガーデンは始まりました。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <h2 class="section-title">Gallery</h2>
+
+        <div id="random-gallery" class="gallery-grid">
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop1" class="pop-check">
+          <label for="pop1"><img src="./Photo thumb/th photo 1.jpg" alt="Gallery 1" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop1" class="pop-close-area"><img src="./Photo/photo 1.jpg" alt="Gallery 1 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop2" class="pop-check">
+          <label for="pop2"><img src="./Photo thumb/th photo 2.jpg" alt="Gallery 2" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop2"><img src="./Photo/photo 2.jpg" alt="Gallery 2 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop3" class="pop-check">
+          <label for="pop3"><img src="./Photo thumb/th photo 3.jpg" alt="Gallery 3" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop3"><img src="./Photo/photo 3.jpg" alt="Gallery 3 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop4" class="pop-check">
+          <label for="pop4"><img src="./Photo thumb/th photo 4.jpg" alt="Gallery 4" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop4"><img src="./Photo/photo 4.jpg" alt="Gallery 4 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop5" class="pop-check">
+          <label for="pop5"><img src="./Photo thumb/th photo 5.jpg" alt="Gallery 5" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop5"><img src="./Photo/photo 5.jpg" alt="Gallery 5 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop6" class="pop-check">
+          <label for="pop6"><img src="./Photo thumb/th photo 6.jpg" alt="Gallery 6" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop6"><img src="./Photo/photo 6.jpg" alt="Gallery 6 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop7" class="pop-check">
+          <label for="pop7"><img src="./Photo thumb/th photo 7.jpg" alt="Gallery 7" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop7"><img src="./Photo/photo 7.jpg" alt="Gallery 7 拡大"></label></div>
+        </div>
+
+        <div class="gallery-item">
+          <input type="checkbox" id="pop8" class="pop-check">
+          <label for="pop8"><img src="./Photo thumb/th photo 8.jpg" alt="Gallery 8" loading="lazy"></label>
+          <div class="pop-overlay"><label for="pop8"><img src="./Photo/photo 8.jpg" alt="Gallery 8 拡大"></label></div>
+        </div>
+
+        </div>
+
+    </section>
+
+      <div class="gallery-grid v-grid">
+        <a href="gallery1.html" class="gallery-more-btn">
+          <span>More</span>
+        </a>
+      </div>
+
+
+    <section id="profile">
+      <h2 class="section-title">Profile</h2>
+
+      <article class="cat-profile">
+        <div class="profile-header">
+          <div class="profile-img"><img src="./Photo/rum2.jpg" alt="茶トラ白（まるどら）" loading="lazy"></div>
+          <div class="profile-summary">
+            <h3 class="cat-name"><big>ラム</big>(茶トラ白)<span><big>Rum</big>(Red Tabby Mix)</span></h3>
+            <p>好奇心旺盛、元気で活発な女の子。<br>温かみのあるオレンジ色の縞模様がチャームポイント。<br>親しみやすさと愛嬌で、みんなを笑顔にしてくれるアイドルです。</p>
+          </div>
+        </div>
+        <table class="spec-table">
+          <tr><th>性格</th><td>甘えん坊、陽気、人懐っこい、好奇心旺盛、食いしん坊(笑)</td></tr>
+          <tr><th>毛種</th><td>短毛種</td></tr>
+          <tr><th>毛質</th><td>柔らかく、密度の高い日本猫らしい毛並み</td></tr>
+          <tr><th>毛色</th><td>ジンジャー（明るい茶色）、ホワイト</td></tr>
+          <tr><th>模様</th><td>マッカレルタビー（魚の骨のような美しい縞模様）</td></tr>
+          <tr><th>体型</th><td>フォーリン（スマートで引き締まった体型）</td></tr>
+          <tr><th>チャームポイント</th><td>クリクリの大きな瞳と、おでこの見事なM字マーク</td></tr>
+        </table>
+      </article>
+
+      <div class="gallery-grid v-grid">
+        <a href="profile1.html" class="gallery-more-btn">
+          <span>More</span>
+        </a>
+      </div>
+    </section>
+
+    <section id="link">
+      <h2 class="section-title">Link</h2>
+      <div class="link-buttons">
+        <a href="../index.html" class="btn">X (Twitter)未開設</a>
+        <a href="../index.html" class="btn">INDEX</a>
+      </div>
+    </section>
   </main>
 
-  <footer class="copy">
-    <small>Copyright (C) <a href="index.html">d0x0bw</a>. All Rights Reserved.</small>
+  <footer class="footer">
+    <p>&copy; 2026 SHERRY's GARDEN・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
   </footer>
 
-</div>
-<script>
-  // 1. ボタン（.btn）のクリックイベントを設定
-  document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      const targetUrl = this.getAttribute('href');
-      
-      this.classList.add('is-active');
-      
-      setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 400); 
-    });
-  });
+  <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
-  // 2. 【追加】画像（.menu-item img）のクリックイベントを設定
-  document.querySelectorAll('.menu-item img').forEach(img => {
-    img.addEventListener('click', function(e) {
-      // 一度画像のリンク遷移をキャンセル
-      e.preventDefault();
-      
-      // 同じリスト（.menu-item）の中にあるボタン（.btn）を探す
-      const menuItem = this.closest('.menu-item');
-      const targetButton = menuItem.querySelector('.btn');
-      const targetUrl = targetButton.getAttribute('href');
-      
-      if (targetButton) {
-        // ボタンにクラスを付与して、文字の背景アニメーションを発火させる
-        targetButton.classList.add('is-active');
+  <script>
+    /* メニュー関連の要素を取得 */
+    const menuCheck = document.getElementById('menu-btn-check');
+    const menuLinks = document.querySelectorAll('.menu-content a');
+    const menuBg = document.querySelector('.menu-background');
+
+    // 1. スマホのメニューを開いた時に、背景がスクロールしないようにロックする
+    menuCheck.addEventListener('change', () => {
+      if (menuCheck.checked) {
+        document.body.style.overflow = 'hidden'; // スクロール禁止
+      } else {
+        document.body.style.overflow = '';       // スクロール許可
       }
-      
-      // アニメーション完了後にページ遷移
-      setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 400);
     });
-  });
-</script>
+
+    // 2. メニュー内のリンクをクリックした時の動き
+    menuLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        // スマホ画面かつ「Gallery」などの親メニューの場合は、そのままサブメニューを開くために処理を中断
+        if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) {
+          return; 
+        }
+        // それ以外のリンク（ページ移動）ならメニューを閉じる
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    });
+
+    // 3. 暗い背景部分をクリックしたら確実にメニューを閉じる
+    if (menuBg) {
+      menuBg.addEventListener('click', () => { 
+        menuCheck.checked = false; 
+        document.body.style.overflow = ''; 
+      });
+    }
+
+    // 4. トップへ戻るボタンの表示・非表示の切り替え
+    const goTopBtn = document.querySelector('.gotop');
+
+    // JSが動いている場合は、初期状態を「非表示」にする（JSオフの環境に配慮した設計）
+    if (goTopBtn) {
+      goTopBtn.classList.add('js-hidden');
+    }
+
+    window.addEventListener('scroll', () => {
+      // 画面が200px以上下にスクロールされたらボタンを表示
+      if (window.scrollY > 200) {
+        goTopBtn.classList.remove('js-hidden');
+        goTopBtn.classList.add('is-show');
+      } else {
+        // 200px未満（一番上付近）ならボタンを隠す
+        goTopBtn.classList.add('js-hidden');
+        goTopBtn.classList.remove('is-show');
+      }
+    });
+
+    // 5. ギャラリー画像をランダムで8枚選んで表示する処理
+    // ① 表示させたい画像のファイル名をすべてリストアップ
+const photoFiles = [
+  "photo 1.jpg",
+  "photo 2.jpg",
+  "photo 3.jpg",
+  "photo 4.jpg",
+  "photo 5.jpg",
+  "photo 6.jpg",
+  "photo 7.jpg",
+  "photo 8.jpg",
+  "photo 9.jpg",
+  "photo 10.jpg",
+  "photo 11.jpg",
+  "photo 12.jpg",
+  "photo 13.jpg",
+  "photo 14.jpg",
+  "photo 15.jpg",
+  "photo 16.jpg",
+  "photo 17.jpg",
+  "photo 18.jpg",
+  "photo 19.jpg",
+  "photo 20.jpg",
+  "photo 31.jpg",
+  "photo 32.jpg",
+  "photo 33.jpg",
+  "photo 34.jpg",
+  "photo 35.jpg",
+  "photo 36.jpg",
+  "photo 37.jpg",
+  "photo 38.jpg",
+  "photo 39.jpg",
+  "photo 40.jpg",
+  "photo 41.jpg",
+  "photo 42.jpg",
+  "photo 43.jpg",
+  "photo 44.jpg",
+  "photo 45.jpg",
+  "photo 46.jpg",
+  "photo 47.jpg",
+  "photo 48.jpg",
+  "photo 49.jpg",
+  "photo 50.jpg",
+  "photo 51.jpg",
+  "photo 52.jpg",
+  "photo 53.jpg",
+  "photo 54.jpg",
+  "photo 55.jpg",
+  "photo 56.jpg",
+  "photo 57.jpg",
+  "photo 58.jpg",
+  "photo 59.jpg",
+  "photo 60.jpg",
+  "photo 61.jpg",
+  "photo 62.jpg",
+  "photo 63.jpg",
+  "photo 64.jpg",
+  "photo 65.jpg",
+  "photo 66.jpg",
+  "photo 67.jpg"
+];
+
+    // ② 配列の順番をバラバラにする関数（シャッフル）
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    // ③ 実際にランダムに画像を表示する関数
+    function renderRandomGallery() {
+      const galleryContainer = document.getElementById('random-gallery');
+      if (!galleryContainer) return; // ギャラリーエリアがないページでは何もしない
+
+      // HTMLに手書きしてあったデフォルトの8枚を消す
+      galleryContainer.innerHTML = '';
+
+      // リストをシャッフルする
+      const shuffledPhotos = shuffleArray([...photoFiles]);
+
+      // シャッフルした中から最初の8枚だけを取り出す
+      const selectedPhotos = shuffledPhotos.slice(0, 8);
+
+      // 選ばれた8枚のHTMLブロックを作成して画面に追加する
+      selectedPhotos.forEach((fileName, index) => {
+        const popId = `pop-rand-${index}`; // ポップアップ用のIDが重複しないようにする
+        
+        const itemHtml = `
+          <div class="gallery-item">
+            <input type="checkbox" id="${popId}" class="pop-check">
+            <label for="${popId}">
+              <img src="./Photo thumb/th ${fileName}" alt="Gallery ${index + 1}">
+            </label>
+            <div class="pop-overlay">
+              <label for="${popId}" class="pop-close-area">
+                <img src="./Photo/${fileName}" alt="Gallery ${index + 1} 拡大">
+              </label>
+            </div>
+          </div>
+        `;
+        // 作成したHTMLをギャラリーエリアの末尾に挿入
+        galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
+      });
+    }
+
+    // ページ（HTML）の読み込みが完了した瞬間に上記のランダム表示処理を実行する
+    document.addEventListener('DOMContentLoaded', renderRandomGallery);
+  </script>
 
 </body>
 </html>
