@@ -16,6 +16,7 @@
       background: #000;
       color: #00ff41;
       font-family: 'Courier New', monospace;
+      font-weight: bold;
       height: 100vh;
       overflow: hidden;
       display: flex;
@@ -414,7 +415,7 @@
     ctx.fillStyle = bgBase;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.font = `${fs}px monospace`;
+    ctx.font = `bold ${fs}px monospace`;
     ctx.shadowBlur = 12;
     ctx.shadowColor = currentColor.glow;
 
