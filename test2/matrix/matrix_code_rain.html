@@ -260,7 +260,7 @@
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
 
-  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ＠＃＄％＆＊＜＞［］｛｝＝±｜/￥￥？！';
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ日＠＃＄％＆＊{}[]＿；：・±｜/￥￥？！<>¦*⁼+-"'
 
   const COLOR_MAP = {
     green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)' },
@@ -289,14 +289,25 @@
   let rightIndex = 0;
 
   function drawChar(char, x, y) {
-    if (char >= 'ァ' && char <= 'ン') {
+    if (char >= 'ァ' && char <= 'ン' || char === '２' || char === '５' || char === '９') {
+      // 左右反転（カタカナ + ２・５・９）
       ctx.save();
       ctx.translate(x + fs / 2, y);
       ctx.scale(-1, 1);
       ctx.fillText(char, -fs / 2, 0);
       ctx.restore();
+    } else if (char === '３') {
+      // 上下反転
+      ctx.save();
+      ctx.translate(x, y - fs / 2);
+      ctx.scale(1, -1);
+      ctx.fillText(char, 0, fs / 2);
+      ctx.restore();
     } else {
-      ctx.fillText(char, x, y);
+      // 半角文字は幅が狭く左詰めになるため、セル中央に来るよう補正する
+      const width = ctx.measureText(char).width;
+      const offsetX = (fs - width) / 2;
+      ctx.fillText(char, x + offsetX, y);
     }
   }
 
