@@ -452,116 +452,268 @@
 
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    const popChecks = Array.from(document.querySelectorAll('.pop-check'));
+
+    // --- 1. モーダル上部ヘッダーUIの動的生成 ---
+    if (popChecks.length > 0) {
+      const modalHeader = document.createElement('div');
+      modalHeader.className = 'modal-header-ui';
+      modalHeader.innerHTML = `
+        <div class="modal-counter"><span id="current-photo-num">1</span> / ${popChecks.length}</div>
+        <div class="modal-controls">
+          <!-- スライドショーコントロール -->
+          <div class="slideshow-settings">
+            <svg class="play-pause-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="再生/一時停止">
+              <!-- 再生アイコン -->
+              <polygon points="5 3 19 12 5 21 5 3" class="play-icon"></polygon>
+              <!-- 一時停止アイコン (初期非表示) -->
+              <line x1="10" y1="5" x2="10" y2="19" class="pause-icon" style="display:none;"></line>
+              <line x1="14" y1="5" x2="14" y2="19" class="pause-icon" style="display:none;"></line>
+            </svg>
+            <span class="sec-btn minus-btn" title="秒数を減らす">−</span>
+            <span class="sec-display"><span id="slide-sec">5</span>秒</span>
+            <span class="sec-btn plus-btn" title="秒数を増やす">＋</span>
+          </div>
+          <!-- 全画面表示 -->
+          <svg class="fullscreen-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="全画面表示"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          <!-- 閉じる -->
+          <svg class="close-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="閉じる"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+      `;
+      document.body.appendChild(modalHeader);
+
+      // プログレスバーの生成
+      const progressBar = document.createElement('div');
+      progressBar.className = 'slideshow-progress';
+      progressBar.id = 'slideshow-progress';
+      document.body.appendChild(progressBar);
+    }
+
+    const currentNumSpan = document.getElementById('current-photo-num');
+    const playPauseBtn = document.querySelector('.play-pause-btn');
+    const playIcon = document.querySelector('.play-icon');
+    const pauseIcons = document.querySelectorAll('.pause-icon');
+    const minusBtn = document.querySelector('.minus-btn');
+    const plusBtn = document.querySelector('.plus-btn');
+    const secDisplay = document.getElementById('slide-sec');
+    const progressBar = document.getElementById('slideshow-progress');
+    const fullscreenBtn = document.querySelector('.fullscreen-btn');
+    const closeBtn = document.querySelector('.close-btn');
+
+    let isPlaying = false;
+    let slideDuration = 5; // デフォルト5秒
+    let slideshowTimer = null;
+
+    // 写真の切り替えとカウンター更新を行う共通関数
+    function switchPhoto(newIndex) {
+      const activeIndex = popChecks.findIndex(c => c.checked);
+      if (activeIndex !== -1) popChecks[activeIndex].checked = false;
+      popChecks[newIndex].checked = true;
+      if (currentNumSpan) currentNumSpan.textContent = newIndex + 1;
+      updateScrollLock();
+    }
+
+    // アイコンの切り替え処理
+    function updatePlayPauseIcon() {
+      if (isPlaying) {
+        if (playIcon) playIcon.style.display = 'none';
+        pauseIcons.forEach(el => el.style.display = 'block');
+      } else {
+        if (playIcon) playIcon.style.display = 'block';
+        pauseIcons.forEach(el => el.style.display = 'none');
+      }
+    }
+
+    // プログレスバーのアニメーション処理
+    function startProgress() {
+      if (!progressBar) return;
+      // アニメーションをリセット
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
       
-      // --- 共通状態管理：スクロールロック ---
-      // メニューやモーダルの状態を一括監視してbodyのスクロールを制御
-      function updateScrollLock() {
-        const menuCheck = document.getElementById('menu-btn-check');
-        const anyPopOpen = popChecks.some(c => c.checked);
-        
-        if ((menuCheck && menuCheck.checked) || anyPopOpen) {
-          document.body.classList.add('is-locked');
-        } else {
-          document.body.classList.remove('is-locked');
-        }
-      }
-
-      // --- ハンバーガーメニュー制御 ---
-      const menuCheck = document.getElementById('menu-btn-check');
-      const menuLinks = document.querySelectorAll('.menu-content a');
-      const menuBg = document.querySelector('.menu-background');
-
-      if (menuCheck) {
-        menuCheck.addEventListener('change', updateScrollLock);
-        [...menuLinks, menuBg].forEach(el => {
-          el.addEventListener('click', () => { 
-            menuCheck.checked = false; 
-            updateScrollLock();
-          });
-        });
-      }
-
-      // --- トップ戻りボタン制御 ---
-      const goTopBtn = document.querySelector('.gotop');
-      if (goTopBtn) {
-        goTopBtn.classList.add('js-hidden');
-        // 連続スクロール時の負荷を軽減（パッシブイベント）
-        window.addEventListener('scroll', () => {
-          if (window.scrollY > 300) {
-            goTopBtn.classList.add('is-show');
-          } else {
-            goTopBtn.classList.remove('is-show');
-          }
-        }, { passive: true });
-      }
-
-      // --- ギャラリーモーダル & スライド機能 ---
-      const popChecks = Array.from(document.querySelectorAll('.pop-check'));
+      // リフローを強制して0%を即座に反映させる
+      progressBar.offsetHeight;
       
-      popChecks.forEach((check, index) => {
-        const overlay = check.parentElement.querySelector('.pop-overlay');
-        if (!overlay) return;
-
-        const prevIndex = (index - 1 + popChecks.length) % popChecks.length;
-        const nextIndex = (index + 1) % popChecks.length;
-
-        // 「前へ」ボタン生成
-        const prevBtn = document.createElement('div');
-        prevBtn.className = 'pop-nav prev';
-        prevBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
-        prevBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation(); 
-          check.checked = false;
-          popChecks[prevIndex].checked = true;
-          updateScrollLock();
-        });
-        overlay.appendChild(prevBtn);
-
-        // 「次へ」ボタン生成
-        const nextBtn = document.createElement('div');
-        nextBtn.className = 'pop-nav next';
-        nextBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
-        nextBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation(); 
-          check.checked = false;
-          popChecks[nextIndex].checked = true;
-          updateScrollLock();
-        });
-        overlay.appendChild(nextBtn);
-
-        // 画像そのもののクリックは閉じないようにガード
-        const img = overlay.querySelector('.full-img');
-        if (img) {
-          img.addEventListener('click', (e) => {
-            e.stopPropagation();
-          });
-        }
-
-        // チェックボックス変化時にスクロールを制御
-        check.addEventListener('change', updateScrollLock);
+      // CSSトランジションを使用して設定秒数かけて幅を100%にする
+      requestAnimationFrame(() => {
+        progressBar.style.transition = `width ${slideDuration}s linear`;
+        progressBar.style.width = '100%';
       });
+    }
 
-      // キーボード操作（左右矢印でスライド、Escで閉じる）
-      document.addEventListener('keydown', (e) => {
+    // スライドショーの実行ループ
+    function runSlideShow() {
+      if (!isPlaying) return;
+      startProgress();
+      slideshowTimer = setTimeout(() => {
         const activeIndex = popChecks.findIndex(c => c.checked);
-        if (activeIndex === -1) return;
+        if (activeIndex !== -1) {
+          const nextIndex = (activeIndex + 1) % popChecks.length;
+          switchPhoto(nextIndex);
+        }
+        runSlideShow(); // 次の切り替えを予約
+      }, slideDuration * 1000);
+    }
 
-        if (e.key === 'ArrowRight') {
-          popChecks[activeIndex].checked = false;
-          popChecks[(activeIndex + 1) % popChecks.length].checked = true;
-        } else if (e.key === 'ArrowLeft') {
-          popChecks[activeIndex].checked = false;
-          popChecks[(activeIndex - 1 + popChecks.length) % popChecks.length].checked = true;
-        } else if (e.key === 'Escape') {
-          popChecks[activeIndex].checked = false;
+    function startSlideshow() {
+      if (isPlaying) return;
+      isPlaying = true;
+      updatePlayPauseIcon();
+      runSlideShow();
+    }
+
+    function stopSlideshow() {
+      isPlaying = false;
+      updatePlayPauseIcon();
+      clearTimeout(slideshowTimer);
+      if (progressBar) {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+      }
+    }
+
+    // --- 2. 共通状態管理：スクロールロック ---
+    function updateScrollLock() {
+      const menuCheck = document.getElementById('menu-btn-check');
+      const anyPopOpen = popChecks.some(c => c.checked);
+      
+      if ((menuCheck && menuCheck.checked) || anyPopOpen) {
+        document.body.classList.add('is-locked');
+      } else {
+        document.body.classList.remove('is-locked');
+        stopSlideshow(); // ギャラリーを閉じたらスライドショーも停止させる
+      }
+    }
+
+    // --- 3. イベントリスナー（上部UIボタン） ---
+    if (playPauseBtn) {
+      playPauseBtn.addEventListener('click', () => {
+        if (isPlaying) stopSlideshow();
+        else startSlideshow();
+      });
+    }
+
+    if (minusBtn) {
+      minusBtn.addEventListener('click', () => {
+        if (slideDuration > 1) { // 最小1秒
+          slideDuration--;
+          if (secDisplay) secDisplay.textContent = slideDuration;
+          if (isPlaying) {
+            stopSlideshow();
+            startSlideshow(); // 秒数が変わったらタイマーとバーをリセットして再開
+          }
+        }
+      });
+    }
+
+    if (plusBtn) {
+      plusBtn.addEventListener('click', () => {
+        slideDuration++;
+        if (secDisplay) secDisplay.textContent = slideDuration;
+        if (isPlaying) {
+          stopSlideshow();
+          startSlideshow(); // 秒数が変わったらタイマーとバーをリセットして再開
+        }
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        popChecks.forEach(c => c.checked = false);
+        updateScrollLock();
+      });
+    }
+
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => console.log(err));
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      });
+    }
+
+    // --- 4. ギャラリーモーダル & 左右スライド機能 ---
+    popChecks.forEach((check, index) => {
+      const overlay = check.parentElement.querySelector('.pop-overlay');
+      if (!overlay) return;
+
+      const prevIndex = (index - 1 + popChecks.length) % popChecks.length;
+      const nextIndex = (index + 1) % popChecks.length;
+
+      const prevBtn = document.createElement('div');
+      prevBtn.className = 'pop-nav prev';
+      prevBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        if(isPlaying) { stopSlideshow(); startSlideshow(); } // 手動切り替え時にリセット
+        switchPhoto(prevIndex);
+      });
+      overlay.appendChild(prevBtn);
+
+      const nextBtn = document.createElement('div');
+      nextBtn.className = 'pop-nav next';
+      nextBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        if(isPlaying) { stopSlideshow(); startSlideshow(); } // 手動切り替え時にリセット
+        switchPhoto(nextIndex);
+      });
+      overlay.appendChild(nextBtn);
+
+      const img = overlay.querySelector('.full-img');
+      if (img) img.addEventListener('click', (e) => e.stopPropagation());
+
+      check.addEventListener('change', () => {
+        if (check.checked && currentNumSpan) {
+          currentNumSpan.textContent = index + 1;
         }
         updateScrollLock();
       });
     });
-  </script>
+
+    // --- 5. キーボード操作 ---
+    document.addEventListener('keydown', (e) => {
+      const activeIndex = popChecks.findIndex(c => c.checked);
+      if (activeIndex === -1) return;
+
+      if (e.key === 'ArrowRight') {
+        if(isPlaying) { stopSlideshow(); startSlideshow(); }
+        switchPhoto((activeIndex + 1) % popChecks.length);
+      } else if (e.key === 'ArrowLeft') {
+        if(isPlaying) { stopSlideshow(); startSlideshow(); }
+        switchPhoto((activeIndex - 1 + popChecks.length) % popChecks.length);
+      } else if (e.key === 'Escape') {
+        popChecks[activeIndex].checked = false;
+        updateScrollLock();
+      }
+    });
+
+    // --- 6. ハンバーガーメニュー & トップ戻りボタン制御 ---
+    const menuCheck = document.getElementById('menu-btn-check');
+    const menuLinks = document.querySelectorAll('.menu-content a');
+    const menuBg = document.querySelector('.menu-background');
+    if (menuCheck) {
+      menuCheck.addEventListener('change', updateScrollLock);
+      [...menuLinks, menuBg].forEach(el => {
+        if(el) el.addEventListener('click', () => { menuCheck.checked = false; updateScrollLock(); });
+      });
+    }
+
+    const goTopBtn = document.querySelector('.gotop');
+    if (goTopBtn) {
+      goTopBtn.classList.add('js-hidden');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) goTopBtn.classList.add('is-show');
+        else goTopBtn.classList.remove('is-show');
+      }, { passive: true });
+    }
+  });
+</script>
+
 </body>
 </html>
