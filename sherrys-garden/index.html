@@ -71,73 +71,60 @@
       </div>
     </section>
 
-
-<!-- Galleryセクション -->
+    <!-- Galleryセクション -->
     <section id="gallery">
-      <h2 class="section-title">Gallery</h2>
+      <h2 class="section-title fade-in">Gallery</h2>
 
-  <!-- JSがオンの場合は以下の8枚が消去されてランダム表示に上書きされ、
-       JSがオフの場合は以下の8枚がそのまま表示されます -->
-
-        <div id="random-gallery" class="gallery-grid">
+      <!-- JSオフ時用フォールバック表示 -->
+      <div id="random-gallery" class="gallery-grid">
         <div class="gallery-item">
-          <input type="checkbox" id="pop1" class="pop-check">
-          <label for="pop1" class="thumb-label"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop1" class="pop-img-wrap"><img src="./photos/photo-01.jpg" alt="Gallery 1 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop1" class="pop-check" style="display: none;">
+          <label for="idx-pop1" class="thumb-label fade-in"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop1" class="pop-img-wrap"><img src="./photos/photo-01.jpg" alt="Gallery 1 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop2" class="pop-check">
-          <label for="pop2" class="thumb-label"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop2" class="pop-img-wrap"><img src="./photos/photo-02.jpg" alt="Gallery 2 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop2" class="pop-check" style="display: none;">
+          <label for="idx-pop2" class="thumb-label fade-in"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop2" class="pop-img-wrap"><img src="./photos/photo-02.jpg" alt="Gallery 2 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop3" class="pop-check">
-          <label for="pop3" class="thumb-label"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop3" class="pop-img-wrap"><img src="./photos/photo-03.jpg" alt="Gallery 3 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop3" class="pop-check" style="display: none;">
+          <label for="idx-pop3" class="thumb-label fade-in"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop3" class="pop-img-wrap"><img src="./photos/photo-03.jpg" alt="Gallery 3 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop4" class="pop-check">
-          <label for="pop4" class="thumb-label"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop4" class="pop-img-wrap"><img src="./photos/photo-04.jpg" alt="Gallery 4 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop4" class="pop-check" style="display: none;">
+          <label for="idx-pop4" class="thumb-label fade-in"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop4" class="pop-img-wrap"><img src="./photos/photo-04.jpg" alt="Gallery 4 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop5" class="pop-check">
-          <label for="pop5" class="thumb-label"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop5" class="pop-img-wrap"><img src="./photos/photo-05.jpg" alt="Gallery 5 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop5" class="pop-check" style="display: none;">
+          <label for="idx-pop5" class="thumb-label fade-in"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop5" class="pop-img-wrap"><img src="./photos/photo-05.jpg" alt="Gallery 5 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop6" class="pop-check">
-          <label for="pop6" class="thumb-label"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop6" class="pop-img-wrap"><img src="./photos/photo-06.jpg" alt="Gallery 6 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop6" class="pop-check" style="display: none;">
+          <label for="idx-pop6" class="thumb-label fade-in"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop6" class="pop-img-wrap"><img src="./photos/photo-06.jpg" alt="Gallery 6 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop7" class="pop-check">
-          <label for="pop7" class="thumb-label"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop7" class="pop-img-wrap"><img src="./photos/photo-07.jpg" alt="Gallery 7 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop7" class="pop-check" style="display: none;">
+          <label for="idx-pop7" class="thumb-label fade-in"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop7" class="pop-img-wrap"><img src="./photos/photo-07.jpg" alt="Gallery 7 拡大" class="full-img"></label></div>
         </div>
-
         <div class="gallery-item">
-          <input type="checkbox" id="pop8" class="pop-check">
-          <label for="pop8" class="thumb-label"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></label>
-          <div class="pop-overlay"><label for="pop8" class="pop-img-wrap"><img src="./photos/photo-08.jpg" alt="Gallery 8 拡大" class="full-img"></label></div>
+          <input type="checkbox" id="idx-pop8" class="pop-check" style="display: none;">
+          <label for="idx-pop8" class="thumb-label fade-in"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></label>
+          <div class="pop-overlay"><label for="idx-pop8" class="pop-img-wrap"><img src="./photos/photo-08.jpg" alt="Gallery 8 拡大" class="full-img"></label></div>
         </div>
+      </div>
 
-        </div>
-
+      <div class="gallery-grid v-grid fade-in" style="margin-top: 30px;">
+        <a href="gallery1.html" class="gallery-more-btn">
+          <span>More</span>
+        </a>
+      </div>
     </section>
-
-  <div class="gallery-grid v-grid fade-in">
-    <a href="gallery1.html" class="gallery-more-btn">
-      <span>More</span>
-    </a>
-  </div>
-</section>
 
     <!-- Profileセクション -->
     <section id="profile">
@@ -162,7 +149,7 @@
         </table>
       </article>
 
-      <div class="gallery-grid v-grid fade-in">
+      <div class="gallery-grid v-grid fade-in" style="margin-top: 30px;">
         <a href="profile1.html" class="gallery-more-btn">
           <span>More</span>
         </a>
@@ -186,128 +173,123 @@
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
 <script>
-    document.body.classList.add('js-active');
+  document.body.classList.add('js-active');
 
-    // スクロール監視関数（後から追加された動的要素にも対応できるように共通化）
-    let observer;
-    if (!CSS.supports('animation-timeline', 'view()')) {
-      observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-          }
-        });
-      }, {
-        rootMargin: '0px 0px -10% 0px'
-      });
-
-      document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    }
-
-    /* メニュー関連処理 */
-    const menuCheck = document.getElementById('menu-btn-check');
-    const menuLinks = document.querySelectorAll('.menu-content a');
-    const menuBg = document.querySelector('.menu-background');
-
-    if (menuCheck) {
-      menuCheck.addEventListener('change', () => {
-        document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
-      });
-    }
-
-    // 2. メニュー内のリンクをクリックした時の動き
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
-        if (menuCheck) menuCheck.checked = false; 
-        document.body.style.overflow = ''; 
-      });
-    });
-
-    // 3. 暗い背景部分をクリックしたら確実にメニューを閉じる
-    if (menuBg) {
-      menuBg.addEventListener('click', () => { 
-        if (menuCheck) menuCheck.checked = false; 
-        document.body.style.overflow = ''; 
-      });
-    }
-
-    /* トップへ戻るボタンの表示・非表示の切り替え */
-    const goTopBtn = document.querySelector('.gotop');
-    if (goTopBtn) goTopBtn.classList.add('js-hidden');
-
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 200) {
-        if (goTopBtn) {
-          goTopBtn.classList.remove('js-hidden');
-          goTopBtn.classList.add('is-show');
+  // 1. スクロール監視
+  let observer;
+  if (!CSS.supports('animation-timeline', 'view()')) {
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
         }
-      } else {
-        if (goTopBtn) {
-          goTopBtn.classList.add('js-hidden');
-          goTopBtn.classList.remove('is-show');
-        }
-      }
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  }
+
+  // 2. スマホメニュー制御
+  const menuCheck = document.getElementById('menu-btn-check');
+  const menuLinks = document.querySelectorAll('.menu-content a');
+  const menuBg = document.querySelector('.menu-background');
+
+  if (menuCheck) {
+    menuCheck.addEventListener('change', () => {
+      document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
     });
+  }
 
-    /* ランダムギャラリー表示処理(8枚選んで表示) */
-    const photoFiles = [
-      "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg", "photo-05.jpg",
-      "photo-06.jpg", "photo-07.jpg", "photo-08.jpg", "photo-09.jpg", "photo-10.jpg",
-      "photo-11.jpg", "photo-12.jpg", "photo-13.jpg", "photo-14.jpg", "photo-15.jpg",
-      "photo-16.jpg", "photo-17.jpg", "photo-18.jpg", "photo-19.jpg", "photo-20.jpg",
-      "photo-31.jpg", "photo-32.jpg", "photo-33.jpg", "photo-34.jpg", "photo-35.jpg",
-      "photo-36.jpg", "photo-37.jpg", "photo-38.jpg", "photo-39.jpg", "photo-40.jpg",
-      "photo-41.jpg", "photo-42.jpg", "photo-43.jpg", "photo-44.jpg", "photo-45.jpg",
-      "photo-46.jpg", "photo-47.jpg", "photo-48.jpg", "photo-49.jpg", "photo-50.jpg",
-      "photo-51.jpg", "photo-52.jpg", "photo-53.jpg", "photo-54.jpg", "photo-55.jpg",
-      "photo-56.jpg", "photo-57.jpg", "photo-58.jpg", "photo-59.jpg", "photo-60.jpg",
-      "photo-61.jpg", "photo-62.jpg", "photo-63.jpg", "photo-64.jpg", "photo-65.jpg",
-      "photo-66.jpg", "photo-67.jpg", "photo-68.jpg"
-    ];
+  menuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
+      if (menuCheck) menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+  });
 
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+  if (menuBg) {
+    menuBg.addEventListener('click', () => { 
+      if (menuCheck) menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+  }
+
+  // 3. トップへ戻るボタン制御
+  const goTopBtn = document.querySelector('.gotop');
+  if (goTopBtn) goTopBtn.classList.add('js-hidden');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) {
+      if (goTopBtn) {
+        goTopBtn.classList.remove('js-hidden');
+        goTopBtn.classList.add('is-show');
       }
-      return array;
+    } else {
+      if (goTopBtn) {
+        goTopBtn.classList.add('js-hidden');
+        goTopBtn.classList.remove('is-show');
+      }
     }
+  });
 
-    function renderRandomGallery() {
-      const galleryContainer = document.getElementById('random-gallery');
-      if (!galleryContainer) return;
+  // 4. ランダムギャラリー生成制御
+  const photoFiles = [
+    "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg", "photo-05.jpg",
+    "photo-06.jpg", "photo-07.jpg", "photo-08.jpg", "photo-09.jpg", "photo-10.jpg",
+    "photo-11.jpg", "photo-12.jpg", "photo-13.jpg", "photo-14.jpg", "photo-15.jpg",
+    "photo-16.jpg", "photo-17.jpg", "photo-18.jpg", "photo-19.jpg", "photo-20.jpg",
+    "photo-31.jpg", "photo-32.jpg", "photo-33.jpg", "photo-34.jpg", "photo-35.jpg",
+    "photo-36.jpg", "photo-37.jpg", "photo-38.jpg", "photo-39.jpg", "photo-40.jpg",
+    "photo-41.jpg", "photo-42.jpg", "photo-43.jpg", "photo-44.jpg", "photo-45.jpg",
+    "photo-46.jpg", "photo-47.jpg", "photo-48.jpg", "photo-49.jpg", "photo-50.jpg",
+    "photo-51.jpg", "photo-52.jpg", "photo-53.jpg", "photo-54.jpg", "photo-55.jpg",
+    "photo-56.jpg", "photo-57.jpg", "photo-58.jpg", "photo-59.jpg", "photo-60.jpg",
+    "photo-61.jpg", "photo-62.jpg", "photo-63.jpg", "photo-64.jpg", "photo-65.jpg",
+    "photo-66.jpg", "photo-67.jpg", "photo-68.jpg"
+  ];
 
-      galleryContainer.innerHTML = '';
-      const shuffledPhotos = shuffleArray([...photoFiles]);
-      const selectedPhotos = shuffledPhotos.slice(0, 8);
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
 
-      selectedPhotos.forEach((fileName, index) => {
-        const popId = `pop-rand-${index}`;
-        const itemHtml = `
-          <div class="gallery-item fade-in">
-            <input type="checkbox" id="${popId}" class="pop-check">
-            <label for="${popId}" class="thumb-label">
-              <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
+  function renderRandomGallery() {
+    const galleryContainer = document.getElementById('random-gallery');
+    if (!galleryContainer) return;
+
+    galleryContainer.innerHTML = '';
+    const shuffledPhotos = shuffleArray([...photoFiles]);
+    const selectedPhotos = shuffledPhotos.slice(0, 8);
+
+    selectedPhotos.forEach((fileName, index) => {
+      const popId = `pop-rand-${index}`;
+      const itemHtml = `
+        <div class="gallery-item">
+          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;">
+          <label for="${popId}" class="thumb-label fade-in">
+            <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
+          </label>
+          <div class="pop-overlay">
+            <label for="${popId}" class="pop-img-wrap">
+              <img src="./photos/${fileName}" alt="Gallery ${index + 1} 拡大" class="full-img">
             </label>
-            <div class="pop-overlay">
-              <label for="${popId}" class="pop-img-wrap">
-                <img src="./photos/${fileName}" alt="Gallery ${index + 1} 拡大" class="full-img">
-              </label>
-            </div>
           </div>
-        `;
-        galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
-      });
+        </div>
+      `;
+      galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
+    });
 
-      // JS動的生成後のfade-in要素をObserverに登録
-      if (observer) {
-        galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-      }
+    if (observer) {
+      galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', renderRandomGallery);
-  </script>
+  document.addEventListener('DOMContentLoaded', renderRandomGallery);
+</script>
 
 </body>
 </html>
