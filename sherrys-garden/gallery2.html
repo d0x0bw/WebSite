@@ -20,9 +20,8 @@
   <nav class="menu-content">
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li>Gallery ≫</li>
-        <li><a href="gallery1.html">◾ Gallery1</a></li>
-        <li><a href="gallery2.html">◾ Gallery2</a></li>
+        <li><a href="gallery1.html">・Gallery1</a></li>
+        <li style="font-weight: bold;"><a href="gallery2.html">・GALLERY2</a></li>
       </ul>
   </nav>
   <label for="menu-btn-check" class="menu-background"></label>
@@ -579,11 +578,19 @@
     function updateScrollLock() {
       const menuCheck = document.getElementById('menu-btn-check');
       const anyPopOpen = popChecks.some(c => c.checked);
-      
+
       if ((menuCheck && menuCheck.checked) || anyPopOpen) {
         document.body.classList.add('is-locked');
       } else {
         document.body.classList.remove('is-locked');
+      }
+
+      // 写真モーダル用UI（カウンター・コントロール・プログレスバー）は
+      // 写真モーダルが開いている時だけ表示する（メニュー開閉とは切り離す）
+      if (anyPopOpen) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
         stopSlideshow(); // ギャラリーを閉じたらスライドショーも停止させる
       }
     }

@@ -722,6 +722,7 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 40px;
   grid-column: 4;
   border: 1px dashed var(--accent-color);
   border-radius: var(--radius-md);
@@ -867,7 +868,7 @@ section {
   transition: opacity .4s ease, visibility .4s ease;
 }
 
-body.is-locked .modal-header-ui {
+body.modal-open .modal-header-ui {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
@@ -948,7 +949,7 @@ body.is-locked .modal-header-ui {
   transition: opacity .3s;
 }
 
-body.is-locked .slideshow-progress {
+body.modal-open .slideshow-progress {
   opacity: 1;
 }
 
@@ -1024,7 +1025,7 @@ body.is-locked .slideshow-progress {
 /* Profile Card ------------------------------------ */
 .cat-profile {
   max-width: 850px;
-  margin: 0 auto 40px;
+  margin: 0 auto 10px;
   padding: 40px;
   border-radius: var(--radius-lg);
   background: var(--card-bg);
