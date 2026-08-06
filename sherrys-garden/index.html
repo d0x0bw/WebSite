@@ -175,7 +175,62 @@
 <script>
   document.body.classList.add('js-active');
 
-  // 画像ファイルリスト
+// 1. スクロール監視（全ブラウザ共通でIntersectionObserverを使用）
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // 2. スマホメニュー制御
+  const menuCheck = document.getElementById('menu-btn-check');
+  const menuLinks = document.querySelectorAll('.menu-content a');
+  const menuBg = document.querySelector('.menu-background');
+
+  if (menuCheck) {
+    menuCheck.addEventListener('change', () => {
+      document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
+    });
+  }
+
+  menuLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
+      if (menuCheck) menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+  });
+
+  if (menuBg) {
+    menuBg.addEventListener('click', () => { 
+      if (menuCheck) menuCheck.checked = false; 
+      document.body.style.overflow = ''; 
+    });
+  }
+
+  // 3. トップへ戻るボタン制御
+  const goTopBtn = document.querySelector('.gotop');
+  if (goTopBtn) goTopBtn.classList.add('js-hidden');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) {
+      if (goTopBtn) {
+        goTopBtn.classList.remove('js-hidden');
+        goTopBtn.classList.add('is-show');
+      }
+    } else {
+      if (goTopBtn) {
+        goTopBtn.classList.add('js-hidden');
+        goTopBtn.classList.remove('is-show');
+      }
+    }
+  });
+
+  // 4. ランダムギャラリー生成制御
   const photoFiles = [
     "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg", "photo-05.jpg",
     "photo-06.jpg", "photo-07.jpg", "photo-08.jpg", "photo-09.jpg", "photo-10.jpg",
@@ -199,7 +254,6 @@
     return array;
   }
 
-  // 1. ランダムギャラリー生成関数
   function renderRandomGallery() {
     const galleryContainer = document.getElementById('random-gallery');
     if (!galleryContainer) return;
@@ -225,77 +279,12 @@
       `;
       galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
     });
+
+    galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
   }
 
-  // DOM構築完了後のメイン処理
-  document.addEventListener('DOMContentLoaded', () => {
-
-    // ① まずランダムギャラリーを生成する
-    renderRandomGallery();
-
-    // ② IntersectionObserver の初期化
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      root: null,
-      rootMargin: '0px 0px -10% 0px',
-      threshold: 0
-    });
-
-    // ③ 動的生成された要素も含め、すべての .fade-in を監視対象に追加する
-    const fadeElements = document.querySelectorAll('.fade-in');
-    fadeElements.forEach(el => observer.observe(el));
-
-    // スマホメニュー制御
-    const menuCheck = document.getElementById('menu-btn-check');
-    const menuLinks = document.querySelectorAll('.menu-content a');
-    const menuBg = document.querySelector('.menu-background');
-
-    if (menuCheck) {
-      menuCheck.addEventListener('change', () => {
-        document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
-      });
-    }
-
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
-        if (menuCheck) menuCheck.checked = false; 
-        document.body.style.overflow = ''; 
-      });
-    });
-
-    if (menuBg) {
-      menuBg.addEventListener('click', () => { 
-        if (menuCheck) menuCheck.checked = false; 
-        document.body.style.overflow = ''; 
-      });
-    }
-
-    // トップへ戻るボタン制御
-    const goTopBtn = document.querySelector('.gotop');
-    if (goTopBtn) goTopBtn.classList.add('js-hidden');
-
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 200) {
-        if (goTopBtn) {
-          goTopBtn.classList.remove('js-hidden');
-          goTopBtn.classList.add('is-show');
-        }
-      } else {
-        if (goTopBtn) {
-          goTopBtn.classList.add('js-hidden');
-          goTopBtn.classList.remove('is-show');
-        }
-      }
-    });
-
-  });
+  document.addEventListener('DOMContentLoaded', renderRandomGallery);
 </script>
+
 </body>
 </html>

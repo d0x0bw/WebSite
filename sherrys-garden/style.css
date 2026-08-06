@@ -1202,39 +1202,17 @@ body.modal-open .slideshow-progress {
 
 
 /* --- 13. SCROLL FADE IN -------------------------------------------
-   index.htmlのスクロール連動フェードイン (CSS/JS両対応)
+   index.htmlのスクロール連動フェードイン (JS / IntersectionObserver に一本化)
 -------------------------------------------------------------- */
 
-/* 1. CSS標準のスクロール駆動アニメーション（Chrome等対応ブラウザ用） */
-@supports (animation-timeline: view()) {
-  .fade-in {
-    animation: scrollFadeIn linear both;
-    animation-timeline: view();
-    animation-range: entry 5% entry 35%;
-  }
-
-  @keyframes scrollFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+body.js-active .fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
 }
 
-/* 2. 未対応ブラウザ（Safari等）＋JS環境用の補完設定 */
-@supports not (animation-timeline: view()) {
-  body.js-active .fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
-  }
-
-  body.js-active .fade-in.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body.js-active .fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 }
