@@ -92,10 +92,10 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--scroll-offset);
   scrollbar-gutter: stable;
+  overflow-x: clip;
 }
 
 body {
-  overflow-x: hidden;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -581,7 +581,7 @@ section {
 
 /* Main Visual ------------------------------------ */
 .main-image {
-  overflow: hidden;
+  overflow: clip;
   width: 100%;
   margin-bottom: var(--space-lg);
   border-radius: var(--radius-lg);
@@ -690,7 +690,7 @@ section {
 /* Gallery Item ------------------------------------ */
 .gallery-item {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
   box-shadow: 0 4px 15px rgba(0, 0, 0, .04);
@@ -722,6 +722,7 @@ section {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 40px;
   grid-column: 4;
   border: 1px dashed var(--accent-color);
   border-radius: var(--radius-md);
@@ -867,7 +868,7 @@ section {
   transition: opacity .4s ease, visibility .4s ease;
 }
 
-body.is-locked .modal-header-ui {
+body.modal-open .modal-header-ui {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
@@ -948,7 +949,7 @@ body.is-locked .modal-header-ui {
   transition: opacity .3s;
 }
 
-body.is-locked .slideshow-progress {
+body.modal-open .slideshow-progress {
   opacity: 1;
 }
 
@@ -1024,7 +1025,7 @@ body.is-locked .slideshow-progress {
 /* Profile Card ------------------------------------ */
 .cat-profile {
   max-width: 850px;
-  margin: 0 auto 40px;
+  margin: 0 auto 10px;
   padding: 40px;
   border-radius: var(--radius-lg);
   background: var(--card-bg);
@@ -1201,21 +1202,20 @@ body.is-locked .slideshow-progress {
 
 
 /* --- 13. SCROLL FADE IN -------------------------------------------
-   スクロール連動フェードイン (CSSのみ / JS互換対応)
+   index.htmlのスクロール連動フェードイン (CSS/JS両対応)
 -------------------------------------------------------------- */
 
-/* 1. CSS標準のスクロール駆動アニメーション（JSオフでも動きます） */
+/* 1. CSS標準のスクロール駆動アニメーション（Chrome等対応ブラウザ用） */
 @supports (animation-timeline: view()) {
   .fade-in {
     animation: scrollFadeIn linear both;
     animation-timeline: view();
-    /* 画面下部に入ってから30%進む間に10%→100%へふんわり変化 */
     animation-range: entry 5% entry 35%;
   }
 
   @keyframes scrollFadeIn {
     from {
-      opacity: 0.1;
+      opacity: 0;
       transform: translateY(30px);
     }
     to {
@@ -1225,10 +1225,10 @@ body.is-locked .slideshow-progress {
   }
 }
 
-/* 2. 旧ブラウザ＋JSオン環境用の補完設定 */
+/* 2. 未対応ブラウザ（Safari等）＋JS環境用の補完設定 */
 @supports not (animation-timeline: view()) {
   body.js-active .fade-in {
-    opacity: 0.1;
+    opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
   }
