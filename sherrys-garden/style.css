@@ -339,12 +339,12 @@ section {
     box-shadow: none;
   }
 
-  .menu-content ul {
+  .menu-content > ul {
     display: flex;
     align-items: center;
   }
 
-  .menu-content li {
+  .menu-content > ul > li {
     margin-left: 30px;
   }
 
@@ -1214,5 +1214,4 @@ body.js-active .fade-in {
 body.js-active .fade-in.is-visible {
   opacity: 1;
   transform: translateY(0);
-}
 }
