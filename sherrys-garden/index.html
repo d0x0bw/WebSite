@@ -199,7 +199,7 @@
     return array;
   }
 
-  // 1. ランダムギャラリー生成関数
+// 1. ランダムギャラリー生成関数
   function renderRandomGallery() {
     const galleryContainer = document.getElementById('random-gallery');
     if (!galleryContainer) return;
@@ -212,7 +212,8 @@
       const popId = `pop-rand-${index}`;
       const itemHtml = `
         <div class="gallery-item">
-          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;">
+          <!-- ↓ ここの input タグ内に autocomplete="off" を追加します -->
+          <input type="checkbox" id="${popId}" class="pop-check" autocomplete="off" style="display: none;">
           <label for="${popId}" class="thumb-label fade-in">
             <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
           </label>
