@@ -89,13 +89,14 @@
 }
 
 html {
+  overflow-x: clip;
   scroll-behavior: smooth;
   scroll-padding-top: var(--scroll-offset);
   scrollbar-gutter: stable;
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: visible;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -581,7 +582,7 @@ section {
 
 /* Main Visual ------------------------------------ */
 .main-image {
-  overflow: hidden;
+  overflow: clip;
   width: 100%;
   margin-bottom: var(--space-lg);
   border-radius: var(--radius-lg);
@@ -690,7 +691,7 @@ section {
 /* Gallery Item ------------------------------------ */
 .gallery-item {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
   box-shadow: 0 4px 15px rgba(0, 0, 0, .04);
@@ -1201,41 +1202,19 @@ body.modal-open .slideshow-progress {
 }
 
 
-/* --- 13. SCROLL FADE IN -------------------------------------------
-   スクロール連動フェードイン (CSSのみ / JS互換対応)
+/* --- 13. SCROLL FADE IN (IntersectionObserver一元化) --------------
+   スクロール連動フェードイン
 -------------------------------------------------------------- */
-
-/* 1. CSS標準のスクロール駆動アニメーション（JSオフでも動きます） */
-@supports (animation-timeline: view()) {
-  .fade-in {
-    animation: scrollFadeIn linear both;
-    animation-timeline: view();
-    /* 画面下部に入ってから30%進む間に10%→100%へふんわり変化 */
-    animation-range: entry 5% entry 35%;
-  }
-
-  @keyframes scrollFadeIn {
-    from {
-      opacity: 0.1;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: opacity, transform;
 }
 
-/* 2. 旧ブラウザ＋JSオン環境用の補完設定 */
-@supports not (animation-timeline: view()) {
-  body.js-active .fade-in {
-    opacity: 0.1;
-    transform: translateY(30px);
-    transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
-  }
-
-  body.js-active .fade-in.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* 画面内に進入した際に付与されるクラス */
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
