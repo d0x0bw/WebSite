@@ -13,7 +13,7 @@
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
   </header>
 
-  <input type="checkbox" id="menu-btn-check">
+  <input type="checkbox" id="menu-btn-check" autocomplete="off">
   <label for="menu-btn-check" class="menu-btn"><span></span></label>
 
   <nav class="menu-content">
@@ -78,42 +78,42 @@
       <!-- JSオフ時用フォールバック表示 -->
       <div id="random-gallery" class="gallery-grid">
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop1" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop1" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop1" class="thumb-label fade-in"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop1" class="pop-img-wrap"><img src="./photos/photo-01.jpg" alt="Gallery 1 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop2" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop2" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop2" class="thumb-label fade-in"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop2" class="pop-img-wrap"><img src="./photos/photo-02.jpg" alt="Gallery 2 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop3" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop3" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop3" class="thumb-label fade-in"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop3" class="pop-img-wrap"><img src="./photos/photo-03.jpg" alt="Gallery 3 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop4" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop4" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop4" class="thumb-label fade-in"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop4" class="pop-img-wrap"><img src="./photos/photo-04.jpg" alt="Gallery 4 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop5" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop5" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop5" class="thumb-label fade-in"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop5" class="pop-img-wrap"><img src="./photos/photo-05.jpg" alt="Gallery 5 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop6" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop6" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop6" class="thumb-label fade-in"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop6" class="pop-img-wrap"><img src="./photos/photo-06.jpg" alt="Gallery 6 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop7" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop7" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop7" class="thumb-label fade-in"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop7" class="pop-img-wrap"><img src="./photos/photo-07.jpg" alt="Gallery 7 拡大" class="full-img"></label></div>
         </div>
         <div class="gallery-item">
-          <input type="checkbox" id="idx-pop8" class="pop-check" style="display: none;">
+          <input type="checkbox" id="idx-pop8" class="pop-check" style="display: none;" autocomplete="off">
           <label for="idx-pop8" class="thumb-label fade-in"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></label>
           <div class="pop-overlay"><label for="idx-pop8" class="pop-img-wrap"><img src="./photos/photo-08.jpg" alt="Gallery 8 拡大" class="full-img"></label></div>
         </div>
@@ -266,7 +266,7 @@
       const popId = `pop-rand-${index}`;
       const itemHtml = `
         <div class="gallery-item">
-          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;">
+          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;" autocomplete="off">
           <label for="${popId}" class="thumb-label fade-in">
             <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
           </label>
