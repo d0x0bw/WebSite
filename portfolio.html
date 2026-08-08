@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>履歴書作ってみた ポートフォリオデザイン参照して</title>
+  <style>
+/* --------------------------------------------------
+   基本・リセット設定
+-------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP", sans-serif;
+  background-color: #d8dad8;
+  color: #43443f;
+  display: flex;
+  justify-content: center;
+  padding: 20px 10px;
+  line-height: 1.6;
+}
+
+    a {
+      color: #29a7e1;
+      text-decoration: none;
+      transition: color 0.2s ease; /* 滑らかな変化 */
+    }
+    a:hover {
+      color: #f39801;
+    }
+
+/* 全体コンテナ */
+.resume-container {
+  width: 100%;
+  max-width: 800px;
+  background-color: #f9f8f4;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------
+   1. ヘッダー領域
+-------------------------------------------------- */
+.top-banner {
+  background-color: #b9c9c8;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.header-box {
+  border: 1px solid #4a4a4a;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 8px #ffffff;
+  display: inline-block;
+  padding: 10px 120px;
+  max-width: 85%;
+}
+
+.header-box h1 {
+  font-size: 28px;
+  font-weight: 110;
+  letter-spacing: 0.25em;
+  color: #43443f;
+  margin-bottom: 6px;
+}
+
+.header-box p {
+  font-size: 15px;
+  letter-spacing: 0.15em;
+  color: #43443f;
+}
+
+/* --------------------------------------------------
+   2. プロフィール・写真・連絡先セクション（Grid使用）
+-------------------------------------------------- */
+.profile-section {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 40px; /* 左右均等の余白にして中央配置を正確に設定 */
+  gap: 20px;
+}
+
+.profile-bio {
+  text-align: center;
+  padding-right: 60px;
+}
+
+.profile-bio h2 {
+  font-size: 20px;
+  letter-spacing: 0.15em;
+  margin-bottom: 15px;
+  color: #43443f;
+  font-weight: bold;
+}
+
+.profile-bio p {
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: #43443f;
+  text-align: justify;
+  text-align-last: left;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  text-align: center;
+}
+
+.profile-avatar img {
+  width: 135px;
+  height: 135px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+}
+
+.profile-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #333333;
+  letter-spacing: 0.03em;
+  text-align: right;
+}
+
+.contact-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #43443f;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------
+   3. 3カラム（学歴・スキル・専門知識）セクション
+-------------------------------------------------- */
+.three-col-divider {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 35px 20px;
+}
+
+.three-col-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #43443f;
+  z-index: 1;
+}
+
+.header-badge {
+  position: relative;
+  z-index: 2;
+  width: 30%;
+  text-align: center;
+  padding: 7px 0;
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+}
+
+.badge-white {
+  background-color: #ffffff;
+  border: 1px solid #43443f;
+}
+
+.badge-tan {
+  background-color: #ebdcc9;
+}
+
+.three-columns {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 35px 25px;
+  gap: 20px;
+}
+
+.column {
+  width: 30%;
+}
+
+.edu-item {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 11.5px;
+  color: #43443f;
+  line-height: 1.5;
+}
+
+.edu-item strong {
+  display: block;
+  color: #444444;
+  font-weight: 100;
+}
+
+.edu-item span {
+  display: block;
+  color: #666666;
+}
+
+.skill-list {
+  list-style: none;
+  text-align: center;
+}
+
+.skill-list li {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 13px;
+  letter-spacing: 0.05em;
+}
+
+/* クリック可能な要素のスタイル */
+.clickable-magic {
+  cursor: pointer;
+  color: #29a7e1;
+  transition: color 0.2s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.clickable-magic:hover {
+  color: #f39801;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------
+   4. 職歴セクション
+-------------------------------------------------- */
+.work-header-divider {
+  position: relative;
+  margin: 10px 35px 25px;
+  text-align: center;
+}
+
+.work-header-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #43443f;
+  z-index: 1;
+}
+
+.work-badge {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  width: 30%;
+  background-color: #ebdcc9;
+  padding: 7px 0;
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+}
+
+.experience-container {
+  padding: 0 48px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.job-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.job-details {
+  flex: 1;
+}
+
+.job-title {
+  font-size: 19px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  color: #43443f;
+  margin-bottom: 10px;
+}
+
+.job-details ul {
+  padding-left: 18px;
+  padding-right: 10px;
+}
+
+.job-details li {
+  font-size: 11.5px;
+  color: #43443f;
+  line-height: 1.65;
+  margin-bottom: 6px;
+}
+
+/* PC表示時の正方形ボックス */
+.company-box {
+  flex: 0 0 120px;
+  width: 120px;
+  height: 120px;
+  background-color: #b9c9c8;
+  color: #43443f;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.35;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+.company-box .years {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* フッターアクセント */
+.footer-bar {
+  height: 12px;
+  background-color: #ebdcc9;
+  margin-top: 15px;
+}
+
+/* --------------------------------------------------
+   5. レスポンシブ（スマホ・タブレット対応）
+-------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  .resume-container {
+    box-shadow: none;
+  }
+
+  .top-banner {
+    padding: 28px 15px;
+  }
+
+  .header-box {
+    padding: 10px 60px;
+  }
+
+  .header-box h1 {
+    font-size: 22px;
+    letter-spacing: 0.18em;
+  }
+
+  .header-box p {
+    font-size: 13px;
+  }
+
+  .profile-section {
+    display: flex;
+    flex-direction: column;
+    padding: 25px 20px 15px;
+    gap: 20px;
+  }
+
+  .profile-avatar {
+    order: 1;
+  }
+
+  .profile-avatar img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-bio {
+    order: 2;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .profile-bio h2 {
+    font-size: 18px;
+  }
+
+  .profile-bio p {
+    max-width: 100%;
+  }
+
+  .profile-contact {
+    order: 3;
+    width: 100%;
+    align-items: center;
+  }
+
+  .contact-item {
+    text-align: center;
+    flex-direction: row-reverse;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .three-col-divider {
+    display: none;
+  }
+
+  .three-columns {
+    flex-direction: column;
+    padding: 0 20px 15px;
+    gap: 25px;
+  }
+
+  .column {
+    width: 100%;
+  }
+
+  .mobile-section-title {
+    display: block;
+    text-align: center;
+    padding: 8px 0;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    margin-bottom: 15px;
+  }
+
+  .work-header-divider {
+    margin: 10px 20px 20px;
+  }
+
+  .work-badge {
+    width: 60%;
+    font-size: 16px;
+  }
+
+  .experience-container {
+    padding: 0 20px 15px;
+    gap: 25px;
+  }
+
+  .job-entry {
+    flex-direction: column-reverse;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .job-details {
+    width: 100%;
+  }
+
+  .job-title {
+    font-size: 17px;
+  }
+
+  .company-box {
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    min-height: unset;
+    padding: 6px 16px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+  }
+
+  .company-box br {
+    display: none;
+  }
+
+  .company-box .years {
+    margin-top: 0;
+    white-space: nowrap;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .mobile-section-title {
+    display: none;
+  }
+}
+  </style>
+</head>
+<body>
+
+  <div class="resume-container">
+    
+    <!-- ヘッダー -->
+    <header class="top-banner">
+      <div class="header-box">
+        <h1>John Doe</h1>
+        <p>おバカデザイナー</p>
+      </div>
+    </header>
+
+    <!-- プロフィール & 連絡先 -->
+    <section class="profile-section">
+      <div class="profile-bio">
+        <h2>プロフィール</h2>
+        <p>
+          非凡な思い込み、謎の技術、美への偏見とパッション、どうでもいい細部への執着をもって、お客様の予想の斜め上をいく大惨事な提案を提供したいと思っています。常に命の危険を感じるスリリングな環境で、インテリアを破壊し再構築できるような戦場を探しています。
+        </p>
+      </div>
+
+      <div class="profile-avatar">
+        <img src="./icon/favicon.png" alt="おバカの相手をするネコ">
+      </div>
+
+      <div class="profile-contact">
+        <div class="contact-item">
+          <span>山城国 平安京 左京九条三坊十四町</span>
+          <div class="contact-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V18z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <span>John Doe@EMAIL.CO.JP</span>
+          <div class="contact-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <span><a href="./index.html">WWW.MYWEBSITE.CO.JP</a></span>
+          <div class="contact-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <span>01-2345-6789</span>
+          <div class="contact-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 学歴 / スキル / 専門知識 ヘッダー（デスクトップ用） -->
+    <div class="three-col-divider">
+      <div class="header-badge badge-white">学歴</div>
+      <div class="header-badge badge-tan">スキル</div>
+      <div class="header-badge badge-white">専門知識</div>
+    </div>
+
+    <!-- 3列コンテンツ -->
+    <div class="three-columns">
+      <!-- 学歴 -->
+      <section class="column">
+        <div class="mobile-section-title badge-white">学歴</div>
+        <div class="edu-item">
+          <strong>間抜中学</strong>
+          お情けで卒業
+          <span>(2002年)</span>
+        </div>
+        <div class="edu-item">
+          <strong>阿呆高等学校</strong>
+          普通出羽無科卒業
+          <span>(2004年)</span>
+        </div>
+        <div class="edu-item">
+          <strong>馬鹿田大学</strong>
+          おバカ認定証取得
+          <span>(2006年)</span>
+        </div>
+      </section>
+
+      <!-- スキル -->
+      <section class="column">
+        <div class="mobile-section-title badge-tan">スキル</div>
+        <ul class="skill-list">
+          <li>うぃんどｗｓ/ぃぬｘ/あんｄろいｄ/ときどきまｃ</li>
+          <li>HTML/CSS・JavaScript</li>
+          <li>EXCEL関数・マクロ</li>
+          <!-- 呪文実行用IDとスタイルクラスを付与 -->
+          <li id="magic-trigger" class="clickable-magic" title="クリックして呪文を唱える！">🔮 Pythonの呪文を覚えた！</li>
+          <li>PHOTOSHOP CS</li>
+          <li>犬に吠えられ、猫に引っ掻かれる</li>
+        </ul>
+      </section>
+
+      <!-- 専門知識 -->
+      <section class="column">
+        <div class="mobile-section-title badge-white">専門知識</div>
+        <ul class="skill-list">
+          <li>低品質(自己)管理</li>
+          <li>報告(始末)書作成</li>
+          <li>おふざけWEBデザイン</li>
+          <li>実はこれと言ってナシ😭</li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- 職歴 ヘッダー -->
+    <div class="work-header-divider">
+      <div class="work-badge">職歴</div>
+    </div>
+
+    <!-- 職歴 コンテンツ -->
+    <section class="experience-container">
+      <!-- 職歴 1 -->
+      <article class="job-entry">
+        <div class="job-details">
+          <h3 class="job-title">🤖 AIロボット・エデュケーター（最先端AIの教育係）</h3>
+          <ul>
+            <li>AIに正しい日本語を教えようとして、逆に自分の滑舌の悪さをAIにバカにされる<br>（自然言語処理モデルに対する高精度なテキストデータの入力）</li>
+            <li>ロボットの感情表現を豊かにした結果、説教した瞬間に部屋の隅で体育座りして起動を拒否される<br>（機械学習アルゴリズムの最適化と応答パターンの調整）</li>
+            <li>開発チームと連携してバグの原因を探るが、自分のポケットから消しゴムのカスが基盤に落ちていただけだと判明する<br>（エンジニアと密に連携し、システムのエラーを特定・解決）</li>
+            <li>AIが導き出した人類の未来予測データを、うっかり「ゴミ箱」に入れて空にしてしまい歴史から抹消する<br>（ビッグデータの適切な管理と、クラウドへの安全なバックアップの実施）</li>
+          </ul>
+        </div>
+        <div class="company-box">
+          <div>有限会社サイバーお留守番</div>
+          <div class="years">2024年～2026年</div>
+        </div>
+      </article>
+
+      <!-- 職歴 2 -->
+      <article class="job-entry">
+        <div class="job-details">
+          <h3 class="job-title">🍦 アイスクリーム・ディスペンサー</h3>
+          <ul>
+            <li>お客さまと目が合った瞬間に緊張し、コーンではなく自分の手にソフトクリームを巻く<br>（顧客の注文に応じた適切な分量の提供）</li>
+            <li>マシンのレバーが戻らなくなり、閉店間際までコーンスープの器で受け止め続ける<br>（機械の適切な操作とトラブルシューティング）</li>
+            <li>店長と連携して新メニューの開発に挑むも、すべてをコショウ味にして怒られる<br>（上長と連携し、季節限定商品のアイデア出しを牽引）</li>
+            <li>巻き方の黄金比率を研究した結果、ピサの斜塔のように傾いて3秒で崩壊する<br>（美しく安定したレイアウトを構築し、顧客満足度の向上に貢献）</li>
+          </ul>
+        </div>
+        <div class="company-box">
+          <div>株式会社バニラパニック</div>
+          <div class="years">2021年～2023年</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- フッターアクセント -->
+    <div class="footer-bar"></div>
+
+  </div>
+
+  <!-- --------------------------------------------------
+     JavaScript：おうむがえしのじゅもんの組み込み
+  -------------------------------------------------- -->
+  <script>
+    // 1. じゅもんを 定義（ていぎ）する (Pythonの apply_magic 関数と同じ)
+    function applyMagic(yourVoice) {
+      /**
+       * あなたが話した言葉を、そのまま2回繰り返して
+       * 山びこのように響かせる、おバカで平和な呪文です。
+       */
+      // 2. 呪文の効果を つくる
+      const magicEcho = `✨「${yourVoice}！... ${yourVoice}！🍄」`;
+
+      // 3. 効果を 返す
+      return magicEcho;
+    }
+
+    // 4. イベントを設定する（リスト項目がクリックされたとき）
+    const magicTrigger = document.getElementById('magic-trigger');
+
+    magicTrigger.addEventListener('click', function() {
+      // ユーザーに好きな言葉を入力させる（初期値: キノコノコノコタヌキノコ）
+      const userWord = prompt('呪文で叫びたい言葉を入力してください！', 'キノコノコノコタヌキノコ');
+
+      // キャンセルされなかった場合のみ呪文を実行
+      if (userWord !== null && userWord.trim() !== '') {
+        // 実際に 呪文を つかってみる！
+        const result = applyMagic(userWord);
+
+        // 5. 画面に 呪文の結果を 表示する (alertダイアログで表示)
+        alert(result);
+      }
+    });
+  </script>
+</body>
+</html>
