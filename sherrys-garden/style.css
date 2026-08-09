@@ -993,6 +993,14 @@ body.modal-open .slideshow-progress {
   background: rgba(164, 138, 92, .8);
 }
 
+/* Controls Auto-Hide（スライドショー再生中、一定時間無操作でUIを隠す） ------------------------------------ */
+body.controls-idle .modal-header-ui,
+body.controls-idle .pop-nav {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Responsive: Modal ------------------------------------ */
 @media (max-width: 768px) {
   .pop-img-wrap {

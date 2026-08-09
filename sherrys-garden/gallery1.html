@@ -926,6 +926,35 @@
     let slideDuration = 5; // デフォルト5秒
     let slideshowTimer = null;
 
+    // --- 0. コントロールUIの自動非表示（スライドショー再生中のみ有効） ---
+    let idleTimer = null;
+    const IDLE_DELAY = 3000; // 無操作とみなす時間（ミリ秒）
+
+    // 無操作タイマーを再設定する。再生中でなければ何もしない。
+    function scheduleIdle() {
+      clearTimeout(idleTimer);
+      if (!isPlaying) return;
+      idleTimer = setTimeout(() => {
+        document.body.classList.add('controls-idle');
+      }, IDLE_DELAY);
+    }
+
+    // 操作があった時にコントロールを再表示し、タイマーを仕切り直す
+    function showControls() {
+      document.body.classList.remove('controls-idle');
+      scheduleIdle();
+    }
+
+    // 一時停止・終了時は無条件でコントロールを表示状態に戻す
+    function hideIdleState() {
+      clearTimeout(idleTimer);
+      document.body.classList.remove('controls-idle');
+    }
+
+    ['mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, showControls, { passive: true });
+    });
+
     // 写真の切り替えとカウンター更新を行う共通関数
     function switchPhoto(newIndex) {
       const activeIndex = popChecks.findIndex(c => c.checked);
@@ -982,6 +1011,7 @@
       isPlaying = true;
       updatePlayPauseIcon();
       runSlideShow();
+      scheduleIdle();
     }
 
     function stopSlideshow() {
@@ -992,6 +1022,7 @@
         progressBar.style.transition = 'none';
         progressBar.style.width = '0%';
       }
+      hideIdleState();
     }
 
     // --- 2. 共通状態管理：スクロールロック ---
