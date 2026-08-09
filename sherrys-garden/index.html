@@ -3,286 +3,326 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SHERRY's GARDEN</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="../icon/favicon.png" type="image/png">
+  <title>INDEX - d0x0bw -</title>
+
+  <link rel="icon" href="./icon/favicon.png" type="image/png">
+
+  <style>
+    /* 全体のリセットと基本設定 */
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* ホバー時に展開される背景円のカラー設定 */
+      --color-link: #f39801; 
+    }
+    
+    body {
+      margin: 0;
+      padding: 1rem;
+      background-color: #f9f8f2;
+      color: #614f38;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      line-height: 1.4;
+    }
+
+    /* メインコンテナ */
+    .main {
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* 基本リンクスタイル */
+    a {
+      color: #29a7e1;
+      font-size: 0.8rem;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    a:hover {
+      color: #f39801;
+    }
+
+    /* ヘッダー部分 */
+    .head h1 {
+      font-size: 1.625rem;
+      font-family: 'Arial Black', Arial, Helvetica, sans-serif;
+      text-align: center;
+      color: #614f38;
+      margin-top: 3px;
+      margin-bottom: 8px;
+    }
+
+    .head p {
+      max-width: 350px;
+      margin-top: 0;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+    .head h1 .color-1 { color: #ff5f5f; }
+    .head h1 .color-2 { color: #ffbc00; }
+    .head h1 .color-3 { color: #9ccc65; }
+    .head h1 .color-4 { color: #29a7e1; }
+    .head h1 .color-5 { color: #b39ddb; }
+
+    /* メニュー部分 */
+    .menu {
+      margin-top: 30px;
+    }
+
+    .menu-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .menu-item {
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* カード（アンカー要素） */
+    .menu-card {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
+      justify-content: flex-start;
+      gap: 16px;
+      background-color: #ffffff;
+      padding: 24px 18px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+      transition: box-shadow 0.2s ease 0s, color 0.4s ease 0s;
+      z-index: 1;
+      text-decoration: none;
+      color: #614f38;
+    }
+
+    /* === 抽出したホバーアニメーション（円形広がり） === */
+    .menu-card::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0px;
+      height: 0px;
+      border-radius: 50%;
+      background-color: var(--color-link);
+      transform: translate(-50%, -50%);
+      transition-duration: 0.4s;
+      transition-timing-function: cubic-bezier(0.77, 0, 0.18, 1);
+      transition-delay: 0s;
+      transition-property: opacity, transform, width, height;
+      z-index: 1;
+      opacity: 0;
+      content: "";
+    }
+
+    /* ホバー時またはis-active付与時のアニメーション展開 */
+    .menu-card:hover::before,
+    .menu-card.is-active::before {
+      width: 800px;  /* カード全体を覆うのに十分な大きさ */
+      height: 600px;
+      opacity: 1;
+      transition-duration: 3.8s;
+      transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    .menu-card:hover,
+    .menu-card.is-active {
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      color: #ffffff; /* ホバー時にテキストを白へ */
+    }
+
+    /* カード内の画像設定 */
+    .menu-card img {
+      position: relative;
+      z-index: 2;
+      border: none;
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.15));
+      transition: transform 0.3s ease;
+    }
+
+    .menu-card:hover img,
+    .menu-card.is-active img {
+      transform: scale(1.08);
+    }
+
+    /* カード内のテキスト領域 */
+    .menu-text {
+      position: relative;
+      z-index: 2;
+      font-size: 0.75rem;
+    }
+
+    .menu-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+      transition: color 0.3s ease;
+      color: #29a7e1;
+    }
+
+    .menu-card:hover .menu-title,
+    .menu-card.is-active .menu-title {
+      color: #ffffff;
+    }
+
+    .menu-text p {
+      margin: 0;
+      font-size: 0.75rem;
+    }
+
+    /* フッター部分 */
+    .copy {
+      font-size: 0.625rem;
+      text-align: center;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      padding-top: 14px;
+      border-top: solid 0px #e8e6da;
+    }
+    .copy a {
+      color: #f39801;
+      font-size: 0.625rem;
+    }
+    .copy a:hover {
+      color: #ff6600;
+      font-size: 0.625rem;
+    }
+
+    /* === PC表示（画面幅が550px以上）のときの設定 === */
+    @media (min-width: 550px) {
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: top;
+        min-height: auto;
+        background-color: #f9f8f2;
+      }
+      
+      .main {
+        max-width: 1600px;
+        background-color: #f9f8f2;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .menu-list {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+      }
+
+      .menu-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <header class="header">
-    <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
+<div class="main">
+
+  <header class="head">
+    <h1 lang="en">
+      <span class="color-1">I</span><span class="color-2">N</span><span class="color-3">D</span><span class="color-4">E</span><span class="color-5">X</span> 🗂️
+    </h1>
   </header>
 
-  <input type="checkbox" id="menu-btn-check">
-  <label for="menu-btn-check" class="menu-btn"><span></span></label>
-
-  <nav class="menu-content">
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="#about">About</a></li>
-      <li class="has-sub-menu">
-        <a href="#gallery" class="sub-menu-toggle">Gallery</a>
-        <ul class="sub-menu">
-          <li><a href="gallery1.html">Gallery1</a></li>
-          <li><a href="gallery2.html">Gallery2</a></li>
-        </ul>
-      </li>
-      <li class="has-sub-menu">
-        <a href="#profile" class="sub-menu-toggle">Profile</a>
-        <ul class="sub-menu">
-          <li><a href="profile1.html">Profile1</a></li>
-        </ul>
-      </li>
-      <li><a href="#link">Link</a></li>
-    </ul>
-  </nav>
-  <label for="menu-btn-check" class="menu-background"></label>
-
-  <main class="content">
-    <div class="main-image">
-      <div class="main-image-wrapper">
-        <img src="./photos/top-01.jpg" alt="メインイメージ" title="シェリーとラム" class="fade-in">
-        <img src="./photos/top-03.jpg" alt="メインイメージ" title="シェリーとラム" class="fade-in">
-        <img src="./photos/top-04.jpg" alt="メインイメージ" title="シェリーとラム" class="fade-in">
-        <img src="./photos/top-02.jpg" alt="メインイメージ" title="シェリーとラム" class="fade-in">
-      </div>
-    </div>
-    
-    <div class="title-area">
-      <p class="text fade-in">SHERRY's GARDEN<span>since 2023</span></p>
-    </div>
-
-    <div class="intro-text">
-      <h1 class="fade-in">猫たちと過ごす穏やかな時間</h1>
-      <p class="fade-in">May all living things be treated with love.🌞🌜️✨️</p>
-    </div>
-
-    <!-- Aboutセクション -->
-    <section id="about">
-      <h2 class="section-title fade-in">About</h2>
-      <div class="feature-item">
-        <div class="feature-img">
-          <img src="../icon/icon.png" alt="画像" title="ラム" loading="lazy" class="fade-in">
-        </div>
-        <div class="feature-text">
-          <h3 class="fade-in">Concept</h3>
-          <p class="fade-in">何気なく撮りためた写真たち。<br>それらを一つの形にしたいという想いから。<br>このプライベートガーデンは始まりました。</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Galleryセクション -->
-    <section id="gallery">
-      <h2 class="section-title fade-in">Gallery</h2>
-
-      <!-- JSオフ時用フォールバック表示 -->
-      <div id="random-gallery" class="gallery-grid">
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop1" class="pop-check" style="display: none;">
-          <label for="idx-pop1" class="thumb-label fade-in"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop1" class="pop-img-wrap"><img src="./photos/photo-01.jpg" alt="Gallery 1 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop2" class="pop-check" style="display: none;">
-          <label for="idx-pop2" class="thumb-label fade-in"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop2" class="pop-img-wrap"><img src="./photos/photo-02.jpg" alt="Gallery 2 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop3" class="pop-check" style="display: none;">
-          <label for="idx-pop3" class="thumb-label fade-in"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop3" class="pop-img-wrap"><img src="./photos/photo-03.jpg" alt="Gallery 3 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop4" class="pop-check" style="display: none;">
-          <label for="idx-pop4" class="thumb-label fade-in"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop4" class="pop-img-wrap"><img src="./photos/photo-04.jpg" alt="Gallery 4 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop5" class="pop-check" style="display: none;">
-          <label for="idx-pop5" class="thumb-label fade-in"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop5" class="pop-img-wrap"><img src="./photos/photo-05.jpg" alt="Gallery 5 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop6" class="pop-check" style="display: none;">
-          <label for="idx-pop6" class="thumb-label fade-in"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop6" class="pop-img-wrap"><img src="./photos/photo-06.jpg" alt="Gallery 6 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop7" class="pop-check" style="display: none;">
-          <label for="idx-pop7" class="thumb-label fade-in"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop7" class="pop-img-wrap"><img src="./photos/photo-07.jpg" alt="Gallery 7 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop8" class="pop-check" style="display: none;">
-          <label for="idx-pop8" class="thumb-label fade-in"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop8" class="pop-img-wrap"><img src="./photos/photo-08.jpg" alt="Gallery 8 拡大" class="full-img"></label></div>
-        </div>
-      </div>
-
-      <div class="gallery-grid v-grid" style="margin-top: 30px;">
-        <a href="gallery1.html" class="gallery-more-btn fade-in">
-          <span>More</span>
-        </a>
-      </div>
-    </section>
-
-    <!-- Profileセクション -->
-    <section id="profile">
-      <h2 class="section-title fade-in">Profile</h2>
-
-      <article class="cat-profile">
-        <div class="profile-header">
-          <div class="profile-img"><img src="./photos/rum-02.jpg" alt="茶トラ白（まるどら）" loading="lazy" class="fade-in"></div>
-          <div class="profile-summary">
-            <h3 class="cat-name fade-in"><big>ラム</big>(茶トラ白)<span><big>Rum</big>(Red Tabby Mix)</span></h3>
-            <p class="fade-in">好奇心旺盛、元気で活発な女の子。<br>温かみのあるオレンジ色の縞模様がチャームポイント。<br>親しみやすさと愛嬌で、みんなを笑顔にしてくれるアイドルです。</p>
+  <main class="menu">
+    <ul class="menu-list">
+      
+      <li class="menu-item">
+        <a href="./sherrys-garden/index.html" class="menu-card">
+          <img src="./icon/icon.png" alt="SHERRY's GARDEN">
+          <div class="menu-text">
+            <div class="menu-title">SHERRY's GARDEN</div>
+            <p>何気なく撮りためた写真を公開しています📷<br>更新履歴：ギャラリーに自動スライドショー追加<br>親ページにスクロールフェードイン追加</p>
           </div>
-        </div>
-        <table class="spec-table">
-          <tr class="fade-in"><th>性格</th><td>甘えん坊、陽気、人懐っこい、好奇心旺盛、食いしん坊(笑)</td></tr>
-          <tr class="fade-in"><th>毛種</th><td>短毛種</td></tr>
-          <tr class="fade-in"><th>毛質</th><td>柔らかく、密度の高い日本猫らしい毛並み</td></tr>
-          <tr class="fade-in"><th>毛色</th><td>ジンジャー（明るい茶色）、ホワイト</td></tr>
-          <tr class="fade-in"><th>模様</th><td>マッカレルタビー（魚の骨のような美しい縞模様）</td></tr>
-          <tr class="fade-in"><th>体型</th><td>フォーリン（スマートで引き締まった体型）</td></tr>
-          <tr class="fade-in"><th>チャームポイント</th><td>クリクリの大きな瞳と、おでこの見事なM字マーク</td></tr>
-        </table>
-      </article>
-
-      <div class="gallery-grid v-grid" style="margin-top: 30px;">
-        <a href="profile1.html" class="gallery-more-btn fade-in">
-          <span>More</span>
         </a>
-      </div>
-    </section>
+      </li>
 
-    <!-- Linkセクション -->
-    <section id="link">
-      <h2 class="section-title fade-in">Link</h2>
-      <div class="link-buttons">
-        <a href="../test2/StackLayout.html" class="btn fade-in">Reportage Cinéma 🎥</a>
-        <a href="../index.html" class="btn fade-in">INDEX</a>
-      </div>
-    </section>
+      <li class="menu-item">
+        <a href="./test/index.html" class="menu-card">
+          <img src="./icon/icon4.png" alt="TEST PAGE">
+          <div class="menu-text">
+            <div class="menu-title">SHERRY's GARDEN Test ver.</div>
+            <p>ぼちぼち更新中...🐈</p>
+          </div>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="./test2/StackLayout.html" class="menu-card">
+          <img src="./icon/icon5.png" alt="TEST PAGE 2">
+          <div class="menu-text">
+            <div class="menu-title">Reportage Cinéma</div>
+            <p>私的映画データベース...地味に更新中🎥</p>
+          </div>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="./test3/tantei.html" class="menu-card">
+          <img src="./icon/icon6.png" alt="TEST PAGE 3">
+          <div class="menu-text">
+            <div class="menu-title">パソコン探偵倶楽部</div>
+            <p>いわゆるファミ○○探偵倶楽部... 遊び🎮</p>
+          </div>
+        </a>
+      </li>
+
+      <li class="menu-item">
+        <a href="./portfolio.html" class="menu-card">
+          <img src="./icon/favicon.png" alt="portfolio">
+          <div class="menu-text">
+            <div class="menu-title">PORTFOLIO</div>
+            <p>ポートフォリオ</p>
+          </div>
+        </a>
+      </li>
+
+    </ul>
   </main>
 
-  <footer class="footer">
-    <p>&copy; 2026 SHERRY's GARDEN・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
+  <footer class="copy">
+    <small><p>&copy; 2026 <a href="./index.html">d0x0bw</a>. All Rights Reserved.</p></small>
   </footer>
 
-  <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
+</div>
 
 <script>
-  document.body.classList.add('js-active');
-
-  // 1. スクロール監視（全ブラウザ共通でIntersectionObserverを使用）
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-      }
-    });
-  }, { rootMargin: '0px 0px -10% 0px' });
-
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-  // 2. スマホメニュー制御
-  const menuCheck = document.getElementById('menu-btn-check');
-  const menuLinks = document.querySelectorAll('.menu-content a');
-  const menuBg = document.querySelector('.menu-background');
-
-  if (menuCheck) {
-    menuCheck.addEventListener('change', () => {
-      document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
-    });
-  }
-
-  menuLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
-      if (menuCheck) menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
+  // カード（.menu-card）をクリックした際の遅延遷移処理
+  document.querySelectorAll('.menu-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetUrl = this.getAttribute('href');
+      
+      // クラスを付与してアニメーションを開始させる
+      this.classList.add('is-active');
+      
+      // アニメーションの完了を待って遷移（400ms）
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 400); 
     });
   });
-
-  if (menuBg) {
-    menuBg.addEventListener('click', () => { 
-      if (menuCheck) menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
-    });
-  }
-
-  // 3. トップへ戻るボタン制御
-  const goTopBtn = document.querySelector('.gotop');
-  if (goTopBtn) goTopBtn.classList.add('js-hidden');
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) {
-      if (goTopBtn) {
-        goTopBtn.classList.remove('js-hidden');
-        goTopBtn.classList.add('is-show');
-      }
-    } else {
-      if (goTopBtn) {
-        goTopBtn.classList.add('js-hidden');
-        goTopBtn.classList.remove('is-show');
-      }
-    }
-  });
-
-  // 4. ランダムギャラリー生成制御
-  const photoFiles = [
-    "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg", "photo-05.jpg",
-    "photo-06.jpg", "photo-07.jpg", "photo-08.jpg", "photo-09.jpg", "photo-10.jpg",
-    "photo-11.jpg", "photo-12.jpg", "photo-13.jpg", "photo-14.jpg", "photo-15.jpg",
-    "photo-16.jpg", "photo-17.jpg", "photo-18.jpg", "photo-19.jpg", "photo-20.jpg",
-    "photo-31.jpg", "photo-32.jpg", "photo-33.jpg", "photo-34.jpg", "photo-35.jpg",
-    "photo-36.jpg", "photo-37.jpg", "photo-38.jpg", "photo-39.jpg", "photo-40.jpg",
-    "photo-41.jpg", "photo-42.jpg", "photo-43.jpg", "photo-44.jpg", "photo-45.jpg",
-    "photo-46.jpg", "photo-47.jpg", "photo-48.jpg", "photo-49.jpg", "photo-50.jpg",
-    "photo-51.jpg", "photo-52.jpg", "photo-53.jpg", "photo-54.jpg", "photo-55.jpg",
-    "photo-61.jpg", "photo-62.jpg", "photo-63.jpg", "photo-64.jpg", "photo-65.jpg",
-    "photo-66.jpg", "photo-67.jpg", "photo-68.jpg"
-  ];
-
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  function renderRandomGallery() {
-    const galleryContainer = document.getElementById('random-gallery');
-    if (!galleryContainer) return;
-
-    galleryContainer.innerHTML = '';
-    const shuffledPhotos = shuffleArray([...photoFiles]);
-    const selectedPhotos = shuffledPhotos.slice(0, 8);
-
-    selectedPhotos.forEach((fileName, index) => {
-      const popId = `pop-rand-${index}`;
-      const itemHtml = `
-        <div class="gallery-item">
-          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;">
-          <label for="${popId}" class="thumb-label fade-in">
-            <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
-          </label>
-          <div class="pop-overlay">
-            <label for="${popId}" class="pop-img-wrap">
-              <img src="./photos/${fileName}" alt="Gallery ${index + 1} 拡大" class="full-img">
-            </label>
-          </div>
-        </div>
-      `;
-      galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
-    });
-
-    galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-  }
-
-  document.addEventListener('DOMContentLoaded', renderRandomGallery);
 </script>
 
 </body>
