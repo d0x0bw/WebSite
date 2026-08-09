@@ -231,19 +231,27 @@
   });
 
   // 4. ランダムギャラリー生成制御
-  const photoFiles = [
-    "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg", "photo-05.jpg",
-    "photo-06.jpg", "photo-07.jpg", "photo-08.jpg", "photo-09.jpg", "photo-10.jpg",
-    "photo-11.jpg", "photo-12.jpg", "photo-13.jpg", "photo-14.jpg", "photo-15.jpg",
-    "photo-16.jpg", "photo-17.jpg", "photo-18.jpg", "photo-19.jpg", "photo-20.jpg",
-    "photo-31.jpg", "photo-32.jpg", "photo-33.jpg", "photo-34.jpg", "photo-35.jpg",
-    "photo-36.jpg", "photo-37.jpg", "photo-38.jpg", "photo-39.jpg", "photo-40.jpg",
-    "photo-41.jpg", "photo-42.jpg", "photo-43.jpg", "photo-44.jpg", "photo-45.jpg",
-    "photo-46.jpg", "photo-47.jpg", "photo-48.jpg", "photo-49.jpg", "photo-50.jpg",
-    "photo-51.jpg", "photo-52.jpg", "photo-53.jpg", "photo-54.jpg", "photo-55.jpg",
-    "photo-61.jpg", "photo-62.jpg", "photo-63.jpg", "photo-64.jpg", "photo-65.jpg",
-    "photo-66.jpg", "photo-67.jpg", "photo-68.jpg"
+  // gallery1.html を実際に取得して掲載中の写真ファイル名を自動抽出する。
+  // → gallery1.html に写真を追加/削除するだけで、ここにも自動的に反映される。
+  // （gallery1.html が取得できない環境向けの最低限のフォールバック）
+  const FALLBACK_PHOTO_FILES = [
+    "photo-01.jpg", "photo-05.jpg", "photo-10.jpg", "photo-15.jpg",
+    "photo-20.jpg", "photo-30.jpg", "photo-45.jpg", "photo-60.jpg"
   ];
+
+  async function getPhotoFiles() {
+    try {
+      const res = await fetch('./gallery1.html');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      const matches = [...html.matchAll(/\.\/photos\/(photo-\d+\.jpg)/g)];
+      const files = [...new Set(matches.map(m => m[1]))];
+      return files.length > 0 ? files : FALLBACK_PHOTO_FILES;
+    } catch (err) {
+      console.error('gallery1.htmlからの写真リスト取得に失敗したため、フォールバックのリストを使用します。', err);
+      return FALLBACK_PHOTO_FILES;
+    }
+  }
 
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -253,9 +261,11 @@
     return array;
   }
 
-  function renderRandomGallery() {
+  async function renderRandomGallery() {
     const galleryContainer = document.getElementById('random-gallery');
     if (!galleryContainer) return;
+
+    const photoFiles = await getPhotoFiles();
 
     galleryContainer.innerHTML = '';
     const shuffledPhotos = shuffleArray([...photoFiles]);
