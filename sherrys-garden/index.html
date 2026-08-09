@@ -186,29 +186,37 @@
 
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-  // 2. スマホメニュー制御
+  // 2. スクロールロック制御（ハンバーガーメニュー・写真モーダル共通）
   const menuCheck = document.getElementById('menu-btn-check');
   const menuLinks = document.querySelectorAll('.menu-content a');
   const menuBg = document.querySelector('.menu-background');
 
+  // メニューか写真モーダルのどちらかが開いていれば背景スクロールを禁止する
+  function updateScrollLock() {
+    const anyPopOpen = document.querySelectorAll('.pop-check:checked').length > 0;
+    if ((menuCheck && menuCheck.checked) || anyPopOpen) {
+      document.body.classList.add('is-locked');
+    } else {
+      document.body.classList.remove('is-locked');
+    }
+  }
+
   if (menuCheck) {
-    menuCheck.addEventListener('change', () => {
-      document.body.style.overflow = menuCheck.checked ? 'hidden' : '';
-    });
+    menuCheck.addEventListener('change', updateScrollLock);
   }
 
   menuLinks.forEach(link => {
     link.addEventListener('click', () => {
       if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
       if (menuCheck) menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
+      updateScrollLock();
     });
   });
 
   if (menuBg) {
     menuBg.addEventListener('click', () => { 
       if (menuCheck) menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
+      updateScrollLock();
     });
   }
 
@@ -244,7 +252,7 @@
       const res = await fetch('./gallery1.html');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const html = await res.text();
-      const matches = [...html.matchAll(/\.\/photos\/(photo-\d+\.jpg)/g)];
+      const matches = [...html.matchAll(/\.\/photos-thumb\/(photo-\d+\.jpg)/g)];
       const files = [...new Set(matches.map(m => m[1]))];
       return files.length > 0 ? files : FALLBACK_PHOTO_FILES;
     } catch (err) {
@@ -290,6 +298,11 @@
     });
 
     galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // 写真モーダルの開閉でもスクロールロックが効くようにする
+    galleryContainer.querySelectorAll('.pop-check').forEach(check => {
+      check.addEventListener('change', updateScrollLock);
+    });
   }
 
   document.addEventListener('DOMContentLoaded', renderRandomGallery);
