@@ -247,6 +247,15 @@ a:hover {
   text-decoration: underline;
 }
 
+.noscript-magic-msg {
+  display: block;
+  font-size: 11px;
+  color: #d9534f;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
 /* --------------------------------------------------
    4. 職歴セクション
 -------------------------------------------------- */
@@ -400,7 +409,39 @@ a:hover {
 }
 
 /* --------------------------------------------------
-   6. 印刷用設定（no-printクラス）
+   6. 魔法エフェクト オーバーレイ (新規追加)
+-------------------------------------------------- */
+#magic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(10, 10, 15, 0.92);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#magic-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#magic-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* --------------------------------------------------
+   7. 印刷用設定（no-printクラス）
 -------------------------------------------------- */
 @media print {
   .no-print {
@@ -413,7 +454,7 @@ a:hover {
 }
 
 /* --------------------------------------------------
-   7. レスポンシブ（スマホ・タブレット対応）
+   8. レスポンシブ（スマホ・タブレット対応）
 -------------------------------------------------- */
 @media screen and (max-width: 768px) {
   body {
@@ -665,7 +706,10 @@ a:hover {
           <li>うぃんどｗｓ/ぃぬｘ/あんｄろいｄ/ときどきまｃ</li>
           <li>HTML/CSS・JavaScript</li>
           <li>EXCEL関数・マクロ</li>
-          <li id="magic-trigger" class="clickable-magic" title="クリックして呪文を唱える！">🔮 Pythonの呪文を覚えた！</li>
+          <li id="magic-trigger" class="clickable-magic" title="クリックして魔法を発動！">🔮 Pythonの呪文を覚えた！</li>
+          <noscript>
+            <div class="noscript-magic-msg">🧙 呪文を封じられているようだ！</div>
+          </noscript>
           <li>PHOTOSHOP CS</li>
           <li>犬に吠えられ、猫に引っ掻かれる</li>
         </ul>
@@ -728,36 +772,149 @@ a:hover {
 
   </div>
 
+  <!-- 暗転＆魔法パーティクル用オーバーレイ -->
+  <div id="magic-overlay" class="no-print">
+    <canvas id="magic-canvas"></canvas>
+  </div>
+
   <!-- トップへ戻るボタン (no-print 指定で印刷時非表示) -->
   <a href="#" class="gotop no-print" aria-label="トップへ戻る"><span class="arrow"></span></a>
 
   <!-- JavaScript -->
   <script>
-    // 1. おうむがえしのじゅもん (既存処理)
-    function applyMagic(yourVoice) {
-      const magicEcho = `✨「${yourVoice}！... ${yourVoice}！🍄」`;
-      return magicEcho;
+    // 1. 魔法パーティクルアニメーション (3秒間)
+    const magicTrigger = document.getElementById('magic-trigger');
+    const magicOverlay = document.getElementById('magic-overlay');
+    const canvas = document.getElementById('magic-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let particles = [];
+    let animationFrameId = null;
+    let isMagicRunning = false;
+
+    // パーティクルのクラス
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 5 + 2;
+        // 放射状に飛び散る速度
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 8 + 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        
+        // 色合い（神秘的な紫・ゴールド・シアン・ピンク・ホワイト等）
+        const colors = ['#f39801', '#29a7e1', '#e056fd', '#f8a5c2', '#ffffff', '#f1c40f'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.008; // 徐々に消える
+        this.gravity = 0.05; // ほんのり重力効果
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.vx *= 0.98; // 空気抵抗で減速
+        this.vy *= 0.98;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(this.alpha, 0);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        
+        // 円形パーティクル
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
     }
 
-    const magicTrigger = document.getElementById('magic-trigger');
-    if (magicTrigger) {
-      magicTrigger.addEventListener('click', function() {
-        const userWord = prompt('呪文で叫びたい言葉を入力してください！', 'キノコノコノコタヌキノコ');
-        if (userWord !== null && userWord.trim() !== '') {
-          const result = applyMagic(userWord);
-          alert(result);
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createMagicParticles() {
+      particles = [];
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      // 最初に大きめの弾けを発生
+      for (let i = 0; i < 150; i++) {
+        particles.push(new Particle(centerX, centerY));
+      }
+    }
+
+    function animateMagic() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // アニメーション中、継続的に画面のあちこちからランダム粒子を追加発生
+      if (particles.length < 300) {
+        const rx = Math.random() * canvas.width;
+        const ry = Math.random() * canvas.height;
+        for (let i = 0; i < 3; i++) {
+          particles.push(new Particle(rx, ry));
         }
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(animateMagic);
+    }
+
+    function triggerMagicEffect() {
+      if (isMagicRunning) return;
+      isMagicRunning = true;
+
+      resizeCanvas();
+      createMagicParticles();
+
+      // 暗転＆エフェクト開始
+      magicOverlay.classList.add('active');
+      animateMagic();
+
+      // 3秒（3000ms）後にフェードアウト終了
+      setTimeout(() => {
+        magicOverlay.classList.remove('active');
+        
+        // オーバーレイのCSSトランジション終了後に描画ループを停止
+        setTimeout(() => {
+          cancelAnimationFrame(animationFrameId);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          particles = [];
+          isMagicRunning = false;
+        }, 500);
+      }, 3000);
+    }
+
+    if (magicTrigger) {
+      magicTrigger.addEventListener('click', triggerMagicEffect);
+      window.addEventListener('resize', () => {
+        if (isMagicRunning) resizeCanvas();
       });
     }
 
-    // 2. トップへ戻るボタンのスクロール制御 (新規追加)
+    // 2. トップへ戻るボタンのスクロール制御
     const goTopBtn = document.querySelector('.gotop');
 
     if (goTopBtn) {
-      // 初期状態を非表示にする
       goTopBtn.classList.add('js-hidden');
 
-      // 200px以上スクロールされた場合にボタンを表示
       window.addEventListener('scroll', () => {
         if (window.scrollY > 200) {
           goTopBtn.classList.remove('js-hidden');
