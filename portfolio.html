@@ -151,6 +151,130 @@ a:hover {
 }
 
 /* --------------------------------------------------
+   吹き出し（縦書き・画像の右側に配置）
+-------------------------------------------------- */
+
+/* アバター親要素の調整 */
+.profile-avatar {
+  position: relative; /* 吹き出しの位置基準にする */
+  display: inline-block;
+  cursor: pointer;
+  outline: none; /* タップ/フォーカス時の枠線を消す */
+}
+
+/* 吹き出し本体（画像の右側に配置） */
+.speech-bubble {
+  position: absolute;
+  bottom: 50%;
+  left: 100%;/* 画像の右側に配置 */
+  transform: translateY(50%) translateX(10px);
+  
+  background-color: #ffffff;
+  color: #43443f;
+  border: 1px solid #43443f;
+  border-radius: 8px;
+  padding: 12px 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+  /* CSSのみで縦書き表示 */
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+
+  /* 非表示状態（フェードアニメーション用） */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  z-index: 10;
+}
+
+/* 吹き出しの三角矢印（吹き出しの左側に配置＝画像を指す） */
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8px; /* ← 左側に配置 */
+  transform: translateY(-50%);
+  border-width: 6px 8px 6px 0; /* ← 左向きの三角形 */
+  border-style: solid;
+  border-color: transparent #ffffff transparent transparent;
+  z-index: 2;
+}
+
+.speech-bubble::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10px; /* ← 左側に配置 */
+  transform: translateY(-50%);
+  border-width: 7px 9px 7px 0; /* ← 左向きの三角形（枠線用） */
+  border-style: solid;
+  border-color: transparent #43443f transparent transparent;
+  z-index: 1;
+}
+
+/* マウスオーバー（ホバー）またはタップ時に表示 */
+.profile-avatar:hover .speech-bubble,
+.profile-avatar:focus .speech-bubble,
+.profile-avatar:active .speech-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(50%) translateX(18px); /* ← 右側に少しフワッと浮き出る */
+}
+
+
+/* --------------------------------------------------
+   スマホ表示（レスポンシブ）時の調整
+-------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  /* 画像の親要素を中央寄せ・基準点に設定 */
+  .profile-avatar {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* スマホでも縦書き吹き出しを画像の右側に配置 */
+  .speech-bubble {
+    top: 50%;
+    left: 100%;
+    bottom: auto;
+    right: auto;
+    transform: translateY(-50%) translateX(10px);
+  }
+
+  /* 三角矢印（画像の左側を指す） */
+  .speech-bubble::after {
+    top: 50%;
+    left: -8px;
+    right: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    border-width: 6px 8px 6px 0;
+    border-color: transparent #ffffff transparent transparent;
+  }
+
+  .speech-bubble::before {
+    top: 50%;
+    left: -10px;
+    right: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    border-width: 7px 9px 7px 0;
+    border-color: transparent #43443f transparent transparent;
+  }
+
+  /* ホバー／タップ時の表示調整 */
+  .profile-avatar:hover .speech-bubble,
+  .profile-avatar:focus .speech-bubble,
+  .profile-avatar:active .speech-bubble {
+    transform: translateY(-50%) translateX(15px);
+  }
+}
+
+/* --------------------------------------------------
    3. 3カラム（学歴・スキル・専門知識）セクション
 -------------------------------------------------- */
 .three-col-divider {
@@ -680,8 +804,15 @@ a:hover {
         </p>
       </div>
 
-      <div class="profile-avatar">
+
+      <div class="profile-avatar" tabindex="0">
         <img src="./icon/avator.png" alt="のびくん">
+        <div class="speech-bubble">
+            私が今日やらかすミスは、<br>
+            未来の私が『やっぱりね』<br>
+            と証明するだろう...
+        </div>
+
       </div>
 
       <div class="profile-contact">
@@ -798,7 +929,7 @@ a:hover {
           </ul>
         </div>
         <div class="company-box">
-          <div>有限会社サイバーお留守番</div>
+          <div>有限会社 電脳工業</div>
           <div class="years">2024年～2026年</div>
         </div>
       </article>
