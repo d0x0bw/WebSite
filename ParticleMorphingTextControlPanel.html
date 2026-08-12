@@ -86,7 +86,7 @@
     .status-bar {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end; /* 入力欄や数値のライン（下揃え）に統一 */
       gap: 30px;
       margin-bottom: 10px;
       flex-wrap: wrap;
@@ -97,6 +97,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    
+    /* Next Word Button Container */
+    .status-item-with-btn {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end; /* ボタンを下ラインに配置 */
+      gap: 15px;
     }
 
     .status-label {
@@ -122,6 +130,7 @@
       border: 1px solid #333;
       border-radius: 8px;
       padding: 6px 12px;
+      height: 34px;
       text-align: center;
       outline: none;
       text-transform: uppercase;
@@ -138,8 +147,8 @@
       background-color: #242424;
       border: 1px solid #333;
       color: #fff;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 8px;
       font-size: 1.2rem;
       line-height: 1;
@@ -161,13 +170,54 @@
     .status-value {
       font-size: 1rem;
       font-weight: 700;
-      padding: 6px 0;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .status-divider {
       width: 1px;
-      height: 32px;
+      height: 34px;
       background-color: #333;
+      align-self: flex-end;
+    }
+    
+    /* Next Word Button Styles */
+    .next-word-action-btn {
+      background-color: #242424;
+      border: none;
+      color: #ffffff;
+      height: 34px; /* 他の入力・値要素と高さを完全に統一 */
+      padding: 0 18px;
+      border-radius: 17px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .next-word-action-btn:hover {
+      background-color: #333;
+    }
+
+    .next-word-action-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* SVG Icon Style */
+    .next-icon-svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      display: none; /* デフォルト（PC表示時）は非表示 */
+    }
+
+    .next-word-text {
+      display: inline; /* デフォルト（PC表示時）はテキストを表示 */
     }
 
     /* Controls Grid */
@@ -175,7 +225,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-areas:
-        "nextword glow"
+        "scatter glow"
         "speed interval";
       gap: 20px 40px;
     }
@@ -183,7 +233,7 @@
     .control-speed    { grid-area: speed; }
     .control-interval { grid-area: interval; }
     .control-glow     { grid-area: glow; }
-    .next-word-btn    { grid-area: nextword; }
+    .control-scatter  { grid-area: scatter; }
 
     .control-group {
       display: flex;
@@ -238,28 +288,6 @@
       min-width: 55px;
       text-align: center;
       color: #ffffff;
-    }
-
-    /* Buttons & Toggles */
-    .action-btn {
-      width: 100%;
-      background-color: #262626;
-      color: #ffffff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .action-btn:hover {
-      background-color: #333;
-    }
-
-    .action-btn:active {
-      transform: scale(0.98);
     }
 
     /* Toggle Switch */
@@ -483,10 +511,28 @@
       .status-bar {
         gap: 16px;
       }
+      
+      .status-item-with-btn {
+        gap: 10px;
+      }
 
       .status-value-input {
         width: 108px;
         font-size: 0.9rem;
+      }
+      
+      /* モバイル時はボタンのテキストを消し、SVGアイコンを表示 */
+      .next-word-action-btn {
+        padding: 0 10px;
+        border-radius: 10px;
+      }
+      
+      .next-icon-svg {
+        display: block; /* モバイル表示時はSVGアイコンを表示 */
+      }
+
+      .next-word-text {
+        display: none; /* モバイル表示時はテキストを非表示 */
       }
 
       .controls-grid {
@@ -494,7 +540,7 @@
         grid-template-areas:
           "speed speed"
           "interval interval"
-          "glow nextword";
+          "glow scatter";
       }
 
       .control-label {
@@ -509,11 +555,6 @@
         padding: 7px 12px;
         min-width: 46px;
         font-size: 0.82rem;
-      }
-
-      .next-word-btn {
-        padding: 10px 12px;
-        font-size: 0.85rem;
       }
 
       .control-glow {
@@ -549,16 +590,35 @@
         <button id="addWordBtn" class="add-word-btn" title="テキストを管理">+</button>
       </div>
     </div>
+    
     <div class="status-divider"></div>
-    <div class="status-item">
-      <div class="status-label">PARTICLES</div>
-      <div class="status-value" id="particleCountDisplay">0</div>
+    
+    <div class="status-item-with-btn">
+      <div class="status-item">
+        <div class="status-label">PARTICLES</div>
+        <div class="status-value" id="particleCountDisplay">0</div>
+      </div>
+      <!-- レスポンシブなNext Wordボタン -->
+      <div class="status-divider"></div>
+      <button class="next-word-action-btn" id="nextWordBtn" title="Next Word">
+        <span class="next-word-text">Next Word</span>
+        <!-- Inline SVG (スキップアイコン) -->
+        <svg class="next-icon-svg" viewBox="0 0 24 24">
+          <path d="M6 18L14.5 12L6 6V18ZM16 6V18H18V6H16Z"/>
+        </svg>
+      </button>
     </div>
   </div>
 
   <!-- Controls -->
   <div class="controls-grid">
-    <button class="action-btn next-word-btn" id="nextWordBtn">Next Word</button>
+    <div class="control-group control-scatter">
+      <span class="control-label">Scatter</span>
+      <div class="slider-container">
+        <input type="range" id="scatterSlider" min="0" max="2000" step="50" value="300">
+        <div class="value-box" id="scatterValue">300</div>
+      </div>
+    </div>
 
     <div class="control-group control-glow">
       <span class="control-label">Particle Glow</span>
@@ -621,6 +681,9 @@
   const wordInput = document.getElementById("wordInput");
   const addWordBtn = document.getElementById("addWordBtn");
   const particleCountDisplay = document.getElementById("particleCountDisplay");
+  
+  const scatterSlider = document.getElementById("scatterSlider");
+  const scatterValue = document.getElementById("scatterValue");
   const speedSlider = document.getElementById("speedSlider");
   const speedValue = document.getElementById("speedValue");
   const intervalSlider = document.getElementById("intervalSlider");
@@ -642,8 +705,10 @@
   // Settings
   let morphSpeed = parseFloat(speedSlider.value);
   let autoInterval = parseInt(intervalSlider.value, 10);
+  let scatterAmount = parseInt(scatterSlider.value, 10);
   let enableGlow = glowToggle.checked;
   let intervalTimer = null;
+  let currentDpr = 1;
 
   // Particle Class
   class Particle {
@@ -652,9 +717,7 @@
       this.y = y;
       this.targetX = x;
       this.targetY = y;
-      this.vx = (Math.random() - 0.5) * 2;
-      this.vy = (Math.random() - 0.5) * 2;
-      this.radius = Math.random() * 1.5 + 1;
+      this.baseRadius = Math.random() * 1.5 + 1;
       this.color = this.getRandomColor();
       this.active = true;
     }
@@ -673,13 +736,13 @@
       this.y += (this.targetY - this.y) * speed;
     }
 
-    draw(context, glow) {
+    draw(context, glow, dpr) {
       context.beginPath();
-      context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      context.arc(this.x, this.y, this.baseRadius * dpr, 0, Math.PI * 2);
       context.fillStyle = this.color;
 
       if (glow) {
-        context.shadowBlur = 8;
+        context.shadowBlur = 8 * dpr;
         context.shadowColor = this.color;
       } else {
         context.shadowBlur = 0;
@@ -693,28 +756,36 @@
 
   function resizeCanvas() {
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    currentDpr = window.devicePixelRatio || 1;
+    
+    canvas.width = rect.width * currentDpr;
+    canvas.height = rect.height * currentDpr;
+    
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
     updateWord(words[wordIndex]);
   }
 
   function getTextCoordinates(text) {
     const offscreen = document.createElement("canvas");
-    const offCtx = offscreen.getContext("2d");
+    const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
     offscreen.width = canvas.width;
     offscreen.height = canvas.height;
 
-    const fontSize = Math.min(canvas.width / Math.max(text.length, 1) * 1.2, 110);
+    const fontSize = Math.min(canvas.width / Math.max(text.length, 1) * 1.2, 110 * currentDpr);
     offCtx.font = `900 ${fontSize}px -apple-system, sans-serif`;
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
+    
     offCtx.fillStyle = "#ffffff";
     offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2);
 
     const imageData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
     const data = imageData.data;
     const points = [];
-    const step = 6;
+    
+    const step = Math.max(Math.floor(6 * currentDpr), 3);
 
     for (let y = 0; y < offscreen.height; y += step) {
       for (let x = 0; x < offscreen.width; x += step) {
@@ -724,18 +795,35 @@
         }
       }
     }
-    return points;
+    
+    offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
+    offCtx.lineWidth = 35 * currentDpr; 
+    offCtx.lineJoin = "round";
+    offCtx.strokeStyle = "#fff";
+    offCtx.strokeText(text, offscreen.width / 2, offscreen.height / 2);
+    offCtx.fillStyle = "#fff";
+    offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2);
+    
+    const maskData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+
+    return { points, maskData, width: offscreen.width, height: offscreen.height };
   }
 
   function updateWord(word) {
     const uppercaseWord = word.toUpperCase();
     wordInput.value = uppercaseWord;
-    const targetPoints = getTextCoordinates(uppercaseWord);
+    
+    const { points: targetPoints, maskData, width: maskW, height: maskH } = getTextCoordinates(uppercaseWord);
+    const totalTarget = targetPoints.length + scatterAmount;
 
-    while (particles.length < targetPoints.length) {
+    while (particles.length < totalTarget) {
       const rx = Math.random() * canvas.width;
       const ry = Math.random() * canvas.height;
       particles.push(new Particle(rx, ry));
+    }
+    
+    if (particles.length > totalTarget) {
+      particles.length = totalTarget;
     }
 
     for (let i = 0; i < particles.length; i++) {
@@ -744,8 +832,29 @@
         particles[i].targetY = targetPoints[i].y;
         particles[i].active = true;
       } else {
-        particles[i].targetX = Math.random() * canvas.width;
-        particles[i].targetY = Math.random() * canvas.height;
+        let validPos = false;
+        
+        for(let attempt = 0; attempt < 30; attempt++) {
+            const rx = Math.random() * canvas.width;
+            const ry = Math.random() * canvas.height;
+            const mx = Math.floor(rx);
+            const my = Math.floor(ry);
+            
+            if (mx >= 0 && mx < maskW && my >= 0 && my < maskH) {
+                const idx = (my * maskW + mx) * 4;
+                if (maskData[idx + 3] === 0) {
+                    particles[i].targetX = rx;
+                    particles[i].targetY = ry;
+                    validPos = true;
+                    break;
+                }
+            }
+        }
+        
+        if(!validPos) {
+            particles[i].targetX = Math.random() > 0.5 ? 0 : canvas.width;
+            particles[i].targetY = Math.random() * canvas.height;
+        }
         particles[i].active = false;
       }
     }
@@ -765,21 +874,17 @@
     }, autoInterval * 1000);
   }
 
-  // --- 入力欄操作イベント ---
-
-  // テキストをリアルタイムに書き換える
+  // Event Listeners
   wordInput.addEventListener("input", (e) => {
     const val = e.target.value.toUpperCase();
     words[wordIndex] = val || " ";
     updateWord(val);
   });
 
-  // フォーカス中は自動切替タイマーを一時停止
   wordInput.addEventListener("focus", () => {
     if (intervalTimer) clearInterval(intervalTimer);
   });
 
-  // フォーカス外れたら空文字チェックをしてタイマー再開
   wordInput.addEventListener("blur", () => {
     if (!wordInput.value.trim()) {
       words[wordIndex] = "MAGIC";
@@ -788,14 +893,15 @@
     resetTimer();
   });
 
-  // Enterキーで確定
   wordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      wordInput.blur();
-    }
+    if (e.key === "Enter") wordInput.blur();
   });
 
-  // --- コントロール各種リスナー ---
+  scatterSlider.addEventListener("input", (e) => {
+    scatterAmount = parseInt(e.target.value, 10);
+    scatterValue.innerText = scatterAmount;
+    updateWord(words[wordIndex]);
+  });
 
   speedSlider.addEventListener("input", (e) => {
     morphSpeed = parseFloat(e.target.value);
@@ -829,8 +935,7 @@
 
   window.addEventListener("resize", resizeCanvas);
 
-  // ===== テキスト管理モーダル =====
-
+  // Modal Methods
   function renderModalList() {
     modalWordList.innerHTML = "";
 
@@ -920,7 +1025,6 @@
     if (e.key === "Enter") addWordFromModal();
   });
 
-  // テキストを保存（JSONダウンロード）
   modalSaveBtn.addEventListener("click", () => {
     const dataStr = JSON.stringify(words, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -934,7 +1038,6 @@
     URL.revokeObjectURL(url);
   });
 
-  // 復元（JSONファイルを読み込み）
   modalRestoreBtn.addEventListener("click", () => {
     modalFileInput.value = "";
     modalFileInput.click();
@@ -976,7 +1079,7 @@
 
     for (let i = 0; i < particles.length; i++) {
       particles[i].update(morphSpeed);
-      particles[i].draw(ctx, enableGlow);
+      particles[i].draw(ctx, enableGlow, currentDpr);
     }
 
     requestAnimationFrame(animate);
