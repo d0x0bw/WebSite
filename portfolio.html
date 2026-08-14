@@ -5,736 +5,998 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>履歴書作ってみた ポートフォリオデザイン参照</title>
   <style>
-/* --------------------------------------------------
-   基本・リセット設定
--------------------------------------------------- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP", sans-serif;
-  background-color: #d8dad8;
-  color: #43443f;
-  display: flex;
-  justify-content: center;
-  padding: 12px 10px;
-  line-height: 1.6;
-}
-
-a {
-  color: #29a7e1;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-a:hover {
-  color: #f39801;
-}
-
-/* 全体コンテナ */
-.resume-container {
-  width: 100%;
-  max-width: 840px;
-  background-color: #f9f8f4;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  position: relative;
-  overflow: hidden;
-}
-
-/* --------------------------------------------------
-   1. ヘッダー領域
--------------------------------------------------- */
-.top-banner {
-  background-color: #b9c9c8;
-  padding: 20px 20px;
-  text-align: center;
-}
-
-.header-box {
-  border: 1px solid #4a4a4a;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 8px #ffffff;
-  display: inline-block;
-  padding: 8px 120px;
-  max-width: 85%;
-}
-
-.header-box h1 {
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  color: #43443f;
-  margin-bottom: 4px;
-}
-
-.header-box p {
-  font-size: 14px;
-  letter-spacing: 0.15em;
-  color: #43443f;
-}
-
-/* --------------------------------------------------
-   2. プロフィール・写真・連絡先セクション（Grid使用）
--------------------------------------------------- */
-.profile-section {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 30px 40px;
-  gap: 20px;
-}
-
-.profile-bio {
-  text-align: center;
-  padding-right: 40px;
-}
-
-.profile-bio h2 {
-  font-size: 19px;
-  letter-spacing: 0.15em;
-  margin-bottom: 10px;
-  color: #43443f;
-  font-weight: bold;
-}
-
-.profile-bio p {
-  font-size: 11px;
-  line-height: 1.65;
-  color: #43443f;
-  text-align: justify;
-  text-align-last: left;
-  max-width: 200px;
-  margin: 0 auto;
-}
-
-.profile-avatar {
-  text-align: center;
-}
-
-.profile-avatar img {
-  width: 125px;
-  height: 125px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto;
-}
-
-.profile-contact {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-end;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #333333;
-  letter-spacing: 0.03em;
-  text-align: right;
-}
-
-.contact-icon {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #43443f;
-  flex-shrink: 0;
-}
-
-/* --------------------------------------------------
-   吹き出し（拡大・スマホ対応の矢印実装）
--------------------------------------------------- */
-
-.profile-avatar {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-  outline: none;
-}
-
-/* 吹き出し本体 */
-.speech-bubble {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  transform: translateY(-50%) translateX(12px);
-  
-  background-color: #ffffff;
-  color: #43443f;
-  border: 1px solid #43443f;
-  border-radius: 8px;
-  padding: 12px 10px;
-  font-size: 11px;
-  line-height: 1.6;
-  letter-spacing: 0.1em;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  /* 縦書き設定 */
-  writing-mode: vertical-rl;
-  white-space: nowrap;
-
-  /* 非表示状態 */
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-  z-index: 10;
-}
-
-/* 吹き出しの三角矢印（正方形を45度回転させて左側に突起させる） */
-.speech-bubble::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -5px; /* 正方形の先端だけを外に出す */
-  width: 8px;
-  height: 8px;
-  background-color: #ffffff; /* 本体と同じ背景色 */
-  border-top: 1px solid #43443f;  /* 本体と同じ枠線 */
-  border-left: 1px solid #43443f; /* 本体と同じ枠線 */
-  transform: translateY(-50%) rotate(-45deg); /* 45度回転で左向きの矢印に */
-  z-index: 1;
-}
-
-/* マウスオーバー / タップ時の表示 */
-.profile-avatar:hover .speech-bubble,
-.profile-avatar:focus .speech-bubble,
-.profile-avatar:active .speech-bubble {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(18px);
-}
-
-/* アバターが震えるアニメーション */
-@keyframes shake {
-  0% { transform: translate(1px, 1px) rotate(0deg); }
-  20% { transform: translate(-3px, 0px) rotate(1deg); }
-  40% { transform: translate(1px, -1px) rotate(-1deg); }
-  60% { transform: translate(-3px, 1px) rotate(0deg); }
-  80% { transform: translate(1px, 1px) rotate(1deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
-}
-
-.profile-avatar.is-shaking img {
-  animation: shake 0.4s ease-in-out;
-}
-
-/* --------------------------------------------------
-   3. 3カラム（学歴・スキル・専門知識）セクション
--------------------------------------------------- */
-.three-col-divider {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px 35px 15px;
-}
-
-.three-col-divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #43443f;
-  z-index: 1;
-}
-
-.header-badge {
-  position: relative;
-  z-index: 2;
-  width: 30%;
-  text-align: center;
-  padding: 5px 0;
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: 0.15em;
-}
-
-.badge-white {
-  background-color: #ffffff;
-  border: 1px solid #43443f;
-}
-
-.badge-tan {
-  background-color: #ebdcc9;
-}
-
-.three-columns {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 35px 15px;
-  gap: 20px;
-}
-
-.column {
-  width: 30%;
-}
-
-.edu-item {
-  text-align: center;
-  margin-bottom: 12px;
-  font-size: 11px;
-  color: #43443f;
-  line-height: 1.4;
-}
-
-.edu-item strong {
-  display: block;
-  color: #444444;
-  font-weight: 600;
-}
-
-.edu-item span {
-  display: block;
-  color: #666666;
-}
-
-.skill-list {
-  list-style: none;
-  text-align: center;
-}
-
-.skill-list li {
-  font-size: 11.5px;
-  font-weight: bold;
-  color: #333333;
-  margin-bottom: 10px;
-  letter-spacing: 0.03em;
-}
-
-.clickable-magic {
-  cursor: pointer;
-  color: #29a7e1;
-  transition: color 0.2s ease, transform 0.1s ease;
-  user-select: none;
-}
-
-.clickable-magic:hover {
-  color: #f39801;
-  text-decoration: underline;
-}
-
-.noscript-magic-msg {
-  display: block;
-  font-size: 11px;
-  color: #d9534f;
-  margin-top: -8px;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-/* --------------------------------------------------
-   4. 職歴セクション
--------------------------------------------------- */
-.work-header-divider {
-  position: relative;
-  margin: 5px 35px 15px;
-  text-align: center;
-}
-
-.work-header-divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #43443f;
-  z-index: 1;
-}
-
-.work-badge {
-  position: relative;
-  z-index: 2;
-  display: inline-block;
-  width: 30%;
-  background-color: #ebdcc9;
-  padding: 5px 0;
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: 0.15em;
-}
-
-.experience-container {
-  padding: 0 48px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.job-entry {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-
-.job-details {
-  flex: 1;
-}
-
-.job-title {
-  font-size: 16px;
-  font-weight: bold;
-  letter-spacing: 0.08em;
-  color: #43443f;
-  margin-bottom: 6px;
-}
-
-.job-details ul {
-  padding-left: 18px;
-  padding-right: 10px;
-}
-
-.job-details li {
-  font-size: 10.5px;
-  color: #43443f;
-  line-height: 1.5;
-  margin-bottom: 4px;
-}
-
-.company-box {
-  flex: 0 0 110px;
-  width: 110px;
-  height: 110px;
-  background-color: #b9c9c8;
-  color: #43443f;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-size: 11px;
-  font-weight: bold;
-  line-height: 1.3;
-  padding: 8px;
-  flex-shrink: 0;
-}
-
-.company-box .years {
-  margin-top: 4px;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.footer-bar {
-  height: 10px;
-  background-color: #ebdcc9;
-  margin-top: 10px;
-}
-
-/* --------------------------------------------------
-   5. トップへ戻るボタン (gotop)
--------------------------------------------------- */
-.gotop {
-  position: fixed;
-  right: 20px; 
-  bottom: 20px;
-  width: 45px; 
-  height: 45px; 
-  background: rgba(51, 51, 51, 0.8);
-  border-radius: 50%;
-  display: flex; 
-  justify-content: center; 
-  align-items: center;
-  z-index: 900; 
-  
-  opacity: 1;             
-  visibility: visible;    
-  pointer-events: auto;   
-  transform: translateY(0);
-  
-  transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.gotop.js-hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateY(15px);
-}
-
-.gotop.is-show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.gotop:hover { 
-  background: #000; 
-  transform: translateY(-5px);
-}
-
-.arrow { 
-  width: 8px; 
-  height: 8px; 
-  border-top: 2px solid #fff;
-  border-right: 2px solid #fff;
-  transform: rotate(-45deg);
-  margin-top: 4px;
-}
-
-/* --------------------------------------------------
-   6. 魔法エフェクト オーバーレイ
--------------------------------------------------- */
-#magic-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(10, 10, 15, 0.92);
-  z-index: 99999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#magic-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-#magic-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* --------------------------------------------------
-   7. A4印刷専用スタイル（追加・拡張）
--------------------------------------------------- */
-@page {
-  size: A4 portrait;
-  margin: 0; /* ブラウザ標準のヘッダー・フッター（日付・URL等）を非表示化 */
-}
-
-@media print {
-  /* 背景色や背景画像を強制表示 */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  html, body {
-    width: 210mm;
-    height: 297mm;
-    background-color: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden;
-  }
-
-  .resume-container {
-    width: 210mm !important;
-    max-width: 210mm !important;
-    min-height: 297mm !important;
-    box-shadow: none !important;
-    margin: 0 auto !important;
-    border: none !important;
-  }
-
-  /* 画面・レイアウト固定用の調整 */
-  .profile-section {
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr !important;
-  }
-
-  .three-col-divider {
-    display: flex !important;
-  }
-
-  .three-columns {
-    display: flex !important;
-    flex-direction: row !important;
-  }
-
-  .column {
-    width: 30% !important;
-  }
-
-  .job-entry {
-    display: flex !important;
-    flex-direction: row !important;
-  }
-
-  /* 印刷時に不要なUI要素を削除 */
-  .no-print,
-  .mobile-section-title,
-  #magic-overlay,
-  .gotop {
-    display: none !important;
-  }
-}
-
-/* --------------------------------------------------
-   8. レスポンシブ（スマホ・タブレット表示用）
--------------------------------------------------- */
-@media screen and (max-width: 768px) {
-  body {
-    padding: 0;
-  }
-
-  .resume-container {
-    box-shadow: none;
-  }
-
-  .top-banner {
-    padding: 28px 15px;
-  }
-
-  .header-box {
-    padding: 10px 60px;
-  }
-
-  .header-box h1 {
-    font-size: 22px;
-    letter-spacing: 0.18em;
-  }
-
-  .header-box p {
-    font-size: 13px;
-  }
-
-  .profile-section {
-    display: flex;
-    flex-direction: column;
-    padding: 25px 20px 15px;
-    gap: 20px;
-  }
-
-  .profile-avatar {
-    order: 1;
-  }
-
-  .profile-avatar img {
-    width: 120px;
-    height: 120px;
-  }
-
-  .profile-bio {
-    order: 2;
-    width: 100%;
-    padding-right: 0;
-  }
-
-  .profile-bio h2 {
-    font-size: 18px;
-  }
-
-  .profile-bio p {
-    max-width: 100%;
-  }
-
-  .profile-contact {
-    order: 3;
-    width: 100%;
-    align-items: center;
-  }
-
-  .contact-item {
-    text-align: center;
-    flex-direction: row-reverse;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .three-col-divider {
-    display: none;
-  }
-
-  .three-columns {
-    flex-direction: column;
-    padding: 0 20px 15px;
-    gap: 25px;
-  }
-
-  .column {
-    width: 100%;
-  }
-
-  .mobile-section-title {
-    display: block;
-    text-align: center;
-    padding: 8px 0;
-    font-size: 16px;
-    font-weight: bold;
-    letter-spacing: 0.15em;
-    margin-bottom: 15px;
-  }
-
-  .work-header-divider {
-    margin: 10px 20px 20px;
-  }
-
-  .work-badge {
-    width: 60%;
-    font-size: 16px;
-  }
-
-  .experience-container {
-    padding: 0 20px 15px;
-    gap: 25px;
-  }
-
-  .job-entry {
-    flex-direction: column-reverse;
-    gap: 15px;
-    align-items: stretch;
-  }
-
-  .job-details {
-    width: 100%;
-  }
-
-  .job-title {
-    font-size: 17px;
-  }
-
-  .company-box {
-    flex: 0 0 auto;
-    width: 100%;
-    height: auto;
-    min-height: unset;
-    padding: 6px 16px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12.5px;
-  }
-
-  .company-box br {
-    display: none;
-  }
-
-  .company-box .years {
-    margin-top: 0;
-    white-space: nowrap;
-  }
-}
-
-@media screen and (min-width: 769px) {
-  .mobile-section-title {
-    display: none;
-  }
-}
+    /* --------------------------------------------------
+       基本・リセット設定
+    -------------------------------------------------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", "Noto Sans JP", sans-serif;
+      background-color: #d8dad8;
+      color: #43443f;
+      display: flex;
+      justify-content: center;
+      padding: 12px 10px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #29a7e1;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    a:hover {
+      color: #f39801;
+    }
+
+    /* 全体コンテナ */
+    .resume-container {
+      width: 100%;
+      max-width: 840px;
+      background-color: #f9f8f4;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* --------------------------------------------------
+       1. ヘッダー領域
+    -------------------------------------------------- */
+    .top-banner {
+      background-color: #b9c9c8;
+      padding: 20px 20px;
+      text-align: center;
+    }
+
+    .header-box {
+      border: 1px solid #4a4a4a;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 8px #ffffff;
+      display: inline-block;
+      padding: 8px 120px;
+      max-width: 85%;
+    }
+
+    .header-box h1 {
+      font-size: 26px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      color: #43443f;
+      margin-bottom: 4px;
+    }
+
+    .header-box p {
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      color: #43443f;
+    }
+
+    /* --------------------------------------------------
+       2. プロフィール・写真・連絡先セクション（Grid使用）
+    -------------------------------------------------- */
+    .profile-section {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 30px 40px;
+      gap: 20px;
+    }
+
+    .profile-bio {
+      text-align: center;
+      padding-right: 40px;
+    }
+
+    .profile-bio h2 {
+      font-size: 19px;
+      letter-spacing: 0.15em;
+      margin-bottom: 10px;
+      color: #43443f;
+      font-weight: bold;
+    }
+
+    .profile-bio p {
+      font-size: 11px;
+      line-height: 1.65;
+      color: #43443f;
+      text-align: justify;
+      text-align-last: left;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    .profile-avatar {
+      text-align: center;
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .profile-avatar img {
+      width: 125px;
+      height: 125px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .profile-contact {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #333333;
+      letter-spacing: 0.03em;
+      text-align: right;
+    }
+
+    .contact-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #43443f;
+      flex-shrink: 0;
+    }
+
+    /* --------------------------------------------------
+       吹き出し（拡大・スマホ対応の矢印実装）
+    -------------------------------------------------- */
+    /* 吹き出し本体 */
+    .speech-bubble {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%) translateX(12px);
+      background-color: #ffffff;
+      color: #43443f;
+      border: 1px solid #43443f;
+      border-radius: 8px;
+      padding: 12px 10px;
+      font-size: 11px;
+      line-height: 1.6;
+      letter-spacing: 0.1em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      /* 縦書き設定 */
+      writing-mode: vertical-rl;
+      white-space: nowrap;
+
+      /* 非表示状態 */
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      z-index: 10;
+    }
+
+    /* 吹き出しの三角矢印（正方形を45度回転させて左側に突起させる） */
+    .speech-bubble::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -5px; /* 正方形の先端だけを外に出す */
+      width: 8px;
+      height: 8px;
+      background-color: #ffffff; /* 本体と同じ背景色 */
+      border-top: 1px solid #43443f;  /* 本体と同じ枠線 */
+      border-left: 1px solid #43443f; /* 本体と同じ枠線 */
+      transform: translateY(-50%) rotate(-45deg); /* 45度回転で左向きの矢印に */
+      z-index: 1;
+    }
+
+    /* マウスオーバー / タップ時の表示 */
+    .profile-avatar:hover .speech-bubble,
+    .profile-avatar:focus .speech-bubble,
+    .profile-avatar:active .speech-bubble {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(18px);
+    }
+
+    /* アバターが震えるアニメーション */
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      40% { transform: translate(1px, -1px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      80% { transform: translate(1px, 1px) rotate(1deg); }
+      100% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+
+    .profile-avatar.is-shaking img {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* --------------------------------------------------
+       3. 3カラム（学歴・スキル・専門知識）セクション
+    -------------------------------------------------- */
+    .three-col-divider {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 35px 15px;
+    }
+
+    .three-col-divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #43443f;
+      z-index: 1;
+    }
+
+    .header-badge {
+      position: relative;
+      z-index: 2;
+      width: 30%;
+      text-align: center;
+      padding: 5px 0;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+    }
+
+    .badge-white {
+      background-color: #ffffff;
+      border: 1px solid #43443f;
+    }
+
+    .badge-tan {
+      background-color: #ebdcc9;
+    }
+
+    .three-columns {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 35px 15px;
+      gap: 20px;
+    }
+
+    .column {
+      width: 30%;
+    }
+
+    .edu-item {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 11px;
+      color: #43443f;
+      line-height: 1.4;
+    }
+
+    .edu-item strong {
+      display: block;
+      color: #444444;
+      font-weight: 600;
+    }
+
+    .edu-item span {
+      display: block;
+      color: #666666;
+    }
+
+    .skill-list {
+      list-style: none;
+      text-align: center;
+    }
+
+    .skill-list li {
+      font-size: 11.5px;
+      font-weight: bold;
+      color: #333333;
+      margin-bottom: 10px;
+      letter-spacing: 0.03em;
+    }
+
+    .clickable-magic {
+      cursor: pointer;
+      color: #29a7e1;
+      transition: color 0.2s ease, transform 0.1s ease;
+      user-select: none;
+    }
+
+    .clickable-magic:hover {
+      color: #f39801;
+      text-decoration: underline;
+    }
+
+    .noscript-magic-msg {
+      display: block;
+      font-size: 11px;
+      color: #d9534f;
+      margin-top: -8px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    /* --------------------------------------------------
+       4. 職歴セクション
+    -------------------------------------------------- */
+    .work-header-divider {
+      position: relative;
+      margin: 5px 35px 15px;
+      text-align: center;
+    }
+
+    .work-header-divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #43443f;
+      z-index: 1;
+    }
+
+    .work-badge {
+      position: relative;
+      z-index: 2;
+      display: inline-block;
+      width: 30%;
+      background-color: #ebdcc9;
+      padding: 5px 0;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+    }
+
+    .experience-container {
+      padding: 0 48px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .job-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .job-details {
+      flex: 1;
+    }
+
+    .job-title {
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      color: #43443f;
+      margin-bottom: 6px;
+    }
+
+    .job-details ul {
+      padding-left: 18px;
+      padding-right: 10px;
+    }
+
+    .job-details li {
+      font-size: 10.5px;
+      color: #43443f;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    .company-box {
+      flex: 0 0 110px;
+      width: 110px;
+      height: 110px;
+      background-color: #b9c9c8;
+      color: #43443f;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      line-height: 1.3;
+      padding: 8px;
+      flex-shrink: 0;
+    }
+
+    .company-box .years {
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .footer-bar {
+      height: 10px;
+      background-color: #ebdcc9;
+      margin-top: 10px;
+    }
+
+    /* --------------------------------------------------
+       5. トップへ戻るボタン (gotop)
+    -------------------------------------------------- */
+    .gotop {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 45px;
+      height: 45px;
+      background: rgba(51, 51, 51, 0.8);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 900;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .gotop.js-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(15px);
+    }
+
+    .gotop.is-show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .gotop:hover {
+      background: #000;
+      transform: translateY(-5px);
+    }
+
+    .arrow {
+      width: 8px;
+      height: 8px;
+      border-top: 2px solid #fff;
+      border-right: 2px solid #fff;
+      transform: rotate(-45deg);
+      margin-top: 4px;
+    }
+
+    /* --------------------------------------------------
+       6. 魔法エフェクト オーバーレイ
+    -------------------------------------------------- */
+    #magic-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(10, 10, 15, 0.92);
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #magic-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #magic-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* --------------------------------------------------
+       7. A4印刷専用スタイル（追加・拡張）
+    -------------------------------------------------- */
+    @page {
+      size: A4 portrait;
+      margin: 0; /* ブラウザ標準のヘッダー・フッター（日付・URL等）を非表示化 */
+    }
+
+    @media print {
+      /* 背景色や背景画像を強制表示 */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      html, body {
+        width: 210mm;
+        height: 297mm;
+        background-color: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden;
+      }
+
+      .resume-container {
+        width: 210mm !important;
+        max-width: 210mm !important;
+        min-height: 297mm !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        border: none !important;
+      }
+
+      /* 画面・レイアウト固定用の調整 */
+      .profile-section {
+        display: grid !important;
+        grid-template-columns: 1fr auto 1fr !important;
+      }
+
+      .three-col-divider {
+        display: flex !important;
+      }
+
+      .three-columns {
+        display: flex !important;
+        flex-direction: row !important;
+      }
+
+      .column {
+        width: 30% !important;
+      }
+
+      .job-entry {
+        display: flex !important;
+        flex-direction: row !important;
+      }
+
+      /* 印刷時に不要なUI要素を削除 */
+      .no-print,
+      .mobile-section-title,
+      #magic-overlay,
+      .gotop {
+        display: none !important;
+      }
+    }
+
+    /* --------------------------------------------------
+       8. 画面バグ（Glitch）＆ 復旧モーダル用スタイル
+    -------------------------------------------------- */
+    /* 画面が崩れるアニメーション */
+    @keyframes glitch-shake {
+      0% { transform: translate(0, 0) rotate(0deg); filter: hue-rotate(0deg); }
+      20% { transform: translate(-6px, 4px) rotate(-1.5deg); filter: hue-rotate(90deg) contrast(150%); }
+      40% { transform: translate(6px, -4px) rotate(2deg); filter: hue-rotate(180deg) invert(0.2); }
+      60% { transform: translate(-4px, -2px) rotate(-1deg); filter: hue-rotate(270deg); }
+      80% { transform: translate(5px, 3px) rotate(1.2deg); filter: hue-rotate(120deg) saturate(200%); }
+      100% { transform: translate(-2px, 2px) rotate(-0.5deg); filter: hue-rotate(45deg); }
+    }
+
+    /* バグ発生中に全体コンテナに付与するクラス */
+    .resume-container.is-glitching {
+      animation: glitch-shake 0.15s infinite linear;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+    }
+
+    /* 復旧モーダル背景 */
+    .glitch-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 100000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .glitch-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* 警告ウィンドウ（ダイアログ）本体 */
+    .glitch-modal-box {
+      width: 90%;
+      max-width: 420px;
+      background-color: #f0f0f0;
+      border: 2px solid #000;
+      box-shadow: 6px 6px 0px #000;
+      font-family: monospace, sans-serif;
+      overflow: hidden;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* ウィンドウヘッダー */
+    .glitch-modal-header {
+      background-color: #d9534f;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid #000;
+    }
+
+    /* ウィンドウ本文 */
+    .glitch-modal-body {
+      padding: 20px;
+      color: #333;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .glitch-modal-body p {
+      margin-bottom: 10px;
+    }
+
+    /* ボタンエリア */
+    .glitch-modal-footer {
+      padding: 10px 20px 20px;
+      text-align: center;
+    }
+
+    .restore-button {
+      background-color: #29a7e1;
+      color: #fff;
+      border: 2px solid #000;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 3px 3px 0px #000;
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+
+    .restore-button:hover {
+      background-color: #f39801;
+    }
+
+    .restore-button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #000;
+    }
+
+    /* --------------------------------------------------
+       9. 始末書（反省文）モーダル用スタイル
+    -------------------------------------------------- */
+    /* モーダル背景 */
+    .apology-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.75);
+      z-index: 100000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .apology-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* 和紙風の賞状・始末書用紙 */
+    .apology-paper {
+      position: relative;
+      width: 90%;
+      max-width: 500px;
+      background-color: #fdfcf7;
+      /* 和紙風のダブル境界線 */
+      border: 4px double #5c4334;
+      outline: 8px solid #fdfcf7;
+      padding: 30px 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 60px rgba(210, 190, 160, 0.35);
+      font-family: "Yu Mincho", "Shippori Mincho", "Hiragino Mincho ProN", serif;
+      color: #2b2b2b;
+      overflow: hidden;
+    }
+
+    /* 始末書タイトル */
+    .apology-title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #a89f91;
+      padding-bottom: 8px;
+      color: #3a2e2b;
+    }
+
+    /* 日付と宛先 */
+    .apology-date-to {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-bottom: 15px;
+      color: #666;
+    }
+
+    /* 本文 */
+    .apology-body {
+      font-size: 13px;
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+      text-align: justify;
+    }
+
+    /* やらかし理由（強調赤字） */
+    .apology-reason {
+      font-weight: bold;
+      color: #c0392b;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      display: inline-block;
+      margin: 4px 0;
+    }
+
+    /* 署名 */
+    .apology-author {
+      text-align: right;
+      font-size: 13.5px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      padding-right: 10px;
+    }
+
+    /* ハンコ（朱印） */
+    .stamp-mark {
+      position: absolute;
+      bottom: 65px;
+      right: 45px;
+      width: 85px;
+      height: 85px;
+      border: 3px solid #d63031;
+      border-radius: 50%;
+      color: #d63031;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      font-family: "Yu Mincho", serif;
+      text-shadow: 0 0 1px #d63031;
+      box-shadow: inset 0 0 2px #d63031;
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      transform: scale(3) rotate(-25deg);
+    }
+
+    /* ハンコがドカンと押されるアニメーション */
+    .stamp-mark.stamped {
+      animation: stampDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes stampDown {
+      0% {
+        transform: scale(3.5) rotate(-35deg);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1) rotate(-12deg);
+        opacity: 0.85; /* 朱肉のかすれ感を出すため少し透過 */
+      }
+    }
+
+    /* 提出（閉じる）ボタン */
+    .apology-btn-area {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .apology-close-btn {
+      background-color: #5c4334;
+      color: #fff;
+      border: none;
+      padding: 8px 24px;
+      font-size: 12.5px;
+      font-family: sans-serif;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .apology-close-btn:hover {
+      background-color: #3a2e2b;
+    }
+
+    .apology-close-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* --------------------------------------------------
+       10. レスポンシブ（スマホ・タブレット表示用）
+    -------------------------------------------------- */
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 0;
+      }
+
+      .resume-container {
+        box-shadow: none;
+      }
+
+      .top-banner {
+        padding: 28px 15px;
+      }
+
+      .header-box {
+        padding: 10px 60px;
+      }
+
+      .header-box h1 {
+        font-size: 22px;
+        letter-spacing: 0.18em;
+      }
+
+      .header-box p {
+        font-size: 13px;
+      }
+
+      .profile-section {
+        display: flex;
+        flex-direction: column;
+        padding: 25px 20px 15px;
+        gap: 20px;
+      }
+
+      .profile-avatar {
+        order: 1;
+      }
+
+      .profile-avatar img {
+        width: 120px;
+        height: 120px;
+      }
+
+      .profile-bio {
+        order: 2;
+        width: 100%;
+        padding-right: 0;
+      }
+
+      .profile-bio h2 {
+        font-size: 18px;
+      }
+
+      .profile-bio p {
+        max-width: 100%;
+      }
+
+      .profile-contact {
+        order: 3;
+        width: 100%;
+        align-items: center;
+      }
+
+      .contact-item {
+        text-align: center;
+        flex-direction: row-reverse;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .three-col-divider {
+        display: none;
+      }
+
+      .three-columns {
+        flex-direction: column;
+        padding: 0 20px 15px;
+        gap: 25px;
+      }
+
+      .column {
+        width: 100%;
+      }
+
+      .mobile-section-title {
+        display: block;
+        text-align: center;
+        padding: 8px 0;
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 0.15em;
+        margin-bottom: 15px;
+      }
+
+      .work-header-divider {
+        margin: 10px 20px 20px;
+      }
+
+      .work-badge {
+        width: 60%;
+        font-size: 16px;
+      }
+
+      .experience-container {
+        padding: 0 20px 15px;
+        gap: 25px;
+      }
+
+      .job-entry {
+        flex-direction: column-reverse;
+        gap: 15px;
+        align-items: stretch;
+      }
+
+      .job-details {
+        width: 100%;
+      }
+
+      .job-title {
+        font-size: 17px;
+      }
+
+      .company-box {
+        flex: 0 0 auto;
+        width: 100%;
+        height: auto;
+        min-height: unset;
+        padding: 6px 16px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12.5px;
+      }
+
+      .company-box br {
+        display: none;
+      }
+
+      .company-box .years {
+        margin-top: 0;
+        white-space: nowrap;
+      }
+    }
+
+    @media screen and (min-width: 769px) {
+      .mobile-section-title {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -758,15 +1020,13 @@ a:hover {
         </p>
       </div>
 
-
       <div class="profile-avatar" tabindex="0">
         <img src="./icon/avator.png" alt="のびくん">
         <div class="speech-bubble">
-            私が今日やらかすミスは、<br>
-            未来の私が『やっぱりね』<br>
-            と証明するだろう・・・
+          私が今日やらかすミスは、<br>
+          未来の私が『やっぱりね』<br>
+          と証明するだろう・・・
         </div>
-
       </div>
 
       <div class="profile-contact">
@@ -789,7 +1049,7 @@ a:hover {
         </div>
 
         <div class="contact-item">
-          <span><a href="./index.html">WWW.MYWEBSITE.CO.JP</a></span>
+          <span><a href="./index.html" title="インデックスへ避難">WWW.MYWEBSITE.CO.JP</a></span>
           <div class="contact-icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/>
@@ -842,7 +1102,7 @@ a:hover {
         <div class="mobile-section-title badge-tan">スキル</div>
         <ul class="skill-list">
           <li>うぃんどｗｓ/ぃぬｘ/あんｄろいｄ/ときどきまｃ</li>
-          <li><a href="./effect/ParticleMorphingTextControlPanel.html" target="_blank">HTML/CSS・JavaScript</a></li>
+          <li><a href="./effect/ParticleMorphingTextControlPanel.html" target="_blank" title="おまけ">HTML/CSS・JavaScript</a></li>
           <li>EXCEL関数・マクロ</li>
           <li id="magic-trigger" class="clickable-magic" title="クリックして魔法を発動！">🔮 Pythonの呪文を覚えた！</li>
           <noscript>
@@ -857,8 +1117,8 @@ a:hover {
       <section class="column">
         <div class="mobile-section-title badge-white">専門知識</div>
         <ul class="skill-list">
-          <li>低品質(自己)管理</li>
-          <li>報告(始末)書作成</li>
+          <li id="glitch-trigger" class="clickable-magic" title="クリックすると何かが壊れます">💥 低品質(自己)管理</li>
+          <li id="apology-trigger" class="clickable-magic" title="クリックして始末書を発行">📜 報告(始末)書作成</li>
           <li>おふざけWEBデザイン</li>
           <li>実はこれと言ってナシ😭</li>
         </ul>
@@ -913,6 +1173,52 @@ a:hover {
   <!-- 暗転＆魔法パーティクル用オーバーレイ -->
   <div id="magic-overlay" class="no-print">
     <canvas id="magic-canvas"></canvas>
+  </div>
+
+  <!-- システムエラーポップアップ -->
+  <div id="glitch-modal" class="glitch-modal-overlay no-print">
+    <div class="glitch-modal-box">
+      <div class="glitch-modal-header">
+        <span>⚠️ 警告: 品質低下エラー</span>
+      </div>
+      <div class="glitch-modal-body">
+        <p>🚨 <strong>「低品質(自己)管理」</strong> が実行されました！</p>
+        <p>画面の安定性が著しく損なわれています。<br>このままでは履歴書の信用に関わります！</p>
+      </div>
+      <div class="glitch-modal-footer">
+        <button id="restore-btn" class="restore-button">✨ 奇跡的に復元する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 始末書（反省文）生成モーダル -->
+  <div id="apology-modal" class="apology-modal-overlay no-print">
+    <div class="apology-paper">
+      <h2 class="apology-title">始 末 書</h2>
+      
+      <div class="apology-date-to">
+        <span>関係者各位</span>
+        <span>昭和百年 某月某日</span>
+      </div>
+
+      <div class="apology-body">
+        私儀、この度は<br>
+        <span id="apology-reason" class="apology-reason">（ここにランダム理由）</span><br>
+        という重大な失態を犯し、多大なるご迷惑と大惨事をお引き起こしましたことを、深くお詫び申し上げます。<br><br>
+        今後は二度と（同様の、あるいは更に斬新な）事故を起こさぬよう、二度寝を控え、誠心誠意『やっぱりね』と言われない努力をする所存でございます。
+      </div>
+
+      <div class="apology-author">
+        反省人：Nobilf Nobittar 拝
+      </div>
+
+      <!-- ドカンと押される朱印ハンコ -->
+      <div id="apology-stamp" class="stamp-mark">不合格</div>
+
+      <div class="apology-btn-area">
+        <button id="apology-close-btn" class="apology-close-btn">誠心誠意提出する</button>
+      </div>
+    </div>
   </div>
 
   <!-- トップへ戻るボタン -->
@@ -1039,45 +1345,127 @@ a:hover {
     }
 
     // 2. アバターをクリックするとブルブル震えてセリフが変わる実装
-const avatar = document.querySelector('.profile-avatar');
-const bubble = document.querySelector('.speech-bubble');
+    const avatar = document.querySelector('.profile-avatar');
+    const bubble = document.querySelector('.speech-bubble');
 
-const messages = [
-  "私が今日やらかすミスは、<br>未来の私が『やっぱりね』<br>と証明するだろう・・・",
-  "私は二度寝のために生まれた！",
-  "なぜ二度寝の誘惑に勝てないのか！<br>私は自分の意志の弱さに理解に苦しむ！",
-  "バグでははない・・・<br>仕様（という名の言い訳）だ",
-  "言い訳のあるところに逃げ道はある",
-  "読書とは、<br>目的を持って買った<br>技術書を高く積み上げ、<br>表紙だけを眺めるということだ",
-  "盛大なミスをなし遂げるには、<br>コードを書くだけでなく<br>現実逃避することも必要だ！",
-  "私はバグを生み出しているが、<br>仕様書はもっと狂っている",
-  "ユーザーが変な連打をしないことは、<br>この脆弱なサーバーにとっては幸いだ",
-  "思考する脳は疲れやすく、<br>思考しない脳はスッキリ爆睡しやすい",
-  "私は理性ではなく、<br>締め切り直前の恐怖と<br>『奇跡的に直るかも』<br>という希望によって動く",
-  "私のコードには、<br>一つの論理が内在しているが、<br>この論理は必ずしも、<br>仕様書の其れとは一致しない",
-  "私のミスに続き、後輩が<br>デバッグへと踏み出すときが来た。<br>すべてを修復に捧げ、<br>定時退社以外はなにも望むな。<br>ノー残業以外はなにも望むな",
-  "私の書いたコードの多くは<br>無駄で謎である"
-];
+    const messages = [
+      "私が今日やらかすミスは、<br>未来の私が『やっぱりね』<br>と証明するだろう・・・",
+      "私は二度寝のために生まれた！",
+      "なぜ二度寝の誘惑に勝てないのか！<br>私は自分の意志の弱さに理解に苦しむ！",
+      "バグではない・・・<br>仕様（という名の言い訳）だ",
+      "言い訳のあるところに逃げ道はある",
+      "読書とは、<br>目的を持って買った<br>技術書を高く積み上げ、<br>表紙だけを眺めるということだ",
+      "盛大なミスをなし遂げるには、<br>コードを書くだけでなく<br>現実逃避することも必要だ！",
+      "私はバグを生み出しているが、<br>仕様書はもっと狂っている",
+      "ユーザーが変な連打をしないことは、<br>この脆弱なサーバーにとっては幸いだ",
+      "思考する脳は疲れやすく、<br>思考しない脳はスッキリ爆睡しやすい",
+      "私は理性ではなく、<br>締め切り直前の恐怖と<br>『奇跡的に直るかも』<br>という希望によって動く",
+      "私のコードには、<br>一つの論理が内在しているが、<br>この論理は必ずしも、<br>仕様書の其れとは一致しない",
+      "私のミスに続き、後輩が<br>デバッグへと踏み出すときが来た。<br>すべてを修復に捧げ、<br>定時退社以外はなにも望むな。<br>ノー残業以外はなにも望むな！",
+      "私の書いたコードの多くは<br>無駄で謎である"
+    ];
 
-let msgIndex = 0;
+    let msgIndex = 0;
 
-if (avatar && bubble) {
-  avatar.addEventListener('click', () => {
-    // 震えるクラスを追加
-    avatar.classList.add('is-shaking');
-    
-    // メッセージの切り替え
-    msgIndex = (msgIndex + 1) % messages.length;
-    bubble.innerHTML = messages[msgIndex];
+    if (avatar && bubble) {
+      avatar.addEventListener('click', () => {
+        // 震えるクラスを追加
+        avatar.classList.add('is-shaking');
+        
+        // メッセージの切り替え
+        msgIndex = (msgIndex + 1) % messages.length;
+        bubble.innerHTML = messages[msgIndex];
 
-    // アニメーション終了後にクラス削除
-    setTimeout(() => {
-      avatar.classList.remove('is-shaking');
-    }, 400);
-  });
-}
+        // アニメーション終了後にクラス削除
+        setTimeout(() => {
+          avatar.classList.remove('is-shaking');
+        }, 400);
+      });
+    }
 
-    // 3. トップへ戻るボタンのスクロール制御
+    // 3. 低品質管理（Glitchバグ＆復旧エフェクト）
+    const glitchTrigger = document.getElementById('glitch-trigger');
+    const glitchModal = document.getElementById('glitch-modal');
+    const restoreBtn = document.getElementById('restore-btn');
+    const resumeContainer = document.querySelector('.resume-container');
+
+    if (glitchTrigger && glitchModal && restoreBtn && resumeContainer) {
+      // 低品質管理をクリックでバグ発生
+      glitchTrigger.addEventListener('click', () => {
+        // コンテナをブルブル・色反転させる
+        resumeContainer.classList.add('is-glitching');
+        
+        // 少しだけ遅れてエラーダイアログを表示
+        setTimeout(() => {
+          glitchModal.classList.add('active');
+        }, 200);
+      });
+
+      // 復元ボタンをクリックで元通りに復旧
+      restoreBtn.addEventListener('click', () => {
+        // ダイアログを閉じる
+        glitchModal.classList.remove('active');
+        
+        // バグ演出を解除
+        resumeContainer.classList.remove('is-glitching');
+      });
+    }
+
+    // 4. 始末書（反省文）自動生成ポップアップ
+    const apologyTrigger = document.getElementById('apology-trigger');
+    const apologyModal = document.getElementById('apology-modal');
+    const apologyCloseBtn = document.getElementById('apology-close-btn');
+    const apologyReasonEl = document.getElementById('apology-reason');
+    const apologyStampEl = document.getElementById('apology-stamp');
+
+    // ランダムなやらかし理由バリエーション
+    const apologyReasons = [
+      "AIロボットに『お前、俺より滑舌悪いな』と煽られ、悔しさのあまり電源コードをぶっこ抜いたこと",
+      "ソフトクリームの黄金比を追求するあまりピサの斜塔状態となり、お客様の胸元に壊滅的着弾させたこと",
+      "人類の未来予測ビッグデータを『ファイルの整理整頓』と称してゴミ箱に入れ、パージレベル消去で空にしたこと",
+      "新商品のう○こ味ソフトクリームを独断で全店舗で展開し、会社の経営を壊滅状態に追い込んだこと",
+      "『画期的コードの』の実装・実験と称して、本ポートフォリオのスタイルを崩壊させたこと",
+      "『バグを焼き尽くす呪文』の検証と称して無限ループを起動し、職場のPCから煙を発生させたこと"
+    ];
+
+    // ランダムなハンコ文字バリエーション
+    const stampTexts = [
+      "不認可",
+      "反省ゼロ",
+      "不合格",
+      "大惨事",
+      "再提出",
+      "保留"
+    ];
+
+    if (apologyTrigger && apologyModal && apologyCloseBtn) {
+      apologyTrigger.addEventListener('click', () => {
+        // 理由とハンコをランダム選出
+        const randomReason = apologyReasons[Math.floor(Math.random() * apologyReasons.length)];
+        const randomStamp = stampTexts[Math.floor(Math.random() * stampTexts.length)];
+
+        apologyReasonEl.textContent = randomReason;
+        apologyStampEl.textContent = randomStamp;
+
+        // ハンコのアニメーションをリセット
+        apologyStampEl.classList.remove('stamped');
+
+        // モーダルを表示
+        apologyModal.classList.add('active');
+
+        // 表示から0.35秒後にハンコを「ドカン！」と押す
+        setTimeout(() => {
+          apologyStampEl.classList.add('stamped');
+        }, 350);
+      });
+
+      // 提出して閉じる
+      apologyCloseBtn.addEventListener('click', () => {
+        apologyModal.classList.remove('active');
+      });
+    }
+
+    // 5. トップへ戻るボタンのスクロール制御
     const goTopBtn = document.querySelector('.gotop');
 
     if (goTopBtn) {
