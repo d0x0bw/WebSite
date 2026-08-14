@@ -214,7 +214,19 @@ a:hover {
   transform: translateY(-50%) translateX(18px);
 }
 
+/* アバターが震えるアニメーション */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  40% { transform: translate(1px, -1px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  80% { transform: translate(1px, 1px) rotate(1deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
 
+.profile-avatar.is-shaking img {
+  animation: shake 0.4s ease-in-out;
+}
 
 /* --------------------------------------------------
    3. 3カラム（学歴・スキル・専門知識）セクション
@@ -1026,7 +1038,46 @@ a:hover {
       });
     }
 
-    // 2. トップへ戻るボタンのスクロール制御
+    // 2. アバターをクリックするとブルブル震えてセリフが変わる実装
+const avatar = document.querySelector('.profile-avatar');
+const bubble = document.querySelector('.speech-bubble');
+
+const messages = [
+  "私が今日やらかすミスは、<br>未来の私が『やっぱりね』<br>と証明するだろう・・・",
+  "私は二度寝のために生まれた！",
+  "なぜ二度寝の誘惑に勝てないのか！<br>私は自分の意志の弱さに理解に苦しむ！",
+  "バグでははない・・・<br>仕様（という名の言い訳）だ",
+  "言い訳のあるところに逃げ道はある",
+  "読書とは、<br>目的を持って買った<br>技術書を高く積み上げ、<br>表紙だけを眺めるということだ",
+  "盛大なミスをなし遂げるには、<br>コードを書くだけでなく<br>現実逃避することも必要だ！",
+  "私はバグを生み出しているが、<br>仕様書はもっと狂っている",
+  "ユーザーが変な連打をしないことは、<br>この脆弱なサーバーにとっては幸いだ",
+  "思考する脳は疲れやすく、<br>思考しない脳はスッキリ爆睡しやすい",
+  "私は理性ではなく、<br>締め切り直前の恐怖と<br>『奇跡的に直るかも』<br>という希望によって動く",
+  "私のコードには、<br>一つの論理が内在しているが、<br>この論理は必ずしも、<br>仕様書の其れとは一致しない",
+  "私のミスに続き、後輩が<br>デバッグへと踏み出すときが来た。<br>すべてを修復に捧げ、<br>定時退社以外はなにも望むな。<br>ノー残業以外はなにも望むな",
+  "私の書いたコードの多くは<br>無駄で謎である"
+];
+
+let msgIndex = 0;
+
+if (avatar && bubble) {
+  avatar.addEventListener('click', () => {
+    // 震えるクラスを追加
+    avatar.classList.add('is-shaking');
+    
+    // メッセージの切り替え
+    msgIndex = (msgIndex + 1) % messages.length;
+    bubble.innerHTML = messages[msgIndex];
+
+    // アニメーション終了後にクラス削除
+    setTimeout(() => {
+      avatar.classList.remove('is-shaking');
+    }, 400);
+  });
+}
+
+    // 3. トップへ戻るボタンのスクロール制御
     const goTopBtn = document.querySelector('.gotop');
 
     if (goTopBtn) {
