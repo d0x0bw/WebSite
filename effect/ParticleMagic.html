@@ -17,6 +17,7 @@
     }
     canvas {
       display: block;
+      touch-action: none; /* スクロールやピンチズームなどデフォルト挙動を無効化 */
     }
   </style>
 </head>
@@ -105,6 +106,37 @@ window.addEventListener('click', (e) => {
     particles.push(new Particle(e.clientX, e.clientY, true));
   }
 });
+
+// タッチ開始時（指を置いた瞬間）に弾けるエフェクト
+window.addEventListener('touchstart', (e) => {
+  e.preventDefault(); // スクロールやダブルタップズームを防止
+  for (const touch of e.changedTouches) {
+    mouse.x = touch.clientX;
+    mouse.y = touch.clientY;
+    mouse.active = true;
+    for (let i = 0; i < 40; i++) {
+      particles.push(new Particle(touch.clientX, touch.clientY, true));
+    }
+  }
+}, { passive: false });
+
+// タッチ移動時（指でなぞる）に粒を生成
+window.addEventListener('touchmove', (e) => {
+  e.preventDefault(); // ページのスクロールを防止
+  for (const touch of e.changedTouches) {
+    mouse.x = touch.clientX;
+    mouse.y = touch.clientY;
+    for (let i = 0; i < 3; i++) {
+      particles.push(new Particle(touch.clientX, touch.clientY));
+    }
+  }
+}, { passive: false });
+
+// タッチ終了時
+window.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  mouse.active = false;
+}, { passive: false });
 
 // アニメーションループ
 function animate() {
