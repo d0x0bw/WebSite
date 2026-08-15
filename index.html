@@ -11,6 +11,7 @@
     /* 全体のリセットと基本設定 */
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     :root {
@@ -25,6 +26,13 @@
       color: #614f38;
       font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
       line-height: 1.4;
+      transition: background-color 0.5s ease;
+    }
+
+    /* クリスマス・正月期間の背景色設定 */
+    body.is-christmas {
+      background-color: #1a2634; /* 雪が綺麗に見える濃い背景 */
+      color: #ffffff;
     }
 
     /* メインコンテナ */
@@ -32,6 +40,8 @@
       max-width: 1600px;
       margin: 0 auto;
       width: 100%;
+      position: relative;
+      z-index: 2;
     }
 
     /* 基本リンクスタイル */
@@ -53,6 +63,10 @@
       color: #614f38;
       margin-top: 3px;
       margin-bottom: 8px;
+    }
+
+    body.is-christmas .head h1 {
+      color: #ffffff;
     }
 
     .head p {
@@ -87,7 +101,7 @@
       padding: 0;
     }
 
-    /* カード（アンカー要素） */
+    /* カード（アンカー要素） - 半透明＆背景ぼかし設定 */
     .menu-card {
       position: relative;
       display: flex;
@@ -96,15 +110,38 @@
       text-align: left;
       justify-content: flex-start;
       gap: 16px;
-      background-color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(2px);
       padding: 24px 18px;
       border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
       overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
-      transition: box-shadow 0.2s ease 0s, color 0.4s ease 0s;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      transition: box-shadow 0.2s ease 0s, color 0.4s ease 0s, background-color 0.3s ease;
       z-index: 1;
       text-decoration: none;
       color: #614f38;
+    }
+
+    /* クリスマスモード時のカードデザイン調整 */
+    body.is-christmas .menu-card {
+      background-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* クリスマス期間中のホバー背景円（#f39801）の不透明度を60%に設定 */
+    body.is-christmas .menu-card:hover::before,
+    body.is-christmas .menu-card.is-active::before {
+      opacity: 0.6;
+    }
+
+    /* クリスマス・正月期間（12/24〜1/6）のメニュー文字色指定 */
+    body.is-christmas .menu-title {
+      color: #f39801; /* menu-titleをオレンジに */
+    }
+
+    body.is-christmas .menu-text p {
+      color: #ffffff; /* pを白に */
     }
 
     /* === 抽出したホバーアニメーション（円形広がり） === */
@@ -126,10 +163,9 @@
       content: "";
     }
 
-    /* ホバー時またはis-active付与時のアニメーション展開 */
     .menu-card:hover::before,
     .menu-card.is-active::before {
-      width: 800px;  /* カード全体を覆うのに十分な大きさ */
+      width: 800px;
       height: 600px;
       opacity: 1;
       transition-duration: 3.8s;
@@ -139,7 +175,7 @@
     .menu-card:hover,
     .menu-card.is-active {
       box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-      color: #ffffff; /* ホバー時にテキストを白へ */
+      color: #ffffff;
     }
 
     /* カード内の画像設定 */
@@ -203,22 +239,25 @@
       font-size: 0.625rem;
     }
 
-    /* === PC表示（画面幅が550px以上）のときの設定 === */
+    /* PC表示 */
     @media (min-width: 550px) {
       body {
         display: flex;
         justify-content: center;
         align-items: top;
         min-height: auto;
-        background-color: #f9f8f2;
       }
       
       .main {
         max-width: 1600px;
-        background-color: #f9f8f2;
+        background-color: transparent;
         padding: 30px;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: background-color 0.5s ease;
+      }
+
+      body.is-christmas .main {
+        background-color: transparent;
       }
 
       .menu-list {
@@ -233,15 +272,87 @@
         gap: 12px;
       }
     }
+
+    /* === 雪・動作確認パネル用の追加スタイル === */
+    #snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 隠しテストパネル（初期状態は display: none;） */
+    .test-panel {
+      display: none; 
+      position: relative;
+      z-index: 10000;
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+      border-radius: 8px;
+      padding: 12px 16px;
+      max-width: 380px;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .test-panel input, 
+    .test-panel button {
+      padding: 6px 12px;
+      font-size: 13px;
+      margin-top: 6px;
+      margin-right: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: #1976d2;
+      color: #fff;
+      border: none !important;
+    }
+
+    .btn-secondary {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    /* 隠し要素用トリガーのカーソル設定 */
+    #secret-icon {
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
   </style>
 </head>
 <body>
 
+<!-- 背景の雪エフェクト用Canvas -->
+<canvas id="snow-canvas"></canvas>
+
 <div class="main">
+
+  <!-- 動作確認用UI（隠しパネル） -->
+  <div class="test-panel">
+    <strong>🎄 動作確認パネル</strong><br>
+    <label for="test-date">日付を選択:</label><br>
+    <input type="date" id="test-date">
+    <div>
+      <button class="btn-primary" onclick="testEffect(false)">判定実行</button>
+      <button class="btn-secondary" onclick="clearStorage()">LocalStorageリセット</button>
+    </div>
+    <p id="status-message" style="margin-bottom: 0; font-size: 0.85rem; line-height: 1.4;"></p>
+  </div>
 
   <header class="head">
     <h1 lang="en">
-      <span class="color-1">I</span><span class="color-2">N</span><span class="color-3">D</span><span class="color-4">E</span><span class="color-5">X</span> 🗂️
+      <span class="christmas-decor" style="display:none;">🎄 </span>
+      <span class="color-1">I</span><span class="color-2">N</span><span class="color-3">D</span><span class="color-4">E</span><span class="color-5">X</span> 
+      <span id="secret-icon" title="7回タップで隠しパネル切り替え">🗂️</span>
+      <span class="christmas-decor" style="display:none;"> ❄️</span>
     </h1>
   </header>
 
@@ -308,20 +419,167 @@
 </div>
 
 <script>
-  // カード（.menu-card）をクリックした際の遅延遷移処理
+  // 1. 12月24日〜1月6日の判定
+  function isChristmasSeason(date) {
+    const month = date.getMonth(); // 0: 1月, 11: 12月
+    const day = date.getDate();
+
+    const isLateDec = (month === 11 && day >= 24);
+    const isEarlyJan = (month === 0 && day <= 6);
+
+    return isLateDec || isEarlyJan;
+  }
+
+  // 判定処理と演出制御
+  function checkAndRun(date) {
+    const message = document.getElementById('status-message');
+    const decors = document.querySelectorAll('.christmas-decor');
+    const formattedDateMsg = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+
+    if (isChristmasSeason(date)) {
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 期間内です。クリスマス演出と雪を有効化します。</span>`;
+      document.body.classList.add('is-christmas');
+      decors.forEach(el => el.style.display = 'inline');
+      startSnow();
+    } else {
+      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: 期間外です（12/24〜1/6のみ）。</span>`;
+      document.body.classList.remove('is-christmas');
+      decors.forEach(el => el.style.display = 'none');
+      stopSnow();
+    }
+  }
+
+  // 手動テスト実行
+  function testEffect() {
+    const inputVal = document.getElementById('test-date').value;
+    if (!inputVal) return;
+    
+    const parts = inputVal.split('-');
+    const testDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    checkAndRun(testDate);
+  }
+
+  // LocalStorageのリセット
+  function clearStorage() {
+    localStorage.removeItem('santa_effect_last_shown');
+    alert('表示記録をリセットしました。');
+    testEffect();
+  }
+
+  // ==========================================
+  // 隠しトリガー機能（🗂️ 7回タップで表示切り替え）
+  // ==========================================
+  let secretClickCount = 0;
+  let secretClickTimer = null;
+
+  document.getElementById('secret-icon').addEventListener('click', () => {
+    secretClickCount++;
+    clearTimeout(secretClickTimer);
+
+    // 2.5秒以内に7回連打すると表示/非表示をトグル
+    if (secretClickCount >= 7) {
+      const panel = document.querySelector('.test-panel');
+      const isHidden = window.getComputedStyle(panel).display === 'none';
+      panel.style.display = isHidden ? 'block' : 'none';
+      secretClickCount = 0;
+    } else {
+      secretClickTimer = setTimeout(() => {
+        secretClickCount = 0;
+      }, 2500);
+    }
+  });
+
+  // ==========================================
+  // 背景の「雪が降る」Canvasアニメーション
+  // ==========================================
+  let snowAnimationId = null;
+  const canvas = document.getElementById('snow-canvas');
+  const ctx = canvas.getContext('2d');
+  let flakes = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function createFlakes() {
+    flakes = [];
+    const count = Math.floor(window.innerWidth / 15);
+    for (let i = 0; i < count; i++) {
+      flakes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 3 + 1,
+        speedY: Math.random() * 1 + 0.5,
+        speedX: Math.random() * 0.5 - 0.25,
+        opacity: Math.random() * 0.7 + 0.3
+      });
+    }
+  }
+
+  function drawSnow() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+
+    for (let flake of flakes) {
+      ctx.beginPath();
+      ctx.globalAlpha = flake.opacity;
+      ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      flake.y += flake.speedY;
+      flake.x += flake.speedX;
+
+      if (flake.y > canvas.height) {
+        flake.y = -flake.radius;
+        flake.x = Math.random() * canvas.width;
+      }
+    }
+
+    snowAnimationId = requestAnimationFrame(drawSnow);
+  }
+
+  function startSnow() {
+    if (!snowAnimationId) {
+      createFlakes();
+      drawSnow();
+    }
+  }
+
+  function stopSnow() {
+    if (snowAnimationId) {
+      cancelAnimationFrame(snowAnimationId);
+      snowAnimationId = null;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  // カード（.menu-card）の遅延遷移処理
   document.querySelectorAll('.menu-card').forEach(card => {
     card.addEventListener('click', function(e) {
       e.preventDefault();
       const targetUrl = this.getAttribute('href');
       
-      // クラスを付与してアニメーションを開始させる
       this.classList.add('is-active');
       
-      // アニメーションの完了を待って遷移（400ms）
       setTimeout(() => {
         window.location.href = targetUrl;
       }, 400); 
     });
+  });
+
+  // 初期化処理
+  window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('test-date').value = `${yyyy}-${mm}-${dd}`;
+
+    checkAndRun(today);
   });
 </script>
 
