@@ -30,6 +30,7 @@
       text-decoration: none;
       transition: color 0.2s ease;
     }
+
     a:hover {
       color: #f39801;
     }
@@ -122,7 +123,7 @@
       cursor: pointer;
       outline: none;
       -webkit-tap-highlight-color: transparent;
-}
+    }
 
     .profile-avatar img {
       width: 125px;
@@ -693,6 +694,15 @@
       box-shadow: 1px 1px 0px #000;
     }
 
+    .ohirune-button {
+      background-color: #444444;
+      margin-left: 8px;
+    }
+
+    .ohirune-button:hover {
+      background-color: #222222;
+    }
+
     /* --------------------------------------------------
        9. 始末書（反省文）モーダル用スタイル
     -------------------------------------------------- */
@@ -1010,7 +1020,7 @@
 <body>
 
   <div class="resume-container">
-    
+
     <!-- ヘッダー -->
     <header class="top-banner">
       <div class="header-box">
@@ -1195,6 +1205,7 @@
       </div>
       <div class="glitch-modal-footer">
         <button id="restore-btn" class="restore-button">✨ 奇跡的に復元する</button>
+        <button id="ohirune-btn" class="restore-button ohirune-button">💤 かまわず昼寝</button>
       </div>
     </div>
   </div>
@@ -1203,7 +1214,7 @@
   <div id="apology-modal" class="apology-modal-overlay no-print">
     <div class="apology-paper">
       <h2 class="apology-title">始 末 書</h2>
-      
+
       <div class="apology-date-to">
         <span>関係者各位</span>
         <span>昭和百年 某月某日</span>
@@ -1253,10 +1264,10 @@
         const speed = Math.random() * 8 + 2;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
-        
+
         const colors = ['#f39801', '#29a7e1', '#e056fd', '#f8a5c2', '#ffffff', '#f1c40f'];
         this.color = colors[Math.floor(Math.random() * colors.length)];
-        
+
         this.alpha = 1;
         this.decay = Math.random() * 0.015 + 0.008;
         this.gravity = 0.05;
@@ -1277,7 +1288,7 @@
         ctx.fillStyle = this.color;
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
-        
+
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -1335,7 +1346,7 @@
 
       setTimeout(() => {
         magicOverlay.classList.remove('active');
-        
+
         setTimeout(() => {
           cancelAnimationFrame(animationFrameId);
           ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1358,14 +1369,14 @@
 
     const messages = [
       "私が今日やらかすミスは、<br>未来の私が『やっぱりね』<br>と証明するだろう・・・",
-      "私は二度寝のために生まれた！",
-      "なぜ二度寝の誘惑に勝てないのか！<br>私は自分の意志の弱さに理解に苦しむ！",
       "バグではない・・・<br>仕様（という名の言い訳）だ",
       "言い訳のあるところに逃げ道はある",
-      "読書とは、<br>目的を持って買った<br>技術書を高く積み上げ、<br>表紙だけを眺めるということだ",
       "盛大なミスをなし遂げるには、<br>コードを書くだけでなく<br>現実逃避することも必要だ！",
       "私はバグを生み出しているが、<br>仕様書はもっと狂っている",
       "ユーザーが変な連打をしないことは、<br>この脆弱なサーバーにとっては幸いだ",
+      "読書とは、<br>目的を持って買った<br>技術書を高く積み上げ、<br>表紙だけを眺めるということだ",
+      "私は二度寝のために生まれた！",
+      "なぜ二度寝の誘惑に勝てないのか！<br>私は自分の意志の弱さに理解に苦しむ！",
       "思考する脳は疲れやすく、<br>思考しない脳はスッキリ爆睡しやすい",
       "私は理性ではなく、<br>締め切り直前の恐怖と<br>『奇跡的に直るかも』<br>という希望によって動く",
       "私のコードには、<br>一つの論理が内在しているが、<br>この論理は必ずしも、<br>仕様書の其れとは一致しない",
@@ -1379,7 +1390,7 @@
       avatar.addEventListener('click', () => {
         // 震えるクラスを追加
         avatar.classList.add('is-shaking');
-        
+
         // メッセージの切り替え
         msgIndex = (msgIndex + 1) % messages.length;
         bubble.innerHTML = messages[msgIndex];
@@ -1402,7 +1413,7 @@
       glitchTrigger.addEventListener('click', () => {
         // コンテナをブルブル・色反転させる
         resumeContainer.classList.add('is-glitching');
-        
+
         // 少しだけ遅れてエラーダイアログを表示
         setTimeout(() => {
           glitchModal.classList.add('active');
@@ -1413,10 +1424,126 @@
       restoreBtn.addEventListener('click', () => {
         // ダイアログを閉じる
         glitchModal.classList.remove('active');
-        
+
         // バグ演出を解除
         resumeContainer.classList.remove('is-glitching');
       });
+    }
+
+    // 「かまわず昼寝」ボタンのイベント爆発・落下＆全画面タップ復元処理
+    const ohiruneBtn = document.getElementById('ohirune-btn');
+    let isDestroyedState = false;
+
+    if (ohiruneBtn) {
+      ohiruneBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        glitchModal.classList.remove('active');
+        resumeContainer.classList.remove('is-glitching');
+
+        // ランダム演出を実行
+        triggerRandomDestroyEffect();
+      });
+    }
+
+    // 【追加】画面全体がタップされたときに履歴書を復元する処理
+    document.addEventListener('click', () => {
+      if (isDestroyedState) {
+        resumeContainer.style.opacity = '1';
+        isDestroyedState = false;
+      }
+    });
+
+    function triggerRandomDestroyEffect() {
+      // 50%の確率で「爆発（true）」か「真下落下（false）」を分岐
+      const isExplosion = Math.random() < 0.5;
+
+      const expCanvas = document.createElement('canvas');
+      expCanvas.style.position = 'fixed';
+      expCanvas.style.top = '0';
+      expCanvas.style.left = '0';
+      expCanvas.style.width = '100vw';
+      expCanvas.style.height = '100vh';
+      expCanvas.style.zIndex = '999999';
+      expCanvas.style.pointerEvents = 'none';
+      expCanvas.width = window.innerWidth;
+      expCanvas.height = window.innerHeight;
+      document.body.appendChild(expCanvas);
+
+      const expCtx = expCanvas.getContext('2d');
+      const colors = ['#43443f', '#ebdcc9', '#b9c9c8', '#29a7e1', '#d9534f', '#ffffff'];
+      const debris = [];
+      const count = 160;
+
+      for (let i = 0; i < count; i++) {
+        if (isExplosion) {
+          // パターンA：爆発（四方八方に激しく吹き飛ぶ）
+          debris.push({
+            x: Math.random() * expCanvas.width,
+            y: Math.random() * expCanvas.height * 0.7,
+            w: Math.random() * 22 + 6,
+            h: Math.random() * 12 + 4,
+            vx: (Math.random() - 0.5) * 45,
+            vy: Math.random() * -25 - 5,
+            gravity: 0.8,
+            rotation: Math.random() * Math.PI,
+            vRot: (Math.random() - 0.5) * 0.4,
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+        } else {
+          // パターンB：落下（横ブレせず「ストン」と真下へ落ちる）
+          debris.push({
+            x: Math.random() * expCanvas.width,
+            y: Math.random() * expCanvas.height * 0.7,
+            w: Math.random() * 22 + 6,
+            h: Math.random() * 12 + 4,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: Math.random() * 4 + 2,
+            gravity: 1.3,
+            rotation: Math.random() * Math.PI,
+            vRot: (Math.random() - 0.5) * 0.05,
+            color: colors[Math.floor(Math.random() * colors.length)]
+          });
+        }
+      }
+
+      // 画面本体を消失させて真っ新にする
+      resumeContainer.style.transition = 'opacity 0.15s ease';
+      resumeContainer.style.opacity = '0';
+
+      function animateDebris() {
+        expCtx.clearRect(0, 0, expCanvas.width, expCanvas.height);
+        let activeCount = 0;
+
+        debris.forEach(p => {
+          if (p.y < expCanvas.height + 60) {
+            activeCount++;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.rotation += p.vRot;
+
+            expCtx.save();
+            expCtx.translate(p.x, p.y);
+            expCtx.rotate(p.rotation);
+            expCtx.fillStyle = p.color;
+            expCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            expCtx.restore();
+          }
+        });
+
+        if (activeCount > 0) {
+          requestAnimationFrame(animateDebris);
+        } else {
+          document.body.removeChild(expCanvas);
+          // 連打による誤作動を防ぐため、アニメーション完了後わずかに遅れてタップ復元を有効化
+          setTimeout(() => {
+            isDestroyedState = true;
+          }, 100);
+        }
+      }
+
+      requestAnimationFrame(animateDebris);
     }
 
     // 4. 始末書（反省文）自動生成ポップアップ
