@@ -48,11 +48,11 @@
       width: 320px;
       max-height: calc(100vh - 32px);
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch; /* スマホでのスムーズな滑らかスクロール */
+      -webkit-overflow-scrolling: touch; /* スマホでの滑らかスクロール */
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
       user-select: none;
-      touch-action: pan-y; /* 垂直方向のスワイプ操作（スクロール）を許可 */
+      touch-action: pan-y; /* 垂直スワイプ（スクロール）を許可 */
       /* フェードイン・フェードアウト用アニメーション設定 */
       opacity: 1;
       visibility: visible;
@@ -150,7 +150,7 @@
     }
 
     .control-group {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .control-group label {
@@ -165,8 +165,8 @@
       width: 100%;
       accent-color: #c0ea2e;
       cursor: pointer;
-      height: 6px;
-      touch-action: pan-x; /* スライダー操作（左右）を優先 */
+      height: 8px;
+      touch-action: pan-y; /* 縦スワイプを最優先 */
     }
 
     .control-group input[type="color"] {
@@ -217,7 +217,6 @@
   <div class="panel-header" id="panel-header">
     <h3>✨ 蛍パラメータ設定 ⠿</h3>
     <div class="header-controls">
-      <!-- 丸い矢印（リセット）ボタン -->
       <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -229,7 +228,6 @@
   </div>
 
   <div class="panel-content" id="panel-body">
-    <!-- 1. 数量・サイズ -->
     <div class="control-section">
       <div class="section-title">■ 数と大きさ</div>
       <div class="control-group">
@@ -246,7 +244,6 @@
       </div>
     </div>
 
-    <!-- 2. カラー & 発光 -->
     <div class="control-section">
       <div class="section-title">■ 色と光</div>
       <div class="control-group">
@@ -263,7 +260,6 @@
       </div>
     </div>
 
-    <!-- 3. 移動 & 物理 -->
     <div class="control-section">
       <div class="section-title">■ 動きと速さ</div>
       <div class="control-group">
@@ -280,7 +276,6 @@
       </div>
     </div>
 
-    <!-- 4. 点滅 & ライフサイクル -->
     <div class="control-section">
       <div class="section-title">■ 点滅と余韻</div>
       <div class="control-group">
@@ -293,7 +288,6 @@
       </div>
     </div>
 
-    <!-- 5. 環境 & システム設定 -->
     <div class="control-section">
       <div class="section-title">■ 環境とシステム</div>
       <div class="control-group">
@@ -371,6 +365,9 @@
       });
     });
 
+    // スライダー上で「縦にスワイプ」した時に誤作動しないよう制御
+    initSliderTouchPrevention();
+
     const toggleBtn = document.getElementById('btn-toggle-panel');
     const resetBtn = document.getElementById('btn-reset-panel');
     const panelBody = document.getElementById('panel-body');
@@ -440,6 +437,42 @@
     });
 
     initDraggable();
+  }
+
+  // スライダー上のタッチジェスチャー判定（縦移動ならスライダーを無効化してスクロールに専念させる）
+  function initSliderTouchPrevention() {
+    const sliders = document.querySelectorAll('input[type="range"]');
+
+    sliders.forEach(slider => {
+      let startX = 0;
+      let startY = 0;
+      let isVertical = false;
+
+      slider.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isVertical = false;
+      }, { passive: true });
+
+      slider.addEventListener('touchmove', (e) => {
+        if (isVertical) return;
+
+        const touch = e.touches[0];
+        const diffX = Math.abs(touch.clientX - startX);
+        const diffY = Math.abs(touch.clientY - startY);
+
+        // 動き始めの段階で「縦移動」が「横移動」より勝っている場合
+        if (diffY > diffX && diffY > 4) {
+          isVertical = true;
+          // 一時的にポインターイベントをOFFにしてスクロールに譲る
+          slider.style.pointerEvents = 'none';
+          setTimeout(() => {
+            slider.style.pointerEvents = 'auto';
+          }, 300);
+        }
+      }, { passive: true });
+    });
   }
 
   // PC用ドラッグ移動機能
