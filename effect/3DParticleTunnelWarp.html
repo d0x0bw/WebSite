@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Particle Tunnel Warp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #030308; overflow: hidden; user-select: none; }
+    #canvas-container { width: 100vw; height: 100vh; cursor: pointer; }
+    #ui-guide {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-family: sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+      letter-spacing: 0.1em;
+    }
+  </style>
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<script>
+// 1. シーン・カメラ・レンダラーの設定
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+scene.fog = new THREE.FogExp2(0x030308, 0.006);
+
+const BASE_FOV = 75;
+const BOOST_FOV = 95; // 加速時に視野角を広げてスピード感を強調
+const camera = new THREE.PerspectiveCamera(BASE_FOV, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// 2. トンネル・パーティクルの設定
+const PARTICLE_COUNT = 12000;
+const TUNNEL_LENGTH = 600;
+const TUNNEL_RADIUS = 35;
+
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(PARTICLE_COUNT * 3);
+const colors = new Float32Array(PARTICLE_COUNT * 3);
+
+const color1 = new THREE.Color(0x00f0ff); // シアン
+const color2 = new THREE.Color(0x7800ff); // パープル
+const color3 = new THREE.Color(0xff007f); // マゼンタ
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  const i3 = i * 3;
+  const radius = Math.random() * TUNNEL_RADIUS + 3;
+  const angle = Math.random() * Math.PI * 2;
+
+  positions[i3]     = Math.cos(angle) * radius;
+  positions[i3 + 1] = Math.sin(angle) * radius;
+  positions[i3 + 2] = -Math.random() * TUNNEL_LENGTH;
+
+  const mixRatio = Math.random();
+  const pColor = mixRatio < 0.5 
+    ? color1.clone().lerp(color2, mixRatio * 2) 
+    : color2.clone().lerp(color3, (mixRatio - 0.5) * 2);
+
+  colors[i3]     = pColor.r;
+  colors[i3 + 1] = pColor.g;
+  colors[i3 + 2] = pColor.b;
+}
+
+geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+// 3. テクスチャとマテリアル
+function createParticleTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+  grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+
+  const texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+const material = new THREE.PointsMaterial({
+  size: 1.8,
+  map: createParticleTexture(),
+  vertexColors: true,
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
+
+const tunnelParticles = new THREE.Points(geometry, material);
+scene.add(tunnelParticles);
+
+// 4. 速度管理とインタラクション設定
+const BASE_SPEED = 0.04;   // 通常時の控えめな速度
+const BOOST_SPEED = 2.5;  // クリック（タップ）時の加速速度
+
+let currentSpeed = BASE_SPEED;
+let isBoosting = false;
+
+// マウス移動
+let mouseX = 0;
+let mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// 加速イベント（マウス長押し / タップ）
+const startBoost = () => { isBoosting = true; };
+const endBoost = () => { isBoosting = false; };
+
+window.addEventListener('mousedown', startBoost);
+window.addEventListener('mouseup', endBoost);
+window.addEventListener('mouseleave', endBoost);
+
+window.addEventListener('touchstart', (e) => {
+  startBoost();
+  if (e.touches.length > 0) {
+    mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+  }
+});
+window.addEventListener('touchend', endBoost);
+
+// 5. アニメーションループ
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const elapsedTime = clock.getElapsedTime();
+  const posArr = geometry.attributes.position.array;
+
+  // 目標速度と目標FOVの計算（イージングで滑らかに遷移）
+  const targetSpeed = isBoosting ? BOOST_SPEED : BASE_SPEED;
+  const targetFov = isBoosting ? BOOST_FOV : BASE_FOV;
+
+  currentSpeed += (targetSpeed - currentSpeed) * 0.08;
+  camera.fov += (targetFov - camera.fov) * 0.08;
+  camera.updateProjectionMatrix();
+
+  // 粒子の移動処理
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const i3 = i * 3;
+    posArr[i3 + 2] += currentSpeed;
+
+    if (posArr[i3 + 2] > 10) {
+      posArr[i3 + 2] -= TUNNEL_LENGTH;
+    }
+  }
+
+  geometry.attributes.position.needsUpdate = true;
+
+  // 加速時は回転も少し速くする
+  tunnelParticles.rotation.z = elapsedTime * (isBoosting ? 0.4 : 0.12);
+
+  // カメラの傾き補正
+  camera.position.x += (mouseX * 8 - camera.position.x) * 0.05;
+  camera.position.y += (-mouseY * 8 - camera.position.y) * 0.05;
+  camera.lookAt(0, 0, -100);
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// リサイズ対応
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
