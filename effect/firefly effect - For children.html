@@ -48,10 +48,11 @@
       width: 320px;
       max-height: calc(100vh - 32px);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch; /* スマホでのスムーズな滑らかスクロール */
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
       user-select: none;
-      touch-action: none;
+      touch-action: pan-y; /* 垂直方向のスワイプ操作（スクロール）を許可 */
       /* フェードイン・フェードアウト用アニメーション設定 */
       opacity: 1;
       visibility: visible;
@@ -165,6 +166,7 @@
       accent-color: #c0ea2e;
       cursor: pointer;
       height: 6px;
+      touch-action: pan-x; /* スライダー操作（左右）を優先 */
     }
 
     .control-group input[type="color"] {
