@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Firefly Effect - Auto Hide & Click Show</title>
+  <title>Firefly Effect For Children</title>
 
   <style>
     * {
@@ -254,77 +254,77 @@
   <div class="panel-content" id="panel-body">
     <!-- 1. 数量・サイズ -->
     <div class="control-section">
-      <div class="section-title">■ 数量 & サイズ</div>
+      <div class="section-title">■ 数と大きさ</div>
       <div class="control-group">
         <label>蛍の数: <span id="val-count">35</span>匹</label>
         <input type="range" id="param-count" min="1" max="250" value="35">
       </div>
       <div class="control-group">
-        <label>核サイズ（大きさ）: <span id="val-radius">1.3</span>px</label>
+        <label>蛍の大きさ: <span id="val-radius">1.3</span>px</label>
         <input type="range" id="param-radius" min="0.5" max="4.0" step="0.1" value="1.3">
       </div>
       <div class="control-group">
-        <label>光の広がり範囲: <span id="val-glow">1.0</span>倍</label>
+        <label>光の広がり: <span id="val-glow">1.0</span>倍</label>
         <input type="range" id="param-glow" min="0.2" max="3.0" step="0.1" value="1.0">
       </div>
     </div>
 
     <!-- 2. カラー & 発光 -->
     <div class="control-section">
-      <div class="section-title">■ 発光 & カラー</div>
+      <div class="section-title">■ 色と光</div>
       <div class="control-group">
-        <label>基本の色相 (Hue): <span id="val-hue">75</span>°</label>
+        <label>蛍の色: <span id="val-hue">75</span>°</label>
         <input type="range" id="param-hue" min="0" max="360" value="75">
       </div>
       <div class="control-group">
-        <label>色の個体差（ばらつき）: <span id="val-huerange">30</span>°</label>
+        <label>色のばらつき: <span id="val-huerange">30</span>°</label>
         <input type="range" id="param-huerange" min="0" max="90" value="30">
       </div>
       <div class="control-group">
-        <label>発光強度: <span id="val-brightness">1.0</span>倍</label>
+        <label>光の強さ: <span id="val-brightness">1.0</span>倍</label>
         <input type="range" id="param-brightness" min="0.2" max="2.5" step="0.1" value="1.0">
       </div>
     </div>
 
     <!-- 3. 移動 & 物理 -->
     <div class="control-section">
-      <div class="section-title">■ 動き & 物理</div>
+      <div class="section-title">■ 動きと速さ</div>
       <div class="control-group">
         <label>移動速度: <span id="val-speed">1.0</span>倍</label>
         <input type="range" id="param-speed" min="0.0" max="3.0" step="0.1" value="1.0">
       </div>
       <div class="control-group">
-        <label>浮遊の揺らぎ (Wobble): <span id="val-wobble">1.0</span>倍</label>
+        <label>揺れ具合: <span id="val-wobble">1.0</span>倍</label>
         <input type="range" id="param-wobble" min="0.0" max="3.0" step="0.1" value="1.0">
       </div>
       <div class="control-group">
-        <label>上昇傾向（上昇力）: <span id="val-rise">-0.08</span></label>
+        <label>浮き上がりを抑える: <span id="val-rise">-0.08</span></label>
         <input type="range" id="param-rise" min="-0.30" max="0.10" step="0.02" value="-0.08">
       </div>
     </div>
 
     <!-- 4. 点滅 & ライフサイクル -->
     <div class="control-section">
-      <div class="section-title">■ 点滅 & 余韻</div>
+      <div class="section-title">■ 点滅と余韻</div>
       <div class="control-group">
-        <label>点滅周期速度: <span id="val-duration">1.0</span>倍</label>
+        <label>点滅の速さ: <span id="val-duration">1.0</span>倍</label>
         <input type="range" id="param-duration" min="0.2" max="3.0" step="0.1" value="1.0">
       </div>
       <div class="control-group">
-        <label>長光個体の割合: <span id="val-longratio">30</span>%</label>
+        <label>長く光る蛍の多さ: <span id="val-longratio">30</span>%</label>
         <input type="range" id="param-longratio" min="0" max="100" value="30">
       </div>
     </div>
 
     <!-- 5. 環境 & システム設定 -->
     <div class="control-section">
-      <div class="section-title">■ 環境 & システム</div>
+      <div class="section-title">■ タイマーとと背景</div>
       <div class="control-group">
-        <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
+        <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
         <input type="range" id="param-hidedelay" min="1" max="10" value="3">
       </div>
       <div class="control-group">
-        <label>背景カラー</label>
+        <label>背景の色</label>
         <input type="color" id="param-bgcolor" value="#070d16">
       </div>
     </div>
