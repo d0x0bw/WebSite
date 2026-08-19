@@ -174,6 +174,76 @@
       background: none;
     }
 
+    .control-group.inline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-group.inline-row label {
+      margin-bottom: 0;
+    }
+
+    .control-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #00f0ff;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* 速度メーター（左上表示） */
+    .speed-meter {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 9;
+      background: rgba(8, 10, 20, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: #00f0ff;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+      line-height: 1.3;
+    }
+
+    .speed-meter.is-hidden {
+      display: none;
+    }
+
+    .speed-meter-label {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: rgba(0, 240, 255, 0.65);
+    }
+
+    .speed-meter-value {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .speed-meter {
+        top: 12px;
+        left: 12px;
+        padding: 6px 12px;
+      }
+
+      .speed-meter-label {
+        font-size: 0.56rem;
+      }
+
+      .speed-meter-value {
+        font-size: 1.1rem;
+      }
+    }
+
     .panel-content.is-collapsed {
       display: none;
     }
@@ -235,9 +305,14 @@
 
 <div id="canvas-container"></div>
 
+<div class="speed-meter" id="speed-meter">
+  <span class="speed-meter-label">SPEED</span>
+  <span class="speed-meter-value" id="speed-meter-value">0.02</span>
+</div>
+
 <div class="control-panel" id="draggable-panel">
   <div class="panel-header" id="panel-header">
-    <h3>⚡ トンネルパラメータ設定 ⠿</h3>
+    <h3>⚡ パラメータ設定 ⠿</h3>
     <div class="header-controls">
       <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -336,6 +411,10 @@
         <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
         <input type="range" id="param-hidedelay" min="1" max="10" value="3">
       </div>
+      <div class="control-group inline-row">
+        <label for="param-speedmeter">速度メーターを表示（左上）</label>
+        <input type="checkbox" id="param-speedmeter" checked>
+      </div>
     </div>
   </div>
 </div>
@@ -359,7 +438,8 @@ const defaultConfig = {
   warpSpeed: 8.0,
   baseFov: 75,
   maxFov: 110,
-  hideDelay: 3
+  hideDelay: 3,
+  showSpeedMeter: true
 };
 
 // 現在の設定（初期値でコピー複製）
@@ -367,6 +447,8 @@ const config = { ...defaultConfig };
 
 // 1. シーン・カメラ・レンダラーの設定
 const container = document.getElementById('canvas-container');
+const speedMeterEl = document.getElementById('speed-meter');
+const speedMeterValueEl = document.getElementById('speed-meter-value');
 const scene = new THREE.Scene();
 
 scene.fog = new THREE.FogExp2(config.bgColor, config.fogDensity);
@@ -554,7 +636,8 @@ const controls = [
   { id: 'param-warp', key: 'warpSpeed', valId: 'val-warp', type: 'float' },
   { id: 'param-basefov', key: 'baseFov', valId: 'val-basefov', type: 'int' },
   { id: 'param-maxfov', key: 'maxFov', valId: 'val-maxfov', type: 'int' },
-  { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' }
+  { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
+  { id: 'param-speedmeter', key: 'showSpeedMeter', type: 'checkbox', onChange: () => { speedMeterEl.classList.toggle('is-hidden', !config.showSpeedMeter); } }
 ];
 
 let hideTimerId = null;
@@ -574,6 +657,7 @@ function initUI() {
       let val;
       if (item.type === 'int') val = parseInt(e.target.value);
       else if (item.type === 'float' || item.type === 'float3') val = parseFloat(e.target.value);
+      else if (item.type === 'checkbox') val = e.target.checked;
       else val = e.target.value;
 
       config[item.key] = val;
@@ -604,7 +688,9 @@ function initUI() {
       const valDisplay = item.valId ? document.getElementById(item.valId) : null;
       const defaultVal = defaultConfig[item.key];
 
-      input.value = defaultVal;
+      if (item.type === 'checkbox') input.checked = defaultVal;
+      else input.value = defaultVal;
+
       if (valDisplay) valDisplay.textContent = formatValue(item.type, defaultVal);
 
       if (item.onChange) item.onChange();
@@ -641,10 +727,21 @@ function initUI() {
     }
   });
 
-  // 画面（トンネル）をクリック／タップした時の再表示
+  // 画面（トンネル）を3回クリック／タップした時の再表示
+  const SHOW_PANEL_CLICK_WINDOW = 600; // この間隔内(ms)の3クリック/タップをトリプルクリックと判定
+  let showPanelClickTimestamps = [];
   container.addEventListener('click', () => {
-    if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
+    if (!(panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed'))) {
+      return; // すでに表示されている場合は何もしない
+    }
+
+    const now = Date.now();
+    showPanelClickTimestamps.push(now);
+    showPanelClickTimestamps = showPanelClickTimestamps.filter(t => now - t <= SHOW_PANEL_CLICK_WINDOW);
+
+    if (showPanelClickTimestamps.length >= 3) {
       showPanel();
+      showPanelClickTimestamps = [];
     }
   });
 
@@ -810,6 +907,11 @@ function animate() {
 
   // 現在速度を目標速度に追従（スムーズな加減速）
   currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+
+  // 速度メーター表示の更新
+  if (config.showSpeedMeter) {
+    speedMeterValueEl.textContent = currentSpeed.toFixed(2);
+  }
 
   // 速度に比例してFOV（視野角）を無段階変化（スピード感の連動）
   const speedRatio = Math.min(currentSpeed / config.warpSpeed, 1.0);
