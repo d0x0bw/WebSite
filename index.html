@@ -47,6 +47,12 @@
       color: #ffffff;
     }
 
+    /* 桜イベント（3月27日〜4月7日）の背景色・デザイン設定 */
+    body.is-sakura {
+      background-color: #2a1a2e; /* 夜桜をイメージした深い紫紺 */
+      color: #ffffff;
+    }
+
     /* メインコンテナ */
     .main {
       max-width: 1600px;
@@ -79,7 +85,8 @@
 
     body.is-christmas .head h1,
     body.is-firefly .head h1,
-    body.is-fireworks .head h1 {
+    body.is-fireworks .head h1,
+    body.is-sakura .head h1 {
       color: #ffffff;
     }
 
@@ -156,13 +163,21 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
+    /* 桜モード時のカードデザイン調整（背景は透明にして夜桜と桜吹雪を活かす） */
+    body.is-sakura .menu-card {
+      background-color: transparent;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
     /* ホバー背景円（#f39801）の不透明度を60%に設定 */
     body.is-christmas .menu-card:hover::before,
     body.is-christmas .menu-card.is-active::before,
     body.is-firefly .menu-card:hover::before,
     body.is-firefly .menu-card.is-active::before,
     body.is-fireworks .menu-card:hover::before,
-    body.is-fireworks .menu-card.is-active::before {
+    body.is-fireworks .menu-card.is-active::before,
+    body.is-sakura .menu-card:hover::before,
+    body.is-sakura .menu-card.is-active::before {
       opacity: 0.6;
     }
 
@@ -190,6 +205,15 @@
     }
 
     body.is-fireworks .menu-text p {
+      color: #e0e0e0;
+    }
+
+    /* 桜期間（3/27〜4/7）のメニュー文字色指定 */
+    body.is-sakura .menu-title {
+      color: #ff8fab; /* 桜のような優しいピンク */
+    }
+
+    body.is-sakura .menu-text p {
       color: #e0e0e0;
     }
 
@@ -497,6 +521,17 @@
     return month === 7 && day >= 1 && day <= 31;
   }
 
+  // 4. 桜イベント判定（3月27日〜4月7日）
+  function isSakuraSeason(date) {
+    const month = date.getMonth(); // 2: 3月, 3: 4月
+    const day = date.getDate();
+
+    const isLateMar = (month === 2 && day >= 27);
+    const isEarlyApr = (month === 3 && day <= 7);
+
+    return isLateMar || isEarlyApr;
+  }
+
   // 判定処理と演出制御
   function checkAndRun(date) {
     const message = document.getElementById('status-message');
@@ -504,7 +539,7 @@
     const formattedDateMsg = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
     // 初期化（クラス解除＆過去エフェクト停止）
-    document.body.classList.remove('is-christmas', 'is-firefly', 'is-fireworks');
+    document.body.classList.remove('is-christmas', 'is-firefly', 'is-fireworks', 'is-sakura');
     decors.forEach(el => el.style.display = 'none');
     stopEffect();
 
@@ -513,6 +548,10 @@
       document.body.classList.add('is-christmas');
       decors.forEach(el => el.style.display = 'inline');
       startEffect('snow');
+    } else if (isSakuraSeason(date)) {
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 桜イベント期間内です（3/27〜4/7）。桜吹雪エフェクトを有効化します。</span>`;
+      document.body.classList.add('is-sakura');
+      startEffect('sakura');
     } else if (isFireflySeason(date)) {
       if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 蛍イベント期間内です（5/9〜5/31）。蛍エフェクトを有効化します。</span>`;
       document.body.classList.add('is-firefly');
@@ -522,7 +561,7 @@
       document.body.classList.add('is-fireworks');
       startEffect('fireworks');
     } else {
-      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:12/24〜1/6、蛍:5/9〜5/31、花火:8/1〜8/31）。</span>`;
+      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:12/24〜1/6、桜:3/27〜4/7、蛍:5/9〜5/31、花火:8/1〜8/31）。</span>`;
     }
   }
 
@@ -623,7 +662,28 @@
           brightness: 0
         });
       }
+    } else if (mode === 'sakura') {
+      const count = 80; // 花びらの数
+      for (let i = 0; i < count; i++) {
+        particles.push(createSakuraPetal(true));
+      }
     }
+  }
+
+  // 桜の花びら1枚分の初期状態を生成（isInit=trueなら画面全体に、falseなら画面上部外側に配置）
+  function createSakuraPetal(isInit) {
+    return {
+      x: Math.random() * canvas.width,
+      y: isInit ? Math.random() * canvas.height : -50,
+      angle: Math.random() * Math.PI * 2,
+      flipAngle: Math.random() * Math.PI,
+      randomSize: Math.random(),
+      randomSpeedY: Math.random(),
+      randomSpeedX: Math.random(),
+      randomAngular: Math.random(),
+      randomFlip: Math.random(),
+      randomOpacity: Math.random()
+    };
   }
 
   // 光の粒（花びら）を放射状にばら撒くヘルパー（菊・牡丹共通）
@@ -936,6 +996,74 @@
           if (p.alpha <= 0) {
             particles.splice(i, 1);
           }
+        }
+      }
+    } else if (currentMode === 'sakura') {
+      // --- 桜吹雪ロジック（固定パラメータ：花びらの数80／サイズ倍率0.6／透明度62%） ---
+      const sakuraSizeScale = 0.6;
+      const sakuraSpeedScale = 1.0;
+      const sakuraWindForce = 0.0;
+      const sakuraMaxOpacity = 0.62;
+      const sakuraOuterColor = '#FBA5D1';
+      const sakuraInnerColor = '#FFD1EA';
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        const minS = 10 * sakuraSizeScale;
+        const maxS = 18 * sakuraSizeScale;
+        const size = p.randomSize * (maxS - minS) + minS;
+
+        const minY = 0.8 * sakuraSpeedScale;
+        const maxY = 2.0 * sakuraSpeedScale;
+        const speedY = p.randomSpeedY * (maxY - minY) + minY;
+        const speedX = (p.randomSpeedX * 0.6 - 0.3) + sakuraWindForce;
+
+        const angularSpeed = (p.randomAngular * 0.02 - 0.01) * sakuraSpeedScale;
+        const flipSpeed = (p.randomFlip * 0.03 + 0.01) * sakuraSpeedScale;
+
+        const minOp = Math.max(0, sakuraMaxOpacity - 0.4);
+        const opacity = p.randomOpacity * (sakuraMaxOpacity - minOp) + minOp;
+
+        p.y += speedY;
+        p.x += Math.sin(p.y * 0.01) + speedX;
+        p.angle += angularSpeed;
+        p.flipAngle += flipSpeed;
+
+        // 花びらの描画（外側1枚＋内側1枚の二層構造）
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.scale(1, Math.sin(p.flipAngle));
+        ctx.globalAlpha = opacity;
+
+        const s = size;
+        const drawPetalPath = () => {
+          ctx.beginPath();
+          ctx.moveTo(0, s * 1.2);
+          ctx.bezierCurveTo(-s * 0.7, s * 0.5, -s * 0.7, -s * 0.6, -s * 0.3, -s);
+          ctx.lineTo(0, -s * 0.7);
+          ctx.lineTo(s * 0.3, -s);
+          ctx.bezierCurveTo(s * 0.7, -s * 0.6, s * 0.7, s * 0.5, 0, s * 1.2);
+          ctx.closePath();
+        };
+
+        drawPetalPath();
+        ctx.fillStyle = sakuraOuterColor;
+        ctx.fill();
+
+        ctx.save();
+        ctx.scale(0.85, 0.85);
+        drawPetalPath();
+        ctx.fillStyle = sakuraInnerColor;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
+
+        // 画面外に出たら花びらを再生成（画面上部外側から再度舞い落ちる）
+        if (p.y > canvas.height + size * 2 || p.x < -size * 3 || p.x > canvas.width + size * 3) {
+          particles[i] = createSakuraPetal(false);
         }
       }
     }
