@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Code Rain - Cinematic Intro</title>
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
+
+  <style>
+    /* =====================================================
+       リセット CSS & 基本レイアウト
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      flex: 1;
+      filter: blur(0.6px);
+    }
+
+    /* =====================================================
+       コントロールパネルの装飾
+    ===================================================== */
+    #controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: rgba(0, 0, 0, 0.90);
+      border-top: 1px solid rgba(0, 255, 65, 0.25);
+      padding: 0;
+      backdrop-filter: blur(6px);
+      z-index: 10;
+      height: 48px;
+    }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      padding: 0 12px;
+      min-width: 0;
+    }
+
+    .ctrl-pause {
+      flex: 0 0 auto;
+      padding: 0 16px;
+      border-left: 1px solid rgba(0, 255, 65, 0.2);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      order: 999;
+    }
+
+    #controls label {
+      font-size: 11px;
+      color: rgba(0, 255, 65, 0.6);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #controls input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      min-width: 60px;
+      height: 3px;
+      background: rgba(0, 255, 65, 0.25);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      flex: 1;
+    }
+    #controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #00ff41;
+      cursor: pointer;
+      box-shadow: 0 0 6px #00ff41;
+    }
+
+    #controls select {
+      background: transparent;
+      border: 1px solid rgba(0, 255, 65, 0.4);
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    /* =====================================================
+       再生 / 一時停止ボタン（CSS描画）
+    ===================================================== */
+    #pauseBtn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2.5px solid #00ff41;
+      background: transparent;
+      cursor: pointer;
+      outline: none;
+      padding: 0;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(0, 255, 65, 0.5), inset 0 0 8px rgba(0, 255, 65, 0.05);
+      transition: box-shadow 0.15s;
+    }
+    #pauseBtn:hover {
+      box-shadow: 0 0 14px rgba(0, 255, 65, 0.8), inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    /* ── 一時停止アイコン（2本バー）── */
+    #pauseBtn::before,
+    #pauseBtn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 13px;
+      background: #00ff41;
+      border-radius: 1px;
+      transition: all 0.15s ease;
+    }
+    #pauseBtn::before { left: 10px; }
+    #pauseBtn::after  { right: 10px; }
+
+    /* ── 再生アイコン（三角形）── paused クラスで切り替え */
+    #pauseBtn.paused::before {
+      width: 0;
+      height: 0;
+      background: transparent;
+      border-style: solid;
+      border-width: 7px 0 7px 13px;
+      border-color: transparent transparent transparent #00ff41;
+      border-radius: 0;
+      left: 50%;
+      transform: translate(-40%, -50%);
+    }
+    #pauseBtn.paused::after {
+      display: none;
+    }
+    #controls select option { background: #001a00; color: #00ff41; }
+
+    .val-display {
+      font-size: 11px;
+      color: #00ff41;
+      min-width: 22px;
+      text-align: right;
+      flex-shrink: 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .sep {
+      width: 1px;
+      height: 28px;
+      background: rgba(0, 255, 65, 0.2);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 798px) {
+      #controls {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 6px 4px;
+        gap: 4px 0;
+        align-items: center;
+      }
+      .ctrl-pause {
+        order: 999;
+        border-left: 1px solid rgba(0, 255, 65, 0.2);
+        border-bottom: none;
+        height: 100%;
+        padding: 0 14px;
+        align-self: stretch;
+      }
+      .ctrl-group {
+        flex: 1 1 40%;
+        padding: 2px 10px;
+      }
+      .sep { display: none; }
+      #controls input[type="range"] { min-width: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div id="controls" role="toolbar">
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="speed">速度</label>
+    <input type="range" id="speed" min="1" max="20" value="8" step="1" oninput="showVal(this)">
+    <span class="val-display" id="speed-val">8</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="density">密度</label>
+    <input type="range" id="density" min="1" max="10" value="8" step="1" oninput="showVal(this)">
+    <span class="val-display" id="density-val">8</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="fontSize">サイズ</label>
+    <input type="range" id="fontSize" min="6" max="40" value="14" step="1" oninput="showVal(this)">
+    <span class="val-display" id="fontSize-val">14</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="trailLength">残像</label>
+    <input type="range" id="trailLength" min="1" max="20" value="16" step="1" oninput="showVal(this)">
+    <span class="val-display" id="trailLength-val">16</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group">
+    <label for="blurAmount">ぼかし</label>
+    <input type="range" id="blurAmount" min="0" max="3" value="0.6" step="0.1" oninput="showVal(this)">
+    <span class="val-display" id="blurAmount-val">0.6</span>
+  </div>
+  <div class="sep"></div>
+  <div class="ctrl-group" style="flex: 0 0 auto;">
+    <label for="colorMode">色</label>
+    <select id="colorMode" onchange="applyColor()">
+      <option value="green">グリーン</option>
+      <option value="cyan">シアン</option>
+      <option value="red">レッド</option>
+      <option value="amber">アンバー</option>
+      <option value="white">ホワイト</option>
+      <option value="purple">パープル</option>
+    </select>
+  </div>
+  <div class="ctrl-pause">
+    <button id="pauseBtn" onclick="togglePause()" aria-label="再生/一時停止"></button>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('matrix');
+  const ctx = canvas.getContext('2d');
+
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ日＠＃＄％＆＊{}[]＿；：・±｜/￥￥？！<>¦*⁼+-"'
+
+  const COLOR_MAP = {
+    green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)' },
+    cyan:   { head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', bg: 'rgba(0, 0, 5, 0.03)' },
+    red:    { head: '#ffffff', body: '#cc2200', glow: '#ff3c28', bg: 'rgba(5, 0, 0, 0.03)' },
+    amber:  { head: '#ffffff', body: '#cc8800', glow: '#ffaa00', bg: 'rgba(5, 3, 0, 0.03)' },
+    white:  { head: '#ffffff', body: '#999999', glow: '#ffffff', bg: 'rgba(0, 0, 0, 0.03)' },
+    purple: { head: '#ffffff', body: '#9b45e0', glow: '#c77dff', bg: 'rgba(2, 0, 5, 0.03)' },
+  };
+
+  let W, H, cols;
+  let columnsData = [];
+  let paused = false;
+  let currentColor = COLOR_MAP.green;
+  let fs = 14;
+
+  let speedVal = 8;
+  let densityVal = 8;
+  let trailVal = 18;
+  let blurVal = 0.6;
+
+  // --- 演出用の変数 ---
+  let introPhase = 1;         // 1:真ん中のみ, 2:右追加, 3:通常通り
+  let hasPlayedIntro = false; // 一度演出が終わったらリサイズしてもスキップする用
+  let midIndex = 0;
+  let rightIndex = 0;
+
+  function drawChar(char, x, y) {
+    if (char >= 'ァ' && char <= 'ン' || char === '２' || char === '５' || char === '９') {
+      // 左右反転（カタカナ + ２・５・９）
+      ctx.save();
+      ctx.translate(x + fs / 2, y);
+      ctx.scale(-1, 1);
+      ctx.fillText(char, -fs / 2, 0);
+      ctx.restore();
+    } else if (char === '３') {
+      // 上下反転
+      ctx.save();
+      ctx.translate(x, y - fs / 2);
+      ctx.scale(1, -1);
+      ctx.fillText(char, 0, fs / 2);
+      ctx.restore();
+    } else {
+      // 半角文字は幅が狭く左詰めになるため、セル中央に来るよう補正する
+      const width = ctx.measureText(char).width;
+      const offsetX = (fs - width) / 2;
+      ctx.fillText(char, x + offsetX, y);
+    }
+  }
+
+  class Column {
+    constructor(colIndex) {
+      this.colIndex = colIndex;
+      this.isActive = false; // ★追加：最初はすべて停止状態で生成
+      this.reset(true);
+    }
+
+    reset(isInit) {
+      if (isInit) {
+        // 初期状態は画面上空（見えない位置）にランダム配置
+        this.y = -(Math.random() * (H / fs) * 1.5) - 2;
+      } else {
+        const delayRows = 30 + ((10 - densityVal) * 15) + (Math.random() * 40);
+        this.y = -delayRows;
+      }
+      this.speed = Math.random() * 0.4 + 0.15; 
+      this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+    }
+
+    updateAndDraw(speedMultiplier) {
+      let oldRow = Math.floor(this.y);
+      this.y += this.speed * (speedMultiplier * 0.2);
+      let newRow = Math.floor(this.y);
+      const xPos = this.colIndex * fs;
+
+      if (newRow > oldRow) {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = currentColor.body;
+        drawChar(this.char, xPos, (oldRow + 1) * fs);
+        ctx.shadowBlur = 12;
+
+        this.char = CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+
+      if (newRow >= 0 && newRow * fs <= H + fs) {
+        ctx.fillStyle = currentColor.head;
+        drawChar(this.char, xPos, (newRow + 1) * fs);
+      }
+
+      if (newRow * fs > H) {
+        this.reset(false);
+      }
+    }
+  }
+
+  function applyColor() {
+    currentColor = COLOR_MAP[document.getElementById('colorMode').value] || COLOR_MAP.green;
+  }
+
+  function init() {
+    fs = parseInt(document.getElementById('fontSize').value) || 14;
+    speedVal = parseInt(document.getElementById('speed').value) || 8;
+    densityVal = parseInt(document.getElementById('density').value) || 8;
+    trailVal = parseInt(document.getElementById('trailLength').value) || 18;
+    blurVal = parseFloat(document.getElementById('blurAmount').value) || 0.6;
+
+    canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+
+    const controlsH = document.getElementById('controls').offsetHeight || 48;
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight - controlsH;
+
+    cols = Math.floor(W / fs);
+    columnsData = [];
+    
+    // 全列のインスタンスを作成（この時点では isActive = false）
+    for (let i = 0; i < cols; i++) {
+      columnsData.push(new Column(i));
+    }
+
+    // --- 演出の初期化 ---
+    if (!hasPlayedIntro) {
+      // まだ演出を見ていない場合（初回ロード）
+      introPhase = 1;
+      midIndex = Math.floor(cols / 2);         // 画面中央の列番号
+      rightIndex = Math.floor(cols * 0.75);    // 画面右（75%）の列番号
+
+      // 中央の列だけ動かし、開始位置を画面一番上（0付近）にする
+      columnsData[midIndex].isActive = true;
+      columnsData[midIndex].y = -1;
+    } else {
+      // 既に演出が終わっている場合（リサイズ時など）は全列アクティブ
+      introPhase = 3;
+      for (let i = 0; i < cols; i++) {
+        columnsData[i].isActive = true;
+      }
+    }
+
+    // キャンバスを真っ黒にリセット
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function draw() {
+    requestAnimationFrame(draw);
+    if (paused) return;
+
+    const trailAlpha = (0.12 - (trailVal - 1) * (0.115 / 19)).toFixed(4);
+    const bgBase = currentColor.bg.replace(/[\d.]+\)$/, `${trailAlpha})`);
+    
+    ctx.fillStyle = bgBase;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.font = `bold ${fs}px monospace`;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = currentColor.glow;
+
+    // =====================================================
+    // ★ 演出の進行管理
+    // =====================================================
+    if (introPhase === 1) {
+      // 真ん中の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ2へ
+      if (columnsData[midIndex].y * fs > H * 0.3) {
+        introPhase = 2;
+        columnsData[rightIndex].isActive = true;
+        columnsData[rightIndex].y = -1; // 右の列も一番上からスタート
+      }
+    } 
+    else if (introPhase === 2) {
+      // 右の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ3へ
+      if (columnsData[rightIndex].y * fs > H * 0.3) {
+        introPhase = 3;
+        hasPlayedIntro = true; // 演出完了フラグを立てる
+
+        // 残りの全列をアクティブにする
+        for (let i = 0; i < columnsData.length; i++) {
+          if (!columnsData[i].isActive) {
+            columnsData[i].isActive = true;
+          }
+        }
+      }
+    }
+
+    // =====================================================
+    // 描画処理（アクティブな列だけを更新）
+    // =====================================================
+    for (let i = 0; i < columnsData.length; i++) {
+      if (columnsData[i].isActive) {
+        columnsData[i].updateAndDraw(speedVal);
+      }
+    }
+
+    ctx.shadowBlur = 0;
+  }
+
+  function showVal(input) {
+    const val = parseFloat(input.value);
+    document.getElementById(input.id + '-val').textContent = input.value;
+    
+    if (input.id === 'speed') speedVal = val;
+    if (input.id === 'density') densityVal = val;
+    if (input.id === 'trailLength') trailVal = val;
+    if (input.id === 'blurAmount') {
+      blurVal = val;
+      canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+    }
+    if (input.id === 'fontSize') {
+      init();
+    }
+  }
+
+  function togglePause() {
+    paused = !paused;
+    document.getElementById('pauseBtn').classList.toggle('paused', paused);
+  }
+
+  window.addEventListener('resize', init);
+
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+  });
+
+  init();
+  draw();
+</script>
+</body>
+</html>
