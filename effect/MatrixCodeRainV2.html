@@ -12,6 +12,11 @@
     ===================================================== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    :root {
+      --accent: #00ff41;
+      --accent-rgb: 0, 255, 65;
+    }
+
     body {
       background: #000;
       color: #00ff41;
@@ -42,7 +47,7 @@
       z-index: 10;
       background: rgba(0, 12, 4, 0.88);
       color: #eafff0;
-      border: 1px solid rgba(0, 255, 65, 0.3);
+      border: 1px solid rgba(var(--accent-rgb), 0.3);
       border-radius: 12px;
       padding: 16px 18px;
       width: 320px;
@@ -56,7 +61,7 @@
       font-family: 'Courier New', monospace;
       opacity: 1;
       visibility: visible;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      transition: opacity 0.5s ease, visibility 0.5s ease, border-color 0.3s ease;
     }
 
     .control-panel.is-fully-hidden {
@@ -67,7 +72,7 @@
 
     .control-panel::-webkit-scrollbar { width: 5px; }
     .control-panel::-webkit-scrollbar-thumb {
-      background: rgba(0, 255, 65, 0.4);
+      background: rgba(var(--accent-rgb), 0.4);
       border-radius: 3px;
     }
 
@@ -77,17 +82,19 @@
       align-items: center;
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+      border-bottom: 1px solid rgba(var(--accent-rgb), 0.15);
       cursor: move;
+      transition: border-color 0.3s ease;
     }
 
     .panel-header h3 {
       margin: 0;
       font-size: 0.9rem;
-      color: #00ff41;
+      color: var(--accent);
       letter-spacing: 0.03em;
       pointer-events: none;
-      text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+      text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
+      transition: color 0.3s ease, text-shadow 0.3s ease;
     }
 
     .header-controls {
@@ -98,8 +105,8 @@
 
     .icon-btn {
       background: transparent;
-      border: 1px solid rgba(0, 255, 65, 0.4);
-      color: #00ff41;
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      color: var(--accent);
       border-radius: 6px;
       width: 26px;
       height: 26px;
@@ -108,33 +115,35 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.2s ease;
+      transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.3s ease, color 0.3s ease;
     }
-    .icon-btn:hover { background: rgba(0, 255, 65, 0.15); }
+    .icon-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
     .icon-btn:active { transform: scale(0.92); }
     .icon-btn svg { width: 14px; height: 14px; }
 
     .toggle-btn {
       background: transparent;
-      border: 1px solid rgba(0, 255, 65, 0.4);
-      color: #00ff41;
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      color: var(--accent);
       border-radius: 6px;
       padding: 4px 10px 26px 10px;
       font-size: 0.75rem;
       height: 30px;
       cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.3s ease, color 0.3s ease;
     }
-    .toggle-btn:hover { background: rgba(0, 255, 65, 0.15); }
+    .toggle-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
 
     .control-section { margin-bottom: 14px; }
 
     .section-title {
       font-size: 0.75rem;
       font-weight: bold;
-      color: #7fae8c;
+      color: rgba(var(--accent-rgb), 0.55);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       margin-bottom: 8px;
+      transition: color 0.3s ease;
     }
 
     .control-group { margin-bottom: 10px; }
@@ -149,25 +158,27 @@
 
     .control-group input[type="range"] {
       width: 100%;
-      accent-color: #00ff41;
+      accent-color: var(--accent);
       cursor: pointer;
       height: 6px;
       touch-action: pan-y;
+      transition: accent-color 0.3s ease;
     }
 
     .control-group select {
       width: 100%;
       background: rgba(0, 20, 8, 0.6);
-      border: 1px solid rgba(0, 255, 65, 0.4);
-      color: #00ff41;
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      color: var(--accent);
       font-family: 'Courier New', monospace;
       font-size: 0.8rem;
       padding: 6px 8px;
       border-radius: 6px;
       cursor: pointer;
       outline: none;
+      transition: border-color 0.3s ease, color 0.3s ease;
     }
-    .control-group select option { background: #001a00; color: #00ff41; }
+    .control-group select option { background: #001a00; color: var(--accent); }
 
     .panel-content.is-collapsed { display: none; }
 
@@ -272,12 +283,12 @@
   const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ日＠＃＄％＆＊{}[]＿；：・±｜/￥￥？！<>¦*⁼+-"'
 
   const COLOR_MAP = {
-    green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)' },
-    cyan:   { head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', bg: 'rgba(0, 0, 5, 0.03)' },
-    red:    { head: '#ffffff', body: '#cc2200', glow: '#ff3c28', bg: 'rgba(5, 0, 0, 0.03)' },
-    amber:  { head: '#ffffff', body: '#cc8800', glow: '#ffaa00', bg: 'rgba(5, 3, 0, 0.03)' },
-    white:  { head: '#ffffff', body: '#999999', glow: '#ffffff', bg: 'rgba(0, 0, 0, 0.03)' },
-    purple: { head: '#ffffff', body: '#9b45e0', glow: '#c77dff', bg: 'rgba(2, 0, 5, 0.03)' },
+    green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)', accentRgb: '0, 255, 65' },
+    cyan:   { head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', bg: 'rgba(0, 0, 5, 0.03)', accentRgb: '0, 229, 255' },
+    red:    { head: '#ffffff', body: '#cc2200', glow: '#ff3c28', bg: 'rgba(5, 0, 0, 0.03)', accentRgb: '255, 60, 40' },
+    amber:  { head: '#ffffff', body: '#cc8800', glow: '#ffaa00', bg: 'rgba(5, 3, 0, 0.03)', accentRgb: '255, 170, 0' },
+    white:  { head: '#ffffff', body: '#999999', glow: '#ffffff', bg: 'rgba(0, 0, 0, 0.03)', accentRgb: '255, 255, 255' },
+    purple: { head: '#ffffff', body: '#9b45e0', glow: '#c77dff', bg: 'rgba(2, 0, 5, 0.03)', accentRgb: '199, 125, 255' },
   };
 
   // --- デフォルト値（リセット用） ---
@@ -377,6 +388,10 @@
 
   function applyColor() {
     currentColor = COLOR_MAP[document.getElementById('colorMode').value] || COLOR_MAP.green;
+
+    // フローティングパネルのアクセントカラーも選択中の色に同期させる
+    document.documentElement.style.setProperty('--accent', currentColor.glow);
+    document.documentElement.style.setProperty('--accent-rgb', currentColor.accentRgb);
   }
 
   function init() {
@@ -587,6 +602,7 @@
       }
     });
 
+    applyColor(); // 初期表示時もパネルのアクセントカラーを選択中の色に同期
     initDraggable();
   }
 
