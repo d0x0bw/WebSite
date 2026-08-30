@@ -257,16 +257,16 @@
             <div class="control-section">
                 <div class="section-title">■ 星（数量 & サイズ）</div>
                 <div class="control-group">
-                    <label>星の数: <span id="val-star-count">300</span>個</label>
-                    <input type="range" id="param-star-count" min="10" max="1000" value="300">
+                    <label>星の数: <span id="val-star-count">400</span>個</label>
+                    <input type="range" id="param-star-count" min="10" max="1000" value="400">
                 </div>
                 <div class="control-group">
-                    <label>最小サイズ: <span id="val-star-min-size">0.5</span>px</label>
-                    <input type="range" id="param-star-min-size" min="0.1" max="2.0" step="0.1" value="0.5">
+                    <label>最小サイズ: <span id="val-star-min-size">0.2</span>px</label>
+                    <input type="range" id="param-star-min-size" min="0.1" max="2.0" step="0.1" value="0.2">
                 </div>
                 <div class="control-group">
-                    <label>最大サイズ: <span id="val-star-max-size">2.0</span>px</label>
-                    <input type="range" id="param-star-max-size" min="1.0" max="5.0" step="0.1" value="2.0">
+                    <label>最大サイズ: <span id="val-star-max-size">1.4</span>px</label>
+                    <input type="range" id="param-star-max-size" min="1.0" max="5.0" step="0.1" value="1.4">
                 </div>
             </div>
 
@@ -291,12 +291,12 @@
                     <input type="range" id="param-meteor-freq" min="0.1" max="25.0" step="0.1" value="1.0">
                 </div>
                 <div class="control-group">
-                    <label>流れる速度: <span id="val-meteor-speed">1.0</span>倍</label>
-                    <input type="range" id="param-meteor-speed" min="0.3" max="3.0" step="0.1" value="1.0">
+                    <label>流れる速度: <span id="val-meteor-speed">1.6</span>倍</label>
+                    <input type="range" id="param-meteor-speed" min="0.3" max="3.0" step="0.1" value="1.6">
                 </div>
                 <div class="control-group">
-                    <label>尾の長さ: <span id="val-meteor-length">1.0</span>倍</label>
-                    <input type="range" id="param-meteor-length" min="0.3" max="3.0" step="0.1" value="1.0">
+                    <label>尾の長さ: <span id="val-meteor-length">2.4</span>倍</label>
+                    <input type="range" id="param-meteor-length" min="0.3" max="3.0" step="0.1" value="2.4">
                 </div>
             </div>
 
@@ -322,14 +322,14 @@
     <script>
         // パラメータ初期値設定オブジェクト
         const defaultConfig = {
-            starCount: 300,
-            starMinSize: 0.5,
-            starMaxSize: 2.0,
+            starCount: 400,
+            starMinSize: 0.2,
+            starMaxSize: 1.4,
             twinkleSpeed: 1.0,
             glowScale: 1.0,
             meteorFreq: 1.0,
-            meteorSpeed: 1.0,
-            meteorLength: 1.0,
+            meteorSpeed: 1.6,
+            meteorLength: 2.4,
             hideDelay: 3,
             bgCenter: '#0d1a33',
             bgOuter: '#000000'
@@ -656,8 +656,8 @@
                 activeMeteor.update();
                 activeMeteor.draw();
             } else {
-                // 基本の確率 (0.0004) に meteorFreq 倍率を適用
-                if (Math.random() < 0.0004 * config.meteorFreq) { 
+                // 基本の確率 (0.004) に meteorFreq 倍率を適用
+                if (Math.random() < 0.004 * config.meteorFreq) { 
                     activeMeteor.reset();
                 }
             }
