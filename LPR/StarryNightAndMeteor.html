@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>星空と流れ星 Starry Night & Meteor</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 深みのある夜空のグラデーション */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* スクロールバーを消す */
+            background: radial-gradient(circle at top, #0d1a33 0%, #000000 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            transition: background 0.3s ease;
+        }
+
+        #skyCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        /* 調整コントロールパネル */
+        .control-panel {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.88);
+            color: #ffffff;
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            border-radius: 12px;
+            padding: 16px 18px;
+            width: 320px;
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            user-select: none;
+            touch-action: pan-y;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        /* パネル完全非表示状態 */
+        .control-panel.is-fully-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .control-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .control-panel::-webkit-scrollbar-thumb {
+            background: rgba(138, 180, 248, 0.4);
+            border-radius: 3px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: move;
+        }
+
+        .panel-header h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #8ab4f8;
+            pointer-events: none;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            color: #8ab4f8;
+            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(138, 180, 248, 0.15);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        .icon-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            color: #8ab4f8;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .control-section {
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            margin-bottom: 4px;
+            color: #e5e7eb;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            accent-color: #8ab4f8;
+            cursor: pointer;
+            height: 6px;
+            touch-action: pan-y;
+        }
+
+        .control-group input[type="color"] {
+            width: 100%;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .panel-content.is-collapsed {
+            display: none;
+        }
+
+        /* レスポンシブ表示 (幅768px以下) */
+        @media (max-width: 768px) {
+            .control-panel {
+                top: auto !important;
+                bottom: 16px !important;
+                left: 16px !important;
+                right: 16px !important;
+                width: auto !important;
+                max-height: 35vh;
+                border-radius: 16px;
+                padding: 10px 14px;
+            }
+
+            .panel-header {
+                cursor: default;
+                margin-bottom: 6px;
+                padding-bottom: 6px;
+            }
+
+            .panel-header h3 {
+                font-size: 0.82rem;
+            }
+
+            .control-section {
+                margin-bottom: 8px;
+            }
+
+            .section-title {
+                font-size: 0.66rem;
+                margin-bottom: 5px;
+            }
+
+            .control-group {
+                margin-bottom: 6px;
+            }
+
+            .control-group label {
+                font-size: 0.72rem;
+                margin-bottom: 2px;
+            }
+
+            .control-group input[type="range"] {
+                height: 10px;
+            }
+
+            .control-group input[type="color"] {
+                height: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="skyCanvas"></canvas>
+
+    <div class="control-panel" id="draggable-panel">
+        <div class="panel-header" id="panel-header">
+            <h3>🌌 星空パラメータ設定 ⠿</h3>
+            <div class="header-controls">
+                <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                    </svg>
+                </button>
+                <button class="toggle-btn" id="btn-toggle-panel">非表示</button>
+            </div>
+        </div>
+
+        <div class="panel-content" id="panel-body">
+            <!-- 1. 星：数量 & サイズ -->
+            <div class="control-section">
+                <div class="section-title">■ 星（数量 & サイズ）</div>
+                <div class="control-group">
+                    <label>星の数: <span id="val-star-count">400</span>個</label>
+                    <input type="range" id="param-star-count" min="10" max="1000" value="400">
+                </div>
+                <div class="control-group">
+                    <label>最小サイズ: <span id="val-star-min-size">0.2</span>px</label>
+                    <input type="range" id="param-star-min-size" min="0.1" max="2.0" step="0.1" value="0.2">
+                </div>
+                <div class="control-group">
+                    <label>最大サイズ: <span id="val-star-max-size">1.4</span>px</label>
+                    <input type="range" id="param-star-max-size" min="1.0" max="5.0" step="0.1" value="1.4">
+                </div>
+            </div>
+
+            <!-- 2. 星：瞬き & 輝き -->
+            <div class="control-section">
+                <div class="section-title">■ 星（瞬き & 輝き）</div>
+                <div class="control-group">
+                    <label>瞬きの速度: <span id="val-twinkle-speed">1.0</span>倍</label>
+                    <input type="range" id="param-twinkle-speed" min="0.1" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label>輝き（グロー）強度: <span id="val-glow-scale">1.0</span>倍</label>
+                    <input type="range" id="param-glow-scale" min="0.0" max="3.0" step="0.1" value="1.0">
+                </div>
+            </div>
+
+            <!-- 3. 流れ星：頻度 & 物理 -->
+            <div class="control-section">
+                <div class="section-title">■ 流れ星（頻度 & 物理）</div>
+                <div class="control-group">
+                    <label>発生頻度: <span id="val-meteor-freq">1.0</span>倍</label>
+                    <input type="range" id="param-meteor-freq" min="0.1" max="25.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label>流れる速度: <span id="val-meteor-speed">1.6</span>倍</label>
+                    <input type="range" id="param-meteor-speed" min="0.3" max="3.0" step="0.1" value="1.6">
+                </div>
+                <div class="control-group">
+                    <label>尾の長さ: <span id="val-meteor-length">2.4</span>倍</label>
+                    <input type="range" id="param-meteor-length" min="0.3" max="3.0" step="0.1" value="2.4">
+                </div>
+            </div>
+
+            <!-- 4. 実在の星座（リアル再現） -->
+            <div class="control-section">
+                <div class="section-title">■ 実在の星座（リアル再現）</div>
+                <div class="control-group">
+                    <label>星座線
+                        <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>星の明るさスケール: <span id="val-real-scale">1.5</span>倍</label>
+                    <input type="range" id="param-real-scale" min="0.5" max="3.0" step="0.1" value="1.5">
+                </div>
+                <div class="control-group">
+                    <label>星空の自転速度（演出）: <span id="val-rotation-speed">0.3</span>度/秒</label>
+                    <input type="range" id="param-rotation-speed" min="0" max="2.0" step="0.05" value="0.3">
+                </div>
+            </div>
+
+            <!-- 5. 環境 & システム設定 -->
+            <div class="control-section">
+                <div class="section-title">■ 環境 & システム</div>
+                <div class="control-group">
+                    <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
+                    <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+                </div>
+                <div class="control-group">
+                    <label>背景カラー（上部/中央）</label>
+                    <input type="color" id="param-bgcenter" value="#0d1a33">
+                </div>
+                <div class="control-group">
+                    <label>背景カラー（下部/外縁）</label>
+                    <input type="color" id="param-bgouter" value="#000000">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // パラメータ初期値設定オブジェクト
+        const defaultConfig = {
+            starCount: 400,
+            starMinSize: 0.2,
+            starMaxSize: 1.4,
+            twinkleSpeed: 1.0,
+            glowScale: 1.0,
+            meteorFreq: 1.0,
+            meteorSpeed: 1.6,
+            meteorLength: 2.4,
+            hideDelay: 3,
+            bgCenter: '#0d1a33',
+            bgOuter: '#000000',
+            showLines: true,
+            realStarScale: 1.5,
+            rotationSpeed: 0.3
+        };
+
+        const config = { ...defaultConfig };
+
+        const controls = [
+            { id: 'param-star-count', key: 'starCount', valId: 'val-star-count', type: 'int', onChange: adjustStarCount },
+            { id: 'param-star-min-size', key: 'starMinSize', valId: 'val-star-min-size', type: 'float', onChange: reinitStars },
+            { id: 'param-star-max-size', key: 'starMaxSize', valId: 'val-star-max-size', type: 'float', onChange: reinitStars },
+            { id: 'param-twinkle-speed', key: 'twinkleSpeed', valId: 'val-twinkle-speed', type: 'float' },
+            { id: 'param-glow-scale', key: 'glowScale', valId: 'val-glow-scale', type: 'float' },
+            { id: 'param-meteor-freq', key: 'meteorFreq', valId: 'val-meteor-freq', type: 'float' },
+            { id: 'param-meteor-speed', key: 'meteorSpeed', valId: 'val-meteor-speed', type: 'float' },
+            { id: 'param-meteor-length', key: 'meteorLength', valId: 'val-meteor-length', type: 'float' },
+            { id: 'param-real-scale', key: 'realStarScale', valId: 'val-real-scale', type: 'float' },
+            { id: 'param-rotation-speed', key: 'rotationSpeed', valId: 'val-rotation-speed', type: 'float' },
+            { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
+            { id: 'param-bgcenter', key: 'bgCenter', type: 'color', onChange: updateBgColor },
+            { id: 'param-bgouter', key: 'bgOuter', type: 'color', onChange: updateBgColor }
+        ];
+
+        let hideTimerId = null;
+
+        function initUI() {
+            controls.forEach(item => {
+                const input = document.getElementById(item.id);
+                const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+
+                input.addEventListener('input', (e) => {
+                    let val;
+                    if (item.type === 'int') val = parseInt(e.target.value);
+                    else if (item.type === 'float') val = parseFloat(e.target.value);
+                    else val = e.target.value;
+
+                    config[item.key] = val;
+
+                    if (valDisplay) {
+                        valDisplay.textContent = item.type === 'float' ? val.toFixed(1) : val;
+                    }
+
+                    if (item.onChange) item.onChange();
+                });
+            });
+
+            const toggleBtn = document.getElementById('btn-toggle-panel');
+            const resetBtn = document.getElementById('btn-reset-panel');
+            const panelBody = document.getElementById('panel-body');
+            const panel = document.getElementById('draggable-panel');
+            const canvas = document.getElementById('skyCanvas');
+            const linesBtn = document.getElementById('btn-toggle-lines');
+
+            linesBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.showLines = !config.showLines;
+                linesBtn.textContent = config.showLines ? '表示中' : '非表示';
+            });
+
+            resetBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                Object.assign(config, defaultConfig);
+                linesBtn.textContent = config.showLines ? '表示中' : '非表示';
+
+                controls.forEach(item => {
+                    const input = document.getElementById(item.id);
+                    const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+                    const defaultVal = defaultConfig[item.key];
+
+                    input.value = defaultVal;
+
+                    if (valDisplay) {
+                        valDisplay.textContent = typeof defaultVal === 'number' && !Number.isInteger(defaultVal) ? defaultVal.toFixed(1) : defaultVal;
+                    }
+
+                    if (item.onChange) item.onChange();
+                });
+            });
+
+            function startHideTimer() {
+                clearTimeout(hideTimerId);
+                hideTimerId = setTimeout(() => {
+                    panel.classList.add('is-fully-hidden');
+                }, config.hideDelay * 1000);
+            }
+
+            function showPanel() {
+                clearTimeout(hideTimerId);
+                panel.classList.remove('is-fully-hidden');
+                panelBody.classList.remove('is-collapsed');
+                toggleBtn.textContent = '非表示';
+            }
+
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isCollapsed = panelBody.classList.toggle('is-collapsed');
+                if (isCollapsed) {
+                    toggleBtn.textContent = '表示';
+                    startHideTimer();
+                } else {
+                    toggleBtn.textContent = '非表示';
+                    clearTimeout(hideTimerId);
+                    panel.classList.remove('is-fully-hidden');
+                }
+            });
+
+            canvas.addEventListener('click', () => {
+                if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
+                    showPanel();
+                }
+            });
+
+            initDraggable();
+        }
+
+        function initDraggable() {
+            const panel = document.getElementById('draggable-panel');
+            const header = document.getElementById('panel-header');
+
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let initialLeft = 0, initialTop = 0;
+
+            header.addEventListener('mousedown', (e) => {
+                if (window.innerWidth <= 768) return;
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+
+                const rect = panel.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                panel.style.right = 'auto';
+                panel.style.bottom = 'auto';
+                panel.style.left = `${initialLeft}px`;
+                panel.style.top = `${initialTop}px`;
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+
+                const maxLeft = window.innerWidth - panel.offsetWidth;
+                const maxTop = window.innerHeight - panel.offsetHeight;
+
+                newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                newTop = Math.max(0, Math.min(newTop, maxTop));
+
+                panel.style.left = `${newLeft}px`;
+                panel.style.top = `${newTop}px`;
+            }
+
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        }
+
+        function updateBgColor() {
+            document.body.style.background = `radial-gradient(circle at top, ${config.bgCenter} 0%, ${config.bgOuter} 100%)`;
+        }
+
+        // --- 基礎設定 ---
+        const canvas = document.getElementById('skyCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const stars = [];
+        let activeMeteor = null;
+
+        // --- 星(Star)クラス ---
+        class Star {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                
+                const minSize = Math.min(config.starMinSize, config.starMaxSize);
+                const maxSize = Math.max(config.starMinSize, config.starMaxSize);
+                this.size = Math.random() * (maxSize - minSize) + minSize;
+                
+                this.flickerSpeed = Math.random() * 0.05 + 0.01;
+                this.baseAlpha = Math.random() * 0.7 + 0.3;
+                this.flickerOffset = Math.random() * Math.PI * 2;
+            }
+
+            update() {
+                // パラメータ twinkleSpeed を考慮した明るさ更新
+                this.alpha = this.baseAlpha + Math.sin(Date.now() * (this.flickerSpeed * config.twinkleSpeed) + this.flickerOffset) * 0.3;
+                if (this.alpha < 0) this.alpha = 0;
+                if (this.alpha > 1) this.alpha = 1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                
+                // 輝き（グロー）効果の設定
+                if (config.glowScale > 0) {
+                    ctx.shadowBlur = 6 * config.glowScale;
+                    ctx.shadowColor = "white";
+                }
+                
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- 流れ星(Meteor)クラス ---
+        class Meteor {
+            constructor() {
+                this.reset();
+                this.active = false;
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = -Math.random() * 100;
+
+                const baseLength = Math.random() * 80 + 50;
+                this.length = baseLength * config.meteorLength;
+                
+                const baseSpeed = Math.random() * 12 + 10;
+                this.speed = baseSpeed * config.meteorSpeed;
+                this.angle = Math.random() * (Math.PI / 4) + (Math.PI / 8);
+                
+                this.dx = Math.cos(this.angle) * this.speed;
+                this.dy = Math.sin(this.angle) * this.speed;
+
+                this.alpha = 1.0;
+                this.active = true;
+            }
+
+            update() {
+                if (!this.active) return;
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.alpha -= 0.012 * config.meteorSpeed; 
+
+                if (this.x > width + this.length || 
+                    this.y > height + this.length || 
+                    this.alpha <= 0) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                if (!this.active) return;
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                
+                const trailX = this.x - this.dx * (1.5 * config.meteorLength);
+                const trailY = this.y - this.dy * (1.5 * config.meteorLength);
+
+                const gradient = ctx.createLinearGradient(this.x, this.y, trailX, trailY);
+                gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+                gradient.addColorStop(0.2, "rgba(230, 240, 255, 0.9)");
+                gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 1.8;
+                ctx.lineCap = "round";
+
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(trailX, trailY);
+                ctx.stroke();
+
+                if (config.glowScale > 0) {
+                    ctx.shadowBlur = 10 * config.glowScale;
+                    ctx.shadowColor = "white";
+                }
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // --- 実在の星(RealStar)クラス：北極星中心の星図から座標を算出 ---
+        class RealStar {
+            constructor(ra, dec, mag, isPolaris) {
+                this.ra = ra;   // 赤経（時）
+                this.dec = dec; // 赤緯（度）
+                this.mag = mag; // 実視等級
+                this.isPolaris = !!isPolaris;
+
+                const clampedMag = Math.min(5.0, Math.max(-1.5, mag));
+                this.brightness = (5.0 - clampedMag) / 6.5; // 0(暗)〜1(明るい)
+                this.baseAlpha = 0.45 + this.brightness * 0.55;
+                this.flickerSpeed = Math.random() * 0.025 + 0.006;
+                this.flickerOffset = Math.random() * Math.PI * 2;
+                this.x = 0;
+                this.y = 0;
+            }
+
+            // 北極星を画面中心(cx,cy)に固定し、赤緯90°(天の北極)からの角距離を半径にした
+            // 方位図法（正距方位図法）で位置を求める。rotationDegは演出用の自転角。
+            updatePosition(cx, cy, maxR, decMin, rotationDeg) {
+                if (this.isPolaris) {
+                    // 実際の天の北極は北極星から約0.7°ずれているが、
+                    // 「北極星を画面の中心に配置する」という指定に合わせ、ここだけは厳密に中心固定する
+                    this.x = cx;
+                    this.y = cy;
+                    return;
+                }
+                const raDeg = this.ra * 15;
+                const theta = (raDeg + rotationDeg) * Math.PI / 180;
+                const r = maxR * (90 - this.dec) / (90 - decMin);
+                this.x = cx + r * Math.cos(theta);
+                this.y = cy - r * Math.sin(theta);
+            }
+
+            update() {
+                this.alpha = this.baseAlpha + Math.sin(Date.now() * (this.flickerSpeed * config.twinkleSpeed) + this.flickerOffset) * 0.18 * (0.4 + this.brightness);
+                if (this.alpha < 0.08) this.alpha = 0.08;
+                if (this.alpha > 1) this.alpha = 1;
+            }
+
+            draw() {
+                const size = (0.5 + this.brightness * 2.6) * config.realStarScale;
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                if (config.glowScale > 0) {
+                    ctx.shadowBlur = (3 + this.brightness * 11) * config.glowScale;
+                    ctx.shadowColor = "white";
+                }
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- 実在の星図データ（J2000元期・簡略値／赤経:時, 赤緯:度, 等級） ---
+        // 北極星(こぐま座アルファ)を基準に、周極星座を中心として赤緯-20°付近までの
+        // 主要な恒星・星座線（アステリズム）を収録
+        const SKY_DATA = [
+            { name: "こぐま座", stars: [
+                [2.530, 89.264, 1.98, true],  // ポラリス
+                [14.845, 74.155, 2.08],       // コカブ
+                [15.345, 71.834, 3.05],       // フェルカド
+                [17.537, 86.586, 4.36],
+                [16.766, 82.037, 4.23],
+                [15.735, 77.794, 4.32],
+                [16.292, 75.755, 4.95]
+            ], lines: [[0,3],[3,4],[4,5],[5,1],[1,2],[2,6],[6,5]] },
+
+            { name: "おおぐま座", stars: [
+                [11.062, 61.751, 1.79],  // ドゥベ
+                [11.031, 56.382, 2.37],  // メラク
+                [11.897, 53.695, 2.44],  // フェクダ
+                [12.257, 57.033, 3.31],  // メグレズ
+                [12.900, 55.960, 1.77],  // アリオト
+                [13.398, 54.925, 2.23],  // ミザール
+                [13.792, 49.313, 1.85],  // アルカイド
+                [8.986, 48.042, 3.14],
+                [8.505, 60.718, 3.36]
+            ], lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]] },
+
+            { name: "カシオペヤ座", stars: [
+                [0.153, 59.150, 2.27],
+                [0.675, 56.540, 2.24],
+                [0.945, 60.717, 2.47],
+                [1.430, 60.235, 2.68],
+                [1.907, 63.670, 3.35]
+            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+
+            { name: "ケフェウス座", stars: [
+                [21.310, 62.585, 2.44],
+                [21.478, 70.561, 3.23],
+                [23.655, 77.632, 3.21],
+                [22.182, 58.202, 3.35],
+                [22.487, 58.415, 3.50],
+                [22.828, 66.203, 3.50],
+                [20.755, 61.839, 3.40]
+            ], lines: [[0,1],[1,2],[2,5],[5,3],[3,4],[4,0]] },
+
+            { name: "きりん座", stars: [
+                [5.057, 60.443, 4.03],
+                [4.902, 66.343, 4.29],
+                [3.837, 71.333, 4.63]
+            ] },
+
+            { name: "ペルセウス座", stars: [
+                [3.405, 49.861, 1.79],  // ミルファク
+                [3.136, 40.956, 2.12],  // アルゴル
+                [3.902, 31.884, 2.85],
+                [3.965, 40.010, 2.89],
+                [3.080, 53.506, 2.93],
+                [3.715, 47.788, 3.01]
+            ], lines: [[4,0],[0,5],[5,3],[3,2]] },
+
+            { name: "アンドロメダ座", stars: [
+                [0.140, 29.090, 2.06],  // アルフェラッツ
+                [0.655, 30.861, 3.27],
+                [1.162, 35.621, 2.07],  // ミラク
+                [2.065, 42.330, 2.10]   // アルマク
+            ], lines: [[0,1],[1,2],[2,3]] },
+
+            { name: "ペガスス座", stars: [
+                [23.079, 15.205, 2.49], // マルカブ
+                [23.063, 28.083, 2.42], // シェアト
+                [0.220, 15.183, 2.83],  // アルゲニブ
+                [0.140, 29.090, 2.06]   // アルフェラッツ（アンドロメダ座と共有）
+            ], lines: [[0,1],[1,3],[3,2],[2,0]] },
+
+            { name: "さんかく座", stars: [
+                [2.158, 34.987, 3.00],
+                [1.885, 29.579, 3.41]
+            ] },
+
+            { name: "おひつじ座", stars: [
+                [2.119, 23.462, 2.00],  // ハマル
+                [1.911, 20.808, 2.64],
+                [1.892, 19.294, 3.90]
+            ], lines: [[0,1],[1,2]] },
+
+            { name: "おうし座", stars: [
+                [4.599, 16.509, 0.85],  // アルデバラン
+                [5.438, 28.608, 1.65],  // エルナト
+                [5.627, 21.143, 3.00],
+                [4.330, 15.627, 3.65],
+                [4.382, 17.542, 3.76],
+                [4.478, 19.180, 3.53],
+                [3.791, 24.105, 2.87],  // プレアデス星団（すばる）
+                [3.749, 24.113, 3.70],
+                [3.763, 24.367, 3.87],
+                [3.772, 23.949, 4.18],
+                [3.754, 24.467, 4.30]
+            ], lines: [[0,5],[5,4],[4,3]] },
+
+            { name: "ぎょしゃ座", stars: [
+                [5.278, 45.998, 0.08],  // カペラ
+                [5.992, 44.947, 1.90],
+                [5.995, 37.213, 2.62],
+                [4.949, 33.166, 2.69],
+                [5.027, 43.823, 3.00]
+            ], lines: [[0,4],[4,3],[3,2],[2,1],[1,0]] },
+
+            { name: "ふたご座", stars: [
+                [7.577, 31.888, 1.58],  // カストル
+                [7.755, 28.026, 1.14],  // ポルックス
+                [6.629, 16.399, 1.93]
+            ], lines: [[0,1],[1,2]] },
+
+            { name: "しし座", stars: [
+                [10.140, 11.967, 1.35], // レグルス
+                [11.818, 14.572, 2.14], // デネボラ
+                [10.333, 19.842, 2.08],
+                [10.278, 23.417, 3.44],
+                [11.235, 20.523, 2.56],
+                [11.237, 15.430, 3.34]
+            ], lines: [[0,2],[2,3],[2,4],[4,1],[4,5]] },
+
+            { name: "こいぬ座", stars: [
+                [7.655, 5.225, 0.34]     // プロキオン
+            ] },
+
+            { name: "オリオン座", stars: [
+                [5.920, 7.407, 0.50],    // ベテルギウス
+                [5.242, -8.202, 0.13],   // リゲル
+                [5.418, 6.350, 1.64],
+                [5.533, -0.299, 2.23],
+                [5.604, -1.202, 1.69],
+                [5.680, -1.943, 1.74],
+                [5.795, -9.670, 2.06]
+            ], lines: [[0,5],[2,3],[3,4],[4,5],[5,6],[3,1]] },
+
+            { name: "おおいぬ座", stars: [
+                [6.752, -16.716, -1.46], // シリウス
+                [6.378, -17.956, 1.98]
+            ], lines: [[0,1]] },
+
+            { name: "こと座", stars: [
+                [18.615, 38.784, 0.03], // ベガ
+                [18.738, 39.672, 4.70],
+                [18.747, 37.605, 4.34],
+                [18.835, 33.363, 3.45],
+                [18.982, 32.690, 3.24]
+            ], lines: [[0,2],[2,3],[3,4],[4,1],[1,2]] },
+
+            { name: "はくちょう座", stars: [
+                [20.690, 45.280, 1.25], // デネブ
+                [20.370, 40.257, 2.23],
+                [20.770, 33.970, 2.46],
+                [19.750, 45.131, 2.87],
+                [19.512, 27.960, 3.18]  // アルビレオ
+            ], lines: [[0,1],[1,4],[1,3],[1,2]] },
+
+            { name: "わし座", stars: [
+                [19.847, 8.868, 0.77],  // アルタイル
+                [19.921, 6.407, 3.71],
+                [19.772, 10.613, 2.72]
+            ], lines: [[1,0],[0,2]] },
+
+            { name: "いるか座", stars: [
+                [20.660, 15.912, 3.77],
+                [20.625, 14.595, 3.63],
+                [20.778, 16.123, 3.90],
+                [20.725, 15.070, 4.43]
+            ], lines: [[0,1],[1,3],[3,2],[2,0]] },
+
+            { name: "うしかい座", stars: [
+                [14.261, 19.182, -0.05], // アークトゥルス
+                [14.750, 27.074, 2.35],
+                [14.535, 38.308, 3.03],
+                [14.530, 30.371, 3.58],
+                [15.258, 33.315, 3.48],
+                [15.032, 40.391, 3.50],
+                [13.912, 18.398, 2.68]
+            ] },
+
+            { name: "かんむり座", stars: [
+                [15.463, 29.106, 3.68],
+                [15.548, 31.360, 4.14],
+                [15.578, 26.715, 2.23],
+                [15.712, 26.297, 3.84]
+            ], lines: [[0,1],[1,2],[2,3]] },
+
+            { name: "ヘルクレス座", stars: [
+                [16.503, 21.489, 2.77],
+                [16.688, 31.603, 2.81],
+                [17.244, 14.390, 3.00],
+                [17.250, 24.839, 3.14],
+                [17.250, 36.809, 3.16],
+                [17.005, 30.926, 3.92],
+                [16.365, 19.153, 3.75],
+                [16.715, 38.922, 3.85]
+            ], lines: [[1,5],[5,4],[4,7],[7,1],[0,1],[3,4]] },
+
+            { name: "へびつかい座", stars: [
+                [17.582, 12.560, 2.08]
+            ] },
+
+            { name: "へび座", stars: [
+                [15.738, 6.426, 2.63]
+            ] },
+
+            { name: "おとめ座", stars: [
+                [13.420, -11.161, 0.97]  // スピカ
+            ] },
+
+            { name: "くじら座", stars: [
+                [3.038, 4.090, 2.54],
+                [0.726, -17.987, 2.04]
+            ] },
+
+            { name: "りゅう座", stars: [
+                [14.073, 64.376, 3.65], // トゥバン（かつての北極星）
+                [17.944, 51.489, 2.23],
+                [17.507, 52.301, 2.79],
+                [17.537, 55.167, 4.90],
+                [17.892, 56.867, 3.75],
+                [19.210, 67.661, 3.07],
+                [19.803, 70.269, 3.83],
+                [17.146, 65.714, 3.17],
+                [16.400, 61.514, 2.74],
+                [16.032, 58.565, 4.01],
+                [11.523, 69.331, 3.84],
+                [12.558, 69.789, 3.85],
+                [15.415, 58.966, 3.29]
+            ] }
+        ];
+
+        const DEC_MIN = -20; // これより赤緯が低い星は表示範囲外
+        const realStars = [];
+        const lineSegments = [];
+        let rotationDeg = 0;
+        let lastFrameTime = performance.now();
+
+        function buildSky() {
+            SKY_DATA.forEach(con => {
+                const offset = realStars.length;
+                con.stars.forEach(s => {
+                    realStars.push(new RealStar(s[0], s[1], s[2], s[3]));
+                });
+                if (con.lines) {
+                    con.lines.forEach(pair => lineSegments.push([offset + pair[0], offset + pair[1]]));
+                }
+            });
+        }
+
+        function drawConstellationLines() {
+            if (!config.showLines) return;
+            ctx.save();
+            ctx.strokeStyle = "rgba(150, 190, 255, 0.35)";
+            ctx.lineWidth = 1;
+            lineSegments.forEach(([a, b]) => {
+                const s1 = realStars[a];
+                const s2 = realStars[b];
+                ctx.beginPath();
+                ctx.moveTo(s1.x, s1.y);
+                ctx.lineTo(s2.x, s2.y);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
+        function adjustStarCount() {
+            while (stars.length < config.starCount) {
+                stars.push(new Star());
+            }
+            if (stars.length > config.starCount) {
+                stars.length = config.starCount;
+            }
+        }
+
+        function reinitStars() {
+            stars.forEach(star => star.reset());
+        }
+
+        // --- 初期化関数 ---
+        function init() {
+            adjustStarCount();
+            activeMeteor = new Meteor(); 
+            activeMeteor.active = false;
+        }
+
+        // --- アニメーション関数 ---
+        function animate() {
+            const now = performance.now();
+            const dt = Math.min(0.1, (now - lastFrameTime) / 1000); // タブ非アクティブ復帰時の飛び防止
+            lastFrameTime = now;
+            rotationDeg += config.rotationSpeed * dt;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // 1. 背景の淡い星（実在データを持たない演出用の星屑）
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            // 2. 北極星を中心とした実在の星図の位置を更新
+            const cx = width / 2;
+            const cy = height / 2;
+            const maxR = Math.min(width, height) * 0.47;
+            realStars.forEach(rs => rs.updatePosition(cx, cy, maxR, DEC_MIN, rotationDeg));
+
+            // 3. 星座線 → 4. 実在の星（明るさ順ではなく上に重ねて描画）
+            drawConstellationLines();
+            realStars.forEach(rs => {
+                rs.update();
+                rs.draw();
+            });
+
+            // 5. 流れ星
+            if (activeMeteor.active) {
+                activeMeteor.update();
+                activeMeteor.draw();
+            } else {
+                // 基本の確率 (0.004) に meteorFreq 倍率を適用
+                if (Math.random() < 0.004 * config.meteorFreq) { 
+                    activeMeteor.reset();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- リサイズイベント ---
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            reinitStars(); // 画面サイズが変わっても背景の星が旧サイズの範囲に偏らないようにする
+            init();
+        });
+
+        // 実行開始
+        window.addEventListener('DOMContentLoaded', () => {
+            initUI();
+            updateBgColor();
+            buildSky();
+            init();
+            animate();
+        });
+    </script>
+</body>
+</html>

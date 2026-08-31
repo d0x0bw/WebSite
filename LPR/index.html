@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
-<title>光と粒子の展示室 — The Light & Particle Exhibition</title>
+<meta name="description" content="Firefly、Sakura、Matrix Code Rainなど、8つの単体HTML Canvasエフェクトを集めた展示室。HTML/CSSだけでも閲覧でき、JavaScriptを有効にするとミニプレビューが動き出します。">
+<title>光と粒子の展示室 — Canvas Effects Gallery</title>
 
 <!-- JSが有効な場合のみ .js クラスを付与し、CSS側で強化表現を切り替える -->
 <script>document.documentElement.className = document.documentElement.className.replace('no-js','js');</script>
@@ -468,7 +469,7 @@
       <div class="card-preview" data-preview="matrix" aria-hidden="true"><canvas></canvas></div>
       <div class="card-body">
         <h3 class="card-title">Matrix Code Rain</h3>
-        <p class="card-blurb">文字が滝のように流れ落ちる、おなじみのアレです。</p>
+        <p class="card-blurb">半角カナと記号が滝のように流れ落ちる、おなじみのサイバー演出。</p>
         <ul class="card-params">
           <li>落下速度</li><li>密度</li><li>残像</li><li>カラー6色</li>
         </ul>
@@ -571,8 +572,8 @@
     });
   }
 
-  // 「動きを減らす」設定が有効な場合は、これ以降のCanvas演出を一切起動しない
-  if (reduceMotion) return;
+  // 「動きを減らす」設定が有効な場合は、連続ループさせず1コマだけ描いた静止画にする
+  // （各アニメーションの start() 内で分岐している。以降の初期化は常に実行する）
 
   /* =====================================================
      C. ヒーローの星空アンビエント
@@ -607,11 +608,7 @@
       }
     }
 
-    function loop(ts) {
-      if (!running) return;
-      if (last == null) last = ts;
-      var dt = Math.min(0.05, (ts - last) / 1000);
-      last = ts;
+    function step(dt) {
       var w = canvas.width / dpr, h = canvas.height / dpr;
       ctx.clearRect(0, 0, w, h);
 
@@ -650,15 +647,30 @@
           meteorTimer = 4 + Math.random() * 6;
         }
       }
+    }
 
+    function loop(ts) {
+      if (!running) return;
+      if (last == null) last = ts;
+      var dt = Math.min(0.05, (ts - last) / 1000);
+      last = ts;
+      step(dt);
       raf = requestAnimationFrame(loop);
     }
 
-    function start() { if (running) return; running = true; last = null; raf = requestAnimationFrame(loop); }
+    function start() {
+      if (running) return;
+      if (reduceMotion) {
+        // 「動きを減らす」設定時はループさせず、少し早送りした1コマだけを静止画として描く
+        for (var i = 0; i < 50; i++) step(0.06);
+        return;
+      }
+      running = true; last = null; raf = requestAnimationFrame(loop);
+    }
     function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', function () { resize(); start(); });
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stop(); else start();
     });
@@ -910,18 +922,20 @@
   function makeMorph() {
     var points = [], cyclePhase = 0;
     function sampleText(w, h, text) {
+      var iw = Math.max(1, Math.round(w));
+      var ih = Math.max(1, Math.round(h));
       var off = document.createElement('canvas');
-      off.width = w; off.height = h;
+      off.width = iw; off.height = ih;
       var octx = off.getContext('2d');
       octx.fillStyle = '#fff';
-      octx.font = 'bold ' + Math.floor(h * 0.46) + 'px sans-serif';
+      octx.font = 'bold ' + Math.floor(ih * 0.46) + 'px sans-serif';
       octx.textAlign = 'center'; octx.textBaseline = 'middle';
-      octx.fillText(text, w / 2, h / 2 + 2);
-      var data = octx.getImageData(0, 0, w, h).data;
+      octx.fillText(text, iw / 2, ih / 2 + 2);
+      var data = octx.getImageData(0, 0, iw, ih).data;
       var pts = [], step = 4;
-      for (var y = 0; y < h; y += step) {
-        for (var x = 0; x < w; x += step) {
-          if (data[(y * w + x) * 4 + 3] > 128) pts.push({ x: x, y: y });
+      for (var y = 0; y < ih; y += step) {
+        for (var x = 0; x < iw; x += step) {
+          if (data[(y * iw + x) * 4 + 3] > 128) pts.push({ x: x, y: y });
         }
       }
       return pts;
@@ -980,21 +994,34 @@
         anim.init(rect.width, rect.height, accentRgb);
       }
 
+      function step(dt, ts) {
+        var w = canvas.width / dpr, h = canvas.height / dpr;
+        anim.tick(ctx, w, h, ts, dt, hexToRgbStr(accentRgb));
+      }
+
       function loop(ts) {
         if (!running) return;
         if (last == null) last = ts;
         var dt = Math.min(0.05, (ts - last) / 1000);
         last = ts;
-        var w = canvas.width / dpr, h = canvas.height / dpr;
-        anim.tick(ctx, w, h, ts / 1000, dt, hexToRgbStr(accentRgb));
+        step(dt, ts / 1000);
         raf = requestAnimationFrame(loop);
       }
 
-      function start() { if (running) return; running = true; last = null; raf = requestAnimationFrame(loop); }
+      function start() {
+        if (running) return;
+        if (reduceMotion) {
+          // 「動きを減らす」設定時はループさせず、少し早送りした1コマだけを静止画として描く
+          var tAcc = 0;
+          for (var i = 0; i < 50; i++) { tAcc += 0.06; step(0.06, tAcc); }
+          return;
+        }
+        running = true; last = null; raf = requestAnimationFrame(loop);
+      }
       function stop() { running = false; if (raf) cancelAnimationFrame(raf); }
 
       resize();
-      window.addEventListener('resize', resize);
+      window.addEventListener('resize', function () { resize(); start(); });
 
       if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (entries) {
