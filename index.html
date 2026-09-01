@@ -41,7 +41,7 @@
       color: #ffffff;
     }
 
-    /* 花火イベント（8月1日〜8月31日）の背景色・デザイン設定 */
+    /* 花火イベント（8月21日〜9月6日）の背景色・デザイン設定 */
     body.is-fireworks {
       background-color: #05050d; /* 漆黒に近い夜空色 */
       color: #ffffff;
@@ -395,6 +395,53 @@
       color: #333;
     }
 
+    /* 各イベントの有効期間設定エリア */
+    .period-settings {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed #ccc;
+    }
+
+    .period-settings > strong {
+      font-size: 0.85rem;
+    }
+
+    .period-event {
+      margin-top: 10px;
+      font-size: 0.8rem;
+    }
+
+    .period-event-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .period-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .period-fields label {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .p-input {
+      width: 44px !important;
+      padding: 3px 4px !important;
+      margin: 0 !important;
+      font-size: 13px !important;
+      text-align: center;
+    }
+
+    .period-actions {
+      margin-top: 10px;
+    }
+
     /* 隠し要素用トリガーのカーソル設定 */
     #secret-icon {
       cursor: pointer;
@@ -420,6 +467,72 @@
       <button class="btn-secondary" onclick="clearStorage()">LocalStorageリセット</button>
     </div>
     <p id="status-message" style="margin-bottom: 0; font-size: 0.85rem; line-height: 1.4;"></p>
+
+    <div class="period-settings">
+      <strong>📅 イベント有効期間設定</strong>
+
+      <div class="period-event" data-event="christmas">
+        <div class="period-event-title">🎄 クリスマス・正月</div>
+        <div class="period-fields">
+          <label>開始
+            <input type="number" class="p-input" data-field="startMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="startDay" min="1" max="31">日
+          </label>
+          <label>終了
+            <input type="number" class="p-input" data-field="endMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="endDay" min="1" max="31">日
+          </label>
+        </div>
+      </div>
+
+      <div class="period-event" data-event="sakura">
+        <div class="period-event-title">🌸 桜</div>
+        <div class="period-fields">
+          <label>開始
+            <input type="number" class="p-input" data-field="startMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="startDay" min="1" max="31">日
+          </label>
+          <label>終了
+            <input type="number" class="p-input" data-field="endMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="endDay" min="1" max="31">日
+          </label>
+        </div>
+      </div>
+
+      <div class="period-event" data-event="firefly">
+        <div class="period-event-title">✨ 蛍</div>
+        <div class="period-fields">
+          <label>開始
+            <input type="number" class="p-input" data-field="startMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="startDay" min="1" max="31">日
+          </label>
+          <label>終了
+            <input type="number" class="p-input" data-field="endMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="endDay" min="1" max="31">日
+          </label>
+        </div>
+      </div>
+
+      <div class="period-event" data-event="fireworks">
+        <div class="period-event-title">🎆 花火</div>
+        <div class="period-fields">
+          <label>開始
+            <input type="number" class="p-input" data-field="startMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="startDay" min="1" max="31">日
+          </label>
+          <label>終了
+            <input type="number" class="p-input" data-field="endMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="endDay" min="1" max="31">日
+          </label>
+        </div>
+      </div>
+
+      <div class="period-actions">
+        <button class="btn-primary" onclick="savePeriodSettings()">設定を保存して判定</button>
+        <button class="btn-secondary" onclick="resetPeriodSettings()">デフォルトに戻す</button>
+      </div>
+      <p id="period-status-message" style="margin-bottom: 0; margin-top: 6px; font-size: 0.8rem; line-height: 1.4;"></p>
+    </div>
   </div>
 
   <header class="head">
@@ -494,42 +607,100 @@
 </div>
 
 <script>
-  // 1. クリスマス・正月期間判定（12月24日〜1月6日）
+  // ==========================================
+  // 各イベントの有効期間設定（隠しパネルから編集可能）
+  // ==========================================
+  const PERIOD_STORAGE_KEY = 'event_period_settings';
+
+  // デフォルトの有効期間
+  const DEFAULT_EVENT_SETTINGS = {
+    christmas: { startMonth: 12, startDay: 24, endMonth: 1, endDay: 6, label: 'クリスマス' },
+    sakura:    { startMonth: 3,  startDay: 27, endMonth: 4, endDay: 7,  label: '桜' },
+    firefly:   { startMonth: 5,  startDay: 9,  endMonth: 5, endDay: 31, label: '蛍' },
+    fireworks: { startMonth: 8,  startDay: 21,  endMonth: 9, endDay: 6, label: '花火' }
+  };
+
+  function cloneDefaultSettings() {
+    return JSON.parse(JSON.stringify(DEFAULT_EVENT_SETTINGS));
+  }
+
+  // 月ごとの最大日数（うるう年考慮せず29日まで許容）
+  function daysInMonth(month) {
+    const table = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return table[month - 1] || 31;
+  }
+
+  // 保存済み設定を読み込み、不足・不正な値はデフォルトで補完する
+  function loadEventSettings() {
+    const merged = cloneDefaultSettings();
+    try {
+      const raw = localStorage.getItem(PERIOD_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        for (const key in merged) {
+          if (saved[key]) {
+            const s = saved[key];
+            const month = n => Number.isInteger(n) && n >= 1 && n <= 12;
+            const day = (n, m) => Number.isInteger(n) && n >= 1 && n <= daysInMonth(m);
+            if (month(s.startMonth) && month(s.endMonth) &&
+                day(s.startDay, s.startMonth) && day(s.endDay, s.endMonth)) {
+              merged[key].startMonth = s.startMonth;
+              merged[key].startDay = s.startDay;
+              merged[key].endMonth = s.endMonth;
+              merged[key].endDay = s.endDay;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // 壊れたデータの場合はデフォルトのまま使用
+    }
+    return merged;
+  }
+
+  let eventSettings = loadEventSettings();
+
+  // 日付が month/day の範囲内かどうかを判定（年をまたぐ期間にも対応）
+  function isDateInRange(date, startMonth, startDay, endMonth, endDay) {
+    const value = (date.getMonth() + 1) * 100 + date.getDate();
+    const start = startMonth * 100 + startDay;
+    const end = endMonth * 100 + endDay;
+
+    if (start <= end) {
+      return value >= start && value <= end;
+    } else {
+      // 12/24〜1/6 のように年をまたぐ期間
+      return value >= start || value <= end;
+    }
+  }
+
+  // 表示用に「M/D〜M/D」形式へ整形
+  function formatPeriod(s) {
+    return `${s.startMonth}/${s.startDay}〜${s.endMonth}/${s.endDay}`;
+  }
+
+  // 1. クリスマス・正月期間判定（設定可能・デフォルト12月24日〜1月6日）
   function isChristmasSeason(date) {
-    const month = date.getMonth(); // 0: 1月, 11: 12月
-    const day = date.getDate();
-
-    const isLateDec = (month === 11 && day >= 24);
-    const isEarlyJan = (month === 0 && day <= 6);
-
-    return isLateDec || isEarlyJan;
+    const s = eventSettings.christmas;
+    return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 2. 蛍イベント判定（5月9日〜5月31日）
+  // 2. 蛍イベント判定（設定可能・デフォルト5月9日〜5月31日）
   function isFireflySeason(date) {
-    const month = date.getMonth(); // 4: 5月
-    const day = date.getDate();
-
-    return month === 4 && day >= 9 && day <= 31;
+    const s = eventSettings.firefly;
+    return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 3. 花火イベント判定（8月1日〜8月31日）
+  // 3. 花火イベント判定（設定可能・デフォルト8月21日〜9月6日）
   function isFireworksSeason(date) {
-    const month = date.getMonth(); // 7: 8月
-    const day = date.getDate();
-
-    return month === 7 && day >= 1 && day <= 31;
+    const s = eventSettings.fireworks;
+    return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 4. 桜イベント判定（3月27日〜4月7日）
+  // 4. 桜イベント判定（設定可能・デフォルト3月27日〜4月7日）
   function isSakuraSeason(date) {
-    const month = date.getMonth(); // 2: 3月, 3: 4月
-    const day = date.getDate();
-
-    const isLateMar = (month === 2 && day >= 27);
-    const isEarlyApr = (month === 3 && day <= 7);
-
-    return isLateMar || isEarlyApr;
+    const s = eventSettings.sakura;
+    return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
   // 判定処理と演出制御
@@ -544,24 +715,24 @@
     stopEffect();
 
     if (isChristmasSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: クリスマス期間内です。クリスマス演出と雪を有効化します。</span>`;
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: クリスマス期間内です（${formatPeriod(eventSettings.christmas)}）。クリスマス演出と雪を有効化します。</span>`;
       document.body.classList.add('is-christmas');
       decors.forEach(el => el.style.display = 'inline');
       startEffect('snow');
     } else if (isSakuraSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 桜イベント期間内です（3/27〜4/7）。桜吹雪エフェクトを有効化します。</span>`;
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 桜イベント期間内です（${formatPeriod(eventSettings.sakura)}）。桜吹雪エフェクトを有効化します。</span>`;
       document.body.classList.add('is-sakura');
       startEffect('sakura');
     } else if (isFireflySeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 蛍イベント期間内です（5/9〜5/31）。蛍エフェクトを有効化します。</span>`;
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 蛍イベント期間内です（${formatPeriod(eventSettings.firefly)}）。蛍エフェクトを有効化します。</span>`;
       document.body.classList.add('is-firefly');
       startEffect('firefly');
     } else if (isFireworksSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 花火イベント期間内です（8/1〜8/31）。花火エフェクトを有効化します。</span>`;
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 花火イベント期間内です（${formatPeriod(eventSettings.fireworks)}）。花火エフェクトを有効化します。</span>`;
       document.body.classList.add('is-fireworks');
       startEffect('fireworks');
     } else {
-      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:12/24〜1/6、桜:3/27〜4/7、蛍:5/9〜5/31、花火:8/1〜8/31）。</span>`;
+      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:${formatPeriod(eventSettings.christmas)}、桜:${formatPeriod(eventSettings.sakura)}、蛍:${formatPeriod(eventSettings.firefly)}、花火:${formatPeriod(eventSettings.fireworks)}）。</span>`;
     }
   }
 
@@ -579,6 +750,76 @@
   function clearStorage() {
     localStorage.removeItem('santa_effect_last_shown');
     alert('表示記録をリセットしました。');
+    testEffect();
+  }
+
+  // ==========================================
+  // イベント有効期間設定パネルの入出力
+  // ==========================================
+
+  // eventSettings の値をパネルの入力欄に反映
+  function populatePeriodInputs() {
+    document.querySelectorAll('.period-event').forEach(block => {
+      const key = block.getAttribute('data-event');
+      const s = eventSettings[key];
+      if (!s) return;
+      block.querySelectorAll('.p-input').forEach(input => {
+        const field = input.getAttribute('data-field');
+        input.value = s[field];
+      });
+    });
+  }
+
+  // パネルの入力値を検証して保存し、その場で判定をやり直す
+  function savePeriodSettings() {
+    const periodMessage = document.getElementById('period-status-message');
+    const draft = JSON.parse(JSON.stringify(eventSettings)); // 不正入力時は直前の値を保持
+    let hasError = false;
+
+    document.querySelectorAll('.period-event').forEach(block => {
+      const key = block.getAttribute('data-event');
+      if (!draft[key]) return;
+
+      const values = {};
+      block.querySelectorAll('.p-input').forEach(input => {
+        values[input.getAttribute('data-field')] = parseInt(input.value, 10);
+      });
+
+      const monthOk = n => Number.isInteger(n) && n >= 1 && n <= 12;
+      const dayOk = (n, m) => Number.isInteger(n) && n >= 1 && n <= daysInMonth(m);
+
+      if (monthOk(values.startMonth) && monthOk(values.endMonth) &&
+          dayOk(values.startDay, values.startMonth) && dayOk(values.endDay, values.endMonth)) {
+        draft[key].startMonth = values.startMonth;
+        draft[key].startDay = values.startDay;
+        draft[key].endMonth = values.endMonth;
+        draft[key].endDay = values.endDay;
+      } else {
+        hasError = true;
+      }
+    });
+
+    if (hasError) {
+      if (periodMessage) periodMessage.innerHTML = `<span style="color:#c62828;">❌ 入力値が不正な項目があります（月:1〜12、日:各月の実在日）。該当イベントは直前の設定のまま保持しました。</span>`;
+    } else {
+      if (periodMessage) periodMessage.innerHTML = `<span style="color:#2e7d32;">✅ 有効期間を保存しました。</span>`;
+    }
+
+    eventSettings = draft;
+    localStorage.setItem(PERIOD_STORAGE_KEY, JSON.stringify(eventSettings));
+    populatePeriodInputs();
+    testEffect(); // 現在選択中の日付で再判定
+  }
+
+  // 全イベントの有効期間をデフォルトに戻す
+  function resetPeriodSettings() {
+    eventSettings = cloneDefaultSettings();
+    localStorage.setItem(PERIOD_STORAGE_KEY, JSON.stringify(eventSettings));
+    populatePeriodInputs();
+
+    const periodMessage = document.getElementById('period-status-message');
+    if (periodMessage) periodMessage.innerHTML = `<span style="color:#2e7d32;">✅ デフォルトの有効期間に戻しました。</span>`;
+
     testEffect();
   }
 
@@ -1109,6 +1350,7 @@
     const dd = String(today.getDate()).padStart(2, '0');
     document.getElementById('test-date').value = `${yyyy}-${mm}-${dd}`;
 
+    populatePeriodInputs();
     checkAndRun(today);
   });
 </script>
