@@ -1,4 +1,22 @@
-<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">水面を泳ぐ金魚と浮かぶ蓮の花のインタラクティブなアニメーション。背景色を選べて、水面をクリックまたはタップ、カーソルを動かすと波紋が広がります。</h2>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>金魚 試作</title>
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            margin: 10;
+        }
+    </style>
+</head>
+<body>
+
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;">
   <label for="waterColor" style="font-size:14px;color:var(--text-secondary);">水面の色</label>
   <input type="color" id="waterColor" value="#8fc4cf" style="width:34px;height:30px;padding:0;border:none;cursor:pointer;" />
@@ -437,3 +455,5 @@
   requestAnimationFrame(frame);
 })();
 </script>
+</body>
+</html>
