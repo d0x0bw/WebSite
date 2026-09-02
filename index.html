@@ -41,7 +41,7 @@
       color: #ffffff;
     }
 
-    /* 花火イベント（8月21日〜9月6日）の背景色・デザイン設定 */
+    /* 花火イベント（8月1日〜8月31日）の背景色・デザイン設定 */
     body.is-fireworks {
       background-color: #05050d; /* 漆黒に近い夜空色 */
       color: #ffffff;
@@ -50,6 +50,12 @@
     /* 桜イベント（3月27日〜4月7日）の背景色・デザイン設定 */
     body.is-sakura {
       background-color: #2a1a2e; /* 夜桜をイメージした深い紫紺 */
+      color: #ffffff;
+    }
+
+    /* 星空・流れ星イベントの背景色・デザイン設定 */
+    body.is-starrynight {
+      background-color: #05070f; /* 満天の星が映える漆黒に近い夜空色 */
       color: #ffffff;
     }
 
@@ -86,7 +92,8 @@
     body.is-christmas .head h1,
     body.is-firefly .head h1,
     body.is-fireworks .head h1,
-    body.is-sakura .head h1 {
+    body.is-sakura .head h1,
+    body.is-starrynight .head h1 {
       color: #ffffff;
     }
 
@@ -169,6 +176,13 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
 
+    /* 星空・流れ星モード時のカードデザイン調整（背景は透明にして星空と流れ星を活かす） */
+    body.is-starrynight .menu-card {
+      background-color: transparent;
+      backdrop-filter: none; /* ぼかし解除 */
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
     /* ホバー背景円（#f39801）の不透明度を60%に設定 */
     body.is-christmas .menu-card:hover::before,
     body.is-christmas .menu-card.is-active::before,
@@ -177,7 +191,9 @@
     body.is-fireworks .menu-card:hover::before,
     body.is-fireworks .menu-card.is-active::before,
     body.is-sakura .menu-card:hover::before,
-    body.is-sakura .menu-card.is-active::before {
+    body.is-sakura .menu-card.is-active::before,
+    body.is-starrynight .menu-card:hover::before,
+    body.is-starrynight .menu-card.is-active::before {
       opacity: 0.6;
     }
 
@@ -214,6 +230,15 @@
     }
 
     body.is-sakura .menu-text p {
+      color: #e0e0e0;
+    }
+
+    /* 星空・流れ星イベントのメニュー文字色指定 */
+    body.is-starrynight .menu-title {
+      color: #8ab4f8; /* 夜空に映える淡い青 */
+    }
+
+    body.is-starrynight .menu-text p {
       color: #e0e0e0;
     }
 
@@ -527,6 +552,20 @@
         </div>
       </div>
 
+      <div class="period-event" data-event="starrynight">
+        <div class="period-event-title">🌌 星空・流れ星</div>
+        <div class="period-fields">
+          <label>開始
+            <input type="number" class="p-input" data-field="startMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="startDay" min="1" max="31">日
+          </label>
+          <label>終了
+            <input type="number" class="p-input" data-field="endMonth" min="1" max="12">月
+            <input type="number" class="p-input" data-field="endDay" min="1" max="31">日
+          </label>
+        </div>
+      </div>
+
       <div class="period-actions">
         <button class="btn-primary" onclick="savePeriodSettings()">設定を保存して判定</button>
         <button class="btn-secondary" onclick="resetPeriodSettings()">デフォルトに戻す</button>
@@ -612,12 +651,13 @@
   // ==========================================
   const PERIOD_STORAGE_KEY = 'event_period_settings';
 
-  // デフォルトの有効期間
+  // デフォルトの有効期間（元々コードに直書きされていた期間）
   const DEFAULT_EVENT_SETTINGS = {
-    christmas: { startMonth: 12, startDay: 24, endMonth: 1, endDay: 6, label: 'クリスマス' },
-    sakura:    { startMonth: 3,  startDay: 27, endMonth: 4, endDay: 7,  label: '桜' },
-    firefly:   { startMonth: 5,  startDay: 9,  endMonth: 5, endDay: 31, label: '蛍' },
-    fireworks: { startMonth: 8,  startDay: 21,  endMonth: 9, endDay: 6, label: '花火' }
+    christmas:   { startMonth: 12, startDay: 24, endMonth: 1,  endDay: 6,  label: 'クリスマス' },
+    sakura:      { startMonth: 3,  startDay: 27, endMonth: 4,  endDay: 7,  label: '桜' },
+    firefly:     { startMonth: 5,  startDay: 9,  endMonth: 5,  endDay: 23, label: '蛍' },
+    fireworks:   { startMonth: 8,  startDay: 21,  endMonth: 8,  endDay: 25, label: '花火' },
+    starrynight: { startMonth: 9,  startDay: 1,  endMonth: 9,  endDay: 30, label: '星空・流れ星' } // 七夕の時期を仮の初期値として設定。パネルから変更可
   };
 
   function cloneDefaultSettings() {
@@ -685,13 +725,13 @@
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 2. 蛍イベント判定（設定可能・デフォルト5月9日〜5月31日）
+  // 2. 蛍イベント判定（設定可能・デフォルト5月9日〜5月23日）
   function isFireflySeason(date) {
     const s = eventSettings.firefly;
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 3. 花火イベント判定（設定可能・デフォルト8月21日〜9月6日）
+  // 3. 花火イベント判定（設定可能・デフォルト8月21日〜8月25日）
   function isFireworksSeason(date) {
     const s = eventSettings.fireworks;
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
@@ -703,6 +743,12 @@
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
+  // 5. 星空・流れ星イベント判定（設定可能・デフォルト9月1日〜9月30日）
+  function isStarryNightSeason(date) {
+    const s = eventSettings.starrynight;
+    return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
+  }
+
   // 判定処理と演出制御
   function checkAndRun(date) {
     const message = document.getElementById('status-message');
@@ -710,7 +756,7 @@
     const formattedDateMsg = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
     // 初期化（クラス解除＆過去エフェクト停止）
-    document.body.classList.remove('is-christmas', 'is-firefly', 'is-fireworks', 'is-sakura');
+    document.body.classList.remove('is-christmas', 'is-firefly', 'is-fireworks', 'is-sakura', 'is-starrynight');
     decors.forEach(el => el.style.display = 'none');
     stopEffect();
 
@@ -731,8 +777,12 @@
       if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 花火イベント期間内です（${formatPeriod(eventSettings.fireworks)}）。花火エフェクトを有効化します。</span>`;
       document.body.classList.add('is-fireworks');
       startEffect('fireworks');
+    } else if (isStarryNightSeason(date)) {
+      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 星空・流れ星イベント期間内です（${formatPeriod(eventSettings.starrynight)}）。満天の星と流れ星エフェクトを有効化します。</span>`;
+      document.body.classList.add('is-starrynight');
+      startEffect('starrynight');
     } else {
-      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:${formatPeriod(eventSettings.christmas)}、桜:${formatPeriod(eventSettings.sakura)}、蛍:${formatPeriod(eventSettings.firefly)}、花火:${formatPeriod(eventSettings.fireworks)}）。</span>`;
+      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:${formatPeriod(eventSettings.christmas)}、桜:${formatPeriod(eventSettings.sakura)}、蛍:${formatPeriod(eventSettings.firefly)}、花火:${formatPeriod(eventSettings.fireworks)}、星空・流れ星:${formatPeriod(eventSettings.starrynight)}）。</span>`;
     }
   }
 
@@ -856,6 +906,336 @@
   let fireworkTimer = 0;
   let nextLaunch = 0;
 
+  // ==========================================
+  // 星空・流れ星イベント用の設定・データ
+  // ==========================================
+  // ご指定の初期値：星空の中心=シリウス／星座線=非表示／星の明るさスケール=1.0／自転速度=0.1
+  const STARRY_CONFIG = {
+    starCount: 400,
+    starMinSize: 0.2,
+    starMaxSize: 1.4,
+    twinkleSpeed: 1.0,
+    glowScale: 1.0,
+    meteorFreq: 1.0,
+    meteorSpeed: 1.6,
+    meteorLength: 2.4,
+    showLines: false,
+    realStarScale: 1.0,
+    rotationSpeed: 0.1,
+    centerStar: 'sirius'
+  };
+
+  // 中心にできる恒星のプリセット（赤経:時, 赤緯:度）
+  const NIGHT_CENTER_PRESETS = {
+      polaris: { label: '北極星（ポラリス）', ra: 2.530, dec: 89.264 },
+      sirius: { label: 'シリウス', ra: 6.752, dec: -16.716 }
+  };
+  const NIGHT_MAX_ANG_DEG = 115; // 中心からこの角距離までを描画範囲とする
+
+  // --- 実在の星図データ（J2000元期・簡略値／赤経:時, 赤緯:度, 等級） ---
+  // 北天の周極星座を中心に、冬の星座やシリウス周辺の南天の主要な恒星・
+  // 星座線（アステリズム）も収録
+  const NIGHT_SKY_DATA = [
+      { name: "こぐま座", stars: [
+          [2.530, 89.264, 1.98, true],  // ポラリス
+          [14.845, 74.155, 2.08],       // コカブ
+          [15.345, 71.834, 3.05],       // フェルカド
+          [17.537, 86.586, 4.36],
+          [16.766, 82.037, 4.23],
+          [15.735, 77.794, 4.32],
+          [16.292, 75.755, 4.95]
+      ], lines: [[0,3],[3,4],[4,5],[5,1],[1,2],[2,6],[6,5]] },
+
+      { name: "おおぐま座", stars: [
+          [11.062, 61.751, 1.79],  // ドゥベ
+          [11.031, 56.382, 2.37],  // メラク
+          [11.897, 53.695, 2.44],  // フェクダ
+          [12.257, 57.033, 3.31],  // メグレズ
+          [12.900, 55.960, 1.77],  // アリオト
+          [13.398, 54.925, 2.23],  // ミザール
+          [13.792, 49.313, 1.85],  // アルカイド
+          [8.986, 48.042, 3.14],
+          [8.505, 60.718, 3.36]
+      ], lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]] },
+
+      { name: "カシオペヤ座", stars: [
+          [0.153, 59.150, 2.27],
+          [0.675, 56.540, 2.24],
+          [0.945, 60.717, 2.47],
+          [1.430, 60.235, 2.68],
+          [1.907, 63.670, 3.35]
+      ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+
+      { name: "ケフェウス座", stars: [
+          [21.310, 62.585, 2.44],
+          [21.478, 70.561, 3.23],
+          [23.655, 77.632, 3.21],
+          [22.182, 58.202, 3.35],
+          [22.487, 58.415, 3.50],
+          [22.828, 66.203, 3.50],
+          [20.755, 61.839, 3.40]
+      ], lines: [[0,1],[1,2],[2,5],[5,3],[3,4],[4,0]] },
+
+      { name: "きりん座", stars: [
+          [5.057, 60.443, 4.03],
+          [4.902, 66.343, 4.29],
+          [3.837, 71.333, 4.63]
+      ] },
+
+      { name: "ペルセウス座", stars: [
+          [3.405, 49.861, 1.79],  // ミルファク
+          [3.136, 40.956, 2.12],  // アルゴル
+          [3.902, 31.884, 2.85],
+          [3.965, 40.010, 2.89],
+          [3.080, 53.506, 2.93],
+          [3.715, 47.788, 3.01]
+      ], lines: [[4,0],[0,5],[5,3],[3,2]] },
+
+      { name: "アンドロメダ座", stars: [
+          [0.140, 29.090, 2.06],  // アルフェラッツ
+          [0.655, 30.861, 3.27],
+          [1.162, 35.621, 2.07],  // ミラク
+          [2.065, 42.330, 2.10]   // アルマク
+      ], lines: [[0,1],[1,2],[2,3]] },
+
+      { name: "ペガスス座", stars: [
+          [23.079, 15.205, 2.49], // マルカブ
+          [23.063, 28.083, 2.42], // シェアト
+          [0.220, 15.183, 2.83],  // アルゲニブ
+          [0.140, 29.090, 2.06]   // アルフェラッツ（アンドロメダ座と共有）
+      ], lines: [[0,1],[1,3],[3,2],[2,0]] },
+
+      { name: "さんかく座", stars: [
+          [2.158, 34.987, 3.00],
+          [1.885, 29.579, 3.41]
+      ] },
+
+      { name: "おひつじ座", stars: [
+          [2.119, 23.462, 2.00],  // ハマル
+          [1.911, 20.808, 2.64],
+          [1.892, 19.294, 3.90]
+      ], lines: [[0,1],[1,2]] },
+
+      { name: "おうし座", stars: [
+          [4.599, 16.509, 0.85],  // アルデバラン
+          [5.438, 28.608, 1.65],  // エルナト
+          [5.627, 21.143, 3.00],
+          [4.330, 15.627, 3.65],
+          [4.382, 17.542, 3.76],
+          [4.478, 19.180, 3.53],
+          [3.791, 24.105, 2.87],  // プレアデス星団（すばる）
+          [3.749, 24.113, 3.70],
+          [3.763, 24.367, 3.87],
+          [3.772, 23.949, 4.18],
+          [3.754, 24.467, 4.30]
+      ], lines: [[0,5],[5,4],[4,3]] },
+
+      { name: "ぎょしゃ座", stars: [
+          [5.278, 45.998, 0.08],  // カペラ
+          [5.992, 44.947, 1.90],
+          [5.995, 37.213, 2.62],
+          [4.949, 33.166, 2.69],
+          [5.027, 43.823, 3.00]
+      ], lines: [[0,4],[4,3],[3,2],[2,1],[1,0]] },
+
+      { name: "ふたご座", stars: [
+          [7.577, 31.888, 1.58],  // カストル
+          [7.755, 28.026, 1.14],  // ポルックス
+          [6.629, 16.399, 1.93]
+      ], lines: [[0,1],[1,2]] },
+
+      { name: "しし座", stars: [
+          [10.140, 11.967, 1.35], // レグルス
+          [11.818, 14.572, 2.14], // デネボラ
+          [10.333, 19.842, 2.08],
+          [10.278, 23.417, 3.44],
+          [11.235, 20.523, 2.56],
+          [11.237, 15.430, 3.34]
+      ], lines: [[0,2],[2,3],[2,4],[4,1],[4,5]] },
+
+      { name: "こいぬ座", stars: [
+          [7.655, 5.225, 0.34]     // プロキオン
+      ] },
+
+      { name: "オリオン座", stars: [
+          [5.920, 7.407, 0.50],    // ベテルギウス
+          [5.242, -8.202, 0.13],   // リゲル
+          [5.418, 6.350, 1.64],
+          [5.533, -0.299, 2.23],
+          [5.604, -1.202, 1.69],
+          [5.680, -1.943, 1.74],
+          [5.795, -9.670, 2.06]
+      ], lines: [[0,5],[2,3],[3,4],[4,5],[5,6],[3,1]] },
+
+      { name: "おおいぬ座", stars: [
+          [6.752, -16.716, -1.46], // シリウス
+          [6.378, -17.956, 1.98],  // ムルジム
+          [7.140, -26.393, 1.83],  // ウェズン
+          [6.977, -28.972, 1.50],  // アダラ
+          [7.402, -29.303, 2.45]   // アルドラ
+      ], lines: [[0,1],[1,2],[2,3],[2,4]] },
+
+      { name: "うさぎ座", stars: [
+          [5.545, -17.822, 2.58],  // アルネブ
+          [5.471, -20.759, 2.81]   // ニハル
+      ], lines: [[0,1]] },
+
+      { name: "はと座", stars: [
+          [5.660, -34.074, 2.65],  // ファクト
+          [5.850, -35.768, 3.12]
+      ], lines: [[0,1]] },
+
+      { name: "とも座", stars: [
+          [8.059, -40.003, 2.25],  // ナオス
+          [7.291, -37.097, 2.70],
+          [8.128, -24.304, 2.81]
+      ] },
+
+      { name: "ほ座", stars: [
+          [8.159, -47.337, 1.75],  // レゴル
+          [8.745, -54.709, 1.96]
+      ], lines: [[0,1]] },
+
+      { name: "りゅうこつ座", stars: [
+          [6.399, -52.696, -0.72]  // カノープス（全天2位の明るさ）
+      ] },
+
+      { name: "みなみじゅうじ座", stars: [
+          [12.443, -63.099, 0.77], // アクルックス
+          [12.795, -59.689, 1.25], // ミモザ
+          [12.519, -57.113, 1.63], // ガクルックス
+          [12.252, -58.749, 2.79]
+      ], lines: [[0,2],[1,3]] },
+
+      { name: "ケンタウルス座", stars: [
+          [14.660, -60.833, -0.27], // リギル・ケンタウルス（太陽系から最も近い恒星系）
+          [14.064, -60.373, 0.61]   // ハダル
+      ], lines: [[0,1]] },
+
+      { name: "からす座", stars: [
+          [12.264, -17.542, 2.59],
+          [12.472, -16.515, 2.95],
+          [12.159, -22.620, 3.00],
+          [12.577, -23.397, 2.65]
+      ], lines: [[0,1],[1,3],[3,2],[2,0]] },
+
+      { name: "うみへび座", stars: [
+          [9.460, -8.659, 1.98]    // アルファルド
+      ] },
+
+      { name: "さそり座", stars: [
+          [16.090, -19.805, 2.56],
+          [16.005, -22.622, 2.29],
+          [16.490, -26.432, 0.96],  // アンタレス
+          [17.622, -42.998, 1.87],
+          [17.560, -37.104, 1.62]
+      ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+
+      { name: "いて座", stars: [
+          [18.403, -34.384, 1.85],
+          [18.921, -26.297, 2.05],
+          [19.045, -29.880, 2.60]
+      ], lines: [[0,1],[1,2]] },
+
+      { name: "こと座", stars: [
+          [18.615, 38.784, 0.03], // ベガ
+          [18.738, 39.672, 4.70],
+          [18.747, 37.605, 4.34],
+          [18.835, 33.363, 3.45],
+          [18.982, 32.690, 3.24]
+      ], lines: [[0,2],[2,3],[3,4],[4,1],[1,2]] },
+
+      { name: "はくちょう座", stars: [
+          [20.690, 45.280, 1.25], // デネブ
+          [20.370, 40.257, 2.23],
+          [20.770, 33.970, 2.46],
+          [19.750, 45.131, 2.87],
+          [19.512, 27.960, 3.18]  // アルビレオ
+      ], lines: [[0,1],[1,4],[1,3],[1,2]] },
+
+      { name: "わし座", stars: [
+          [19.847, 8.868, 0.77],  // アルタイル
+          [19.921, 6.407, 3.71],
+          [19.772, 10.613, 2.72]
+      ], lines: [[1,0],[0,2]] },
+
+      { name: "いるか座", stars: [
+          [20.660, 15.912, 3.77],
+          [20.625, 14.595, 3.63],
+          [20.778, 16.123, 3.90],
+          [20.725, 15.070, 4.43]
+      ], lines: [[0,1],[1,3],[3,2],[2,0]] },
+
+      { name: "うしかい座", stars: [
+          [14.261, 19.182, -0.05], // アークトゥルス
+          [14.750, 27.074, 2.35],
+          [14.535, 38.308, 3.03],
+          [14.530, 30.371, 3.58],
+          [15.258, 33.315, 3.48],
+          [15.032, 40.391, 3.50],
+          [13.912, 18.398, 2.68]
+      ] },
+
+      { name: "かんむり座", stars: [
+          [15.463, 29.106, 3.68],
+          [15.548, 31.360, 4.14],
+          [15.578, 26.715, 2.23],
+          [15.712, 26.297, 3.84]
+      ], lines: [[0,1],[1,2],[2,3]] },
+
+      { name: "ヘルクレス座", stars: [
+          [16.503, 21.489, 2.77],
+          [16.688, 31.603, 2.81],
+          [17.244, 14.390, 3.00],
+          [17.250, 24.839, 3.14],
+          [17.250, 36.809, 3.16],
+          [17.005, 30.926, 3.92],
+          [16.365, 19.153, 3.75],
+          [16.715, 38.922, 3.85]
+      ], lines: [[1,5],[5,4],[4,7],[7,1],[0,1],[3,4]] },
+
+      { name: "へびつかい座", stars: [
+          [17.582, 12.560, 2.08]
+      ] },
+
+      { name: "へび座", stars: [
+          [15.738, 6.426, 2.63]
+      ] },
+
+      { name: "おとめ座", stars: [
+          [13.420, -11.161, 0.97]  // スピカ
+      ] },
+
+      { name: "くじら座", stars: [
+          [3.038, 4.090, 2.54],
+          [0.726, -17.987, 2.04]
+      ] },
+
+      { name: "りゅう座", stars: [
+          [14.073, 64.376, 3.65], // トゥバン（かつての北極星）
+          [17.944, 51.489, 2.23],
+          [17.507, 52.301, 2.79],
+          [17.537, 55.167, 4.90],
+          [17.892, 56.867, 3.75],
+          [19.210, 67.661, 3.07],
+          [19.803, 70.269, 3.83],
+          [17.146, 65.714, 3.17],
+          [16.400, 61.514, 2.74],
+          [16.032, 58.565, 4.01],
+          [11.523, 69.331, 3.84],
+          [12.558, 69.789, 3.85],
+          [15.415, 58.966, 3.29]
+      ] }
+  ];
+
+  let nightStars = [];
+  let nightRealStars = [];
+  let nightLineSegments = [];
+  let nightMeteor = null;
+  let nightRotationDeg = 0;
+  let nightLastFrameTime = 0;
+  let nightSkyBuilt = false;
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -908,6 +1288,8 @@
       for (let i = 0; i < count; i++) {
         particles.push(createSakuraPetal(true));
       }
+    } else if (mode === 'starrynight') {
+      initNightSky();
     }
   }
 
@@ -963,6 +1345,247 @@
       radius: 4,
       maxRadius: 42 + Math.random() * 22
     });
+  }
+
+  // 背景の瞬く星を1つ生成
+  function createNightStar() {
+    const minSize = Math.min(STARRY_CONFIG.starMinSize, STARRY_CONFIG.starMaxSize);
+    const maxSize = Math.max(STARRY_CONFIG.starMinSize, STARRY_CONFIG.starMaxSize);
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * (maxSize - minSize) + minSize,
+      flickerSpeed: Math.random() * 0.05 + 0.01,
+      baseAlpha: Math.random() * 0.7 + 0.3,
+      flickerOffset: Math.random() * Math.PI * 2
+    };
+  }
+
+  // 実在の恒星データを1つ生成
+  function createNightRealStar(ra, dec, mag) {
+    const clampedMag = Math.min(5.0, Math.max(-1.5, mag));
+    const brightness = (5.0 - clampedMag) / 6.5; // 0(暗)〜1(明るい)
+    return {
+      ra, dec, mag,
+      brightness,
+      baseAlpha: 0.45 + brightness * 0.55,
+      flickerSpeed: Math.random() * 0.025 + 0.006,
+      flickerOffset: Math.random() * Math.PI * 2,
+      x: 0, y: 0, alpha: 1
+    };
+  }
+
+  // NIGHT_SKY_DATAから実在の星・星座線リストを構築（初回のみ実行）
+  function buildNightSky() {
+    nightRealStars.length = 0;
+    nightLineSegments.length = 0;
+    NIGHT_SKY_DATA.forEach(con => {
+      const offset = nightRealStars.length;
+      con.stars.forEach(s => {
+        nightRealStars.push(createNightRealStar(s[0], s[1], s[2]));
+      });
+      if (con.lines) {
+        con.lines.forEach(pair => nightLineSegments.push({ a: offset + pair[0], b: offset + pair[1] }));
+      }
+    });
+  }
+
+  function createNightMeteor() {
+    return { x: 0, y: 0, length: 0, speed: 0, angle: 0, dx: 0, dy: 0, alpha: 0, active: false };
+  }
+
+  function resetNightMeteor(m) {
+    m.x = Math.random() * canvas.width;
+    m.y = -Math.random() * 100;
+
+    const baseLength = Math.random() * 80 + 50;
+    m.length = baseLength * STARRY_CONFIG.meteorLength;
+
+    const baseSpeed = Math.random() * 12 + 10;
+    m.speed = baseSpeed * STARRY_CONFIG.meteorSpeed;
+    m.angle = Math.random() * (Math.PI / 4) + (Math.PI / 8);
+
+    m.dx = Math.cos(m.angle) * m.speed;
+    m.dy = Math.sin(m.angle) * m.speed;
+
+    m.alpha = 1.0;
+    m.active = true;
+  }
+
+  // 星空エフェクトの初期化（表示切替のたびに呼び出される）
+  function initNightSky() {
+    nightStars = [];
+    for (let i = 0; i < STARRY_CONFIG.starCount; i++) {
+      nightStars.push(createNightStar());
+    }
+    if (!nightSkyBuilt) {
+      buildNightSky();
+      nightSkyBuilt = true;
+    }
+    if (!nightMeteor) {
+      nightMeteor = createNightMeteor();
+    }
+    nightMeteor.active = false;
+    nightRotationDeg = 0;
+    nightLastFrameTime = performance.now();
+  }
+
+  // 背景の瞬く星屑を描画
+  function drawNightBackgroundStars() {
+    nightStars.forEach(star => {
+      star.alpha = star.baseAlpha + Math.sin(Date.now() * (star.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + star.flickerOffset) * 0.3;
+      if (star.alpha < 0) star.alpha = 0;
+      if (star.alpha > 1) star.alpha = 1;
+
+      ctx.save();
+      ctx.globalAlpha = star.alpha;
+      if (STARRY_CONFIG.glowScale > 0) {
+        ctx.shadowBlur = 6 * STARRY_CONFIG.glowScale;
+        ctx.shadowColor = 'white';
+      }
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  // 指定した中心天体からの角距離・方位角をもとに、実在の星の画面座標を更新（正距方位図法）
+  function updateNightRealStarPosition(rs, centerRaDeg, centerDecDeg, cx, cy, maxR, maxAngDeg, rotationDeg) {
+    const toRad = Math.PI / 180;
+    const raDeg = rs.ra * 15;
+    const dRa = (raDeg - centerRaDeg) * toRad;
+    const dec0 = centerDecDeg * toRad;
+    const decR = rs.dec * toRad;
+
+    const cosC = Math.sin(dec0) * Math.sin(decR) + Math.cos(dec0) * Math.cos(decR) * Math.cos(dRa);
+    const c = Math.acos(Math.min(1, Math.max(-1, cosC)));
+    const cDeg = c * 180 / Math.PI;
+
+    const y = Math.sin(dRa) * Math.cos(decR);
+    const x = Math.cos(dec0) * Math.sin(decR) - Math.sin(dec0) * Math.cos(decR) * Math.cos(dRa);
+    const bearing = Math.atan2(y, x) * 180 / Math.PI;
+
+    const theta = (bearing + rotationDeg) * toRad;
+    const r = maxR * (cDeg / maxAngDeg);
+
+    rs.x = cx + r * Math.sin(theta);
+    rs.y = cy - r * Math.cos(theta);
+  }
+
+  // 星座線を描画（showLines=falseの場合は何も描画しない）
+  function drawNightConstellationLines() {
+    if (!STARRY_CONFIG.showLines) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(150, 190, 255, 0.35)';
+    ctx.lineWidth = 1;
+    nightLineSegments.forEach(seg => {
+      const s1 = nightRealStars[seg.a];
+      const s2 = nightRealStars[seg.b];
+      ctx.beginPath();
+      ctx.moveTo(s1.x, s1.y);
+      ctx.lineTo(s2.x, s2.y);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  // 実在の星を描画
+  function drawNightRealStars() {
+    nightRealStars.forEach(rs => {
+      rs.alpha = rs.baseAlpha + Math.sin(Date.now() * (rs.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + rs.flickerOffset) * 0.18 * (0.4 + rs.brightness);
+      if (rs.alpha < 0.08) rs.alpha = 0.08;
+      if (rs.alpha > 1) rs.alpha = 1;
+
+      const size = (0.5 + rs.brightness * 2.6) * STARRY_CONFIG.realStarScale;
+      ctx.save();
+      ctx.globalAlpha = rs.alpha;
+      if (STARRY_CONFIG.glowScale > 0) {
+        ctx.shadowBlur = (3 + rs.brightness * 11) * STARRY_CONFIG.glowScale;
+        ctx.shadowColor = 'white';
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(rs.x, rs.y, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  // 流れ星の位置更新
+  function updateNightMeteorPos(m) {
+    m.x += m.dx;
+    m.y += m.dy;
+    m.alpha -= 0.012 * STARRY_CONFIG.meteorSpeed;
+
+    if (m.x > canvas.width + m.length || m.y > canvas.height + m.length || m.alpha <= 0) {
+      m.active = false;
+    }
+  }
+
+  // 流れ星を描画
+  function drawNightMeteor(m) {
+    if (!m.active) return;
+
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, m.alpha);
+
+    const trailX = m.x - m.dx * (1.5 * STARRY_CONFIG.meteorLength);
+    const trailY = m.y - m.dy * (1.5 * STARRY_CONFIG.meteorLength);
+
+    const gradient = ctx.createLinearGradient(m.x, m.y, trailX, trailY);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.2, 'rgba(230, 240, 255, 0.9)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(m.x, m.y);
+    ctx.lineTo(trailX, trailY);
+    ctx.stroke();
+
+    if (STARRY_CONFIG.glowScale > 0) {
+      ctx.shadowBlur = 10 * STARRY_CONFIG.glowScale;
+      ctx.shadowColor = 'white';
+    }
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, 1, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 星空・流れ星エフェクトの1フレーム分の描画処理
+  function drawNightSky() {
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - nightLastFrameTime) / 1000); // タブ非アクティブ復帰時の飛び防止
+    nightLastFrameTime = now;
+    nightRotationDeg += STARRY_CONFIG.rotationSpeed * dt;
+
+    drawNightBackgroundStars();
+
+    const center = NIGHT_CENTER_PRESETS[STARRY_CONFIG.centerStar] || NIGHT_CENTER_PRESETS.sirius;
+    const centerRaDeg = center.ra * 15;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const maxR = Math.min(canvas.width, canvas.height) * 0.47;
+
+    nightRealStars.forEach(rs => updateNightRealStarPosition(rs, centerRaDeg, center.dec, cx, cy, maxR, NIGHT_MAX_ANG_DEG, nightRotationDeg));
+
+    drawNightConstellationLines();
+    drawNightRealStars();
+
+    if (nightMeteor.active) {
+      updateNightMeteorPos(nightMeteor);
+      drawNightMeteor(nightMeteor);
+    } else if (Math.random() < 0.004 * STARRY_CONFIG.meteorFreq) {
+      resetNightMeteor(nightMeteor);
+    }
   }
 
   function drawEffect() {
@@ -1307,6 +1930,8 @@
           particles[i] = createSakuraPetal(false);
         }
       }
+    } else if (currentMode === 'starrynight') {
+      drawNightSky();
     }
 
     effectAnimationId = requestAnimationFrame(drawEffect);
