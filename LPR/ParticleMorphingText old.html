@@ -11,9 +11,25 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
+    /* ============================================================
+       DESIGN TOKENS
+       このパネルは「粒子で描かれた文字」を操作する道具そのものも
+       粒子でできている、という一つの考え方で統一しています。
+       アクセントカラーは JS 内の getRandomParticleColor() が
+       キャンバス上で実際に使っている5色をそのまま流用し、
+       各コントロールが担当する色を持つことで、盤面と作品が
+       同じ語彙で会話しているように見せています。
 
+       [フルスクリーン化 / パラメータパネル追加]
+       画面全体を一つの巨大な計器スクリーンに見立て、キャンバスを
+       100vw×100vh で敷き詰め、その上に「常時表示のステータス札」
+       (左上・WORDと粒子数)と「格納式のパラメータパネル」
+       (右上・ドラッグ移動 / 折りたたみ / 無操作で自動退避)を
+       浮かべる構成にしています。パネルの挙動は姉妹ツール
+       3DParticleTunnelWarpBoostOmega に合わせてあります。
+       ============================================================ */
     :root {
-      --void: #000000;
+      --void: #07070b;
       --panel: #121218;
       --surface: #1a1a22;
       --surface-2: #21212b;
@@ -31,9 +47,6 @@
       --p-green: #50fa7b;
       --p-amber: #ffb86c;
       --p-red: #ff5555;
-
-      --panel-bg-alpha: 0.0;
-      --panel-blur: 10px;
 
       --radius-lg: 20px;
       --radius-md: 12px;
@@ -71,9 +84,8 @@
       width: 100vw;
       height: 100vh;
       background-color: var(--void);
-      /* 画面上方から光が差し込むような柔らかいグラデーション */
-      background-image: radial-gradient(ellipse 70% 55% at 50% -8%, rgba(166, 200, 255, 0.16), transparent 70%);
-      background-repeat: no-repeat;
+      background-image: radial-gradient(circle, var(--line-soft) 1px, transparent 1px);
+      background-size: 22px 22px;
       overflow: hidden;
     }
 
@@ -111,12 +123,12 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      background-color: rgba(18, 18, 24, var(--panel-bg-alpha, 0.88));
+      background-color: rgba(18, 18, 24, 0.88);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
       padding: 14px 18px;
-      backdrop-filter: blur(var(--panel-blur, 10px));
-      -webkit-backdrop-filter: blur(var(--panel-blur, 10px));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
@@ -274,14 +286,14 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
-      background-color: rgba(18, 18, 24, var(--panel-bg-alpha, 0.0));
+      background-color: rgba(18, 18, 24, 0.92);
       color: var(--ink);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
       padding: 18px 20px;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(var(--panel-blur, 10px));
-      -webkit-backdrop-filter: blur(var(--panel-blur, 10px));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       opacity: 1;
       visibility: visible;
       transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -444,55 +456,6 @@
     }
     .control-size {
       --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-uniformsize {
-      --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-pattern, .control-shattercycle {
-      --accent: var(--p-violet); --accent-glow: rgba(189, 147, 249, 0.55);
-    }
-    .control-textstyle {
-      --accent: var(--p-green); --accent-glow: rgba(80, 250, 123, 0.55);
-    }
-    .control-mono {
-      --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-opacity {
-      --accent: var(--p-amber); --accent-glow: rgba(255, 184, 108, 0.55);
-    }
-
-    /* モーフィングパターンの2択スイッチ */
-    .pattern-toggle-group {
-      display: flex;
-      gap: 6px;
-      background-color: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 3px;
-    }
-
-    .pattern-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--dim);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      font-weight: 600;
-      padding: 7px 0;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
-    }
-
-    .pattern-btn.active {
-      background-color: rgba(189, 147, 249, 0.15);
-      color: var(--p-violet);
-      box-shadow: 0 0 12px rgba(189, 147, 249, 0.3);
-    }
-
-    .pattern-btn:hover:not(.active) {
-      color: var(--ink);
     }
 
     .range-label {
@@ -1035,11 +998,6 @@
       .color-swatch span {
         font-size: 0.56rem;
       }
-
-      .pattern-btn {
-        font-size: 0.68rem;
-        padding: 6px 0;
-      }
     }
   </style>
 </head>
@@ -1085,7 +1043,7 @@
   <div class="panel-header" id="panelHeader">
     <div class="panel-header-title">
       <span class="header-eyebrow">Instrument Panel</span>
-      <h3>◆ 文字変形 設定</h3>
+      <h3>◆ パラメータ設定</h3>
     </div>
     <div class="header-controls">
       <button class="icon-btn" id="resetBtn" title="初期値に戻す" aria-label="リセット">
@@ -1102,24 +1060,6 @@
     <div class="control-section">
       <div class="section-title">■ テキスト</div>
 
-      <div class="control-group control-pattern">
-        <div class="range-label">
-          <span class="control-label">モーフィングパターン</span>
-        </div>
-        <div class="pattern-toggle-group">
-          <button type="button" class="pattern-btn" id="patternCrossBtn" data-pattern="cross">ダイレクト</button>
-          <button type="button" class="pattern-btn active" id="patternShatterBtn" data-pattern="shatter">シャッター</button>
-        </div>
-      </div>
-
-      <div class="control-group control-shattercycle" id="shatterCycleGroup" style="display:block;">
-        <div class="range-label">
-          <span class="control-label">分散にかける時間</span>
-          <span class="value-badge" id="shatterCycleValue">2.5s</span>
-        </div>
-        <input type="range" id="shatterCycleSlider" min="1" max="8" step="0.5" value="2.5">
-      </div>
-
       <div class="control-group control-autocycle inline-row">
         <span class="control-label">自動切り替え</span>
         <label class="switch">
@@ -1131,9 +1071,9 @@
       <div class="control-group control-interval">
         <div class="range-label">
           <span class="control-label">切り替え間隔</span>
-          <span class="value-badge" id="intervalValue">4s</span>
+          <span class="value-badge" id="intervalValue">3s</span>
         </div>
-        <input type="range" id="intervalSlider" min="1" max="10" step="1" value="4">
+        <input type="range" id="intervalSlider" min="1" max="10" step="1" value="3">
       </div>
 
       <div class="control-group control-weight">
@@ -1151,16 +1091,6 @@
         </div>
         <input type="range" id="fontScaleSlider" min="0.5" max="1.3" step="0.05" value="0.95">
       </div>
-
-      <div class="control-group control-textstyle">
-        <div class="range-label">
-          <span class="control-label">表示スタイル</span>
-        </div>
-        <div class="pattern-toggle-group">
-          <button type="button" class="pattern-btn active" id="styleFillBtn" data-style="fill">塗りつぶし</button>
-          <button type="button" class="pattern-btn" id="styleOutlineBtn" data-style="outline">アウトライン</button>
-        </div>
-      </div>
     </div>
 
     <div class="control-section">
@@ -1169,9 +1099,9 @@
       <div class="control-group control-scatter">
         <div class="range-label">
           <span class="control-label">Scatter</span>
-          <span class="value-badge" id="scatterValue">0</span>
+          <span class="value-badge" id="scatterValue">300</span>
         </div>
-        <input type="range" id="scatterSlider" min="0" max="2000" step="50" value="0">
+        <input type="range" id="scatterSlider" min="0" max="2000" step="50" value="300">
       </div>
 
       <div class="control-group control-size">
@@ -1182,20 +1112,12 @@
         <input type="range" id="sizeSlider" min="0.3" max="3.0" step="0.1" value="1.0">
       </div>
 
-      <div class="control-group control-uniformsize inline-row">
-        <span class="control-label">粒子サイズを均一に</span>
-        <label class="switch">
-          <input type="checkbox" id="uniformSizeToggle" checked>
-          <span class="slider-toggle"></span>
-        </label>
-      </div>
-
       <div class="control-group control-speed">
         <div class="range-label">
           <span class="control-label">Morph Speed</span>
-          <span class="value-badge" id="speedValue">0.05</span>
+          <span class="value-badge" id="speedValue">0.20</span>
         </div>
-        <input type="range" id="speedSlider" min="0.05" max="0.5" step="0.01" value="0.05">
+        <input type="range" id="speedSlider" min="0.05" max="0.5" step="0.01" value="0.2">
       </div>
 
       <div class="control-group control-glow inline-row">
@@ -1218,15 +1140,7 @@
     <div class="control-section">
       <div class="section-title">■ カラー</div>
 
-      <div class="control-group control-mono inline-row">
-        <span class="control-label">単色モード</span>
-        <label class="switch">
-          <input type="checkbox" id="monoToggle" checked>
-          <span class="slider-toggle"></span>
-        </label>
-      </div>
-
-      <div class="color-grid" id="paletteColorGrid" style="display:none;">
+      <div class="color-grid">
         <div class="color-swatch">
           <input type="color" id="colorBlue" value="#a6c8ff">
           <span>Blue</span>
@@ -1249,27 +1163,14 @@
         </div>
       </div>
 
-      <div class="control-group bg-color-row" id="monoColorRow" style="display:flex;">
-        <span class="control-label">単色</span>
-        <input type="color" id="monoColorPicker" value="#a6c8ff">
-      </div>
-
       <div class="control-group bg-color-row">
         <span class="control-label">背景色</span>
-        <input type="color" id="bgColorPicker" value="#000000">
+        <input type="color" id="bgColorPicker" value="#07070b">
       </div>
     </div>
 
     <div class="control-section">
       <div class="section-title">■ システム</div>
-
-      <div class="control-group control-opacity">
-        <div class="range-label">
-          <span class="control-label">パネルの透明度</span>
-          <span class="value-badge" id="panelOpacityValue">0%</span>
-        </div>
-        <input type="range" id="panelOpacitySlider" min="0" max="100" step="5" value="0">
-      </div>
 
       <div class="control-group">
         <div class="range-label">
@@ -1332,11 +1233,6 @@
   const resetBtn = document.getElementById("resetBtn");
 
   // テキスト
-  const patternCrossBtn = document.getElementById("patternCrossBtn");
-  const patternShatterBtn = document.getElementById("patternShatterBtn");
-  const shatterCycleGroup = document.getElementById("shatterCycleGroup");
-  const shatterCycleSlider = document.getElementById("shatterCycleSlider");
-  const shatterCycleValue = document.getElementById("shatterCycleValue");
   const autoCycleToggle = document.getElementById("autoCycleToggle");
   const intervalSlider = document.getElementById("intervalSlider");
   const intervalValue = document.getElementById("intervalValue");
@@ -1344,15 +1240,12 @@
   const weightValue = document.getElementById("weightValue");
   const fontScaleSlider = document.getElementById("fontScaleSlider");
   const fontScaleValue = document.getElementById("fontScaleValue");
-  const styleFillBtn = document.getElementById("styleFillBtn");
-  const styleOutlineBtn = document.getElementById("styleOutlineBtn");
 
   // パーティクル
   const scatterSlider = document.getElementById("scatterSlider");
   const scatterValue = document.getElementById("scatterValue");
   const sizeSlider = document.getElementById("sizeSlider");
   const sizeValue = document.getElementById("sizeValue");
-  const uniformSizeToggle = document.getElementById("uniformSizeToggle");
   const speedSlider = document.getElementById("speedSlider");
   const speedValue = document.getElementById("speedValue");
   const glowToggle = document.getElementById("glowToggle");
@@ -1360,10 +1253,6 @@
   const glowStrengthValue = document.getElementById("glowStrengthValue");
 
   // カラー
-  const monoToggle = document.getElementById("monoToggle");
-  const paletteColorGrid = document.getElementById("paletteColorGrid");
-  const monoColorRow = document.getElementById("monoColorRow");
-  const monoColorPicker = document.getElementById("monoColorPicker");
   const colorBlue = document.getElementById("colorBlue");
   const colorViolet = document.getElementById("colorViolet");
   const colorGreen = document.getElementById("colorGreen");
@@ -1372,8 +1261,6 @@
   const bgColorPicker = document.getElementById("bgColorPicker");
 
   // システム
-  const panelOpacitySlider = document.getElementById("panelOpacitySlider");
-  const panelOpacityValue = document.getElementById("panelOpacityValue");
   const hideDelaySlider = document.getElementById("hideDelaySlider");
   const hideDelayValue = document.getElementById("hideDelayValue");
 
@@ -1389,29 +1276,22 @@
 
   // ===== パラメータ初期値（3DParticleTunnelWarpBoostOmega と同じ考え方の config オブジェクト） =====
   const defaultConfig = {
-    scatterAmount: 0,
+    scatterAmount: 300,
     particleSize: 1.0,
-    uniformSize: true,
-    morphSpeed: 0.05,
+    morphSpeed: 0.2,
     enableGlow: true,
     glowStrength: 8,
     autoCycle: true,
-    autoInterval: 4,
+    autoInterval: 3,
     fontWeight: 900,
     fontScale: 0.95,
-    textStyle: "fill",
-    morphPattern: "shatter",
-    shatterCycle: 2.5,
-    monochrome: true,
-    monoColor: "#a6c8ff",
     colorBlue: "#a6c8ff",
     colorViolet: "#bd93f9",
     colorGreen: "#50fa7b",
     colorAmber: "#ffb86c",
     colorRed: "#ff5555",
-    bgColor: "#000000",
-    hideDelay: 4,
-    panelOpacity: 0
+    bgColor: "#07070b",
+    hideDelay: 4
   };
 
   const config = { ...defaultConfig };
@@ -1419,27 +1299,14 @@
   let intervalTimer = null;
   let currentDpr = 1;
 
-  // シャッター(分散→収束)パターン用の状態
-  let shatterCycleTimer = null;
-  let shatterPhase = "hold"; // "hold"(文字の形) | "scatter"(バラバラ)
-
   // Particle Class
-  // 粒子サイズが均一な場合に使う固定半径（ランダム時の平均値付近に設定）
-  const UNIFORM_BASE_RADIUS = 1.75;
-
-  function getBaseRadius() {
-    return config.uniformSize ? UNIFORM_BASE_RADIUS : (Math.random() * 1.5 + 1);
-  }
-
   class Particle {
     constructor(x, y) {
       this.x = x;
       this.y = y;
       this.targetX = x;
       this.targetY = y;
-      this.shapeX = x;
-      this.shapeY = y;
-      this.baseRadius = getBaseRadius();
+      this.baseRadius = Math.random() * 1.5 + 1;
       this.color = getRandomParticleColor();
       this.active = true;
     }
@@ -1466,7 +1333,6 @@
   }
 
   function getRandomParticleColor() {
-    if (config.monochrome) return config.monoColor;
     const rand = Math.random();
     if (rand > 0.85) return config.colorRed;
     if (rand > 0.70) return config.colorAmber;
@@ -1482,24 +1348,12 @@
     }
   }
 
-  function applyParticleSizes() {
-    for (let i = 0; i < particles.length; i++) {
-      particles[i].baseRadius = getBaseRadius();
-    }
-  }
-
   function applyAccentVar(varName, value) {
     document.documentElement.style.setProperty(varName, value);
   }
 
   function applyBgColor() {
     document.documentElement.style.setProperty("--void", config.bgColor);
-  }
-
-  function applyPanelOpacity() {
-    document.documentElement.style.setProperty("--panel-bg-alpha", config.panelOpacity);
-    // 透明度が0に近いほど、すりガラス効果(ぼかし)も弱めて背景が完全に透けるようにする
-    document.documentElement.style.setProperty("--panel-blur", (config.panelOpacity * 10).toFixed(1) + "px");
   }
 
   let particles = [];
@@ -1529,34 +1383,19 @@
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
 
-    // 文字の太さが細い(fontWeightが小さい)ほど線が細くなり、
-    // 固定の間隔でサンプリングすると細い線を拾い損ねて「文字の一部が
-    // 欠ける」原因になるため、太さに応じてサンプリング間隔を細かくする
-    const weightFactor = config.fontWeight / 900; // 100/900 ≈ 0.11 〜 900/900 = 1
-    const step = Math.max(Math.floor((3 + weightFactor * 3) * currentDpr), 2);
-
-    if (config.textStyle === "outline") {
-      // 塗りつぶさず輪郭だけを細くなぞることで、面を粒子で埋めるのではなく
-      // 粒子一粒分の線が文字の形をなぞるような見た目にする
-      offCtx.lineWidth = Math.max(step * 1.4, 2 * currentDpr);
-      offCtx.lineJoin = "round";
-      offCtx.lineCap = "round";
-      offCtx.strokeStyle = "#ffffff";
-      offCtx.strokeText(text, offscreen.width / 2, offscreen.height / 2);
-    } else {
-      offCtx.fillStyle = "#ffffff";
-      offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2);
-    }
+    offCtx.fillStyle = "#ffffff";
+    offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2);
 
     const imageData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
     const data = imageData.data;
     const points = [];
 
+    const step = Math.max(Math.floor(6 * currentDpr), 3);
+
     for (let y = 0; y < offscreen.height; y += step) {
       for (let x = 0; x < offscreen.width; x += step) {
         const index = (y * offscreen.width + x) * 4;
-        // アンチエイリアスがかかった細い線の輪郭も拾えるよう閾値を少し下げる
-        if (data[index + 3] > 100) {
+        if (data[index + 3] > 128) {
           points.push({ x, y });
         }
       }
@@ -1592,17 +1431,9 @@
 
     for (let i = 0; i < particles.length; i++) {
       if (i < targetPoints.length) {
-        particles[i].shapeX = targetPoints[i].x;
-        particles[i].shapeY = targetPoints[i].y;
+        particles[i].targetX = targetPoints[i].x;
+        particles[i].targetY = targetPoints[i].y;
         particles[i].active = true;
-
-        // 「シャッター」パターンで今まさに分散フェーズ中の場合は、
-        // 今の分散先へ向かったままにしておき、収束フェーズで新しい
-        // 文字の形へ吸い込まれるようにする
-        if (config.morphPattern !== "shatter" || shatterPhase === "hold") {
-          particles[i].targetX = particles[i].shapeX;
-          particles[i].targetY = particles[i].shapeY;
-        }
       } else {
         let validPos = false;
 
@@ -1641,69 +1472,10 @@
 
   function resetTimer() {
     if (intervalTimer) clearInterval(intervalTimer);
-    // シャッターパターンでは「完全に分散してから次のWORDへ」を
-    // 分散サイクル側のタイマーが担当するため、通常の自動切り替え
-    // タイマーは動かさない（二重に切り替わってしまうのを防ぐ）
-    if (config.morphPattern === "shatter") return;
     if (!config.autoCycle) return;
     intervalTimer = setInterval(() => {
       nextWord();
     }, config.autoInterval * 1000);
-  }
-
-  // ===== シャッター(分散→収束)パターン =====
-  // 文字を形作っている粒子だけを対象に、一定間隔で
-  // 「バラバラに飛び散る」→「文字の形へ再び集まる」を繰り返す
-  function applyShapeTargets() {
-    for (let i = 0; i < particles.length; i++) {
-      if (!particles[i].active) continue;
-      particles[i].targetX = particles[i].shapeX;
-      particles[i].targetY = particles[i].shapeY;
-    }
-  }
-
-  function applyScatterBurstTargets() {
-    for (let i = 0; i < particles.length; i++) {
-      if (!particles[i].active) continue;
-      particles[i].targetX = Math.random() * canvas.width;
-      particles[i].targetY = Math.random() * canvas.height;
-    }
-  }
-
-  function scheduleShatterPhase() {
-    // hold(文字の形で待機) = 「切り替え間隔」、scatter(分散) = 「分散にかける時間」
-    const holdMs = config.autoInterval * 1000;
-    const scatterMs = config.shatterCycle * 1000;
-    const delay = shatterPhase === "hold" ? holdMs : scatterMs;
-
-    shatterCycleTimer = setTimeout(() => {
-      if (config.morphPattern !== "shatter") return;
-      if (shatterPhase === "hold") {
-        shatterPhase = "scatter";
-        applyScatterBurstTargets();
-      } else {
-        // 完全に分散し終えたタイミングで、初めて次のWORDへ切り替える
-        if (config.autoCycle) {
-          nextWord();
-        }
-        shatterPhase = "hold";
-        applyShapeTargets();
-      }
-      scheduleShatterPhase();
-    }, delay);
-  }
-
-  function startShatterCycle() {
-    stopShatterCycle();
-    shatterPhase = "hold";
-    applyShapeTargets();
-    scheduleShatterPhase();
-  }
-
-  function stopShatterCycle() {
-    if (shatterCycleTimer) clearTimeout(shatterCycleTimer);
-    shatterCycleTimer = null;
-    shatterPhase = "hold";
   }
 
   // Event Listeners — テキスト管理
@@ -1735,31 +1507,6 @@
   });
 
   // Event Listeners — パラメータ（テキスト）
-  const patternBtns = [patternCrossBtn, patternShatterBtn];
-  patternBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const pattern = btn.dataset.pattern;
-      if (config.morphPattern === pattern) return;
-
-      config.morphPattern = pattern;
-      patternBtns.forEach((b) => b.classList.toggle("active", b.dataset.pattern === pattern));
-      shatterCycleGroup.style.display = pattern === "shatter" ? "block" : "none";
-
-      if (pattern === "shatter") {
-        startShatterCycle();
-      } else {
-        stopShatterCycle();
-        applyShapeTargets();
-        resetTimer();
-      }
-    });
-  });
-
-  shatterCycleSlider.addEventListener("input", (e) => {
-    config.shatterCycle = parseFloat(e.target.value);
-    shatterCycleValue.textContent = config.shatterCycle + "s";
-  });
-
   autoCycleToggle.addEventListener("change", (e) => {
     config.autoCycle = e.target.checked;
     resetTimer();
@@ -1783,17 +1530,6 @@
     updateWord(words[wordIndex]);
   });
 
-  const styleBtns = [styleFillBtn, styleOutlineBtn];
-  styleBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const style = btn.dataset.style;
-      if (config.textStyle === style) return;
-      config.textStyle = style;
-      styleBtns.forEach((b) => b.classList.toggle("active", b.dataset.style === style));
-      updateWord(words[wordIndex]);
-    });
-  });
-
   // Event Listeners — パラメータ（パーティクル）
   scatterSlider.addEventListener("input", (e) => {
     config.scatterAmount = parseInt(e.target.value, 10);
@@ -1804,11 +1540,6 @@
   sizeSlider.addEventListener("input", (e) => {
     config.particleSize = parseFloat(e.target.value);
     sizeValue.textContent = config.particleSize.toFixed(1) + "x";
-  });
-
-  uniformSizeToggle.addEventListener("change", (e) => {
-    config.uniformSize = e.target.checked;
-    applyParticleSizes();
   });
 
   speedSlider.addEventListener("input", (e) => {
@@ -1826,18 +1557,6 @@
   });
 
   // Event Listeners — カラー
-  monoToggle.addEventListener("change", (e) => {
-    config.monochrome = e.target.checked;
-    paletteColorGrid.style.display = config.monochrome ? "none" : "grid";
-    monoColorRow.style.display = config.monochrome ? "flex" : "none";
-    applyColorPalette();
-  });
-
-  monoColorPicker.addEventListener("input", (e) => {
-    config.monoColor = e.target.value;
-    applyColorPalette();
-  });
-
   colorBlue.addEventListener("input", (e) => {
     config.colorBlue = e.target.value;
     applyAccentVar("--p-blue", config.colorBlue);
@@ -1869,12 +1588,6 @@
   });
 
   // Event Listeners — システム
-  panelOpacitySlider.addEventListener("input", (e) => {
-    config.panelOpacity = parseInt(e.target.value, 10) / 100;
-    panelOpacityValue.textContent = Math.round(config.panelOpacity * 100) + "%";
-    applyPanelOpacity();
-  });
-
   hideDelaySlider.addEventListener("input", (e) => {
     config.hideDelay = parseInt(e.target.value, 10);
     hideDelayValue.textContent = config.hideDelay + "s";
@@ -1886,12 +1599,6 @@
     wordIndex = 0;
     Object.assign(config, defaultConfig);
 
-    stopShatterCycle();
-    patternBtns.forEach((b) => b.classList.toggle("active", b.dataset.pattern === config.morphPattern));
-    shatterCycleGroup.style.display = config.morphPattern === "shatter" ? "block" : "none";
-    shatterCycleSlider.value = config.shatterCycle;
-    shatterCycleValue.textContent = config.shatterCycle + "s";
-
     autoCycleToggle.checked = config.autoCycle;
     intervalSlider.value = config.autoInterval;
     intervalValue.textContent = config.autoInterval + "s";
@@ -1899,24 +1606,16 @@
     weightValue.textContent = config.fontWeight;
     fontScaleSlider.value = config.fontScale;
     fontScaleValue.textContent = config.fontScale.toFixed(2);
-    styleBtns.forEach((b) => b.classList.toggle("active", b.dataset.style === config.textStyle));
 
     scatterSlider.value = config.scatterAmount;
     scatterValue.textContent = config.scatterAmount;
     sizeSlider.value = config.particleSize;
     sizeValue.textContent = config.particleSize.toFixed(1) + "x";
-    uniformSizeToggle.checked = config.uniformSize;
-    applyParticleSizes();
     speedSlider.value = config.morphSpeed;
     speedValue.textContent = config.morphSpeed.toFixed(2);
     glowToggle.checked = config.enableGlow;
     glowStrengthSlider.value = config.glowStrength;
     glowStrengthValue.textContent = config.glowStrength;
-
-    monoToggle.checked = config.monochrome;
-    monoColorPicker.value = config.monoColor;
-    paletteColorGrid.style.display = config.monochrome ? "none" : "grid";
-    monoColorRow.style.display = config.monochrome ? "flex" : "none";
 
     colorBlue.value = config.colorBlue;
     colorViolet.value = config.colorViolet;
@@ -1933,18 +1632,11 @@
     bgColorPicker.value = config.bgColor;
     applyBgColor();
 
-    panelOpacitySlider.value = Math.round(config.panelOpacity * 100);
-    panelOpacityValue.textContent = Math.round(config.panelOpacity * 100) + "%";
-    applyPanelOpacity();
-
     hideDelaySlider.value = config.hideDelay;
     hideDelayValue.textContent = config.hideDelay + "s";
 
     updateWord(words[0]);
     resetTimer();
-    if (config.morphPattern === "shatter") {
-      startShatterCycle();
-    }
     if (wordModalOverlay.classList.contains("open")) {
       renderModalList();
     }
@@ -2219,9 +1911,6 @@
   resetTimer();
   initDraggable();
   initSliderTouchPrevention();
-  if (config.morphPattern === "shatter") {
-    startShatterCycle();
-  }
   animate();
 
   function animate() {
