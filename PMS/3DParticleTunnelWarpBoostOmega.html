@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D Particle Tunnel Warp - Boost Omega</title>
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body { background-color: #030308; overflow: hidden; user-select: none; }
+    #canvas-container { width: 100vw; height: 100vh; cursor: pointer; }
+    #ui-guide {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: sans-serif;
+      font-size: 13px;
+      pointer-events: none;
+      letter-spacing: 0.12em;
+      text-align: center;
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 調整コントロールパネル */
+    .control-panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: rgba(8, 10, 20, 0.88);
+      color: #ffffff;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 0; /* ヘッダーを固定表示にするため、パディングはヘッダー／本文側に持たせる */
+      width: 320px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      user-select: none;
+      touch-action: pan-y;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .control-panel.is-fully-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .control-panel::-webkit-scrollbar {
+      width: 5px;
+    }
+    .control-panel::-webkit-scrollbar-thumb {
+      background: rgba(0, 240, 255, 0.4);
+      border-radius: 3px;
+    }
+
+    .panel-header {
+      /* スクロールしても常に見える位置に固定（sticky）。
+         親要素(.control-panel)のパディングを 0 にした分、
+         ここで上下左右のパディングを肩代わりしている */
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 12px;
+      padding: 16px 18px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: move;
+      background: rgba(8, 10, 20, 0.88);
+      backdrop-filter: blur(10px);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .panel-content {
+      padding: 0 18px 16px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #00f0ff;
+      pointer-events: none;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #00f0ff;
+      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    .icon-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #00f0ff;
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      height: 26px;
+      cursor: pointer;
+    }
+
+    .control-section {
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .control-group {
+      margin-bottom: 10px;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+      color: #e5e7eb;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: #00f0ff;
+      cursor: pointer;
+      height: 6px;
+      touch-action: pan-y;
+    }
+
+    .control-group input[type="color"] {
+      width: 100%;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .control-group.inline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-group.inline-row label {
+      margin-bottom: 0;
+    }
+
+    .control-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #00f0ff;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* 速度メーター（左上表示） */
+    .speed-meter {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 9;
+      background: rgba(8, 10, 20, 0.7);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: #00f0ff;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+      user-select: none;
+      line-height: 1.3;
+    }
+
+    .speed-meter.is-hidden {
+      display: none;
+    }
+
+    .speed-meter-label {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: rgba(0, 240, 255, 0.65);
+    }
+
+    .speed-meter-value {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .speed-meter {
+        top: 12px;
+        left: 12px;
+        padding: 6px 12px;
+      }
+
+      .speed-meter-label {
+        font-size: 0.56rem;
+      }
+
+      .speed-meter-value {
+        font-size: 1.1rem;
+      }
+    }
+
+    .panel-content.is-collapsed {
+      display: none;
+    }
+
+    /* レスポンシブ表示 (幅768px以下) */
+    @media (max-width: 768px) {
+      .control-panel {
+        top: auto !important;
+        bottom: 16px !important;
+        left: 16px !important;
+        right: 16px !important;
+        width: auto !important;
+        max-height: 30vh;
+        border-radius: 16px;
+        padding: 0;
+      }
+
+      .panel-header {
+        cursor: default;
+        margin: 0 0 6px;
+        padding: 10px 14px 6px;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .panel-content {
+        padding: 0 14px 10px;
+      }
+
+      .panel-header h3 {
+        font-size: 0.82rem;
+      }
+
+      .control-section {
+        margin-bottom: 8px;
+      }
+
+      .section-title {
+        font-size: 0.66rem;
+        margin-bottom: 5px;
+      }
+
+      .control-group {
+        margin-bottom: 6px;
+      }
+
+      .control-group label {
+        font-size: 0.72rem;
+        margin-bottom: 2px;
+      }
+
+      .control-group input[type="range"] {
+        height: 12px;
+      }
+
+      .control-group input[type="color"] {
+        height: 24px;
+      }
+    }
+  </style>
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="speed-meter" id="speed-meter">
+  <span class="speed-meter-label">SPEED</span>
+  <span class="speed-meter-value" id="speed-meter-value">0.02</span>
+</div>
+
+<div class="control-panel" id="draggable-panel">
+  <div class="panel-header" id="panel-header">
+    <h3>⚡ ワープ 設定 ⠿</h3>
+    <div class="header-controls">
+      <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+      </button>
+      <button class="toggle-btn" id="btn-toggle-panel">非表示</button>
+    </div>
+  </div>
+
+  <div class="panel-content" id="panel-body">
+    <div class="control-section">
+      <div class="section-title">■ パーティクル</div>
+      <div class="control-group">
+        <label>粒子の数: <span id="val-count">12000</span>個</label>
+        <input type="range" id="param-count" min="1000" max="25000" step="500" value="12000">
+      </div>
+      <div class="control-group">
+        <label>粒子の大きさ: <span id="val-size">1.8</span>倍</label>
+        <input type="range" id="param-size" min="0.3" max="5.0" step="0.1" value="1.8">
+      </div>
+      <div class="control-group">
+        <label>粒子の不透明度: <span id="val-opacity">1.0</span></label>
+        <input type="range" id="param-opacity" min="0.2" max="1.0" step="0.05" value="1.0">
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">■ トンネル形状</div>
+      <div class="control-group">
+        <label>トンネル半径: <span id="val-radius">35</span></label>
+        <input type="range" id="param-radius" min="10" max="100" step="1" value="35">
+      </div>
+      <div class="control-group">
+        <label>トンネル長さ: <span id="val-length">600</span></label>
+        <input type="range" id="param-length" min="200" max="1500" step="50" value="600">
+      </div>
+      <div class="control-group">
+        <label>霧の濃さ: <span id="val-fog">0.006</span></label>
+        <input type="range" id="param-fog" min="0" max="0.02" step="0.001" value="0.006">
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">■ カラー</div>
+      <div class="control-group">
+        <label>色1（始点）</label>
+        <input type="color" id="param-color1" value="#00f0ff">
+      </div>
+      <div class="control-group">
+        <label>色2（中間）</label>
+        <input type="color" id="param-color2" value="#7800ff">
+      </div>
+      <div class="control-group">
+        <label>色3（終点）</label>
+        <input type="color" id="param-color3" value="#ff007f">
+      </div>
+      <div class="control-group">
+        <label>背景色</label>
+        <input type="color" id="param-bgcolor" value="#030308">
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">■ 移動 & 加速</div>
+      <div class="control-group">
+        <label>巡航速度: <span id="val-basespeed">0.020</span></label>
+        <input type="range" id="param-basespeed" min="0" max="0.2" step="0.005" value="0.02">
+      </div>
+      <div class="control-group">
+        <label>長押し時の最大速度: <span id="val-maxspeed">98.0</span></label>
+        <input type="range" id="param-maxspeed" min="10" max="200" step="1" value="98">
+      </div>
+      <div class="control-group">
+        <label>長押し時の加速度: <span id="val-accel">0.020</span></label>
+        <input type="range" id="param-accel" min="0.005" max="0.1" step="0.005" value="0.02">
+      </div>
+      <div class="control-group">
+        <label>ダブルタップのワープ速度: <span id="val-warp">8.0</span></label>
+        <input type="range" id="param-warp" min="1.0" max="30.0" step="0.5" value="8.0">
+      </div>
+      <div class="control-group">
+        <label>基本視野角(FOV): <span id="val-basefov">75</span>°</label>
+        <input type="range" id="param-basefov" min="50" max="90" step="1" value="75">
+      </div>
+      <div class="control-group">
+        <label>ワープ時の最大視野角: <span id="val-maxfov">110</span>°</label>
+        <input type="range" id="param-maxfov" min="90" max="150" step="1" value="110">
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="section-title">■ 環境 & システム</div>
+      <div class="control-group">
+        <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
+        <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+      </div>
+      <div class="control-group inline-row">
+        <label for="param-speedmeter">速度メーターを表示（左上）</label>
+        <input type="checkbox" id="param-speedmeter" checked>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// パラメータ初期値設定オブジェクト
+const defaultConfig = {
+  count: 12000,
+  size: 1.8,
+  opacity: 1.0,
+  tunnelRadius: 35,
+  tunnelLength: 600,
+  fogDensity: 0.006,
+  color1: '#00f0ff',
+  color2: '#7800ff',
+  color3: '#ff007f',
+  bgColor: '#030308',
+  baseSpeed: 0.02,
+  maxClickSpeed: 98.0,
+  acceleration: 0.02,
+  warpSpeed: 8.0,
+  baseFov: 75,
+  maxFov: 110,
+  hideDelay: 3,
+  showSpeedMeter: true
+};
+
+// 現在の設定（初期値でコピー複製）
+const config = { ...defaultConfig };
+
+// 1. シーン・カメラ・レンダラーの設定
+const container = document.getElementById('canvas-container');
+const speedMeterEl = document.getElementById('speed-meter');
+const speedMeterValueEl = document.getElementById('speed-meter-value');
+const scene = new THREE.Scene();
+
+scene.fog = new THREE.FogExp2(config.bgColor, config.fogDensity);
+
+const camera = new THREE.PerspectiveCamera(config.baseFov, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(config.bgColor);
+container.appendChild(renderer.domElement);
+
+// 2. トンネル・パーティクルの生成ロジック
+const INNER_RADIUS = 3; // 中心の空洞半径（常に一定）
+
+function generateParticleData(count) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const angles = new Float32Array(count);
+  const radiusFactors = new Float32Array(count);
+  const mixRatios = new Float32Array(count);
+
+  const c1 = new THREE.Color(config.color1);
+  const c2 = new THREE.Color(config.color2);
+  const c3 = new THREE.Color(config.color3);
+
+  for (let i = 0; i < count; i++) {
+    const i3 = i * 3;
+    const angle = Math.random() * Math.PI * 2;
+    const radiusFactor = Math.random();
+    const radius = INNER_RADIUS + radiusFactor * config.tunnelRadius;
+
+    positions[i3]     = Math.cos(angle) * radius;
+    positions[i3 + 1] = Math.sin(angle) * radius;
+    positions[i3 + 2] = -Math.random() * config.tunnelLength;
+
+    angles[i] = angle;
+    radiusFactors[i] = radiusFactor;
+
+    const mixRatio = Math.random();
+    mixRatios[i] = mixRatio;
+    const pColor = mixRatio < 0.5
+      ? c1.clone().lerp(c2, mixRatio * 2)
+      : c2.clone().lerp(c3, (mixRatio - 0.5) * 2);
+
+    colors[i3]     = pColor.r;
+    colors[i3 + 1] = pColor.g;
+    colors[i3 + 2] = pColor.b;
+  }
+
+  return { positions, colors, angles, radiusFactors, mixRatios };
+}
+
+let currentParticleCount = config.count;
+let particleData = generateParticleData(currentParticleCount);
+
+let geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(particleData.positions, 3));
+geometry.setAttribute('color', new THREE.BufferAttribute(particleData.colors, 3));
+
+let angles = particleData.angles;
+let radiusFactors = particleData.radiusFactors;
+let mixRatios = particleData.mixRatios;
+let prevTunnelLength = config.tunnelLength;
+
+// 3. テクスチャとマテリアル
+function createParticleTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
+  grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+
+  const texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+const material = new THREE.PointsMaterial({
+  size: config.size,
+  map: createParticleTexture(),
+  vertexColors: true,
+  transparent: true,
+  opacity: config.opacity,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
+
+let tunnelParticles = new THREE.Points(geometry, material);
+scene.add(tunnelParticles);
+
+// 粒子数を変更する際、ジオメトリを作り直す
+function rebuildParticles(newCount) {
+  scene.remove(tunnelParticles);
+  geometry.dispose();
+
+  currentParticleCount = newCount;
+  const data = generateParticleData(newCount);
+
+  geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(data.colors, 3));
+  angles = data.angles;
+  radiusFactors = data.radiusFactors;
+  mixRatios = data.mixRatios;
+
+  tunnelParticles = new THREE.Points(geometry, material);
+  scene.add(tunnelParticles);
+}
+
+// トンネル半径の変更を既存の粒子に反映
+function applyTunnelRadius() {
+  const posArr = geometry.attributes.position.array;
+  for (let i = 0; i < currentParticleCount; i++) {
+    const i3 = i * 3;
+    const radius = INNER_RADIUS + radiusFactors[i] * config.tunnelRadius;
+    posArr[i3]     = Math.cos(angles[i]) * radius;
+    posArr[i3 + 1] = Math.sin(angles[i]) * radius;
+  }
+  geometry.attributes.position.needsUpdate = true;
+}
+
+// トンネル長さの変更を既存の粒子の奥行きに比例して反映
+function applyTunnelLength() {
+  const ratio = config.tunnelLength / prevTunnelLength;
+  const posArr = geometry.attributes.position.array;
+  for (let i = 0; i < currentParticleCount; i++) {
+    posArr[i * 3 + 2] *= ratio;
+  }
+  geometry.attributes.position.needsUpdate = true;
+  prevTunnelLength = config.tunnelLength;
+}
+
+// カラー設定の変更を既存の粒子に再適用
+function applyColors() {
+  const c1 = new THREE.Color(config.color1);
+  const c2 = new THREE.Color(config.color2);
+  const c3 = new THREE.Color(config.color3);
+  const colorArr = geometry.attributes.color.array;
+
+  for (let i = 0; i < currentParticleCount; i++) {
+    const i3 = i * 3;
+    const mixRatio = mixRatios[i];
+    const pColor = mixRatio < 0.5
+      ? c1.clone().lerp(c2, mixRatio * 2)
+      : c2.clone().lerp(c3, (mixRatio - 0.5) * 2);
+    colorArr[i3]     = pColor.r;
+    colorArr[i3 + 1] = pColor.g;
+    colorArr[i3 + 2] = pColor.b;
+  }
+  geometry.attributes.color.needsUpdate = true;
+}
+
+// 背景色の変更をレンダラー・霧に反映
+function applyBgColor() {
+  renderer.setClearColor(config.bgColor);
+  scene.fog.color.set(config.bgColor);
+  document.body.style.backgroundColor = config.bgColor;
+}
+
+// 4. UIコントロール定義
+const controls = [
+  { id: 'param-count', key: 'count', valId: 'val-count', type: 'int', onChange: () => rebuildParticles(config.count) },
+  { id: 'param-size', key: 'size', valId: 'val-size', type: 'float', onChange: () => { material.size = config.size; } },
+  { id: 'param-opacity', key: 'opacity', valId: 'val-opacity', type: 'float', onChange: () => { material.opacity = config.opacity; } },
+  { id: 'param-radius', key: 'tunnelRadius', valId: 'val-radius', type: 'int', onChange: applyTunnelRadius },
+  { id: 'param-length', key: 'tunnelLength', valId: 'val-length', type: 'int', onChange: applyTunnelLength },
+  { id: 'param-fog', key: 'fogDensity', valId: 'val-fog', type: 'float3', onChange: () => { scene.fog.density = config.fogDensity; } },
+  { id: 'param-color1', key: 'color1', type: 'color', onChange: applyColors },
+  { id: 'param-color2', key: 'color2', type: 'color', onChange: applyColors },
+  { id: 'param-color3', key: 'color3', type: 'color', onChange: applyColors },
+  { id: 'param-bgcolor', key: 'bgColor', type: 'color', onChange: applyBgColor },
+  { id: 'param-basespeed', key: 'baseSpeed', valId: 'val-basespeed', type: 'float3' },
+  { id: 'param-maxspeed', key: 'maxClickSpeed', valId: 'val-maxspeed', type: 'float' },
+  { id: 'param-accel', key: 'acceleration', valId: 'val-accel', type: 'float3' },
+  { id: 'param-warp', key: 'warpSpeed', valId: 'val-warp', type: 'float' },
+  { id: 'param-basefov', key: 'baseFov', valId: 'val-basefov', type: 'int' },
+  { id: 'param-maxfov', key: 'maxFov', valId: 'val-maxfov', type: 'int' },
+  { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
+  { id: 'param-speedmeter', key: 'showSpeedMeter', type: 'checkbox', onChange: () => { speedMeterEl.classList.toggle('is-hidden', !config.showSpeedMeter); } }
+];
+
+let hideTimerId = null;
+
+function formatValue(type, val) {
+  if (type === 'float3') return val.toFixed(3);
+  if (type === 'float') return val.toFixed(1);
+  return val;
+}
+
+function initUI() {
+  controls.forEach(item => {
+    const input = document.getElementById(item.id);
+    const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+
+    input.addEventListener('input', (e) => {
+      let val;
+      if (item.type === 'int') val = parseInt(e.target.value);
+      else if (item.type === 'float' || item.type === 'float3') val = parseFloat(e.target.value);
+      else if (item.type === 'checkbox') val = e.target.checked;
+      else val = e.target.value;
+
+      config[item.key] = val;
+
+      if (valDisplay) valDisplay.textContent = formatValue(item.type, val);
+
+      if (item.onChange) item.onChange();
+    });
+  });
+
+  const panel = document.getElementById('draggable-panel');
+  const toggleBtn = document.getElementById('btn-toggle-panel');
+  const resetBtn = document.getElementById('btn-reset-panel');
+  const panelBody = document.getElementById('panel-body');
+
+  // パネル上での操作がトンネルの加速操作（ウィンドウ全体のmousedown/touchstart）に
+  // 伝わってしまわないようにブロックする
+  panel.addEventListener('mousedown', (e) => e.stopPropagation());
+  panel.addEventListener('touchstart', (e) => e.stopPropagation());
+
+  // リセットボタン押下時
+  resetBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    Object.assign(config, defaultConfig);
+
+    controls.forEach(item => {
+      const input = document.getElementById(item.id);
+      const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+      const defaultVal = defaultConfig[item.key];
+
+      if (item.type === 'checkbox') input.checked = defaultVal;
+      else input.value = defaultVal;
+
+      if (valDisplay) valDisplay.textContent = formatValue(item.type, defaultVal);
+
+      if (item.onChange) item.onChange();
+    });
+  });
+
+  // 指定秒数後にパネルを完全非表示にするタイマーをスタート
+  function startHideTimer() {
+    clearTimeout(hideTimerId);
+    hideTimerId = setTimeout(() => {
+      panel.classList.add('is-fully-hidden');
+    }, config.hideDelay * 1000);
+  }
+
+  // パネルを再表示する
+  function showPanel() {
+    clearTimeout(hideTimerId);
+    panel.classList.remove('is-fully-hidden');
+    panelBody.classList.remove('is-collapsed');
+    toggleBtn.textContent = '非表示';
+  }
+
+  // 非表示/表示ボタン押下時
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isCollapsed = panelBody.classList.toggle('is-collapsed');
+    if (isCollapsed) {
+      toggleBtn.textContent = '表示';
+      startHideTimer();
+    } else {
+      toggleBtn.textContent = '非表示';
+      clearTimeout(hideTimerId);
+      panel.classList.remove('is-fully-hidden');
+    }
+  });
+
+  // 画面（トンネル）を3回クリック／タップした時の再表示
+  const SHOW_PANEL_CLICK_WINDOW = 600; // この間隔内(ms)の3クリック/タップをトリプルクリックと判定
+  let showPanelClickTimestamps = [];
+  container.addEventListener('click', () => {
+    if (!(panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed'))) {
+      return; // すでに表示されている場合は何もしない
+    }
+
+    const now = Date.now();
+    showPanelClickTimestamps.push(now);
+    showPanelClickTimestamps = showPanelClickTimestamps.filter(t => now - t <= SHOW_PANEL_CLICK_WINDOW);
+
+    if (showPanelClickTimestamps.length >= 3) {
+      showPanel();
+      showPanelClickTimestamps = [];
+    }
+  });
+
+  // スライダー上で「縦にスワイプ」した時に誤作動しないよう制御
+  initSliderTouchPrevention();
+
+  initDraggable();
+}
+
+// スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
+// （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
+//   PCのマウス／カーソル操作はこの判定を通らないため、これまでと同じ挙動のまま）
+// ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
+//   衝突しないようにする（モバイル）
+function initSliderTouchPrevention() {
+  const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
+  const THUMB_SIZE = 20; // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
+
+  function getThumbCenterX(slider, rect) {
+    const min = parseFloat(slider.min) || 0;
+    const max = parseFloat(slider.max) || 100;
+    const val = parseFloat(slider.value);
+    const percent = max > min ? (val - min) / (max - min) : 0;
+    const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
+    return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
+  }
+
+  const sliders = document.querySelectorAll('input[type="range"]');
+
+  sliders.forEach(slider => {
+    let startX = 0;
+    let startY = 0;
+    let isVertical = false;
+    let touchOnThumb = true;
+
+    slider.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      isVertical = false;
+
+      const rect = slider.getBoundingClientRect();
+      const thumbX = getThumbCenterX(slider, rect);
+      const thumbY = rect.top + rect.height / 2;
+      const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
+      touchOnThumb = dist <= THUMB_HIT_RADIUS;
+
+      if (!touchOnThumb) {
+        // つまみ以外の場所へのタップ／ドラッグは、既定の
+        // 「触れた位置へ値をジャンプさせる」動作ごと無効化する
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    slider.addEventListener('touchmove', (e) => {
+      if (!touchOnThumb) {
+        e.preventDefault();
+        return;
+      }
+
+      if (isVertical) return;
+
+      const touch = e.touches[0];
+      const diffX = Math.abs(touch.clientX - startX);
+      const diffY = Math.abs(touch.clientY - startY);
+
+      if (diffY > diffX && diffY > 4) {
+        isVertical = true;
+        slider.style.pointerEvents = 'none';
+        setTimeout(() => {
+          slider.style.pointerEvents = 'auto';
+        }, 300);
+      }
+    }, { passive: false });
+  });
+}
+
+// PC用ドラッグ移動機能
+function initDraggable() {
+  const panel = document.getElementById('draggable-panel');
+  const header = document.getElementById('panel-header');
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  header.addEventListener('mousedown', (e) => {
+    if (window.innerWidth <= 768) return;
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = panel.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left = `${initialLeft}px`;
+    panel.style.top = `${initialTop}px`;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  function onMouseMove(e) {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    let newLeft = initialLeft + dx;
+    let newTop = initialTop + dy;
+
+    const maxLeft = window.innerWidth - panel.offsetWidth;
+    const maxTop = window.innerHeight - panel.offsetHeight;
+
+    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+    newTop = Math.max(0, Math.min(newTop, maxTop));
+
+    panel.style.left = `${newLeft}px`;
+    panel.style.top = `${newTop}px`;
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+// 5. 段階的な速度管理（長押し・ダブルクリック/ダブルタップ）
+let currentSpeed = config.baseSpeed;
+let targetSpeed = config.baseSpeed;
+let isMouseDown = false;
+
+// マウス移動
+let mouseX = 0;
+let mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// 長押し（クリック/タップ継続）開始・終了
+const onPointerDown = () => { isMouseDown = true; };
+const onPointerUp = () => { isMouseDown = false; };
+
+window.addEventListener('mousedown', onPointerDown);
+window.addEventListener('mouseup', onPointerUp);
+window.addEventListener('mouseleave', onPointerUp);
+
+// ダブルクリックで瞬時にワープ最高速へ昇格
+window.addEventListener('dblclick', () => {
+  targetSpeed = config.warpSpeed;
+  currentSpeed = config.warpSpeed; // 一気に加速
+});
+
+// タッチ操作（モバイル対応: ダブルタップ検出付き）
+let lastTapTime = 0;
+window.addEventListener('touchstart', (e) => {
+  const now = Date.now();
+  if (now - lastTapTime < 300) {
+    // ダブルタップ判定
+    targetSpeed = config.warpSpeed;
+    currentSpeed = config.warpSpeed;
+  }
+  lastTapTime = now;
+
+  onPointerDown();
+  if (e.touches.length > 0) {
+    mouseX = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
+  }
+});
+window.addEventListener('touchend', onPointerUp);
+
+// 6. アニメーションループ
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const elapsedTime = clock.getElapsedTime();
+  const posArr = geometry.attributes.position.array;
+
+  // 速度と加速度の計算
+  if (isMouseDown) {
+    // 長押し中は目標速度を徐々に上げる
+    targetSpeed = Math.min(targetSpeed + config.acceleration, config.maxClickSpeed);
+  } else {
+    // 離している間は目標速度をベース速度へ徐々に減速
+    targetSpeed += (config.baseSpeed - targetSpeed) * 0.04;
+  }
+
+  // 現在速度を目標速度に追従（スムーズな加減速）
+  currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+
+  // 速度メーター表示の更新
+  if (config.showSpeedMeter) {
+    speedMeterValueEl.textContent = currentSpeed.toFixed(2);
+  }
+
+  // 速度に比例してFOV（視野角）を無段階変化（スピード感の連動）
+  const speedRatio = Math.min(currentSpeed / config.warpSpeed, 1.0);
+  const targetFov = config.baseFov + speedRatio * (config.maxFov - config.baseFov);
+  camera.fov += (targetFov - camera.fov) * 0.1;
+  camera.updateProjectionMatrix();
+
+  // 粒子の移動処理
+  for (let i = 0; i < currentParticleCount; i++) {
+    const i3 = i * 3;
+    posArr[i3 + 2] += currentSpeed;
+
+    if (posArr[i3 + 2] > 10) {
+      posArr[i3 + 2] -= config.tunnelLength;
+    }
+  }
+
+  geometry.attributes.position.needsUpdate = true;
+
+  // 速度に応じて回転速度も変更
+  tunnelParticles.rotation.z = elapsedTime * (0.1 + speedRatio * 0.5);
+
+  // カメラの傾き補正
+  camera.position.x += (mouseX * 8 - camera.position.x) * 0.05;
+  camera.position.y += (-mouseY * 8 - camera.position.y) * 0.05;
+  camera.lookAt(0, 0, -100);
+
+  renderer.render(scene, camera);
+}
+
+initUI();
+animate();
+
+// リサイズ対応
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
