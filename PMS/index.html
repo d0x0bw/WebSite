@@ -359,9 +359,59 @@
     .gallery { grid-template-columns: 1fr; padding: 12px 18px 100px; }
     .intro { padding: 44px 18px 28px; }
   }
+
+  /* =====================================================
+     7. トップへ戻るボタン
+  ===================================================== */
+  .back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 30;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17,17,25,.72);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px -12px rgba(0,0,0,.6);
+    transition: color .25s ease, border-color .25s ease, background-color .25s ease, transform .2s ease, opacity .3s ease;
+  }
+  .back-to-top svg { width: 18px; height: 18px; }
+  .back-to-top:hover {
+    color: var(--ink);
+    border-color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.06);
+    transform: translateY(-3px);
+  }
+  .back-to-top:active { transform: scale(.92); }
+
+  /* JS有効時は、ある程度スクロールするまで非表示にしてフェードインさせる
+     （JS無効時は常時表示され、アンカーリンクとして機能する） */
+  .js .back-to-top:not(.is-visible) {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* 「動きを減らす」設定時は出現アニメーションを行わず、常時表示にする */
+    .js .back-to-top:not(.is-visible) { opacity: 1; pointer-events: auto; transform: none; }
+    .back-to-top:hover, .back-to-top:active { transform: none; }
+  }
+
+  @media (max-width: 640px) {
+    .back-to-top { right: 16px; bottom: 16px; width: 42px; height: 42px; }
+    .back-to-top svg { width: 16px; height: 16px; }
+  }
 </style>
 </head>
-<body>
+<body id="top">
 
 <header class="topbar">
   <span class="topbar-brand">Particle Magic Studio<span class="dim">.</span>GALLERY</span>
@@ -552,6 +602,13 @@
   <p>8 EFFECTS · SINGLE-FILE HTML / CSS / JS</p>
   <p>&copy; Particle Magic Studio・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
 </footer>
+
+<a href="#top" class="back-to-top" id="back-to-top" aria-label="トップへ戻る" title="トップへ戻る">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"></path>
+    <path d="M6 11l6-6 6 6"></path>
+  </svg>
+</a>
 
 <script>
 (function () {
@@ -1049,6 +1106,33 @@
         start();
       }
     });
+  }
+
+  /* =====================================================
+     E. トップへ戻るボタンの表示切替
+  ===================================================== */
+  var backToTop = document.getElementById('back-to-top');
+  if (backToTop) {
+    var revealAt = 480; // このスクロール量(px)を超えたら表示する
+    var ticking = false;
+
+    var updateBackToTop = function () {
+      if (window.scrollY > revealAt) {
+        backToTop.classList.add('is-visible');
+      } else {
+        backToTop.classList.remove('is-visible');
+      }
+      ticking = false;
+    };
+
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        window.requestAnimationFrame(updateBackToTop);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    updateBackToTop(); // リロード時に途中までスクロールされている場合の初期状態を反映
   }
 
   initHero();
