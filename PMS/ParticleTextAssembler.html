@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Particle Text Assembler</title>
+
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b0c10;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      color: #fff;
+    }
+
+    #canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%);
+    }
+
+    /* =======================================================
+       PC用コントロールパネル（画面下部固定・現行デザインを踏襲）
+       ======================================================= */
+    .control-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 1180px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+      user-select: none;
+    }
+
+    .control-panel::-webkit-scrollbar { width: 6px; }
+    .control-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #66fcf1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      white-space: nowrap;
+      padding-right: 12px;
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .panel-collapse-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .panel-collapse-btn:hover {
+      border-color: #66fcf1;
+      color: #66fcf1;
+      background: rgba(102, 252, 241, 0.1);
+    }
+
+    /* パネル折りたたみ時は操作部分だけを非表示にし、タイトルバーは常に見える状態を保つ */
+    .control-panel.is-collapsed {
+      padding-bottom: 16px;
+      gap: 0;
+    }
+    .control-panel.is-collapsed .controls-container {
+      display: none;
+    }
+    .control-panel.is-collapsed .panel-title {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .controls-container {
+      display: flex;
+      flex: 1;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 16px 20px;
+    }
+
+    .control-panel .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    .control-panel .control-group.text-group {
+      min-width: 200px;
+      flex: 1.6;
+    }
+
+    .control-panel .control-group.bool-group {
+      flex: 0 0 auto;
+      min-width: auto;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-panel .control-group label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      justify-content: space-between;
+      white-space: nowrap;
+    }
+
+    .control-panel .control-group label .val {
+      color: #66fcf1;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    .control-panel .section-divider {
+      flex-basis: 100%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 2px 0;
+    }
+
+    .control-panel textarea,
+    .control-panel input[type="text"] {
+      width: 100%;
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .control-panel textarea {
+      resize: vertical;
+      min-height: 38px;
+      max-height: 90px;
+      line-height: 1.3;
+    }
+
+    .control-panel textarea:focus,
+    .control-panel input[type="text"]:focus {
+      border-color: #66fcf1;
+    }
+
+    .control-panel select {
+      width: 100%;
+      padding: 6px 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .control-panel input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+    }
+
+    .control-panel input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #66fcf1;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(102, 252, 241, 0.6);
+    }
+
+    .control-panel .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-panel input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .control-panel input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .control-panel input[type="color"]::-webkit-color-swatch {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+    }
+
+    /* PC用トグルスイッチ */
+    .control-panel .switch-d {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .control-panel .switch-d input { opacity: 0; width: 0; height: 0; }
+    .control-panel .switch-d .track {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .control-panel .switch-d .track::before {
+      content: "";
+      position: absolute;
+      height: 14px; width: 14px;
+      left: 3px; top: 3px;
+      background: #ccc;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .control-panel .switch-d input:checked + .track {
+      background: rgba(102, 252, 241, 0.25);
+      border-color: #66fcf1;
+    }
+    .control-panel .switch-d input:checked + .track::before {
+      transform: translateX(18px);
+      background: #66fcf1;
+      box-shadow: 0 0 6px rgba(102,252,241,0.8);
+    }
+
+    /* PC用 形状トグル（丸／四角／三角） */
+    .control-panel .shape-toggle {
+      display: flex;
+      gap: 4px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .control-panel .shape-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95rem;
+      padding: 4px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .control-panel .shape-btn.active {
+      background: rgba(102, 252, 241, 0.18);
+      color: #66fcf1;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #45a29e, #66fcf1);
+      color: #0b0c10;
+      box-shadow: 0 4px 12px rgba(102, 252, 241, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 252, 241, 0.5); }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+
+    .btn-danger {
+      background: rgba(255, 75, 75, 0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 75, 75, 0.3);
+    }
+    .btn-danger:hover { background: rgba(255, 75, 75, 0.3); color: #fff; transform: translateY(-2px); }
+
+    /* PCパネルはスマホ幅では非表示（スマホは専用パネルに切り替え） */
+    @media (max-width: 768px) {
+      .control-panel { display: none; }
+    }
+
+    /* =======================================================
+       スマホ用パラメータパネル（ParticleMorphingTextに準拠したデザイン）
+       ======================================================= */
+    :root {
+      --m-panel: #121218;
+      --m-surface: #1a1a22;
+      --m-surface-2: #21212b;
+      --m-line: #26262f;
+      --m-line-soft: #1b1b23;
+      --m-ink: #f2f1ee;
+      --m-dim: #74747f;
+      --m-dim-2: #45454f;
+      --m-blue: #a6c8ff;
+      --m-violet: #bd93f9;
+      --m-green: #50fa7b;
+      --m-amber: #ffb86c;
+      --m-red: #ff5555;
+      --m-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+    }
+
+    .mobile-control-panel { display: none; }
+
+    @media (max-width: 768px) {
+      .mobile-control-panel {
+        display: block;
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        z-index: 20;
+        max-height: 50vh;
+        background-color: rgba(18, 18, 24, 0.92);
+        border: 1px solid var(--m-line);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.03);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: var(--m-ink);
+        font-family: var(--m-font-mono);
+        user-select: none;
+      }
+
+      .mobile-control-panel .panel-header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px 10px;
+        border-bottom: 1px solid var(--m-line);
+        background-color: rgba(18, 18, 24, 0.92);
+        border-radius: 16px 16px 0 0;
+      }
+
+      .mobile-control-panel.is-collapsed .panel-header {
+        border-bottom: none;
+        border-radius: 16px;
+      }
+
+      .mobile-control-panel .panel-header h3 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        color: var(--m-ink);
+      }
+
+      .mobile-control-panel .header-eyebrow {
+        display: block;
+        font-size: 0.58rem;
+        letter-spacing: 1.6px;
+        color: var(--m-dim);
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+
+      .mobile-control-panel .toggle-btn {
+        background-color: var(--m-surface);
+        border: 1px solid var(--m-line);
+        color: var(--m-ink);
+        border-radius: 14px;
+        padding: 0 12px;
+        height: 30px;
+        font-family: var(--m-font-mono);
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .mobile-control-panel .panel-content {
+        max-height: calc(50vh - 48px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 14px 16px 16px;
+      }
+
+      .mobile-control-panel.is-collapsed .panel-content { display: none; }
+
+      .mobile-control-panel .panel-content::-webkit-scrollbar { width: 5px; }
+      .mobile-control-panel .panel-content::-webkit-scrollbar-thumb { background-color: var(--m-line); border-radius: 3px; }
+
+      .mobile-control-panel .control-section { margin-bottom: 16px; }
+      .mobile-control-panel .control-section:last-child { margin-bottom: 0; }
+
+      .mobile-control-panel .section-title {
+        font-size: 0.62rem;
+        font-weight: 600;
+        color: var(--m-dim);
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--m-line-soft);
+      }
+
+      .mobile-control-panel .control-group { margin-bottom: 12px; }
+      .mobile-control-panel .control-group:last-child { margin-bottom: 0; }
+
+      .mobile-control-panel .control-group.inline-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .mobile-control-panel .control-label {
+        font-size: 0.76rem;
+        color: #d6d5d2;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .mobile-control-panel .control-label::before {
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--accent, var(--m-dim-2));
+        box-shadow: 0 0 6px var(--accent-glow, transparent);
+        flex-shrink: 0;
+      }
+
+      .mobile-control-panel .c-text, .mobile-control-panel .c-shape { --accent: var(--m-violet); --accent-glow: rgba(189,147,249,0.55); }
+      .mobile-control-panel .c-particle, .mobile-control-panel .c-weight { --accent: var(--m-green); --accent-glow: rgba(80,250,123,0.55); }
+      .mobile-control-panel .c-effect, .mobile-control-panel .c-auto { --accent: var(--m-amber); --accent-glow: rgba(255,184,108,0.55); }
+      .mobile-control-panel .c-glow { --accent: var(--m-blue); --accent-glow: rgba(166,200,255,0.55); }
+      .mobile-control-panel .c-color { --accent: var(--m-red); --accent-glow: rgba(255,85,85,0.55); }
+
+      .mobile-control-panel .range-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 7px;
+      }
+
+      .mobile-control-panel .value-badge {
+        background-color: var(--m-surface-2);
+        padding: 2px 9px;
+        border-radius: 8px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--accent, var(--m-ink));
+        text-shadow: 0 0 8px var(--accent-glow, transparent);
+      }
+
+      .mobile-control-panel textarea {
+        width: 100%;
+        background-color: var(--m-surface);
+        border: 1px solid var(--m-line);
+        border-radius: 9px;
+        color: var(--m-ink);
+        font-family: var(--m-font-mono);
+        font-size: 0.85rem;
+        padding: 8px 10px;
+        resize: vertical;
+        min-height: 56px;
+        max-height: 110px;
+        outline: none;
+      }
+      .mobile-control-panel textarea:focus {
+        border-color: var(--m-blue);
+        box-shadow: 0 0 0 3px rgba(166,200,255,0.15);
+      }
+
+      .mobile-control-panel select {
+        width: 100%;
+        background-color: var(--m-surface);
+        border: 1px solid var(--m-line);
+        border-radius: 9px;
+        color: var(--m-ink);
+        font-family: var(--m-font-mono);
+        font-size: 0.78rem;
+        padding: 7px 8px;
+        outline: none;
+      }
+
+      .mobile-control-panel input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 18px;
+        background-color: transparent;
+        background-image: radial-gradient(circle, var(--m-line) 1.4px, transparent 1.5px);
+        background-size: 9px 100%;
+        background-repeat: repeat-x;
+        background-position: left center;
+        outline: none;
+        cursor: pointer;
+        touch-action: pan-y;
+      }
+      .mobile-control-panel input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        background: var(--accent, var(--m-blue));
+        border: 2px solid var(--m-panel);
+        box-shadow: 0 0 10px 1px var(--accent-glow, rgba(166,200,255,0.55));
+        cursor: pointer;
+      }
+
+      .mobile-control-panel .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px; height: 24px;
+        flex-shrink: 0;
+      }
+      .mobile-control-panel .switch input { opacity: 0; width: 0; height: 0; }
+      .mobile-control-panel .slider-toggle {
+        position: absolute; cursor: pointer; inset: 0;
+        background-color: var(--m-surface-2);
+        border: 1px solid var(--m-line);
+        border-radius: 30px;
+        transition: background-color 0.25s, border-color 0.25s;
+      }
+      .mobile-control-panel .slider-toggle::before {
+        position: absolute; content: "";
+        height: 16px; width: 16px;
+        left: 3px; bottom: 3px;
+        background-color: var(--m-dim-2);
+        border-radius: 50%;
+        transition: transform 0.25s, background-color 0.25s;
+      }
+      .mobile-control-panel input:checked + .slider-toggle {
+        background-color: rgba(166,200,255,0.15);
+        border-color: var(--m-blue);
+      }
+      .mobile-control-panel input:checked + .slider-toggle::before {
+        transform: translateX(20px);
+        background-color: var(--m-blue);
+        box-shadow: 0 0 10px 2px rgba(166,200,255,0.85);
+      }
+
+      .mobile-control-panel .pattern-toggle-group {
+        display: flex;
+        gap: 6px;
+        background-color: var(--m-surface);
+        border: 1px solid var(--m-line);
+        border-radius: 10px;
+        padding: 3px;
+      }
+      .mobile-control-panel .pattern-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        color: var(--m-dim);
+        font-family: var(--m-font-mono);
+        font-size: 0.85rem;
+        padding: 7px 0;
+        border-radius: 7px;
+        cursor: pointer;
+      }
+      .mobile-control-panel .pattern-btn.active {
+        background-color: rgba(189, 147, 249, 0.15);
+        color: var(--m-violet);
+        box-shadow: 0 0 12px rgba(189, 147, 249, 0.3);
+      }
+
+      .mobile-control-panel .color-swatch-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .mobile-control-panel input[type="color"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 46px; height: 28px;
+        border: 1px solid var(--m-line);
+        border-radius: 8px;
+        cursor: pointer;
+        background: none;
+        padding: 0;
+      }
+      .mobile-control-panel input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+      .mobile-control-panel input[type="color"]::-webkit-color-swatch { border: none; border-radius: 7px; }
+
+      .mobile-control-panel .action-row {
+        display: flex;
+        gap: 8px;
+      }
+      .mobile-control-panel .action-btn {
+        flex: 1;
+        border: 1px solid var(--m-line);
+        border-radius: 10px;
+        padding: 10px 4px;
+        font-family: var(--m-font-mono);
+        font-size: 0.74rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--m-ink);
+        background-color: var(--m-surface);
+      }
+      .mobile-control-panel .action-btn.primary {
+        background: linear-gradient(135deg, #45a29e, #66fcf1);
+        color: #0b0c10;
+        border: none;
+      }
+      .mobile-control-panel .action-btn.danger {
+        background-color: rgba(255,85,85,0.15);
+        color: var(--m-red);
+        border-color: rgba(255,85,85,0.3);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+
+  <!-- ============ PC用コントロールパネル ============ -->
+  <div class="control-panel">
+    <div class="panel-title">
+      <span>Text Assembler</span>
+      <button type="button" class="panel-collapse-btn" id="btnToggleDesktopPanel" title="パネルの表示/非表示">非表示</button>
+    </div>
+
+    <div class="controls-container">
+      <div class="control-group text-group">
+        <label for="textInput">テキスト（Enterで改行）</label>
+        <textarea id="textInput" rows="2" placeholder="テキストを入力...（Enterで改行）">PARTICLE</textarea>
+      </div>
+
+      <div class="control-group">
+        <label for="fontFamily">フォント</label>
+        <select id="fontFamily">
+          <option value="sans-serif">ゴシック体</option>
+          <option value="serif">明朝体</option>
+          <option value="monospace">等幅</option>
+          <option value="cursive">筆記体</option>
+        </select>
+      </div>
+
+      <div class="control-group bool-group">
+        <label for="autoFit">自動フィット</label>
+        <label class="switch-d">
+          <input type="checkbox" id="autoFit" checked>
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="control-group bool-group">
+        <label for="boldToggle">太字</label>
+        <label class="switch-d">
+          <input type="checkbox" id="boldToggle" checked>
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label for="fontScale">サイズ倍率 <span class="val" id="fontScaleVal">1.00</span></label>
+        <input type="range" id="fontScale" min="0.5" max="2" step="0.05" value="1">
+      </div>
+
+      <div class="control-group">
+        <label for="lineSpacing">行間 <span class="val" id="lineSpacingVal">1.20</span></label>
+        <input type="range" id="lineSpacing" min="1" max="2" step="0.05" value="1.2">
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="control-group">
+        <label for="particleSize">粒子サイズ <span class="val" id="sizeVal">2.5</span></label>
+        <input type="range" id="particleSize" min="1" max="6" step="0.5" value="2.5">
+      </div>
+
+      <div class="control-group">
+        <label for="density">密度 <span class="val" id="densityVal">4</span></label>
+        <input type="range" id="density" min="2" max="8" step="1" value="4">
+      </div>
+
+      <div class="control-group">
+        <label for="opacity">不透明度 <span class="val" id="opacityVal">1.00</span></label>
+        <input type="range" id="opacity" min="0.2" max="1" step="0.05" value="1">
+      </div>
+
+      <div class="control-group">
+        <label>粒子の形</label>
+        <div class="shape-toggle">
+          <button type="button" class="shape-btn active" data-shape="circle" id="shapeCircle" title="丸">●</button>
+          <button type="button" class="shape-btn" data-shape="square" id="shapeSquare" title="四角">■</button>
+          <button type="button" class="shape-btn" data-shape="triangle" id="shapeTriangle" title="三角">▲</button>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="control-group">
+        <label for="ease">収束速度 <span class="val" id="easeVal">0.08</span></label>
+        <input type="range" id="ease" min="0.01" max="0.2" step="0.01" value="0.08">
+      </div>
+
+      <div class="control-group">
+        <label for="mouseRadius">反発範囲 <span class="val" id="radiusVal">100</span></label>
+        <input type="range" id="mouseRadius" min="30" max="250" step="10" value="100">
+      </div>
+
+      <div class="control-group">
+        <label for="repulsion">反発力 <span class="val" id="repulsionVal">14</span></label>
+        <input type="range" id="repulsion" min="4" max="40" step="1" value="14">
+      </div>
+
+      <div class="control-group bool-group">
+        <label for="glowEnabled">グロー</label>
+        <label class="switch-d">
+          <input type="checkbox" id="glowEnabled">
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label for="glowStrength">グロー強さ <span class="val" id="glowStrengthVal">8</span></label>
+        <input type="range" id="glowStrength" min="2" max="30" step="1" value="8">
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="control-group bool-group">
+        <label for="autoCycle">自動サイクル</label>
+        <label class="switch-d">
+          <input type="checkbox" id="autoCycle">
+          <span class="track"></span>
+        </label>
+      </div>
+
+      <div class="control-group">
+        <label for="autoCycleInterval">サイクル間隔 <span class="val" id="autoCycleIntervalVal">4s</span></label>
+        <input type="range" id="autoCycleInterval" min="1" max="10" step="1" value="4">
+      </div>
+
+      <div class="control-group" style="min-width: auto; flex: 0;">
+        <label for="particleColor">粒子カラー</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="particleColor" value="#66fcf1">
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);" id="colorHex">#66fcf1</span>
+        </div>
+      </div>
+
+      <div class="control-group" style="min-width: auto; flex: 0;">
+        <label for="bgColor">背景カラー</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="bgColor" value="#0b0c10">
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);" id="bgColorHex">#0b0c10</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-primary" id="btnAssemble">再集結</button>
+        <button class="btn-secondary" id="btnDisperse">拡散</button>
+        <button class="btn-danger" id="btnReset">リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ スマホ用コントロールパネル ============ -->
+  <div class="mobile-control-panel" id="mobileControlPanel">
+    <div class="panel-header" id="mobilePanelHeader">
+      <div>
+        <span class="header-eyebrow">Text Assembler</span>
+        <h3>◆ パラメータ設定</h3>
+      </div>
+      <button class="toggle-btn" id="mobileToggleBtn">非表示</button>
+    </div>
+
+    <div class="panel-content" id="mobilePanelContent">
+
+      <div class="control-section">
+        <div class="section-title">■ テキスト</div>
+
+        <div class="control-group">
+          <span class="control-label c-text">テキスト（Enterで改行）</span>
+          <textarea id="textInputM" rows="3" placeholder="テキストを入力...（Enterで改行）">PARTICLE</textarea>
+        </div>
+
+        <div class="control-group">
+          <span class="control-label c-text">フォント</span>
+          <select id="fontFamilyM">
+            <option value="sans-serif">ゴシック体</option>
+            <option value="serif">明朝体</option>
+            <option value="monospace">等幅</option>
+            <option value="cursive">筆記体</option>
+          </select>
+        </div>
+
+        <div class="control-group inline-row c-text">
+          <span class="control-label">自動フィット（画面に収める）</span>
+          <label class="switch">
+            <input type="checkbox" id="autoFitM" checked>
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <div class="control-group inline-row c-weight">
+          <span class="control-label">太字</span>
+          <label class="switch">
+            <input type="checkbox" id="boldToggleM" checked>
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <div class="control-group c-weight">
+          <div class="range-label">
+            <span class="control-label">サイズ倍率</span>
+            <span class="value-badge" id="fontScaleValM">1.00</span>
+          </div>
+          <input type="range" id="fontScaleM" min="0.5" max="2" step="0.05" value="1">
+        </div>
+
+        <div class="control-group c-weight">
+          <div class="range-label">
+            <span class="control-label">行間</span>
+            <span class="value-badge" id="lineSpacingValM">1.20</span>
+          </div>
+          <input type="range" id="lineSpacingM" min="1" max="2" step="0.05" value="1.2">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <div class="section-title">■ パーティクル</div>
+
+        <div class="control-group c-particle">
+          <div class="range-label">
+            <span class="control-label">粒子サイズ</span>
+            <span class="value-badge" id="sizeValM">2.5</span>
+          </div>
+          <input type="range" id="particleSizeM" min="1" max="6" step="0.5" value="2.5">
+        </div>
+
+        <div class="control-group c-particle">
+          <div class="range-label">
+            <span class="control-label">密度</span>
+            <span class="value-badge" id="densityValM">4</span>
+          </div>
+          <input type="range" id="densityM" min="2" max="8" step="1" value="4">
+        </div>
+
+        <div class="control-group c-particle">
+          <div class="range-label">
+            <span class="control-label">不透明度</span>
+            <span class="value-badge" id="opacityValM">1.00</span>
+          </div>
+          <input type="range" id="opacityM" min="0.2" max="1" step="0.05" value="1">
+        </div>
+
+        <div class="control-group c-shape">
+          <div class="range-label"><span class="control-label">粒子の形</span></div>
+          <div class="pattern-toggle-group">
+            <button type="button" class="pattern-btn active" data-shape="circle" id="shapeCircleM">丸</button>
+            <button type="button" class="pattern-btn" data-shape="square" id="shapeSquareM">四角</button>
+            <button type="button" class="pattern-btn" data-shape="triangle" id="shapeTriangleM">三角</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <div class="section-title">■ エフェクト</div>
+
+        <div class="control-group c-effect">
+          <div class="range-label">
+            <span class="control-label">収束速度</span>
+            <span class="value-badge" id="easeValM">0.08</span>
+          </div>
+          <input type="range" id="easeM" min="0.01" max="0.2" step="0.01" value="0.08">
+        </div>
+
+        <div class="control-group c-effect">
+          <div class="range-label">
+            <span class="control-label">反発範囲</span>
+            <span class="value-badge" id="radiusValM">100</span>
+          </div>
+          <input type="range" id="mouseRadiusM" min="30" max="250" step="10" value="100">
+        </div>
+
+        <div class="control-group c-effect">
+          <div class="range-label">
+            <span class="control-label">反発力</span>
+            <span class="value-badge" id="repulsionValM">14</span>
+          </div>
+          <input type="range" id="repulsionM" min="4" max="40" step="1" value="14">
+        </div>
+
+        <div class="control-group inline-row c-glow">
+          <span class="control-label">グロー</span>
+          <label class="switch">
+            <input type="checkbox" id="glowEnabledM">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <div class="control-group c-glow">
+          <div class="range-label">
+            <span class="control-label">グロー強さ</span>
+            <span class="value-badge" id="glowStrengthValM">8</span>
+          </div>
+          <input type="range" id="glowStrengthM" min="2" max="30" step="1" value="8">
+        </div>
+
+        <div class="control-group inline-row c-auto">
+          <span class="control-label">自動サイクル</span>
+          <label class="switch">
+            <input type="checkbox" id="autoCycleM">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <div class="control-group c-auto">
+          <div class="range-label">
+            <span class="control-label">サイクル間隔</span>
+            <span class="value-badge" id="autoCycleIntervalValM">4s</span>
+          </div>
+          <input type="range" id="autoCycleIntervalM" min="1" max="10" step="1" value="4">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <div class="section-title">■ カラー</div>
+
+        <div class="control-group color-swatch-row c-color">
+          <span class="control-label">粒子カラー</span>
+          <input type="color" id="particleColorM" value="#66fcf1">
+        </div>
+
+        <div class="control-group color-swatch-row c-color">
+          <span class="control-label">背景カラー</span>
+          <input type="color" id="bgColorM" value="#0b0c10">
+        </div>
+      </div>
+
+      <div class="control-section">
+        <div class="action-row">
+          <button class="action-btn primary" id="btnAssembleM">再集結</button>
+          <button class="action-btn" id="btnDisperseM">拡散</button>
+          <button class="action-btn danger" id="btnResetM">リセット</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    function isMobileView() {
+      return window.matchMedia('(max-width: 768px)').matches;
+    }
+
+    // ===== デフォルト設定値（リセット用） =====
+    const DEFAULT_CONFIG = {
+      text: 'PARTICLE',
+      fontFamily: 'sans-serif',
+      bold: true,
+      autoFit: true,
+      fontScale: 1,
+      lineSpacing: 1.2,
+      size: 2.5,
+      density: 4,
+      ease: 0.08,
+      shape: 'circle',
+      opacity: 1,
+      color: '#66fcf1',
+      bgColor: '#0b0c10',
+      mouseRadius: 100,
+      repulsion: 14,
+      glowEnabled: false,
+      glowStrength: 8,
+      autoCycle: false,
+      autoCycleInterval: 4
+    };
+
+    const config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+    // マウス／タッチ位置管理
+    const mouse = { x: null, y: null, radius: config.mouseRadius };
+    const updateMousePos = (x, y) => { mouse.x = x; mouse.y = y; };
+    window.addEventListener('mousemove', (e) => updateMousePos(e.x, e.y));
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    const resetMouse = () => { mouse.x = null; mouse.y = null; };
+    window.addEventListener('mouseleave', resetMouse);
+    window.addEventListener('touchend', resetMouse);
+
+    let particles = [];
+    let autoCycleTimer = null;
+
+    // ===== パーティクルクラス =====
+    class Particle {
+      constructor(x, y, originX, originY) {
+        this.x = x;
+        this.y = y;
+        this.originX = originX;
+        this.originY = originY;
+        this.vx = (Math.random() - 0.5) * 10;
+        this.vy = (Math.random() - 0.5) * 10;
+        this.friction = 0.86;
+        this.ease = config.ease;
+        this.size = config.size;
+        this.color = config.color;
+        this.shape = config.shape;
+        this.repulsion = config.repulsion;
+      }
+
+      draw() {
+        ctx.fillStyle = this.color;
+        if (this.shape === 'square') {
+          const s = this.size * 1.9;
+          ctx.fillRect(this.x - s / 2, this.y - s / 2, s, s);
+        } else if (this.shape === 'triangle') {
+          const s = this.size * 2.1;
+          ctx.beginPath();
+          ctx.moveTo(this.x, this.y - s * 0.6);
+          ctx.lineTo(this.x - s * 0.55, this.y + s * 0.45);
+          ctx.lineTo(this.x + s * 0.55, this.y + s * 0.45);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      update() {
+        if (mouse.x !== null && mouse.y !== null) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < mouse.radius) {
+            const angle = Math.atan2(dy, dx);
+            const force = (mouse.radius - distance) / mouse.radius;
+            const push = force * this.repulsion;
+            this.vx -= Math.cos(angle) * push;
+            this.vy -= Math.sin(angle) * push;
+          }
+        }
+
+        const dxOrigin = this.originX - this.x;
+        const dyOrigin = this.originY - this.y;
+        this.vx += dxOrigin * this.ease;
+        this.vy += dyOrigin * this.ease;
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+        this.x += this.vx;
+        this.y += this.vy;
+      }
+
+      disperse() {
+        this.vx = (Math.random() - 0.5) * 50;
+        this.vy = (Math.random() - 0.5) * 50;
+      }
+    }
+
+    // ===== 文字列の折り返し（自動改行） =====
+    function splitByChar(measureCtx, text, maxWidth) {
+      const lines = [];
+      let current = '';
+      for (const ch of text) {
+        const test = current + ch;
+        if (measureCtx.measureText(test).width > maxWidth && current) {
+          lines.push(current);
+          current = ch;
+        } else {
+          current = test;
+        }
+      }
+      if (current) lines.push(current);
+      return lines.length ? lines : [text];
+    }
+
+    function wrapLine(measureCtx, text, maxWidth) {
+      if (measureCtx.measureText(text).width <= maxWidth) return [text];
+      const words = text.split(' ');
+      if (words.length > 1) {
+        const lines = [];
+        let current = '';
+        for (const w of words) {
+          const test = current ? current + ' ' + w : w;
+          if (measureCtx.measureText(test).width > maxWidth && current) {
+            lines.push(current);
+            current = w;
+          } else {
+            current = test;
+          }
+        }
+        if (current) lines.push(current);
+        return lines.flatMap(l => measureCtx.measureText(l).width > maxWidth ? splitByChar(measureCtx, l, maxWidth) : [l]);
+      }
+      return splitByChar(measureCtx, text, maxWidth);
+    }
+
+    // ===== 折り返し・自動フィットを考慮したフォントサイズ計算 =====
+    function computeFitLayout(measureCtx, rawLines, maxWidth, maxHeight, lineSpacing, autoFit, fontFamily, bold) {
+      const weightStr = bold ? 'bold ' : '';
+      let fontSize = Math.min(maxHeight / Math.max(rawLines.length, 1) * 0.8, maxWidth * 0.3);
+      fontSize = Math.max(fontSize, 10);
+      let lines = rawLines.slice();
+
+      const buildLines = (fs) => {
+        measureCtx.font = `${weightStr}${fs}px ${fontFamily}`;
+        if (!autoFit) return rawLines.slice();
+        const out = [];
+        rawLines.forEach(rl => {
+          if (rl.trim() === '') { out.push(''); return; }
+          out.push(...wrapLine(measureCtx, rl, maxWidth));
+        });
+        return out;
+      };
+
+      for (let i = 0; i < 60; i++) {
+        lines = buildLines(fontSize);
+        const lineHeight = fontSize * lineSpacing;
+        const totalHeight = lineHeight * lines.length;
+        let maxLineWidth = 0;
+        lines.forEach(l => { maxLineWidth = Math.max(maxLineWidth, measureCtx.measureText(l).width); });
+        const widthOk = !autoFit || maxLineWidth <= maxWidth;
+        const heightOk = totalHeight <= maxHeight;
+        if (widthOk && heightOk) break;
+        fontSize *= 0.94;
+        if (fontSize < 8) { fontSize = 8; lines = buildLines(fontSize); break; }
+      }
+
+      return { fontSize, lines };
+    }
+
+    // ===== テキストからパーティクル座標を生成 =====
+    function initParticles() {
+      particles = [];
+      const rawLines = config.text.split('\n');
+      const hasContent = rawLines.some(l => l.trim().length > 0);
+      if (!hasContent) return;
+
+      const offscreen = document.createElement('canvas');
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext('2d');
+
+      const mobile = isMobileView();
+      const marginX = mobile ? 20 : 60;
+      const maxWidth = Math.max(width - marginX * 2, 40);
+      const maxHeight = Math.max(height * (mobile ? 0.58 : 0.7), 60);
+      const verticalShift = mobile ? height * 0.10 : 26;
+
+      const scale = Math.max(config.fontScale, 0.05);
+      const targetMaxWidth = maxWidth / scale;
+      const targetMaxHeight = maxHeight / scale;
+
+      let { fontSize, lines } = computeFitLayout(
+        offCtx, rawLines, targetMaxWidth, targetMaxHeight,
+        config.lineSpacing, config.autoFit, config.fontFamily, config.bold
+      );
+      fontSize *= scale;
+
+      offCtx.fillStyle = '#ffffff';
+      offCtx.font = `${config.bold ? 'bold ' : ''}${fontSize}px ${config.fontFamily}`;
+      offCtx.textAlign = 'center';
+      offCtx.textBaseline = 'middle';
+
+      const lineHeight = fontSize * config.lineSpacing;
+      const blockHeight = lineHeight * lines.length;
+      const startY = height / 2 - verticalShift - blockHeight / 2 + lineHeight / 2;
+
+      lines.forEach((line, i) => {
+        if (!line) return;
+        offCtx.fillText(line, width / 2, startY + i * lineHeight);
+      });
+
+      const pixelData = offCtx.getImageData(0, 0, width, height).data;
+      const step = config.density;
+
+      for (let y = 0; y < height; y += step) {
+        for (let x = 0; x < width; x += step) {
+          const idx = (y * width + x) * 4;
+          if (pixelData[idx + 3] > 128) {
+            const startX = Math.random() * width;
+            const startYp = Math.random() * height;
+            particles.push(new Particle(startX, startYp, x, y));
+          }
+        }
+      }
+    }
+
+    // ===== 背景カラー適用 =====
+    function shadeColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      let r = (num >> 16) + Math.round((255 * percent) / 100);
+      let g = ((num >> 8) & 0x00ff) + Math.round((255 * percent) / 100);
+      let b = (num & 0x0000ff) + Math.round((255 * percent) / 100);
+      r = Math.min(255, Math.max(0, r));
+      g = Math.min(255, Math.max(0, g));
+      b = Math.min(255, Math.max(0, b));
+      return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
+    }
+    function applyBgColor() {
+      const inner = shadeColor(config.bgColor, 35);
+      canvas.style.background = `radial-gradient(circle at center, ${inner} 0%, ${config.bgColor} 100%)`;
+    }
+
+    // ===== メインアニメーションループ =====
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalAlpha = config.opacity;
+      ctx.shadowBlur = config.glowEnabled ? config.glowStrength : 0;
+      ctx.shadowColor = config.color;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.ease = config.ease;
+        p.size = config.size;
+        p.color = config.color;
+        p.shape = config.shape;
+        p.repulsion = config.repulsion;
+        p.update();
+        p.draw();
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      requestAnimationFrame(animate);
+    }
+
+    // ===== 自動サイクル（拡散→再集結を繰り返す） =====
+    function startAutoCycle() {
+      stopAutoCycle();
+      autoCycleTimer = setInterval(() => {
+        particles.forEach(p => p.disperse());
+        setTimeout(() => { initParticles(); }, 900);
+      }, Math.max(config.autoCycleInterval, 1) * 1000);
+    }
+    function stopAutoCycle() {
+      if (autoCycleTimer) { clearInterval(autoCycleTimer); autoCycleTimer = null; }
+    }
+
+    // =======================================================
+    // PC／スマホ両パネルを同期させるための汎用バインド関数
+    // =======================================================
+    function wireRange(ids, valIds, format, onInput) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      const valEls = (valIds || []).map(id => document.getElementById(id)).filter(Boolean);
+      function apply(val) {
+        els.forEach(el => { el.value = val; });
+        valEls.forEach(v => { v.textContent = format ? format(val) : val; });
+      }
+      els.forEach(el => el.addEventListener('input', () => {
+        apply(el.value);
+        onInput(el.value);
+      }));
+      apply(els[0] ? els[0].value : '');
+      return { apply, els };
+    }
+
+    function wireCheckbox(ids, onInput) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      function apply(val) { els.forEach(el => { el.checked = val; }); }
+      els.forEach(el => el.addEventListener('input', () => {
+        apply(el.checked);
+        onInput(el.checked);
+      }));
+      return { apply, els };
+    }
+
+    function wireColor(ids, hexIds, onInput) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      const hexEls = (hexIds || []).map(id => document.getElementById(id)).filter(Boolean);
+      function apply(val) {
+        els.forEach(el => { el.value = val; });
+        hexEls.forEach(h => { h.textContent = val; });
+      }
+      els.forEach(el => el.addEventListener('input', () => {
+        apply(el.value);
+        onInput(el.value);
+      }));
+      return { apply, els };
+    }
+
+    function wireSelect(ids, onInput) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      function apply(val) { els.forEach(el => { el.value = val; }); }
+      els.forEach(el => el.addEventListener('input', () => {
+        apply(el.value);
+        onInput(el.value);
+      }));
+      return { apply, els };
+    }
+
+    function wireText(ids, onInput) {
+      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+      function apply(val) { els.forEach(el => { el.value = val; }); }
+      els.forEach(el => el.addEventListener('input', () => {
+        apply(el.value);
+        onInput(el.value);
+      }));
+      return { apply, els };
+    }
+
+    function wireButtons(ids, handler) {
+      ids.map(id => document.getElementById(id)).filter(Boolean).forEach(el => el.addEventListener('click', handler));
+    }
+
+    function wireShapeButtons() {
+      const allBtns = ['shapeCircle', 'shapeSquare', 'shapeTriangle', 'shapeCircleM', 'shapeSquareM', 'shapeTriangleM']
+        .map(id => document.getElementById(id)).filter(Boolean);
+      function setActive(shape) {
+        allBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.shape === shape));
+      }
+      allBtns.forEach(btn => btn.addEventListener('click', () => {
+        config.shape = btn.dataset.shape;
+        setActive(config.shape);
+      }));
+      return { apply: setActive };
+    }
+
+    // ===== 各パラメータのバインド =====
+    const textCtl = wireText(['textInput', 'textInputM'], (val) => { config.text = val; initParticles(); });
+    const fontFamilyCtl = wireSelect(['fontFamily', 'fontFamilyM'], (val) => { config.fontFamily = val; initParticles(); });
+    const autoFitCtl = wireCheckbox(['autoFit', 'autoFitM'], (val) => { config.autoFit = val; initParticles(); });
+    const boldCtl = wireCheckbox(['boldToggle', 'boldToggleM'], (val) => { config.bold = val; initParticles(); });
+    const fontScaleCtl = wireRange(['fontScale', 'fontScaleM'], ['fontScaleVal', 'fontScaleValM'], v => parseFloat(v).toFixed(2), (val) => { config.fontScale = parseFloat(val); initParticles(); });
+    const lineSpacingCtl = wireRange(['lineSpacing', 'lineSpacingM'], ['lineSpacingVal', 'lineSpacingValM'], v => parseFloat(v).toFixed(2), (val) => { config.lineSpacing = parseFloat(val); initParticles(); });
+
+    const sizeCtl = wireRange(['particleSize', 'particleSizeM'], ['sizeVal', 'sizeValM'], v => parseFloat(v).toFixed(1), (val) => { config.size = parseFloat(val); });
+    const densityCtl = wireRange(['density', 'densityM'], ['densityVal', 'densityValM'], v => v, (val) => { config.density = parseInt(val); initParticles(); });
+    const opacityCtl = wireRange(['opacity', 'opacityM'], ['opacityVal', 'opacityValM'], v => parseFloat(v).toFixed(2), (val) => { config.opacity = parseFloat(val); });
+    const shapeCtl = wireShapeButtons();
+
+    const easeCtl = wireRange(['ease', 'easeM'], ['easeVal', 'easeValM'], v => parseFloat(v).toFixed(2), (val) => { config.ease = parseFloat(val); });
+    const radiusCtl = wireRange(['mouseRadius', 'mouseRadiusM'], ['radiusVal', 'radiusValM'], v => v, (val) => { config.mouseRadius = parseFloat(val); mouse.radius = config.mouseRadius; });
+    const repulsionCtl = wireRange(['repulsion', 'repulsionM'], ['repulsionVal', 'repulsionValM'], v => v, (val) => { config.repulsion = parseFloat(val); });
+    const glowCtl = wireCheckbox(['glowEnabled', 'glowEnabledM'], (val) => { config.glowEnabled = val; });
+    const glowStrengthCtl = wireRange(['glowStrength', 'glowStrengthM'], ['glowStrengthVal', 'glowStrengthValM'], v => v, (val) => { config.glowStrength = parseFloat(val); });
+
+    const autoCycleCtl = wireCheckbox(['autoCycle', 'autoCycleM'], (val) => { config.autoCycle = val; if (val) startAutoCycle(); else stopAutoCycle(); });
+    const autoCycleIntervalCtl = wireRange(['autoCycleInterval', 'autoCycleIntervalM'], ['autoCycleIntervalVal', 'autoCycleIntervalValM'], v => v + 's', (val) => { config.autoCycleInterval = parseFloat(val); if (config.autoCycle) startAutoCycle(); });
+
+    const colorCtl = wireColor(['particleColor', 'particleColorM'], ['colorHex', 'colorHexM'], (val) => { config.color = val; });
+    const bgColorCtl = wireColor(['bgColor', 'bgColorM'], ['bgColorHex', 'bgColorHexM'], (val) => { config.bgColor = val; applyBgColor(); });
+
+    wireButtons(['btnAssemble', 'btnAssembleM'], () => initParticles());
+    wireButtons(['btnDisperse', 'btnDisperseM'], () => particles.forEach(p => p.disperse()));
+    wireButtons(['btnReset', 'btnResetM'], () => doReset());
+
+    function doReset() {
+      Object.assign(config, JSON.parse(JSON.stringify(DEFAULT_CONFIG)));
+      textCtl.apply(config.text);
+      fontFamilyCtl.apply(config.fontFamily);
+      autoFitCtl.apply(config.autoFit);
+      boldCtl.apply(config.bold);
+      fontScaleCtl.apply(config.fontScale);
+      lineSpacingCtl.apply(config.lineSpacing);
+      sizeCtl.apply(config.size);
+      densityCtl.apply(config.density);
+      opacityCtl.apply(config.opacity);
+      shapeCtl.apply(config.shape);
+      easeCtl.apply(config.ease);
+      radiusCtl.apply(config.mouseRadius);
+      repulsionCtl.apply(config.repulsion);
+      glowCtl.apply(config.glowEnabled);
+      glowStrengthCtl.apply(config.glowStrength);
+      autoCycleCtl.apply(config.autoCycle);
+      autoCycleIntervalCtl.apply(config.autoCycleInterval);
+      colorCtl.apply(config.color);
+      bgColorCtl.apply(config.bgColor);
+
+      mouse.radius = config.mouseRadius;
+      stopAutoCycle();
+      applyBgColor();
+      initParticles();
+    }
+
+    // ===== PC用パネルの折りたたみ =====
+    const desktopPanel = document.querySelector('.control-panel');
+    const btnToggleDesktopPanel = document.getElementById('btnToggleDesktopPanel');
+
+    btnToggleDesktopPanel.addEventListener('click', () => {
+      const collapsed = desktopPanel.classList.toggle('is-collapsed');
+      btnToggleDesktopPanel.textContent = collapsed ? '表示' : '非表示';
+    });
+
+    // ===== スマホ用パネルの折りたたみ =====
+    const mobilePanel = document.getElementById('mobileControlPanel');
+    const mobileToggleBtn = document.getElementById('mobileToggleBtn');
+
+    mobileToggleBtn.addEventListener('click', () => {
+      const collapsed = mobilePanel.classList.toggle('is-collapsed');
+      mobileToggleBtn.textContent = collapsed ? '表示' : '非表示';
+    });
+
+    mobilePanel.addEventListener('touchstart', (e) => e.stopPropagation());
+    mobilePanel.addEventListener('mousedown', (e) => e.stopPropagation());
+
+    // キャンバスを3回連続タップでパネルを再表示
+    let tapTimestamps = [];
+    canvas.addEventListener('click', () => {
+      if (!isMobileView() || !mobilePanel.classList.contains('is-collapsed')) return;
+      const now = Date.now();
+      tapTimestamps.push(now);
+      tapTimestamps = tapTimestamps.filter(t => now - t <= 600);
+      if (tapTimestamps.length >= 3) {
+        mobilePanel.classList.remove('is-collapsed');
+        mobileToggleBtn.textContent = '非表示';
+        tapTimestamps = [];
+      }
+    });
+
+    // ===== リサイズ対応 =====
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initParticles();
+    });
+
+    // ===== 初期化実行 =====
+    applyBgColor();
+    initParticles();
+    animate();
+  </script>
+</body>
+</html>

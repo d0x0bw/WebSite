@@ -415,17 +415,17 @@
 
 <header class="topbar">
   <span class="topbar-brand">Particle Magic Studio<span class="dim">.</span>GALLERY</span>
-  <span class="topbar-count">08 EFFECTS</span>
+  <span class="topbar-count">09 EFFECTS</span>
 </header>
 
 <section class="hero">
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
   <div class="hero-content">
     <p class="hero-kicker">CANVAS EFFECTS COLLECTION</p>
-    <h1 class="hero-title">光と粒子の、<br>8つの小さな夜</h1>
+    <h1 class="hero-title">光と粒子の、<br>9つの小さな夜</h1>
     <p class="hero-sub">
       蛍、桜、花火、星空 —— それぞれ独立した1枚のHTMLファイルとして動く、
-      8種類のCanvasエフェクトを集めた展示室です。
+      9種類のCanvasエフェクトを集めた展示室です。
     </p>
     <div class="hero-actions">
       <button type="button" id="random-btn" class="hero-random">🎲 ランダムに1つ開く</button>
@@ -578,20 +578,20 @@
       </div>
     </a>
 
- <a class="card">
-    <!-- No.09 : 作成中 -->
+    <!-- No.09 : Particle Text Assembler -->
+    <a class="card" style="--accent-rgb:102,252,241" href="ParticleTextAssembler.html" target="_blank" rel="noopener">
       <div class="card-plate">
         <span class="card-no">No.09</span>
-        <span class="card-tag">？？？</span>
+        <span class="card-tag">タイポグラフィ・インタラクティブ</span>
       </div>
-      <div class="card-preview" data-preview="" aria-hidden="true"><canvas></canvas></div>
+      <div class="card-preview" data-preview="assembler" aria-hidden="true"><canvas></canvas></div>
       <div class="card-body">
-        <h3 class="card-title">準備中</h3>
-        <p class="card-blurb">？？？</p>
+        <h3 class="card-title">Particle Text Assembler</h3>
+        <p class="card-blurb">入力した文字列が粒子となって組み上がり、カーソルで触れると弾け散る</p>
         <ul class="card-params">
-          <li>？？？</li>
+          <li>自動改行/自動フィット</li><li>形状・グロー効果</li><li>PC/スマホ専用パネル</li>
         </ul>
-        <span class="card-link">作成中 <span class="arrow" aria-hidden="true">🔄</span></span>
+        <span class="card-link">作品を開く <span class="arrow" aria-hidden="true">→</span></span>
       </div>
     </a>
 
@@ -599,7 +599,7 @@
 </main>
 
 <footer class="site-footer">
-  <p>8 EFFECTS · SINGLE-FILE HTML / CSS / JS</p>
+  <p>9 EFFECTS · SINGLE-FILE HTML / CSS / JS</p>
   <p>&copy; Particle Magic Studio・<a href="../index.html">d0x0bw</a>. All Rights Reserved.</p>
 </footer>
 
@@ -1040,9 +1040,70 @@
     };
   }
 
+  // --- No.09: パーティクルテキストアセンブラー ---
+  function makeAssembler() {
+    var points = [], kickTimer = 0;
+    function sampleText(w, h, text) {
+      var iw = Math.max(1, Math.round(w));
+      var ih = Math.max(1, Math.round(h));
+      var off = document.createElement('canvas');
+      off.width = iw; off.height = ih;
+      var octx = off.getContext('2d');
+      octx.fillStyle = '#fff';
+      octx.font = 'bold ' + Math.floor(ih * 0.4) + 'px sans-serif';
+      octx.textAlign = 'center'; octx.textBaseline = 'middle';
+      octx.fillText(text, iw / 2, ih / 2 + 2);
+      var data = octx.getImageData(0, 0, iw, ih).data;
+      var pts = [], step = 4;
+      for (var y = 0; y < ih; y += step) {
+        for (var x = 0; x < iw; x += step) {
+          if (data[(y * iw + x) * 4 + 3] > 128) pts.push({ x: x, y: y });
+        }
+      }
+      return pts;
+    }
+    return {
+      init: function (w, h) {
+        var targets = sampleText(w, h, 'TEXT');
+        points = targets.map(function (p) {
+          return { x: p.x, y: p.y, vx: 0, vy: 0, originX: p.x, originY: p.y };
+        });
+        kickTimer = 1.2;
+      },
+      tick: function (ctx, w, h, t, dt, accentRgb) {
+        // 一定間隔でランダムな向きに弾き、その後バネで元の文字の形へボヨンと戻す
+        kickTimer -= dt;
+        if (kickTimer <= 0) {
+          for (var i = 0; i < points.length; i++) {
+            var ang = Math.random() * Math.PI * 2;
+            var spd = 5 + Math.random() * 8;
+            points[i].vx += Math.cos(ang) * spd;
+            points[i].vy += Math.sin(ang) * spd;
+          }
+          kickTimer = 1.8 + Math.random() * 0.8;
+        }
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(' + accentRgb + ',0.85)';
+        for (var j = 0; j < points.length; j++) {
+          var p = points[j];
+          var dx = p.originX - p.x;
+          var dy = p.originY - p.y;
+          p.vx += dx * 0.12;
+          p.vy += dy * 0.12;
+          p.vx *= 0.84;
+          p.vy *= 0.84;
+          p.x += p.vx * dt * 60;
+          p.y += p.vy * dt * 60;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 1.3, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    };
+  }
+
   var FACTORIES = {
     stars: makeStars, firefly: makeFirefly, sakura: makeSakura, fireworks: makeFireworks,
-    matrix: makeMatrix, tunnel: makeTunnel, magic: makeMagic, morph: makeMorph
+    matrix: makeMatrix, tunnel: makeTunnel, magic: makeMagic, morph: makeMorph, assembler: makeAssembler
   };
 
   function initCardPreviews() {
