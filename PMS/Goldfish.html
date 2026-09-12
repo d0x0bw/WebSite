@@ -1,0 +1,1548 @@
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">水面を泳ぐ金魚と浮かぶ蓮の花のインタラクティブなアニメーション。10種類の金魚と水面の色を選べて、水面をクリックまたはタップ、カーソルを動かすと波紋が広がります。フルスクリーン表示にも対応しています。</h2>
+
+<style id="pondStyles">
+  #pondApp { position:relative; width:100%; box-sizing:border-box; }
+  #pondApp *, #pondApp *::before, #pondApp *::after { box-sizing:border-box; }
+
+  #pondHeaderBar {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px; flex-wrap:wrap; margin:0 0 12px;
+  }
+  #pondControlsLeft { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  #presetSwatches { display:flex; gap:6px; flex-wrap:wrap; }
+  #pondHeaderButtons { display:flex; gap:8px; flex-wrap:wrap; }
+
+  #canvasWrap { position:relative; width:100%; }
+
+  #pondCanvas {
+    width:100%;
+    aspect-ratio:4 / 3;
+    max-height:640px;
+    min-height:260px;
+    display:block;
+    border-radius:12px;
+    cursor:pointer;
+    touch-action:none;
+  }
+
+  #flowerControlPanel {
+    position:absolute; top:10px; right:10px;
+    width:300px; max-height:480px; overflow-y:auto;
+    background:rgba(12,24,18,0.92); backdrop-filter:blur(8px);
+    padding:14px; border-radius:10px; color:#e0f2f1;
+    border:1px solid rgba(255,255,255,0.2);
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+    font-family:sans-serif; z-index:10;
+  }
+
+  #pondApp.is-fullscreen,
+  #pondApp:fullscreen {
+    display:flex; flex-direction:column;
+    width:100vw; height:100vh; max-width:none;
+    padding:12px; background:#0b0f14; border-radius:0; z-index:9999;
+  }
+  #pondApp.is-fullscreen { position:fixed; top:0; left:0; }
+  #pondApp.is-fullscreen #pondHeaderBar label,
+  #pondApp:fullscreen #pondHeaderBar label { color:#e0f2f1; }
+  #pondApp.is-fullscreen #canvasWrap,
+  #pondApp:fullscreen #canvasWrap { flex:1 1 auto; min-height:0; }
+  #pondApp.is-fullscreen #pondCanvas,
+  #pondApp:fullscreen #pondCanvas {
+    width:100%; height:100%;
+    aspect-ratio:auto; max-height:none; min-height:0;
+  }
+
+  @media (max-width:520px){
+    #flowerControlPanel { left:10px; right:10px; width:auto; max-height:55vh; }    
+    #pondHeaderBar button { padding:5px 9px; font-size:12px; }
+    #pondCanvas {
+    aspect-ratio: 3 / 4; 
+    min-height: 400px;
+    max-height: 80vh;
+  }
+}
+</style>
+
+<div id="pondApp">
+  <!-- 水面カラー選択 ＆ コントロールパネル開閉ヘッダー -->
+  <div id="pondHeaderBar">
+    <div id="pondControlsLeft">
+      <label for="waterColor" style="font-size:14px;color:var(--text-secondary);">水面の色</label>
+      <input type="color" id="waterColor" value="#8fc4cf" style="width:34px;height:30px;padding:0;border:none;cursor:pointer;" />
+      <div id="presetSwatches">
+        <button id="presetBlue" type="button" style="display:flex;align-items:center;gap:6px;padding:4px 10px;"><span style="width:11px;height:11px;border-radius:50%;background:#cfe6ea;display:inline-block;border:0.5px solid var(--border);"></span>青</button>
+        <button id="presetGreen" type="button" style="display:flex;align-items:center;gap:6px;padding:4px 10px;"><span style="width:11px;height:11px;border-radius:50%;background:#d7e8c9;display:inline-block;border:0.5px solid var(--border);"></span>緑</button>
+        <button id="presetDusk" type="button" style="display:flex;align-items:center;gap:6px;padding:4px 10px;"><span style="width:11px;height:11px;border-radius:50%;background:#f6c9a0;display:inline-block;border:0.5px solid var(--border);"></span>夕焼け</button>
+        <button id="presetNight" type="button" style="display:flex;align-items:center;gap:6px;padding:4px 10px;"><span style="width:11px;height:11px;border-radius:50%;background:#1f2d3d;display:inline-block;border:0.5px solid var(--border);"></span>夜</button>
+      </div>
+    </div>
+    <div id="pondHeaderButtons">
+      <button id="fullscreenBtn" type="button" style="padding:5px 12px;font-size:13px;cursor:pointer;background:#2a4d38;color:#fff;border:none;border-radius:6px;">⛶ フルスクリーン</button>
+      <button id="togglePanelBtn" type="button" style="padding:5px 12px;font-size:13px;cursor:pointer;background:#2a4d38;color:#fff;border:none;border-radius:6px;">⚙️ パラメータ調整</button>
+    </div>
+  </div>
+
+<div id="canvasWrap">
+  <canvas id="pondCanvas"></canvas>
+
+  <!-- コントロールパネル -->
+  <div id="flowerControlPanel" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:6px;">
+      <span style="font-weight:bold;font-size:14px;color:#80cbc4;">🌸⚙️ 設定パネル</span>
+      <button id="resetPresetBtn" type="button" style="font-size:11px;padding:2px 6px;cursor:pointer;background:#00796b;color:#fff;border:none;border-radius:4px;">初期値にリセット</button>
+    </div>
+
+    <!-- カエル・金魚 -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">🐸 生き物の設定</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>カエルの帰宅時間(秒)</label><input type="range" id="frogReturnTime" min="2" max="20" value="6" step="1" style="width:110px;"><span id="frogReturnTimeVal" style="width:28px;text-align:right;color:#80cbc4;">6</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>金魚の数</label><input type="range" id="koiCount" min="0" max="15" value="3" step="1" style="width:110px;"><span id="koiCountVal" style="width:28px;text-align:right;color:#80cbc4;">3</span>
+      </div>
+    </div>
+
+    <!-- 金魚の種類選択 -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-weight:bold;font-size:12px;color:#b2dfdb;">🎨 金魚の種類</div>
+        <button id="koiSelectAllBtn" type="button" style="font-size:10px;padding:2px 6px;cursor:pointer;background:#00796b;color:#fff;border:none;border-radius:4px;">全て選択</button>
+      </div>
+      <div id="koiTypeList" style="display:flex;flex-direction:column;gap:5px;font-size:11px;"></div>
+    </div>
+
+    <!-- 花全体の大きさ -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">🌸 花全体の大きさ</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>大きさ倍率</label><input type="range" id="flowerSizeScale" min="0.5" max="2" value="1" step="0.05" style="width:110px;"><span id="flowerSizeScaleVal" style="width:28px;text-align:right;color:#80cbc4;">1</span>
+      </div>
+    </div>
+
+    <!-- 風の揺れ具合 -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">🍃 風の設定</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>揺れ幅</label>
+        <input type="range" id="windSway" min="0" max="5" value="1" step="0.1" style="width:110px;">
+        <span id="windSwayVal" style="width:28px;text-align:right;color:#80cbc4;">1</span>
+      </div>
+    </div>
+
+    <!-- 外側の花びら -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">外側の花びら</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>長さ</label><input type="range" id="outerLength" min="80" max="160" value="127" style="width:110px;"><span id="outerLengthVal" style="width:28px;text-align:right;color:#80cbc4;">127</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>太さ</label><input type="range" id="outerWidth" min="10" max="50" value="33" style="width:110px;"><span id="outerWidthVal" style="width:28px;text-align:right;color:#80cbc4;">33</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>根元の色</label><input type="color" id="outerColorBase" value="#ffffff" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>中間の色</label><input type="color" id="outerColorMid" value="#f42bb1" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>先端の色</label><input type="color" id="outerColorTip" value="#a82490" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+    </div>
+
+    <!-- 真ん中の花びら -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">真ん中の花びら</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>長さ</label><input type="range" id="midLength" min="70" max="150" value="133" style="width:110px;"><span id="midLengthVal" style="width:28px;text-align:right;color:#80cbc4;">133</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>太さ</label><input type="range" id="midWidth" min="10" max="50" value="32" style="width:110px;"><span id="midWidthVal" style="width:28px;text-align:right;color:#80cbc4;">32</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>根元の色</label><input type="color" id="midColorBase" value="#ffffff" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>先端の色</label><input type="color" id="midColorTip" value="#da1b9d" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+    </div>
+
+    <!-- 内側の花びら -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">内側の花びら</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>長さ</label><input type="range" id="innerLength" min="40" max="120" value="80" style="width:110px;"><span id="innerLengthVal" style="width:28px;text-align:right;color:#80cbc4;">80</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>太さ</label><input type="range" id="innerWidth" min="10" max="40" value="26" style="width:110px;"><span id="innerWidthVal" style="width:28px;text-align:right;color:#80cbc4;">26</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>根元の色</label><input type="color" id="innerColorBase" value="#ffffff" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>先端の色</label><input type="color" id="innerColorTip" value="#e9346b" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+    </div>
+
+    <!-- 花芯 -->
+    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">🟡 花芯</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>大きさ</label><input type="range" id="coreSize" min="5" max="30" value="13" style="width:110px;"><span id="coreSizeVal" style="width:28px;text-align:right;color:#80cbc4;">13</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;">
+        <label>花芯の色</label><input type="color" id="coreColor" value="#f57f17" style="border:none;width:30px;height:20px;cursor:pointer;background:transparent;">
+      </div>
+    </div>
+    
+    <!-- 背景画像 -->
+    <div style="margin-bottom:4px;">
+      <div style="font-weight:bold;font-size:12px;color:#b2dfdb;margin-bottom:6px;">🖼️ 背景画像の設定</div>
+      <input type="file" id="bgImageInput" accept="image/*" style="font-size:11px; width:100%;">
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('pondCanvas');
+  const ctx = canvas.getContext('2d');
+  let W=0,H=0;
+  const DPR = Math.min(window.devicePixelRatio||1,2);
+  const bgCanvas = document.createElement('canvas');
+  const bgCtx = bgCanvas.getContext('2d');
+
+  function rand(a,b){return a+Math.random()*(b-a);}
+
+  let bgColorTop = '#cfe6ea', bgColorBottom = '#dff0f2';
+
+  function mixWithWhite(hex,amt){
+    const r = parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    const nr = Math.round(r+(255-r)*amt);
+    const ng = Math.round(g+(255-g)*amt);
+    const nb = Math.round(b+(255-b)*amt);
+    return 'rgb('+nr+','+ng+','+nb+')';
+  }
+
+  let bgImage = null; // 背景画像を保持する変数
+
+  function drawBackground(){
+    bgCtx.clearRect(0,0,W,H);
+
+    if(bgImage){
+      // 画像が存在する場合はキャンバスサイズに合わせて描画
+      bgCtx.drawImage(bgImage, 0, 0, W, H);
+      
+      // 画像の上に水面の色を半透明で重ねて水没感を出す
+      const grad = bgCtx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0, bgColorTop);
+      grad.addColorStop(1, bgColorBottom);
+      bgCtx.fillStyle = grad;
+      bgCtx.globalAlpha = 0.35; // 0.0〜1.0で水面色の濃さを調整
+      bgCtx.fillRect(0,0,W,H);
+      bgCtx.globalAlpha = 1.0;
+    } else {
+      // 画像がない場合は従来通りのグラデーションのみ
+      const grad = bgCtx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0, bgColorTop);
+      grad.addColorStop(1, bgColorBottom);
+      bgCtx.fillStyle = grad;
+      bgCtx.fillRect(0,0,W,H);
+    }
+  }
+
+  function setBg(top,bottom){
+    bgColorTop = top;
+    bgColorBottom = bottom;
+    drawBackground();
+  }
+
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    W = Math.max(rect.width,320);
+    H = rect.height;
+    canvas.width = W*DPR;
+    canvas.height = H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    bgCanvas.width = W*DPR;
+    bgCanvas.height = H*DPR;
+    bgCtx.setTransform(DPR,0,0,DPR,0,0);
+    drawBackground();
+  }
+  window.addEventListener('resize',resize);
+  resize();
+
+  // 水面カラーパレット
+  const waterColorInput = document.getElementById('waterColor');
+  waterColorInput.addEventListener('input',e=>{
+    const v = e.target.value;
+    setBg(mixWithWhite(v,0.15),mixWithWhite(v,0.4));
+  });
+  document.getElementById('presetBlue').addEventListener('click',()=>{
+    waterColorInput.value = '#8fc4cf';
+    setBg('#cfe6ea','#dff0f2');
+  });
+  document.getElementById('presetGreen').addEventListener('click',()=>{
+    waterColorInput.value = '#9dc98a';
+    setBg('#d7e8c9','#eef5df');
+  });
+  document.getElementById('presetDusk').addEventListener('click',()=>{
+    waterColorInput.value = '#e8935a';
+    setBg('#f6c9a0','#fbe6c8');
+  });
+  document.getElementById('presetNight').addEventListener('click',()=>{
+    waterColorInput.value = '#243447';
+    setBg('#1f2d3d','#33465c');
+  });
+
+  // コントロールパネルの開閉処理
+  const togglePanelBtn = document.getElementById('togglePanelBtn');
+  const panel = document.getElementById('flowerControlPanel');
+  togglePanelBtn.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // フルスクリーン表示の切り替え
+  const pondApp = document.getElementById('pondApp');
+  const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+  function isFullscreenActive(){
+    return document.fullscreenElement === pondApp
+      || document.webkitFullscreenElement === pondApp
+      || pondApp.classList.contains('is-fullscreen');
+  }
+
+  function afterFullscreenChange(){
+    fullscreenBtn.textContent = isFullscreenActive() ? '⤢ 元に戻す' : '⛶ フルスクリーン';
+    // レイアウト変化後にキャンバスサイズを再計算
+    requestAnimationFrame(resize);
+    setTimeout(resize, 150);
+  }
+
+  function enterFullscreen(){
+    if(pondApp.requestFullscreen){
+      pondApp.requestFullscreen().catch(()=>{
+        pondApp.classList.add('is-fullscreen');
+        document.body.style.overflow = 'hidden';
+        afterFullscreenChange();
+      });
+    } else if(pondApp.webkitRequestFullscreen){
+      pondApp.webkitRequestFullscreen();
+    } else {
+      // Fullscreen API 非対応環境向けの疑似フルスクリーン(古いiOS Safari等)
+      pondApp.classList.add('is-fullscreen');
+      document.body.style.overflow = 'hidden';
+      afterFullscreenChange();
+    }
+  }
+
+  function exitFullscreen(){
+    if(document.fullscreenElement){
+      document.exitFullscreen();
+    } else if(document.webkitFullscreenElement){
+      document.webkitExitFullscreen();
+    } else {
+      pondApp.classList.remove('is-fullscreen');
+      document.body.style.overflow = '';
+      afterFullscreenChange();
+    }
+  }
+
+  fullscreenBtn.addEventListener('click', () => {
+    if(isFullscreenActive()) exitFullscreen();
+    else enterFullscreen();
+  });
+
+  document.addEventListener('fullscreenchange', afterFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', afterFullscreenChange);
+
+  // 生き物パラメータ更新変数
+  let currentFrogReturnTime = 6.0;
+
+  document.getElementById('frogReturnTime').addEventListener('input', e => {
+    currentFrogReturnTime = parseFloat(e.target.value);
+  });
+
+  // 花全体の大きさ倍率(蓮の花のみに掛かる。葉っぱの大きさには影響しない)
+  let flowerSizeScale = 1;
+  document.getElementById('flowerSizeScale').addEventListener('input', e => {
+    flowerSizeScale = parseFloat(e.target.value);
+  });
+
+  // 風の揺れ具合（デフォルト1倍）
+  let windSway = 1;
+  document.getElementById('windSway').addEventListener('input', e => {
+    windSway = parseFloat(e.target.value);
+  });
+
+  document.getElementById('koiCount').addEventListener('input', e => {
+    const targetCount = parseInt(e.target.value, 10);
+    while (koi.length < targetCount) {
+      koi.push(makeKoi(koi.length));
+    }
+    while (koi.length > targetCount) {
+      koi.pop();
+    }
+  });
+
+  // 花のパラメータ読み取り関数
+  function getFlowerParams() {
+    return {
+      outerLength: parseFloat(document.getElementById('outerLength').value),
+      outerWidth: parseFloat(document.getElementById('outerWidth').value),
+      outerColorBase: document.getElementById('outerColorBase').value,
+      outerColorMid: document.getElementById('outerColorMid').value,
+      outerColorTip: document.getElementById('outerColorTip').value,
+
+      midLength: parseFloat(document.getElementById('midLength').value),
+      midWidth: parseFloat(document.getElementById('midWidth').value),
+      midColorBase: document.getElementById('midColorBase').value,
+      midColorTip: document.getElementById('midColorTip').value,
+
+      innerLength: parseFloat(document.getElementById('innerLength').value),
+      innerWidth: parseFloat(document.getElementById('innerWidth').value),
+      innerColorBase: document.getElementById('innerColorBase').value,
+      innerColorTip: document.getElementById('innerColorTip').value,
+
+      coreSize: parseFloat(document.getElementById('coreSize').value),
+      coreColor: document.getElementById('coreColor').value
+    };
+  }
+
+  // スライダー表示値一括更新
+  document.querySelectorAll('#flowerControlPanel input[type="range"]').forEach(input => {
+    input.addEventListener('input', e => {
+      const display = document.getElementById(e.target.id + 'Val');
+      if(display) display.textContent = e.target.value;
+    });
+  });
+
+  // 設定パネルの初期値リセットボタン(パネル内の全項目が対象)
+  document.getElementById('resetPresetBtn').addEventListener('click', () => {
+    const preset = {
+      outerLength: 127, outerWidth: 33, outerColorBase: '#ffffff', outerColorMid: '#f42bb1', outerColorTip: '#a82490',
+      midLength: 133, midWidth: 32, midColorBase: '#ffffff', midColorTip: '#da1b9d',
+      innerLength: 80, innerWidth: 26, innerColorBase: '#ffffff', innerColorTip: '#e9346b',
+      coreSize: 13, coreColor: '#f57f17'
+    };
+    Object.keys(preset).forEach(key => {
+      const el = document.getElementById(key);
+      if(el) {
+        el.value = preset[key];
+        const display = document.getElementById(key + 'Val');
+        if(display) display.textContent = preset[key];
+      }
+    });
+
+    // 生き物の設定(カエルの帰宅時間・金魚の数)を初期値に戻す
+    const frogReturnTimeEl = document.getElementById('frogReturnTime');
+    frogReturnTimeEl.value = 6;
+    document.getElementById('frogReturnTimeVal').textContent = '6';
+    currentFrogReturnTime = 6.0;
+
+    const koiCountEl = document.getElementById('koiCount');
+    koiCountEl.value = 3;
+    document.getElementById('koiCountVal').textContent = '3';
+    while (koi.length < 3) koi.push(makeKoi(koi.length));
+    while (koi.length > 3) koi.pop();
+
+    // 花全体の大きさ倍率を初期値に戻す
+    const flowerSizeScaleEl = document.getElementById('flowerSizeScale');
+    flowerSizeScaleEl.value = 1;
+    document.getElementById('flowerSizeScaleVal').textContent = '1';
+    flowerSizeScale = 1;
+
+    // 風の揺れ具合を初期値に戻す
+    const windSwayEl = document.getElementById('windSway');
+    windSwayEl.value = 1;
+    document.getElementById('windSwayVal').textContent = '1';
+    windSway = 1;
+
+    // 金魚の種類を全て選択状態に戻す
+    palettes.forEach((p, idx) => {
+      const cb = document.getElementById('koiType_' + idx);
+      if(cb) cb.checked = true;
+    });
+    applyPaletteSelectionChange();
+
+    // 背景画像をクリアして元のグラデーションに戻す
+    bgImage = null;
+    const bgImageInputEl = document.getElementById('bgImageInput');
+    if(bgImageInputEl) bgImageInputEl.value = '';
+    drawBackground();
+  });
+
+  function smoothClosedPath(ctx,pts){
+    const n = pts.length;
+    const start = {x:(pts[0].x+pts[n-1].x)/2,y:(pts[0].y+pts[n-1].y)/2};
+    ctx.moveTo(start.x,start.y);
+    for(let i=0;i<n;i++){
+      const p1 = pts[i];
+      const p2 = pts[(i+1)%n];
+      const mx = (p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+      ctx.quadraticCurveTo(p1.x,p1.y,mx,my);
+    }
+    ctx.closePath();
+  }
+
+  function bodyProfile(len){
+    const pr = [
+      {x:0.48,r:0.05}, {x:0.40,r:0.20}, {x:0.25,r:0.32}, {x:0.05,r:0.365},
+      {x:-0.15,r:0.32}, {x:-0.30,r:0.21}, {x:-0.40,r:0.11}, {x:-0.46,r:0.04}
+    ];
+    const top = pr.map(p=>({x:p.x*len,y:-p.r*len}));
+    const bottom = pr.slice().reverse().map(p=>({x:p.x*len,y:p.r*len}));
+    return top.concat(bottom);
+  }
+
+  // 金魚の色バリエーション(10種)。base=体色、patches=模様の楕円、fin=ひれの色
+  const palettes = [
+    // 1. 更紗(白地に紅斑)
+    {name:'更紗', base:'#f8ece0', patches:[{c:'#e8622f',ox:-0.05,oy:-0.02,rx:0.40,ry:0.32},{c:'#e8622f',ox:0.28,oy:0.12,rx:0.20,ry:0.18}], fin:'#e8622f'},
+    // 2. 緋(全身朱赤)
+    {name:'緋(和金)', base:'#e2582a', patches:[{c:'#c94a20',ox:0.08,oy:-0.16,rx:0.28,ry:0.20},{c:'#c94a20',ox:-0.18,oy:0.16,rx:0.26,ry:0.18}], fin:'#e2582a'},
+    // 3. 三色(江戸錦・白×黒×浅葱)
+    {name:'三色(江戸錦)', base:'#eef0ea', patches:[{c:'#e8622f',ox:-0.12,oy:-0.14,rx:0.24,ry:0.19},{c:'#2c2c2e',ox:0.16,oy:0.14,rx:0.15,ry:0.13},{c:'#5b7d99',ox:0.05,oy:0.20,rx:0.17,ry:0.12}], fin:'#c9d3d6'},
+    // 4. 黒(黒出目金風)
+    {name:'黒', base:'#2b2b2e', patches:[{c:'#3f3f45',ox:0.12,oy:-0.12,rx:0.22,ry:0.16},{c:'#1a1a1c',ox:-0.16,oy:0.12,rx:0.20,ry:0.15}], fin:'#1c1c1e'},
+    // 5. 茶金(ブロンズ)
+    {name:'茶金', base:'#8a5a34', patches:[{c:'#6b4321',ox:-0.10,oy:-0.12,rx:0.24,ry:0.18},{c:'#a97b4f',ox:0.18,oy:0.10,rx:0.20,ry:0.15}], fin:'#6b4321'},
+    // 6. 白(白文魚)
+    {name:'白', base:'#fbfaf6', patches:[{c:'#eee9df',ox:0.06,oy:0.16,rx:0.22,ry:0.14}], fin:'#e7e2d5'},
+    // 7. 丹頂(白地に頭部だけ赤い富士額)
+    {name:'丹頂', base:'#fbfaf6', patches:[{c:'#e0332f',ox:0.34,oy:0.00,rx:0.14,ry:0.14}], fin:'#e6e1d4'},
+    // 8. 黄金(金色)
+    {name:'黄金', base:'#f4c430', patches:[{c:'#d9a520',ox:-0.10,oy:0.12,rx:0.22,ry:0.16},{c:'#fce97a',ox:0.16,oy:-0.10,rx:0.18,ry:0.14}], fin:'#d9a520'},
+    // 9. 浅葱(青みがかった灰色に朱のさし色)
+    {name:'浅葱', base:'#9fb8c4', patches:[{c:'#7d97a3',ox:-0.06,oy:-0.15,rx:0.28,ry:0.18},{c:'#e8622f',ox:0.20,oy:0.20,rx:0.14,ry:0.10}], fin:'#7d97a3'},
+    // 10. 桜錦風(白地に紅と黒の斑が細かく散る)
+    {name:'桜錦', base:'#f3ede2', patches:[{c:'#e8622f',ox:-0.16,oy:-0.10,rx:0.22,ry:0.17},{c:'#1c1c1e',ox:0.18,oy:0.15,rx:0.15,ry:0.12},{c:'#e8622f',ox:0.22,oy:-0.15,rx:0.13,ry:0.10}], fin:'#e8622f'}
+  ];
+
+  // 金魚の種類チェックボックスをパネルに生成
+  const koiTypeList = document.getElementById('koiTypeList');
+  palettes.forEach((p, idx) => {
+    const row = document.createElement('label');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '6px';
+    row.style.cursor = 'pointer';
+    row.innerHTML =
+      '<input type="checkbox" id="koiType_' + idx + '" checked style="margin:0;cursor:pointer;">' +
+      '<span style="width:11px;height:11px;border-radius:50%;background:' + p.base + ';border:0.5px solid rgba(255,255,255,0.4);display:inline-block;flex-shrink:0;"></span>' +
+      '<span>' + p.name + '</span>';
+    koiTypeList.appendChild(row);
+  });
+
+  // 現在チェックされている種類だけを対象にする
+  function getEnabledPalettes(){
+    const enabled = palettes.filter((p, idx) => {
+      const cb = document.getElementById('koiType_' + idx);
+      return cb ? cb.checked : true;
+    });
+    return enabled.length ? enabled : palettes;
+  }
+
+  // 種類が偏らないよう、有効な種類だけをシャッフルした「袋」から順に引く
+  function shuffledPaletteBag(){
+    const arr = getEnabledPalettes().slice();
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+  let paletteBag = shuffledPaletteBag();
+  function nextPalette(){
+    if(paletteBag.length === 0) paletteBag = shuffledPaletteBag();
+    return paletteBag.pop();
+  }
+
+  function makeKoi(i){
+    return {
+      xf: rand(0.15,0.85), yf: rand(0.15,0.85),
+      heading: rand(0,Math.PI*2),
+      speed: rand(0.045,0.075),
+      len: rand(46,62),
+      tailPhase: rand(0,10),
+      targetX: rand(0.1,0.9), targetY: rand(0.1,0.9),
+      palette: nextPalette(),
+      startle: 0,
+      px:0, py:0
+    };
+  }
+  const koi = [makeKoi(0),makeKoi(1),makeKoi(2)];
+
+  // チェックボックスの状態が変わったら、既にいる金魚の色も即座に反映する
+  function applyPaletteSelectionChange(){
+    paletteBag = shuffledPaletteBag();
+    koi.forEach(k => { k.palette = nextPalette(); });
+  }
+
+  koiTypeList.addEventListener('change', e => {
+    if(e.target.type !== 'checkbox') return;
+    const anyChecked = palettes.some((p, idx) => document.getElementById('koiType_' + idx).checked);
+    if(!anyChecked){
+      // 最低1種類は選択された状態を保つ
+      e.target.checked = true;
+      return;
+    }
+    applyPaletteSelectionChange();
+  });
+
+  document.getElementById('koiSelectAllBtn').addEventListener('click', () => {
+    palettes.forEach((p, idx) => {
+      document.getElementById('koiType_' + idx).checked = true;
+    });
+    applyPaletteSelectionChange();
+  });
+
+  function pickTarget(k){
+    k.targetX = rand(0.08,0.92);
+    k.targetY = rand(0.08,0.92);
+  }
+
+  function drawKoiBody(ctx,k,len){
+    ctx.save();
+    ctx.beginPath();
+    smoothClosedPath(ctx,bodyProfile(len));
+    ctx.fillStyle = k.palette.base;
+    ctx.fill();
+    ctx.save();
+    ctx.clip();
+    k.palette.patches.forEach(p=>{
+      ctx.beginPath();
+      ctx.ellipse(p.ox*len,p.oy*len,p.rx*len,p.ry*len,0,0,Math.PI*2);
+      ctx.fillStyle = p.c;
+      ctx.fill();
+    });
+    ctx.restore();
+    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = 'rgba(60,50,40,0.3)';
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawDorsal(ctx,k,len){
+    const pts = [
+      {x:-len*0.02,y:-len*0.01}, {x:-len*0.10,y:-len*0.10}, {x:-len*0.20,y:-len*0.13},
+      {x:-len*0.30,y:-len*0.09}, {x:-len*0.32,y:0}, {x:-len*0.30,y:len*0.09},
+      {x:-len*0.20,y:len*0.13}, {x:-len*0.10,y:len*0.10}, {x:-len*0.02,y:len*0.01}
+    ];
+    ctx.beginPath();
+    smoothClosedPath(ctx,pts);
+    ctx.fillStyle = k.palette.fin;
+    ctx.globalAlpha = 0.4;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  function drawKoiDetails(ctx,k,len){
+    ctx.fillStyle = '#161616';
+    ctx.beginPath();
+    ctx.arc(len*0.36,-len*0.14,len*0.028,0,Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(len*0.36,len*0.14,len*0.028,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(len*0.365,-len*0.146,len*0.008,0,Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(len*0.365,len*0.134,len*0.008,0,Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(80,60,40,0.35)';
+    ctx.lineWidth = 0.7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(len*0.46,0,len*0.03,Math.PI*0.25,Math.PI*0.75);
+    ctx.stroke();
+  }
+
+  function drawTail(ctx,k,len){
+    const wag = Math.sin(k.tailPhase)*0.45;
+    ctx.save();
+    ctx.translate(-len*0.44,0);
+    ctx.rotate(wag);
+    [1,-1].forEach(side=>{
+      const flutter = Math.sin(k.tailPhase*1.6+(side>0?0:1))*0.12;
+      ctx.save();
+      ctx.rotate(side*0.32+flutter*side);
+      const pts = [
+        {x:0,y:0}, {x:-len*0.10,y:side*len*0.08}, {x:-len*0.22,y:side*len*0.22},
+        {x:-len*0.34,y:side*len*0.40}, {x:-len*0.44,y:side*len*0.52}, {x:-len*0.30,y:side*len*0.56},
+        {x:-len*0.16,y:side*len*0.42}, {x:-len*0.06,y:side*len*0.20}, {x:0,y:side*len*0.03}
+      ];
+      ctx.beginPath();
+      smoothClosedPath(ctx,pts);
+      ctx.fillStyle = k.palette.fin;
+      ctx.globalAlpha = 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 0.5;
+      for(let i=1;i<=4;i++){
+        ctx.beginPath();
+        ctx.moveTo(-len*0.01,side*len*0.02*i);
+        ctx.lineTo(-len*0.34*(i/4.5),side*len*0.45*(i/4.2));
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
+  function drawPectorals(ctx,k,len){
+    const finWag = Math.sin(k.tailPhase*1.3)*0.22;
+    [1,-1].forEach(side=>{
+      ctx.save();
+      ctx.translate(len*0.20,side*len*0.24);
+      ctx.rotate(side*(0.85+finWag));
+      const pts = [
+        {x:0,y:0}, {x:len*0.06,y:side*len*0.04}, {x:len*0.16,y:side*len*0.14},
+        {x:len*0.18,y:side*len*0.22}, {x:len*0.08,y:side*len*0.14}, {x:0,y:side*len*0.03}
+      ];
+      ctx.beginPath();
+      smoothClosedPath(ctx,pts);
+      ctx.fillStyle = k.palette.fin;
+      ctx.globalAlpha = 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    });
+  }
+
+  function drawKoi(ctx,k){
+    const len = k.len;
+    ctx.save();
+    ctx.translate(k.px,k.py);
+    ctx.rotate(k.heading);
+    drawTail(ctx,k,len);
+    drawPectorals(ctx,k,len);
+    drawKoiBody(ctx,k,len);
+    drawDorsal(ctx,k,len);
+    drawKoiDetails(ctx,k,len);
+    ctx.restore();
+  }
+
+  // 花と葉を別々に管理。hasLeaf、hasFlowerプロパティで制御。
+  const lotuses = [
+    // 葉っぱのみ (hasLeaf: true, hasFlower: false)
+    {xf:0.382, yf:0.618, scale:1.500, phase:rand(0,10), rot:-0.15, notch:-Math.PI/2, tone:0, dragging:false, isHeart:true, hasLeaf:true, hasFlower:false}, // idx 0 (frog leaf)
+    {xf:0.618, yf:0.382, scale:1.382, phase:rand(0,10), rot: 0.16, notch: 0.05, tone:1, dragging:false, isHeart:false, hasLeaf:true, hasFlower:false},
+    {xf:0.236, yf:0.382, scale:1.000, phase:rand(0,10), rot:-0.18, notch: Math.PI*0.82, tone:0, dragging:false, isHeart:false, hasLeaf:true, hasFlower:false},
+    {xf:0.764, yf:0.618, scale:0.854, phase:rand(0,10), rot: 0.12, notch:-0.20, tone:1, dragging:false, isHeart:false, hasLeaf:true, hasFlower:false},
+    {xf:0.618, yf:0.764, scale:1.180, phase:rand(0,10), rot: 0.22, notch: Math.PI*0.58, tone:0, dragging:false, isHeart:false, hasLeaf:true, hasFlower:false},
+
+    // 花のみ (hasLeaf: false, hasFlower: true)
+    // 左下の蓮の花(右上と同じ、中間の大きさ)
+    {xf:0.18, yf:0.82, scale:1.500, phase:rand(0,10), rot:0, notch:0, tone:0, dragging:false, isHeart:false, hasLeaf:false, hasFlower:true},
+    // 右上の蓮の花(左下と同じ、中間の大きさ)
+    {xf:0.82, yf:0.18, scale:1.500, phase:rand(0,10), rot:0, notch:0, tone:0, dragging:false, isHeart:false, hasLeaf:false, hasFlower:true}
+  ];
+
+  const frog = {
+    state: 'onLeaf', leafIdx: 0, x: 0, y: 0, size: 16, heading: 0,
+    jumpT: 0, jumpDur: 0.45, startX: 0, startY: 0, targetX: 0, targetY: 0,
+    swimTargetX: 0, swimTargetY: 0, idleTimer: 0, kickPhase: 0, currentSpeed: 0
+  };
+
+  function updateFrogLeafPos(){
+    const l = lotuses[frog.leafIdx];
+    const cx = l.xf*W;
+    const cy = l.yf*H + (l.dragging ? 0 : Math.sin(l.phase)*2.2);
+    const s = l.scale*Math.min(W,H)*0.105;
+    frog.x = cx - s*0.08;
+    frog.y = cy - s*0.15;
+    frog.heading = l.rot - Math.PI*0.1;
+  }
+
+  function pickFrogSwimTarget(){
+    frog.swimTargetX = rand(0.12,0.88)*W;
+    frog.swimTargetY = rand(0.12,0.88)*H;
+  }
+
+  function updateFrog(dt){
+    if(frog.state === 'onLeaf'){
+      updateFrogLeafPos();
+      frog.kickPhase = 0;
+    }
+    else if(frog.state === 'jumpingToWater'){
+      frog.jumpT += dt / frog.jumpDur;
+      if(frog.jumpT >= 1){
+        frog.jumpT = 1;
+        frog.x = frog.targetX;
+        frog.y = frog.targetY;
+        frog.state = 'swimming';
+        addRipple(frog.x, frog.y, 0.8);
+        pickFrogSwimTarget();
+      } else {
+        const p = frog.jumpT;
+        frog.x = frog.startX + (frog.targetX - frog.startX) * p;
+        const directY = frog.startY + (frog.targetY - frog.startY) * p;
+        const arc = Math.sin(p * Math.PI) * 40;
+        frog.y = directY - arc;
+        frog.heading = Math.atan2(frog.targetY - frog.startY, frog.targetX - frog.startX);
+      }
+    }
+    else if(frog.state === 'swimming' || frog.state === 'returning'){
+      if(frog.state === 'swimming'){
+        frog.idleTimer += dt;
+        // パラメータで指定された帰宅時間を参照
+        if(frog.idleTimer >= currentFrogReturnTime){
+          frog.state = 'returning';
+        }
+      }
+
+      let tx = frog.swimTargetX, ty = frog.swimTargetY;
+
+      if(frog.state === 'returning'){
+        const l = lotuses[frog.leafIdx];
+        tx = l.xf * W;
+        ty = l.yf * H + (l.dragging ? 0 : Math.sin(l.phase)*2.2);
+        const dist = Math.hypot(tx - frog.x, ty - frog.y);
+        if(dist < l.scale * Math.min(W,H) * 0.11 + 10){
+          frog.state = 'jumpingToLeaf';
+          frog.startX = frog.x;
+          frog.startY = frog.y;
+          const s = l.scale * Math.min(W,H) * 0.105;
+          frog.targetX = tx - s * 0.08;
+          frog.targetY = ty - s * 0.15;
+          frog.jumpT = 0;
+          frog.jumpDur = 0.45;
+          return;
+        }
+      } else {
+        const dist = Math.hypot(tx - frog.x, ty - frog.y);
+        if(dist < 22) pickFrogSwimTarget();
+      }
+
+      const dx = tx - frog.x;
+      const dy = ty - frog.y;
+      const angle = Math.atan2(dy, dx);
+      let diff = angle - frog.heading;
+      while(diff > Math.PI) diff -= Math.PI*2;
+      while(diff < -Math.PI) diff += Math.PI*2;
+      frog.heading += diff * Math.min(1, 4.0 * dt);
+
+      frog.kickPhase += dt * 4.2;
+      const cycle = (frog.kickPhase % (Math.PI * 2)) / (Math.PI * 2);
+
+      let thrust = 0;
+      if(cycle > 0.22 && cycle < 0.48){
+        const p = (cycle - 0.22) / 0.26;
+        thrust = Math.sin(p * Math.PI) * 1.8;
+        if(p > 0.4 && p < 0.6 && Math.random() < 0.2){
+          addRipple(frog.x, frog.y, 0.25);
+        }
+      } else if(cycle >= 0.48 && cycle < 0.88){
+        const p = (cycle - 0.48) / 0.40;
+        thrust = 1.0 * (1 - p * 0.75);
+      } else {
+        thrust = 0.12;
+      }
+
+      const baseSpeed = W * 0.085;
+      frog.currentSpeed = baseSpeed * thrust;
+      frog.x += Math.cos(frog.heading) * frog.currentSpeed * dt;
+      frog.y += Math.sin(frog.heading) * frog.currentSpeed * dt;
+      frog.x = Math.min(W-15, Math.max(15, frog.x));
+      frog.y = Math.min(H-15, Math.max(15, frog.y));
+    }
+    else if(frog.state === 'jumpingToLeaf'){
+      frog.jumpT += dt / frog.jumpDur;
+      if(frog.jumpT >= 1){
+        frog.state = 'onLeaf';
+        frog.idleTimer = 0;
+        updateFrogLeafPos();
+      } else {
+        const p = frog.jumpT;
+        const l = lotuses[frog.leafIdx];
+        const lcx = l.xf * W;
+        const lcy = l.yf * H + (l.dragging ? 0 : Math.sin(l.phase)*2.2);
+        const s = l.scale * Math.min(W,H) * 0.105;
+        const endX = lcx - s * 0.08;
+        const endY = lcy - s * 0.15;
+
+        frog.x = frog.startX + (endX - frog.startX) * p;
+        const directY = frog.startY + (endY - frog.startY) * p;
+        const arc = Math.sin(p * Math.PI) * 35;
+        frog.y = directY - arc;
+        frog.heading = Math.atan2(endY - frog.startY, endX - frog.startX);
+      }
+    }
+  }
+
+  function drawFrog(ctx){
+    ctx.save();
+    ctx.translate(frog.x, frog.y);
+    ctx.rotate(frog.heading + Math.PI/2);
+
+    const sz = frog.size;
+    const isSwimming = (frog.state === 'swimming' || frog.state === 'returning');
+    const isJumping = (frog.state === 'jumpingToWater' || frog.state === 'jumpingToLeaf');
+
+    if(isJumping){
+      const shadowScale = 1 - Math.sin(frog.jumpT * Math.PI) * 0.4;
+      ctx.save();
+      ctx.translate(0, Math.sin(frog.jumpT * Math.PI) * 22);
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, sz * 0.8 * shadowScale, sz * 0.6 * shadowScale, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const mainGreen = '#89be19';
+    const darkGreen = '#5f8a0e';
+    const suckerColor = '#4e730a';
+
+    let legFlex = 0, armFlex = 0;
+
+    if(isSwimming){
+      const cycle = (frog.kickPhase % (Math.PI * 2)) / (Math.PI * 2);
+      if(cycle < 0.22){
+        legFlex = (cycle / 0.22) * 0.15; armFlex = (cycle / 0.22) * 0.10;
+      } else if(cycle < 0.48){
+        const p = (cycle - 0.22) / 0.26;
+        legFlex = 0.15 + p * 0.85; armFlex = 0.10 + p * 0.90;
+      } else if(cycle < 0.88){
+        legFlex = 1.0; armFlex = 1.0;
+      } else {
+        const p = (cycle - 0.88) / 0.12;
+        legFlex = 1.0 - p * 1.0; armFlex = 1.0 - p * 1.0;
+      }
+    } else if(isJumping){
+      legFlex = 0.95; armFlex = 0.90;
+    }
+
+    function drawSucker(x, y, r) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = suckerColor;
+      ctx.fill();
+    }
+
+    [-1, 1].forEach(side => {
+      ctx.save();
+      ctx.scale(side, 1);
+      ctx.fillStyle = mainGreen;
+      ctx.strokeStyle = darkGreen;
+      ctx.lineWidth = 1.2;
+
+      if(isSwimming || isJumping){
+        const thighAngle = (1 - legFlex) * (Math.PI * 0.02) + legFlex * (Math.PI * 0.46);
+        const kneeAngle  = (1 - legFlex) * (Math.PI * 0.68) + legFlex * 0.05;
+
+        ctx.save();
+        ctx.translate(sz * 0.38, sz * 0.45);
+        ctx.rotate(thighAngle);
+        ctx.beginPath();
+        ctx.ellipse(sz * 0.35, 0, sz * 0.38, sz * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        ctx.translate(sz * 0.68, 0);
+        ctx.rotate(kneeAngle);
+        ctx.beginPath();
+        ctx.ellipse(sz * 0.38, 0, sz * 0.40, sz * 0.14, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        ctx.translate(sz * 0.72, 0);
+        ctx.rotate((1 - legFlex) * (-Math.PI * 0.35) + legFlex * 0.05);
+
+        const toeLengths = [0.45, 0.65, 0.82, 0.75, 0.55];
+        const toeAngles = [-0.55, -0.25, 0, 0.28, 0.58];
+        toeAngles.forEach((ta, i) => {
+          const tLen = sz * toeLengths[i];
+          const tx = Math.cos(ta) * tLen;
+          const ty = Math.sin(ta) * tLen;
+          ctx.beginPath();
+          ctx.moveTo(0, 0); ctx.lineTo(tx, ty);
+          ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.2;
+          ctx.stroke();
+          drawSucker(tx, ty, sz * 0.08);
+        });
+        ctx.restore();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(sz * 0.42, sz * 0.15);
+        ctx.bezierCurveTo(sz * 1.25, sz * 0.15, sz * 1.2, sz * 0.9, sz * 0.55, sz * 0.92);
+        ctx.bezierCurveTo(sz * 0.28, sz * 0.92, sz * 0.32, sz * 0.5, sz * 0.42, sz * 0.15);
+        ctx.fill(); ctx.stroke();
+
+        const footX = sz * 0.78, footY = sz * 0.70;
+        const angles = [-1.7, -1.2, -0.7, -0.2, 0.3];
+        const lens = [0.42, 0.55, 0.62, 0.52, 0.38];
+        angles.forEach((a, idx) => {
+          const tx = footX + Math.cos(a) * sz * lens[idx];
+          const ty = footY + Math.sin(a) * sz * lens[idx];
+          ctx.beginPath();
+          ctx.moveTo(footX, footY); ctx.lineTo(tx, ty);
+          ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.3;
+          ctx.stroke();
+          drawSucker(tx, ty, sz * 0.09);
+        });
+      }
+      ctx.restore();
+    });
+
+    [-1, 1].forEach(side => {
+      ctx.save();
+      ctx.scale(side, 1);
+      if(isSwimming || isJumping){
+        const armAngle = (1 - armFlex) * (-Math.PI * 0.45) + armFlex * (Math.PI * 0.38);
+        ctx.save();
+        ctx.translate(sz * 0.38, -sz * 0.35);
+        ctx.rotate(armAngle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(sz * 0.55, 0);
+        ctx.strokeStyle = darkGreen; ctx.lineWidth = 2.2;
+        ctx.stroke();
+
+        const handX = sz * 0.55, handY = 0;
+        [-0.5, -0.18, 0.18, 0.5].forEach(fa => {
+          const fx = handX + Math.cos(fa) * sz * 0.32;
+          const fy = handY + Math.sin(fa) * sz * 0.32;
+          ctx.beginPath();
+          ctx.moveTo(handX, handY); ctx.lineTo(fx, fy);
+          ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.1;
+          ctx.stroke();
+          drawSucker(fx, fy, sz * 0.07);
+        });
+        ctx.restore();
+      } else {
+        const shoulderX = sz * 0.38, shoulderY = -sz * 0.20;
+        const handX = sz * 0.68, handY = -sz * 0.52;
+        ctx.beginPath();
+        ctx.moveTo(shoulderX, shoulderY); ctx.lineTo(handX, handY);
+        ctx.strokeStyle = darkGreen; ctx.lineWidth = 2.4;
+        ctx.stroke();
+
+        const fingerAngles = [-2.3, -1.8, -1.2, -0.6];
+        const fingerLens = [0.38, 0.45, 0.42, 0.32];
+        fingerAngles.forEach((fa, idx) => {
+          const fx = handX + Math.cos(fa) * sz * fingerLens[idx];
+          const fy = handY + Math.sin(fa) * sz * fingerLens[idx];
+          ctx.beginPath();
+          ctx.moveTo(handX, handY); ctx.lineTo(fx, fy);
+          ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.2;
+          ctx.stroke();
+          drawSucker(fx, fy, sz * 0.08);
+        });
+      }
+      ctx.restore();
+    });
+
+    ctx.beginPath();
+    ctx.moveTo(0, -sz * 0.96);
+    ctx.bezierCurveTo(sz * 0.25, -sz * 0.92, sz * 0.48, -sz * 0.75, sz * 0.48, -sz * 0.62);
+    ctx.bezierCurveTo(sz * 0.46, -sz * 0.48, sz * 0.38, -sz * 0.38, sz * 0.44, -sz * 0.25);
+    ctx.bezierCurveTo(sz * 0.78, sz * 0.05, sz * 0.82, sz * 0.50, sz * 0.45, sz * 0.82);
+    ctx.bezierCurveTo(sz * 0.22, sz * 0.95, sz * 0.08, sz * 0.98, 0, sz * 1.02);
+
+    ctx.bezierCurveTo(-sz * 0.08, sz * 0.98, -sz * 0.22, sz * 0.95, -sz * 0.45, sz * 0.82);
+    ctx.bezierCurveTo(-sz * 0.82, sz * 0.50, -sz * 0.78, sz * 0.05, -sz * 0.44, -sz * 0.25);
+    ctx.bezierCurveTo(-sz * 0.38, -sz * 0.38, -sz * 0.46, -sz * 0.48, -sz * 0.48, -sz * 0.62);
+    ctx.bezierCurveTo(-sz * 0.48, -sz * 0.75, -sz * 0.25, -sz * 0.92, 0, -sz * 0.96);
+    ctx.closePath();
+
+    ctx.fillStyle = mainGreen; ctx.fill();
+    ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.3; ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-sz * 0.36, -sz * 0.30);
+    ctx.quadraticCurveTo(0, -sz * 0.20, sz * 0.36, -sz * 0.30);
+    ctx.strokeStyle = 'rgba(95, 138, 14, 0.45)'; ctx.lineWidth = 1.1; ctx.stroke();
+
+    [-1, 1].forEach(side => {
+      ctx.beginPath();
+      ctx.moveTo(side * sz * 0.38, -sz * 0.30);
+      ctx.quadraticCurveTo(side * sz * 0.55, sz * 0.15, side * sz * 0.25, sz * 0.78);
+      ctx.strokeStyle = 'rgba(95, 138, 14, 0.35)'; ctx.lineWidth = 1.0; ctx.stroke();
+    });
+
+    [-1, 1].forEach(side => {
+      const ex = side * sz * 0.38, ey = -sz * 0.62;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, sz * 0.16, sz * 0.13, side * 0.2, 0, Math.PI * 2);
+      ctx.fillStyle = mainGreen; ctx.fill();
+      ctx.strokeStyle = darkGreen; ctx.lineWidth = 1.0; ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, sz * 0.10, sz * 0.08, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#222222'; ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(ex - side * sz * 0.03, ey - sz * 0.03, sz * 0.03, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill();
+    });
+
+    ctx.restore();
+  }
+
+  // スケール補正を行った蓮の花描画関数
+  function drawLotusFlower(ctx, scale) {
+    const p = getFlowerParams();
+    const sc = scale / 160;
+
+    ctx.save();
+    ctx.scale(sc, sc);
+
+    // 1. 最外層の花びら (16枚)
+    ctx.save();
+    ctx.globalAlpha = 0.93;
+    const outerGrad = ctx.createLinearGradient(0, 0, 0, -p.outerLength);
+    outerGrad.addColorStop(0, p.outerColorBase);
+    outerGrad.addColorStop(0.5, p.outerColorMid);
+    outerGrad.addColorStop(1, p.outerColorTip);
+
+    for(let i=0; i<16; i++){
+      ctx.save();
+      ctx.rotate(i * (Math.PI * 2 / 16));
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-8, -p.outerLength*0.32, -p.outerWidth, -p.outerLength*0.72, 0, -p.outerLength);
+      ctx.bezierCurveTo(p.outerWidth, -p.outerLength*0.72, 8, -p.outerLength*0.32, 0, 0);
+      ctx.fillStyle = outerGrad;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // 2. 中間層の花びら (12枚)
+    ctx.save();
+    const midGrad = ctx.createLinearGradient(0, 0, 0, -p.midLength);
+    midGrad.addColorStop(0, p.midColorBase);
+    midGrad.addColorStop(1, p.midColorTip);
+
+    for(let i=0; i<12; i++){
+      ctx.save();
+      ctx.rotate(i * (Math.PI * 2 / 12) + 0.26);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-p.midWidth, -p.midLength*0.2, -p.midWidth, -p.midLength*0.78, 0, -p.midLength);
+      ctx.bezierCurveTo(p.midWidth, -p.midLength*0.78, p.midWidth, -p.midLength*0.2, 0, 0);
+      ctx.fillStyle = midGrad;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // 3. 内層の花びら (10枚)
+    ctx.save();
+    const innerGrad = ctx.createLinearGradient(0, 0, 0, -p.innerLength);
+    innerGrad.addColorStop(0, p.innerColorBase);
+    innerGrad.addColorStop(1, p.innerColorTip);
+
+    for(let i=0; i<10; i++){
+      ctx.save();
+      ctx.rotate(i * (Math.PI * 2 / 10));
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-p.innerWidth, -p.innerLength*0.2, -p.innerWidth, -p.innerLength*0.75, 0, -p.innerLength);
+      ctx.bezierCurveTo(p.innerWidth, -p.innerLength*0.75, p.innerWidth, -p.innerLength*0.2, 0, 0);
+      ctx.fillStyle = innerGrad;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // 4. 雄しべ
+    ctx.save();
+    for(let i=0; i<42; i++){
+      ctx.save();
+      ctx.rotate(i * (Math.PI * 2 / 42));
+      ctx.strokeStyle = '#FFB300';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -(p.coreSize + 16));
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFF59D';
+      ctx.beginPath();
+      ctx.arc(0, -(p.coreSize + 18), 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // 5. 花芯
+    ctx.save();
+    const coreGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.coreSize);
+    coreGrad.addColorStop(0, '#FFEE58');
+    coreGrad.addColorStop(0.7, p.coreColor);
+    coreGrad.addColorStop(1, '#E65100');
+
+    ctx.beginPath();
+    ctx.arc(0, 0, p.coreSize, 0, Math.PI * 2);
+    ctx.fillStyle = coreGrad;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, p.coreSize * 0.6, 0, Math.PI * 2);
+    ctx.fillStyle = p.coreColor;
+    ctx.globalAlpha = 0.5;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  let draggedLotus = null;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+
+  function drawLotus(ctx,l){
+    const cx = l.xf*W, cy = l.yf*H + (l.dragging ? 0 : Math.sin(l.phase)*2.2 * windSway);
+    const s = l.scale*(l.hasFlower ? flowerSizeScale : 1)*Math.min(W,H)*0.105;
+    const colors = l.tone===0
+      ? {base:'#6f9f72', edge:'#47724e', vein:'rgba(225,242,217,0.40)'}
+      : {base:'#79a97b', edge:'#4e7f55', vein:'rgba(238,247,226,0.36)'};
+
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(l.rot + Math.sin(l.phase*0.32)*0.012 * windSway);
+
+    // 葉っぱを描画 (明示的にfalseでない場合のみ)
+    if(l.hasLeaf !== false){
+      ctx.shadowColor = 'rgba(40,80,60,0.18)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 3;
+
+      if(l.isHeart){
+        const hr = s * 0.95;
+        ctx.beginPath();
+        ctx.moveTo(0, -hr * 0.35);
+        ctx.bezierCurveTo(-hr * 0.65, -hr * 1.15, -hr * 1.25, -hr * 0.35, -hr * 1.05, hr * 0.20);
+        ctx.bezierCurveTo(-hr * 0.90, hr * 0.70, -hr * 0.40, hr * 1.02, 0, hr * 1.20);
+        ctx.bezierCurveTo(hr * 0.40, hr * 1.02, hr * 0.90, hr * 0.70, hr * 1.05, hr * 0.20);
+        ctx.bezierCurveTo(hr * 1.25, -hr * 0.35, hr * 0.65, -hr * 1.15, 0, -hr * 0.35);
+        ctx.closePath();
+
+        ctx.fillStyle = colors.base; ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = colors.edge; ctx.lineWidth = Math.max(0.8, s*0.018); ctx.stroke();
+
+        ctx.lineWidth = Math.max(0.5, s*0.010);
+        ctx.strokeStyle = colors.vein;
+        const veinAngles = [-0.4, -0.8, -1.2, -1.8, -2.4, 0.4, 0.8, 1.2, 1.8, 2.4, 2.9, -2.9];
+        veinAngles.forEach((a, idx)=>{
+          const veinR = hr * (0.85 + 0.08*Math.sin(idx*1.5 + l.phase));
+          ctx.beginPath(); ctx.moveTo(0,0);
+          ctx.quadraticCurveTo(Math.cos(a)*veinR*0.45, Math.sin(a)*veinR*0.45, Math.cos(a)*veinR, Math.sin(a)*veinR);
+          ctx.stroke();
+        });
+
+        ctx.strokeStyle = colors.edge;
+        ctx.lineWidth = Math.max(0.7, s*0.014);
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0, -hr*0.35); ctx.stroke();
+      } else {
+        const leafR = s;
+        const notchA = l.notch;
+        const notchW = 0.16;
+        const innerR = leafR * 0.14;
+
+        const startX = Math.cos(notchA - notchW) * leafR;
+        const startY = Math.sin(notchA - notchW) * leafR;
+        const endX = Math.cos(notchA + notchW) * leafR;
+        const endY = Math.sin(notchA + notchW) * leafR;
+        const midX = Math.cos(notchA) * innerR;
+        const midY = Math.sin(notchA) * innerR;
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+
+        const steps = 36;
+        for(let i=1;i<=steps;i++){
+          const a = (notchA - notchW) + (Math.PI*2 - notchW*2) * (i/steps);
+          const wobble = 1 + 0.022 * Math.sin(i*1.8 + l.phase);
+          const x = Math.cos(a) * leafR * wobble;
+          const y = Math.sin(a) * leafR * wobble;
+          if(i===1){
+            ctx.lineTo(x,y);
+          }else{
+            const prevA = (notchA - notchW) + (Math.PI*2 - notchW*2) * ((i-1)/steps);
+            const prevWobble = 1 + 0.022 * Math.sin((i-1)*1.8 + l.phase);
+            const px = Math.cos(prevA) * leafR * prevWobble;
+            const py = Math.sin(prevA) * leafR * prevWobble;
+            ctx.quadraticCurveTo(px, py, x, y);
+          }
+        }
+
+        ctx.quadraticCurveTo(
+          Math.cos(notchA + notchW*0.5) * leafR * 0.38,
+          Math.sin(notchA + notchW*0.5) * leafR * 0.38,
+          midX, midY
+        );
+        ctx.quadraticCurveTo(
+          Math.cos(notchA - notchW*0.5) * leafR * 0.38,
+          Math.sin(notchA - notchW*0.5) * leafR * 0.38,
+          startX, startY
+        );
+
+        ctx.closePath();
+        ctx.fillStyle = colors.base; ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = colors.edge; ctx.lineWidth = Math.max(0.8, s*0.018); ctx.stroke();
+
+        ctx.lineWidth = Math.max(0.5, s*0.010);
+        ctx.strokeStyle = colors.vein;
+        for(let i=0;i<12;i++){
+          const a = i*(Math.PI*2/12);
+          const endR = leafR*(0.84 + 0.07*Math.sin(i*1.7+l.phase));
+          ctx.beginPath(); ctx.moveTo(midX, midY);
+          ctx.quadraticCurveTo(Math.cos(a)*endR*0.42, Math.sin(a)*endR*0.42, Math.cos(a)*endR, Math.sin(a)*endR);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = colors.edge;
+        ctx.lineWidth = Math.max(0.7, s*0.014);
+        ctx.beginPath(); ctx.moveTo(endX, endY);
+        ctx.quadraticCurveTo(Math.cos(notchA + notchW*0.5) * leafR * 0.38, Math.sin(notchA + notchW*0.5) * leafR * 0.38, midX, midY);
+        ctx.quadraticCurveTo(Math.cos(notchA - notchW*0.5) * leafR * 0.38, Math.sin(notchA - notchW*0.5) * leafR * 0.38, startX, startY);
+        ctx.stroke();
+      }
+    }
+
+    // 蓮の花を描画
+    if(l.hasFlower){
+      drawLotusFlower(ctx, s);
+    }
+
+    ctx.restore();
+  }
+
+  const highlightSpots = [
+    {bx:0.25,by:0.25,ax:0.06,ay:0.04,sx:0.3,sy:0.25,phase:0,r:0.18},
+    {bx:0.7,by:0.4,ax:0.05,ay:0.05,sx:0.22,sy:0.28,phase:2,r:0.15},
+    {bx:0.5,by:0.65,ax:0.07,ay:0.03,sx:0.18,sy:0.2,phase:4,r:0.2}
+  ];
+  function drawHighlights(t){
+    highlightSpots.forEach(h=>{
+      const hx = (h.bx+Math.sin(t*h.sx+h.phase)*h.ax)*W;
+      const hy = (h.by+Math.cos(t*h.sy+h.phase)*h.ay)*H;
+      const r = h.r*Math.min(W,H);
+      const g = ctx.createRadialGradient(hx,hy,0,hx,hy,r);
+      g.addColorStop(0,'rgba(255,255,255,0.35)');
+      g.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(hx,hy,r,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  function getCanvasPos(e){
+    const rect = canvas.getBoundingClientRect();
+    return { x:e.clientX-rect.left, y:e.clientY-rect.top };
+  }
+
+  function findLotusAt(x,y){
+    for(let i=lotuses.length-1;i>=0;i--){
+      const l = lotuses[i];
+      const cx = l.xf*W;
+      const cy = l.yf*H;
+      const radius = l.scale*(l.hasFlower ? flowerSizeScale : 1)*Math.min(W,H)*0.12;
+      if(Math.hypot(x-cx,y-cy) <= radius) return l;
+    }
+    return null;
+  }
+
+  function checkFrogClick(x,y){
+    const d = Math.hypot(x - frog.x, y - frog.y);
+    if(d < frog.size * 2.8){
+      frog.idleTimer = 0;
+      if(frog.state === 'onLeaf'){
+        frog.state = 'jumpingToWater';
+        frog.startX = frog.x; frog.startY = frog.y;
+        const jumpDist = rand(55, 85);
+        const jumpAngle = frog.heading + rand(-0.4, 0.4);
+        frog.targetX = Math.min(W - 25, Math.max(25, frog.x + Math.cos(jumpAngle) * jumpDist));
+        frog.targetY = Math.min(H - 25, Math.max(25, frog.y + Math.sin(jumpAngle) * jumpDist));
+        frog.jumpT = 0; frog.jumpDur = 0.45;
+        return true;
+      }
+      else if(frog.state === 'swimming' || frog.state === 'returning'){
+        addRipple(frog.x, frog.y, 0.85);
+        pickFrogSwimTarget();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  let ripples = [];
+  function addRipple(x,y,strength){
+    strength = strength===undefined?1:strength;
+    const dur = 1.0+0.8*strength;
+    ripples.push({x,y,t:0,strength,dur});
+    const radiusThresh = 90*Math.min(1,strength+0.3);
+    koi.forEach(k=>{
+      const dx = k.px-x, dy = k.py-y;
+      const d = Math.hypot(dx,dy);
+      if(d<radiusThresh){
+        k.targetX = Math.min(0.92,Math.max(0.08,(k.px+dx*1.5)/W));
+        k.targetY = Math.min(0.92,Math.max(0.08,(k.py+dy*1.5)/H));
+        k.startle = Math.min(1,strength);
+      }
+    });
+
+    if(Math.hypot(frog.x-x, frog.y-y) < radiusThresh){
+      frog.idleTimer = 0;
+      if(frog.state === 'returning'){
+        frog.state = 'swimming';
+        pickFrogSwimTarget();
+      }
+    }
+  }
+
+  let lastMoveX = null, lastMoveY = null, lastMoveT = 0;
+
+  canvas.addEventListener('pointerdown',e=>{
+    const p = getCanvasPos(e);
+
+    if(checkFrogClick(p.x, p.y)){
+      e.preventDefault();
+      return;
+    }
+
+    const l = findLotusAt(p.x,p.y);
+    if(l){
+      draggedLotus = l;
+      l.dragging = true;
+      dragOffsetX = p.x - l.xf*W;
+      dragOffsetY = p.y - l.yf*H;
+      canvas.setPointerCapture?.(e.pointerId);
+      canvas.style.cursor = 'grabbing';
+      e.preventDefault();
+      return;
+    }
+
+    addRipple(p.x,p.y,1);
+    lastMoveX = p.x; lastMoveY = p.y; lastMoveT = performance.now();
+  });
+
+  canvas.addEventListener('pointermove',e=>{
+    const p = getCanvasPos(e);
+
+    if(draggedLotus){
+      draggedLotus.xf = Math.min(0.97,Math.max(0.03,(p.x-dragOffsetX)/W));
+      draggedLotus.yf = Math.min(0.97,Math.max(0.03,(p.y-dragOffsetY)/H));
+      e.preventDefault();
+      return;
+    }
+
+    const now = performance.now();
+    if(lastMoveX===null){
+      lastMoveX = p.x; lastMoveY = p.y; lastMoveT = now;
+      return;
+    }
+
+    const d = Math.hypot(p.x-lastMoveX,p.y-lastMoveY);
+    if(d>12 && now-lastMoveT>35){
+      addRipple(p.x,p.y,0.35);
+      lastMoveX = p.x; lastMoveY = p.y; lastMoveT = now;
+    }
+  });
+
+  function releaseLotus(e){
+    if(!draggedLotus) return;
+    draggedLotus.dragging = false;
+    draggedLotus = null;
+    canvas.releasePointerCapture?.(e.pointerId);
+    canvas.style.cursor = 'pointer';
+  }
+
+  canvas.addEventListener('pointerup',releaseLotus);
+  canvas.addEventListener('pointercancel',releaseLotus);
+
+  let last = performance.now();
+  let tAcc = 0;
+  function frame(now){
+    const dt = Math.min((now-last)/1000,0.05);
+    last = now;
+    tAcc += dt;
+
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(bgCanvas,0,0,W,H);
+    drawHighlights(tAcc);
+
+    koi.forEach(k=>{
+      k.px = k.xf*W; k.py = k.yf*H;
+      const dx = k.targetX*W-k.px, dy = k.targetY*H-k.py;
+      const dist = Math.hypot(dx,dy);
+      if(dist<20) pickTarget(k);
+      const desired = Math.atan2(dy,dx);
+      let diff = desired-k.heading;
+      while(diff>Math.PI) diff -= Math.PI*2;
+      while(diff<-Math.PI) diff += Math.PI*2;
+      const turnRate = k.startle?5:2.2;
+      k.heading += diff*Math.min(1,turnRate*dt);
+      const sp = k.speed*(k.startle?1.8:1);
+      k.px += Math.cos(k.heading)*sp*W*dt;
+      k.py += Math.sin(k.heading)*sp*H*dt;
+      k.px = Math.min(W-10,Math.max(10,k.px));
+      k.py = Math.min(H-10,Math.max(10,k.py));
+      k.xf = k.px/W; k.yf = k.py/H;
+      k.tailPhase += dt*(6+sp*40);
+      k.startle = Math.max(0,k.startle-dt*0.5);
+    });
+
+    updateFrog(dt);
+
+    koi.forEach(k=> drawKoi(ctx,k));
+
+    const isFrogUnderLeaf = (frog.state === 'swimming' || frog.state === 'returning' || frog.state === 'jumpingToWater');
+
+    if(isFrogUnderLeaf){
+      drawFrog(ctx);
+    }
+
+    lotuses.forEach(l=>{ l.phase += dt*0.8; drawLotus(ctx,l); });
+
+    if(!isFrogUnderLeaf){
+      drawFrog(ctx);
+    }
+
+    ripples = ripples.filter(r=>r.t<r.dur);
+    ripples.forEach(r=>{
+      r.t += dt;
+      const p = Math.min(1,r.t/r.dur);
+      const rad = 6+p*(40+110*r.strength);
+      const alphaBase = 0.55*Math.min(1,0.4+0.6*r.strength);
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,rad,0,Math.PI*2);
+      ctx.strokeStyle = 'rgba(255,255,255,'+(alphaBase*(1-p))+')';
+      ctx.lineWidth = 2*(1-p*0.7)*Math.max(0.5,r.strength);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,rad*0.7,0,Math.PI*2);
+      ctx.strokeStyle = 'rgba(140,170,180,'+(alphaBase*0.6*(1-p))+')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    requestAnimationFrame(frame);
+  }
+
+  // 背景画像の読み込み処理（frame関数の外に配置）
+  document.getElementById('bgImageInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = event => {
+      const img = new Image();
+      img.onload = () => {
+        bgImage = img;
+        drawBackground(); // 画像読み込み後に背景を再描画
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  requestAnimationFrame(frame);
+})();
+</script>
