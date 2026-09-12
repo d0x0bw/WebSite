@@ -1,6 +1,17 @@
-<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">水面を泳ぐ金魚と浮かぶ蓮の花のインタラクティブなアニメーション。10種類の金魚と水面の色を選べて、水面をクリックまたはタップ、カーソルを動かすと波紋が広がります。フルスクリーン表示にも対応しています。</h2>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Goldfish & Pond</title>
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
 
-<style id="pondStyles">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
   #pondApp { position:relative; width:100%; box-sizing:border-box; }
   #pondApp *, #pondApp *::before, #pondApp *::after { box-sizing:border-box; }
 
@@ -52,12 +63,12 @@
     aspect-ratio:auto; max-height:none; min-height:0;
   }
 
-  @media (max-width:520px){
+  @media (max-width:600px){
     #flowerControlPanel { left:10px; right:10px; width:auto; max-height:55vh; }    
     #pondHeaderBar button { padding:5px 9px; font-size:12px; }
     #pondCanvas {
-    aspect-ratio: 3 / 4; 
-    min-height: 400px;
+    aspect-ratio: 1 / 4; 
+    min-height: auto;
     max-height: 80vh;
   }
 }
