@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Starry Night & Meteor ver1.1</title>
+    <title>Starry Night & Meteor</title>
     <link rel="icon" href="../icon/favicon.png" type="image/png">
 
     <style>
@@ -152,8 +152,46 @@
             cursor: pointer;
         }
 
+        .toggle-btn:disabled,
+        .control-group input[type="range"]:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
         .control-section {
             margin-bottom: 14px;
+        }
+
+        .section-toggle {
+            all: unset;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .section-toggle:hover .section-title {
+            color: #c7d2e0;
+        }
+
+        .section-chevron {
+            width: 15px;
+            height: 15px;
+            color: #8ab4f8;
+            flex-shrink: 0;
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .control-section:not(.is-collapsed) .section-chevron {
+            transform: rotate(180deg);
+        }
+
+        .control-section.is-collapsed .section-body {
+            display: none;
         }
 
         .section-title {
@@ -162,7 +200,7 @@
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 8px;
+            transition: color 0.15s ease;
         }
 
         .control-group {
@@ -230,9 +268,12 @@
                 margin-bottom: 8px;
             }
 
+            .section-toggle {
+                margin-bottom: 5px;
+            }
+
             .section-title {
                 font-size: 0.66rem;
-                margin-bottom: 5px;
             }
 
             .control-group {
@@ -274,8 +315,14 @@
 
         <div class="panel-content" id="panel-body">
             <!-- 1. 星：数量 & サイズ -->
-            <div class="control-section">
-                <div class="section-title">■ 星（数量 & サイズ）</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 星（数量 & サイズ）</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>星の数: <span id="val-star-count">400</span>個</label>
                     <input type="range" id="param-star-count" min="10" max="1000" value="400">
@@ -288,11 +335,18 @@
                     <label>最大サイズ: <span id="val-star-max-size">1.4</span>px</label>
                     <input type="range" id="param-star-max-size" min="1.0" max="5.0" step="0.1" value="1.4">
                 </div>
+                </div>
             </div>
 
             <!-- 2. 星：瞬き & 輝き -->
-            <div class="control-section">
-                <div class="section-title">■ 星（瞬き & 輝き）</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 星（瞬き & 輝き）</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>瞬きの速度: <span id="val-twinkle-speed">1.0</span>倍</label>
                     <input type="range" id="param-twinkle-speed" min="0.1" max="3.0" step="0.1" value="1.0">
@@ -301,11 +355,18 @@
                     <label>輝き（グロー）強度: <span id="val-glow-scale">1.0</span>倍</label>
                     <input type="range" id="param-glow-scale" min="0.0" max="3.0" step="0.1" value="1.0">
                 </div>
+                </div>
             </div>
 
             <!-- 3. 流れ星：頻度 & 物理 -->
-            <div class="control-section">
-                <div class="section-title">■ 流れ星（頻度 & 物理）</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 流れ星（頻度 & 物理）</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>発生頻度: <span id="val-meteor-freq">1.0</span>倍</label>
                     <input type="range" id="param-meteor-freq" min="0.1" max="25.0" step="0.1" value="1.0">
@@ -318,11 +379,18 @@
                     <label>尾の長さ: <span id="val-meteor-length">2.4</span>倍</label>
                     <input type="range" id="param-meteor-length" min="0.3" max="3.0" step="0.1" value="2.4">
                 </div>
+                </div>
             </div>
 
             <!-- 4. 星空の中心 -->
-            <div class="control-section">
-                <div class="section-title">■ 星空の中心</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 星空の中心</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label style="margin-bottom:6px;">どの星を画面中心に置くか</label>
                     <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.78rem;">
@@ -346,11 +414,95 @@
                         </optgroup>
                     </select>
                 </div>
+                </div>
+            </div>
+
+            <!-- 4.5 太陽と月 -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 太陽と月</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="control-group">
+                    <label>☀️ 太陽を表示
+                        <button class="toggle-btn" id="btn-toggle-sun" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>太陽の大きさ: <span id="val-sun-size">45</span>px</label>
+                    <input type="range" id="param-sun-size" min="10" max="120" value="45">
+                </div>
+                <div class="control-group">
+                    <label>太陽の輝き（グロー）: <span id="val-sun-glow">1.2</span>倍</label>
+                    <input type="range" id="param-sun-glow" min="0.0" max="3.0" step="0.1" value="1.2">
+                </div>
+                <div class="control-group">
+                    <label>太陽の位置（横）: <span id="val-sun-x">15</span>%</label>
+                    <input type="range" id="param-sun-x" min="0" max="100" value="15">
+                </div>
+                <div class="control-group">
+                    <label>太陽の位置（縦）: <span id="val-sun-y">14</span>%</label>
+                    <input type="range" id="param-sun-y" min="0" max="100" value="14">
+                </div>
+                <div class="control-group">
+                    <label>太陽の色</label>
+                    <input type="color" id="param-sun-color" value="#ffb84d">
+                </div>
+
+                <div class="control-group" style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                    <label>🌙 月を表示
+                        <button class="toggle-btn" id="btn-toggle-moon" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>月の大きさ: <span id="val-moon-size">38</span>px</label>
+                    <input type="range" id="param-moon-size" min="10" max="100" value="38">
+                </div>
+                <div class="control-group">
+                    <label>月の輝き（グロー）: <span id="val-moon-glow">1.0</span>倍</label>
+                    <input type="range" id="param-moon-glow" min="0.0" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label>月の位置（横）: <span id="val-moon-x">50</span>%</label>
+                    <input type="range" id="param-moon-x" min="0" max="100" value="50">
+                </div>
+                <div class="control-group">
+                    <label>月の位置（縦）: <span id="val-moon-y">10</span>%</label>
+                    <input type="range" id="param-moon-y" min="0" max="100" value="10">
+                </div>
+                <div class="control-group">
+                    <label>満ち欠けの進み方
+                        <button class="toggle-btn" id="btn-toggle-moon-auto" style="padding:2px 8px;font-size:0.72rem;height:22px;">手動</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>月の輝面比（満ち欠け）: <span id="val-moon-phase">70</span>%</label>
+                    <input type="range" id="param-moon-phase" min="0" max="100" value="70">
+                </div>
+                <div class="control-group">
+                    <label>満ちていく／欠けていく
+                        <button class="toggle-btn" id="btn-toggle-moon-waxing" style="padding:2px 8px;font-size:0.72rem;height:22px;">満ちていく</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>月の色</label>
+                    <input type="color" id="param-moon-color" value="#f4f1e8">
+                </div>
+                </div>
             </div>
 
             <!-- 5. 実在の星座（リアル再現） -->
-            <div class="control-section">
-                <div class="section-title">■ 実在の星座（リアル再現）</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 実在の星座（リアル再現）</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>星座線
                         <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
@@ -364,11 +516,18 @@
                     <label>自転速度（±で回転方向）: <span id="val-rotation-speed">0.3</span>度/秒</label>
                     <input type="range" id="param-rotation-speed" min="-2.0" max="2.0" step="0.05" value="0.3">
                 </div>
+                </div>
             </div>
 
             <!-- 6. 表示する星座 -->
-            <div class="control-section">
-                <div class="section-title">■ 表示する星座</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 表示する星座</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>
                         <span id="con-toggle-summary">星座を選択</span>
@@ -382,11 +541,18 @@
                     </div>
                     <div id="constellation-checkboxes"></div>
                 </div>
+                </div>
             </div>
 
             <!-- 5. 環境 & システム設定 -->
-            <div class="control-section">
-                <div class="section-title">■ 環境 & システム</div>
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">■ 環境 & システム</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
                 <div class="control-group">
                     <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
                     <input type="range" id="param-hidedelay" min="1" max="10" value="3">
@@ -398,6 +564,7 @@
                 <div class="control-group">
                     <label>背景カラー（下部/外縁）</label>
                     <input type="color" id="param-bgouter" value="#000000">
+                </div>
                 </div>
             </div>
         </div>
@@ -420,7 +587,23 @@
             showLines: true,
             realStarScale: 1.5,
             rotationSpeed: 0.3,
-            centerStar: 'polaris'
+            centerStar: 'polaris',
+            showSun: true,
+            sunSize: 45,
+            sunGlow: 1.2,
+            sunX: 15,
+            sunY: 14,
+            sunColor: '#ffb84d',
+            showMoon: true,
+            moonSize: 38,
+            moonGlow: 1.0,
+            moonX: 50,
+            moonY: 10,
+            moonPhase: 70,
+            moonWaxing: true,
+            moonAutoPhase: false,
+            moonColor: '#f4f1e8',
+            moonShadowColor: '#1b2438'
         };
 
         const config = { ...defaultConfig };
@@ -438,7 +621,18 @@
             { id: 'param-rotation-speed', key: 'rotationSpeed', valId: 'val-rotation-speed', type: 'float' },
             { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
             { id: 'param-bgcenter', key: 'bgCenter', type: 'color', onChange: updateBgColor },
-            { id: 'param-bgouter', key: 'bgOuter', type: 'color', onChange: updateBgColor }
+            { id: 'param-bgouter', key: 'bgOuter', type: 'color', onChange: updateBgColor },
+            { id: 'param-sun-size', key: 'sunSize', valId: 'val-sun-size', type: 'int' },
+            { id: 'param-sun-glow', key: 'sunGlow', valId: 'val-sun-glow', type: 'float' },
+            { id: 'param-sun-x', key: 'sunX', valId: 'val-sun-x', type: 'int' },
+            { id: 'param-sun-y', key: 'sunY', valId: 'val-sun-y', type: 'int' },
+            { id: 'param-sun-color', key: 'sunColor', type: 'color' },
+            { id: 'param-moon-size', key: 'moonSize', valId: 'val-moon-size', type: 'int' },
+            { id: 'param-moon-glow', key: 'moonGlow', valId: 'val-moon-glow', type: 'float' },
+            { id: 'param-moon-x', key: 'moonX', valId: 'val-moon-x', type: 'int' },
+            { id: 'param-moon-y', key: 'moonY', valId: 'val-moon-y', type: 'int' },
+            { id: 'param-moon-phase', key: 'moonPhase', valId: 'val-moon-phase', type: 'int' },
+            { id: 'param-moon-color', key: 'moonColor', type: 'color' }
         ];
 
         let hideTimerId = null;
@@ -471,6 +665,11 @@
             const canvas = document.getElementById('skyCanvas');
             const linesBtn = document.getElementById('btn-toggle-lines');
             const centerSelect = document.getElementById('param-center-star');
+            const sunBtn = document.getElementById('btn-toggle-sun');
+            const moonBtn = document.getElementById('btn-toggle-moon');
+            const moonWaxingBtn = document.getElementById('btn-toggle-moon-waxing');
+            const moonAutoBtn = document.getElementById('btn-toggle-moon-auto');
+            const moonPhaseSlider = document.getElementById('param-moon-phase');
             const conListToggle = document.getElementById('btn-toggle-con-list');
             const conList = document.getElementById('constellation-list');
             const conAllBtn = document.getElementById('btn-con-all');
@@ -484,6 +683,32 @@
 
             centerSelect.addEventListener('change', (e) => {
                 config.centerStar = e.target.value;
+            });
+
+            sunBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.showSun = !config.showSun;
+                sunBtn.textContent = config.showSun ? '表示中' : '非表示';
+            });
+
+            moonBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.showMoon = !config.showMoon;
+                moonBtn.textContent = config.showMoon ? '表示中' : '非表示';
+            });
+
+            moonWaxingBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.moonWaxing = !config.moonWaxing;
+                moonWaxingBtn.textContent = config.moonWaxing ? '満ちていく' : '欠けていく';
+            });
+
+            moonAutoBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.moonAutoPhase = !config.moonAutoPhase;
+                moonAutoBtn.textContent = config.moonAutoPhase ? '自転と連動' : '手動';
+                moonPhaseSlider.disabled = config.moonAutoPhase;
+                moonWaxingBtn.disabled = config.moonAutoPhase;
             });
 
             conListToggle.addEventListener('click', (e) => {
@@ -508,6 +733,12 @@
                 Object.assign(config, defaultConfig);
                 linesBtn.textContent = config.showLines ? '表示中' : '非表示';
                 centerSelect.value = config.centerStar;
+                sunBtn.textContent = config.showSun ? '表示中' : '非表示';
+                moonBtn.textContent = config.showMoon ? '表示中' : '非表示';
+                moonWaxingBtn.textContent = config.moonWaxing ? '満ちていく' : '欠けていく';
+                moonAutoBtn.textContent = config.moonAutoPhase ? '自転と連動' : '手動';
+                moonPhaseSlider.disabled = config.moonAutoPhase;
+                moonWaxingBtn.disabled = config.moonAutoPhase;
                 setAllConstellations(true);
                 conList.style.display = 'none';
                 conListToggle.textContent = '開く';
@@ -562,6 +793,21 @@
 
             initDraggable();
             initSliderTouchPrevention();
+            initAccordion();
+        }
+
+        // 設定パネルの各セクションをsection-titleごとに開閉できるアコーディオンにする
+        function initAccordion() {
+            document.querySelectorAll('.control-section').forEach(section => {
+                const toggle = section.querySelector('.section-toggle');
+                if (!toggle) return;
+
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isCollapsed = section.classList.toggle('is-collapsed');
+                    toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                });
+            });
         }
 
         function initDraggable() {
@@ -1226,6 +1472,109 @@
             ctx.restore();
         }
 
+        // --- 太陽 ---
+        function drawSun() {
+            if (!config.showSun) return;
+            const cx = width * (config.sunX / 100);
+            const cy = height * (config.sunY / 100);
+            const r = config.sunSize;
+
+            ctx.save();
+            if (config.sunGlow > 0) {
+                ctx.shadowBlur = 35 * config.sunGlow;
+                ctx.shadowColor = config.sunColor;
+            }
+            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+            grad.addColorStop(0, '#fffdf2');
+            grad.addColorStop(0.55, config.sunColor);
+            grad.addColorStop(1, config.sunColor);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // --- 月（満ち欠け対応） ---
+        // 輝面比 k（0=新月〜1=満月）に応じて、限界線（明るい側の半円）と
+        // ターミネーター（楕円）を組み合わせて三日月〜満月の形を描く
+        let lastAutoMoonPct = -1;
+        let lastAutoMoonDir = null;
+
+        function drawMoon() {
+            if (!config.showMoon) return;
+            const cx = width * (config.moonX / 100);
+            const cy = height * (config.moonY / 100);
+            const r = config.moonSize;
+
+            let k, dir;
+            if (config.moonAutoPhase) {
+                // 自転速度(rotationDeg)に連動：星空が一周(360°)する間に新月→満月→新月を1サイクル
+                // rotationSpeedがマイナスなら満ち欠けの進行方向も自動的に逆になる
+                const deg = ((rotationDeg % 360) + 360) % 360;
+                k = (1 - Math.cos(deg * Math.PI / 180)) / 2;
+                dir = deg < 180 ? 1 : -1;
+
+                // パネルの表示を現在の自動値にリアルタイム同期（値が変わった時だけDOM更新）
+                const pct = Math.round(k * 100);
+                if (pct !== lastAutoMoonPct) {
+                    lastAutoMoonPct = pct;
+                    const valEl = document.getElementById('val-moon-phase');
+                    const sliderEl = document.getElementById('param-moon-phase');
+                    if (valEl) valEl.textContent = pct;
+                    if (sliderEl) sliderEl.value = pct;
+                }
+                if (dir !== lastAutoMoonDir) {
+                    lastAutoMoonDir = dir;
+                    const waxBtn = document.getElementById('btn-toggle-moon-waxing');
+                    if (waxBtn) waxBtn.textContent = dir === 1 ? '満ちていく' : '欠けていく';
+                }
+            } else {
+                k = Math.min(1, Math.max(0, config.moonPhase / 100));
+                dir = config.moonWaxing ? 1 : -1; // 明るい側: +1=右, -1=左
+            }
+
+            ctx.save();
+
+            // 輝き（グロー）：本体より先に、クリップしない状態で描く
+            if (config.moonGlow > 0) {
+                ctx.save();
+                ctx.shadowBlur = 22 * config.moonGlow;
+                ctx.shadowColor = config.moonColor;
+                ctx.globalAlpha = 0.5 * Math.max(0.15, k);
+                ctx.fillStyle = config.moonColor;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.clip();
+
+            // 暗面（影）をベースとして全面に塗る
+            ctx.fillStyle = config.moonShadowColor;
+            ctx.fillRect(-r, -r, r * 2, r * 2);
+
+            // 明るい側の半分を塗る
+            ctx.fillStyle = config.moonColor;
+            ctx.fillRect(dir === 1 ? 0 : -r, -r, r, r * 2);
+
+            // ターミネーター（明暗の境界線）を楕円で表現
+            // k<=0.5: 明るい側に影を上塗りして三日月に、k>0.5: 暗い側に光を上塗りして満ちた形に
+            const t = k <= 0.5 ? r * (1 - 2 * k) : r * (2 * k - 1);
+            if (t > 0.01) {
+                ctx.beginPath();
+                ctx.ellipse(0, 0, t, r, 0, 0, Math.PI * 2);
+                ctx.fillStyle = k <= 0.5 ? config.moonShadowColor : config.moonColor;
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
 
         function buildConstellationCheckboxes() {
             const container = document.getElementById('constellation-checkboxes');
@@ -1323,6 +1672,10 @@
                 rs.update();
                 rs.draw();
             });
+
+            // 4.5 太陽・月（近くの天体として星の手前に描画）
+            drawSun();
+            drawMoon();
 
             // 5. 流れ星
             if (activeMeteor.active) {
