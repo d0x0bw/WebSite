@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Starry Night & Meteor</title>
+    <title>Starry Night & Meteor ver1.1</title>
     <link rel="icon" href="../icon/favicon.png" type="image/png">
 
     <style>
@@ -326,8 +326,24 @@
                 <div class="control-group">
                     <label style="margin-bottom:6px;">どの星を画面中心に置くか</label>
                     <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.78rem;">
-                        <option value="polaris">北極星（ポラリス）</option>
-                        <option value="sirius">シリウス</option>
+                        <optgroup label="恒星">
+                            <option value="polaris">北極星（ポラリス）</option>
+                            <option value="sirius">シリウス</option>
+                        </optgroup>
+                        <optgroup label="黄道十二星座">
+                            <option value="aries">おひつじ座</option>
+                            <option value="taurus">おうし座</option>
+                            <option value="gemini">ふたご座</option>
+                            <option value="cancer">かに座</option>
+                            <option value="leo">しし座</option>
+                            <option value="virgo">おとめ座</option>
+                            <option value="libra">てんびん座</option>
+                            <option value="scorpius">さそり座</option>
+                            <option value="sagittarius">いて座</option>
+                            <option value="capricornus">やぎ座</option>
+                            <option value="aquarius">みずがめ座</option>
+                            <option value="pisces">うお座</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -862,7 +878,20 @@
         // 中心にできる恒星のプリセット（赤経:時, 赤緯:度）
         const CENTER_PRESETS = {
             polaris: { label: '北極星（ポラリス）', ra: 2.530, dec: 89.264 },
-            sirius: { label: 'シリウス', ra: 6.752, dec: -16.716 }
+            sirius: { label: 'シリウス', ra: 6.752, dec: -16.716 },
+            // 黄道十二星座：各星座を代表する目印の恒星を中心に採用
+            aries: { label: 'おひつじ座（ハマル）', ra: 2.1195, dec: 23.4625 },
+            taurus: { label: 'おうし座（アルデバラン）', ra: 4.5987, dec: 16.5092 },
+            gemini: { label: 'ふたご座（ポルックス）', ra: 7.7553, dec: 28.0261 },
+            cancer: { label: 'かに座（アルタルフ）', ra: 8.2753, dec: 9.1856 },
+            leo: { label: 'しし座（レグルス）', ra: 10.1395, dec: 11.9672 },
+            virgo: { label: 'おとめ座（スピカ）', ra: 13.4199, dec: -11.1614 },
+            libra: { label: 'てんびん座（ズベンエルゲヌビ）', ra: 14.8480, dec: -16.0417 },
+            scorpius: { label: 'さそり座（アンタレス）', ra: 16.4901, dec: -26.4319 },
+            sagittarius: { label: 'いて座（カウス・アウストラリス）', ra: 18.4028, dec: -34.3847 },
+            capricornus: { label: 'やぎ座（デネブ・アルゲディ）', ra: 21.7840, dec: -16.1272 },
+            aquarius: { label: 'みずがめ座（サダルスード）', ra: 21.5259, dec: -5.5711 },
+            pisces: { label: 'うお座（アルレシャ）', ra: 2.0341, dec: 2.7636 }
         };
         const MAX_ANG_DEG = 115; // 中心からこの角距離までを描画範囲とする
 
