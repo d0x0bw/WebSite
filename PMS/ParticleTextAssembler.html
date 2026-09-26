@@ -444,15 +444,48 @@
       .mobile-control-panel .control-section { margin-bottom: 16px; }
       .mobile-control-panel .control-section:last-child { margin-bottom: 0; }
 
+      .mobile-control-panel .section-toggle {
+        all: unset;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        box-sizing: border-box;
+        cursor: pointer;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--m-line-soft);
+      }
+
+      .mobile-control-panel .section-toggle:focus-visible {
+        outline: 2px solid var(--m-blue);
+        outline-offset: 3px;
+        border-radius: 4px;
+      }
+
       .mobile-control-panel .section-title {
         font-size: 0.62rem;
         font-weight: 600;
         color: var(--m-dim);
         letter-spacing: 1.8px;
         text-transform: uppercase;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid var(--m-line-soft);
+      }
+
+      .mobile-control-panel .section-chevron {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-left: 8px;
+        color: var(--m-dim);
+        transition: transform 0.2s ease;
+      }
+
+      .mobile-control-panel .control-section:not(.is-collapsed) .section-chevron {
+        transform: rotate(180deg);
+      }
+
+      .mobile-control-panel .control-section.is-collapsed .section-body {
+        display: none;
       }
 
       .mobile-control-panel .control-group { margin-bottom: 12px; }
@@ -825,8 +858,14 @@
 
     <div class="panel-content" id="mobilePanelContent">
 
-      <div class="control-section">
-        <div class="section-title">■ テキスト</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ テキスト</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="section-body">
 
         <div class="control-group">
           <span class="control-label c-text">テキスト（Enterで改行）</span>
@@ -874,10 +913,18 @@
           </div>
           <input type="range" id="lineSpacingM" min="1" max="2" step="0.05" value="1.2">
         </div>
+
+        </div>
       </div>
 
-      <div class="control-section">
-        <div class="section-title">■ パーティクル</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ パーティクル</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="section-body">
 
         <div class="control-group c-particle">
           <div class="range-label">
@@ -911,10 +958,18 @@
             <button type="button" class="pattern-btn" data-shape="triangle" id="shapeTriangleM">三角</button>
           </div>
         </div>
+
+        </div>
       </div>
 
-      <div class="control-section">
-        <div class="section-title">■ エフェクト</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ エフェクト</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="section-body">
 
         <div class="control-group c-effect">
           <div class="range-label">
@@ -971,10 +1026,18 @@
           </div>
           <input type="range" id="autoCycleIntervalM" min="1" max="10" step="1" value="4">
         </div>
+
+        </div>
       </div>
 
-      <div class="control-section">
-        <div class="section-title">■ カラー</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ カラー</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="section-body">
 
         <div class="control-group color-swatch-row c-color">
           <span class="control-label">粒子カラー</span>
@@ -984,6 +1047,8 @@
         <div class="control-group color-swatch-row c-color">
           <span class="control-label">背景カラー</span>
           <input type="color" id="bgColorM" value="#0b0c10">
+        </div>
+
         </div>
       </div>
 
@@ -1452,6 +1517,17 @@
 
     mobilePanel.addEventListener('touchstart', (e) => e.stopPropagation());
     mobilePanel.addEventListener('mousedown', (e) => e.stopPropagation());
+
+    // ===== スマホ用パネル：セクションのアコーディオン開閉（排他制御なし） =====
+    document.querySelectorAll('.mobile-control-panel .control-section').forEach((section) => {
+      const toggle = section.querySelector('.section-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      });
+    });
 
     // キャンバスを3回連続タップでパネルを再表示
     let tapTimestamps = [];

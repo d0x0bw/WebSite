@@ -126,6 +126,21 @@
       font-size: 0.75rem; font-weight: bold; color: #9ca3af;
       text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
     }
+
+    /* セクション見出しのアコーディオン化 */
+    .section-toggle {
+      all: unset;
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; box-sizing: border-box; cursor: pointer;
+      color: #9ca3af; margin-bottom: 8px;
+    }
+    .section-toggle .section-title { margin-bottom: 0; }
+    .section-chevron {
+      width: 15px; height: 15px; flex-shrink: 0; margin-left: 8px;
+      color: #9ca3af; transition: transform 0.2s ease;
+    }
+    .control-section:not(.is-collapsed) .section-chevron { transform: rotate(180deg); }
+    .control-section.is-collapsed .section-body { display: none; }
     .control-group { margin-bottom: 10px; }
     .control-group label {
       display: flex; justify-content: space-between;
@@ -150,6 +165,7 @@
       .panel-header h3 { font-size: 0.82rem; }
       .control-section { margin-bottom: 8px; }
       .section-title { font-size: 0.66rem; margin-bottom: 5px; }
+      .section-toggle { margin-bottom: 5px; }
       .control-group { margin-bottom: 6px; }
       .control-group label { font-size: 0.72rem; margin-bottom: 2px; }
       .control-group input[type="range"] { height: 10px; }
@@ -177,62 +193,90 @@
 
   <div class="panel-content" id="panel-body">
     <!-- 1. 数量・サイズ -->
-    <div class="control-section">
-      <div class="section-title">■ 数量 & サイズ</div>
-      <div class="control-group">
-        <label>花びらの数: <span id="val-count">40</span>枚</label>
-        <input type="range" id="param-count" min="1" max="250" value="40">
-      </div>
-      <div class="control-group">
-        <label>サイズ倍率: <span id="val-size">1.0</span>倍</label>
-        <input type="range" id="param-size" min="0.2" max="3.0" step="0.1" value="1.0">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 数量 & サイズ</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>花びらの数: <span id="val-count">40</span>枚</label>
+          <input type="range" id="param-count" min="1" max="250" value="40">
+        </div>
+        <div class="control-group">
+          <label>サイズ倍率: <span id="val-size">1.0</span>倍</label>
+          <input type="range" id="param-size" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
       </div>
     </div>
 
     <!-- 2. カラー & 透明度 -->
-    <div class="control-section">
-      <div class="section-title">■ カラー & 透明度</div>
-      <div class="control-group">
-        <label>外側の色</label>
-        <input type="color" id="param-outercolor" value="#FBA5D1">
-      </div>
-      <div class="control-group">
-        <label>内側の色</label>
-        <input type="color" id="param-innercolor" value="#FFD1EA">
-      </div>
-      <div class="control-group">
-        <label>透明度（最大）: <span id="val-opacity">100</span>%</label>
-        <input type="range" id="param-opacity" min="10" max="100" value="100">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ カラー & 透明度</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>外側の色</label>
+          <input type="color" id="param-outercolor" value="#FBA5D1">
+        </div>
+        <div class="control-group">
+          <label>内側の色</label>
+          <input type="color" id="param-innercolor" value="#FFD1EA">
+        </div>
+        <div class="control-group">
+          <label>透明度（最大）: <span id="val-opacity">100</span>%</label>
+          <input type="range" id="param-opacity" min="10" max="100" value="100">
+        </div>
       </div>
     </div>
 
     <!-- 3. 動き & 物理 -->
-    <div class="control-section">
-      <div class="section-title">■ 動き & 物理</div>
-      <div class="control-group">
-        <label>落下・回転速度: <span id="val-speed">1.0</span>倍</label>
-        <input type="range" id="param-speed" min="0.1" max="5.0" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>風の強さ: <span id="val-wind">0.0</span></label>
-        <input type="range" id="param-wind" min="-5.0" max="5.0" step="0.1" value="0.0">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 動き & 物理</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>落下・回転速度: <span id="val-speed">1.0</span>倍</label>
+          <input type="range" id="param-speed" min="0.1" max="5.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>風の強さ: <span id="val-wind">0.0</span></label>
+          <input type="range" id="param-wind" min="-5.0" max="5.0" step="0.1" value="0.0">
+        </div>
       </div>
     </div>
 
     <!-- 4. 環境 & システム設定 -->
-    <div class="control-section">
-      <div class="section-title">■ 環境 & システム</div>
-      <div class="control-group">
-        <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
-        <input type="range" id="param-hidedelay" min="1" max="10" value="3">
-      </div>
-      <div class="control-group">
-        <label>背景色（上部）</label>
-        <input type="color" id="param-bgcolor1" value="#dc143c">
-      </div>
-      <div class="control-group">
-        <label>背景色（下部）</label>
-        <input type="color" id="param-bgcolor2" value="#2b1020">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 環境 & システム</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
+          <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+        </div>
+        <div class="control-group">
+          <label>背景色（上部）</label>
+          <input type="color" id="param-bgcolor1" value="#dc143c">
+        </div>
+        <div class="control-group">
+          <label>背景色（下部）</label>
+          <input type="color" id="param-bgcolor2" value="#2b1020">
+        </div>
       </div>
     </div>
   </div>
@@ -304,6 +348,17 @@
     const panelBody = document.getElementById('panel-body');
     const panel = document.getElementById('draggable-panel');
     const canvas = document.getElementById('sakuraCanvas');
+
+    // 各セクションのアコーディオン開閉(他のセクションの開閉状態には影響しない)
+    document.querySelectorAll('.control-section').forEach(section => {
+      const toggle = section.querySelector('.section-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      });
+    });
 
     resetBtn.addEventListener('click', (e) => {
       e.stopPropagation();

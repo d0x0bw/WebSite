@@ -160,6 +160,40 @@
       margin-bottom: 8px;
     }
 
+    /* セクション見出しのアコーディオン化 */
+    .section-toggle {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .section-toggle .section-title {
+      margin-bottom: 0;
+    }
+
+    .section-chevron {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      color: #9ca3af;
+      transition: transform 0.2s ease;
+    }
+
+    .control-section:not(.is-collapsed) .section-chevron {
+      transform: rotate(180deg);
+    }
+
+    .control-section.is-collapsed .section-body {
+      display: none;
+    }
+
     .control-group {
       margin-bottom: 10px;
     }
@@ -300,6 +334,10 @@
         margin-bottom: 5px;
       }
 
+      .section-toggle {
+        margin-bottom: 5px;
+      }
+
       .control-group {
         margin-bottom: 6px;
       }
@@ -345,95 +383,130 @@
   </div>
 
   <div class="panel-content" id="panel-body">
-    <div class="control-section">
-      <div class="section-title">■ パーティクル</div>
-      <div class="control-group">
-        <label>粒子の数: <span id="val-count">12000</span>個</label>
-        <input type="range" id="param-count" min="1000" max="25000" step="500" value="12000">
-      </div>
-      <div class="control-group">
-        <label>粒子の大きさ: <span id="val-size">1.8</span>倍</label>
-        <input type="range" id="param-size" min="0.3" max="5.0" step="0.1" value="1.8">
-      </div>
-      <div class="control-group">
-        <label>粒子の不透明度: <span id="val-opacity">1.0</span></label>
-        <input type="range" id="param-opacity" min="0.2" max="1.0" step="0.05" value="1.0">
-      </div>
-    </div>
-
-    <div class="control-section">
-      <div class="section-title">■ トンネル形状</div>
-      <div class="control-group">
-        <label>トンネル半径: <span id="val-radius">35</span></label>
-        <input type="range" id="param-radius" min="10" max="100" step="1" value="35">
-      </div>
-      <div class="control-group">
-        <label>トンネル長さ: <span id="val-length">600</span></label>
-        <input type="range" id="param-length" min="200" max="1500" step="50" value="600">
-      </div>
-      <div class="control-group">
-        <label>霧の濃さ: <span id="val-fog">0.006</span></label>
-        <input type="range" id="param-fog" min="0" max="0.02" step="0.001" value="0.006">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ パーティクル</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>粒子の数: <span id="val-count">12000</span>個</label>
+          <input type="range" id="param-count" min="1000" max="25000" step="500" value="12000">
+        </div>
+        <div class="control-group">
+          <label>粒子の大きさ: <span id="val-size">1.8</span>倍</label>
+          <input type="range" id="param-size" min="0.3" max="5.0" step="0.1" value="1.8">
+        </div>
+        <div class="control-group">
+          <label>粒子の不透明度: <span id="val-opacity">1.0</span></label>
+          <input type="range" id="param-opacity" min="0.2" max="1.0" step="0.05" value="1.0">
+        </div>
       </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ カラー</div>
-      <div class="control-group">
-        <label>色1（始点）</label>
-        <input type="color" id="param-color1" value="#00f0ff">
-      </div>
-      <div class="control-group">
-        <label>色2（中間）</label>
-        <input type="color" id="param-color2" value="#7800ff">
-      </div>
-      <div class="control-group">
-        <label>色3（終点）</label>
-        <input type="color" id="param-color3" value="#ff007f">
-      </div>
-      <div class="control-group">
-        <label>背景色</label>
-        <input type="color" id="param-bgcolor" value="#030308">
-      </div>
-    </div>
-
-    <div class="control-section">
-      <div class="section-title">■ 移動 & 加速</div>
-      <div class="control-group">
-        <label>巡航速度: <span id="val-basespeed">0.020</span></label>
-        <input type="range" id="param-basespeed" min="0" max="0.2" step="0.005" value="0.02">
-      </div>
-      <div class="control-group">
-        <label>長押し時の最大速度: <span id="val-maxspeed">98.0</span></label>
-        <input type="range" id="param-maxspeed" min="10" max="200" step="1" value="98">
-      </div>
-      <div class="control-group">
-        <label>長押し時の加速度: <span id="val-accel">0.020</span></label>
-        <input type="range" id="param-accel" min="0.005" max="0.1" step="0.005" value="0.02">
-      </div>
-      <div class="control-group">
-        <label>ダブルタップのワープ速度: <span id="val-warp">8.0</span></label>
-        <input type="range" id="param-warp" min="1.0" max="30.0" step="0.5" value="8.0">
-      </div>
-      <div class="control-group">
-        <label>基本視野角(FOV): <span id="val-basefov">75</span>°</label>
-        <input type="range" id="param-basefov" min="50" max="90" step="1" value="75">
-      </div>
-      <div class="control-group">
-        <label>ワープ時の最大視野角: <span id="val-maxfov">110</span>°</label>
-        <input type="range" id="param-maxfov" min="90" max="150" step="1" value="110">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ トンネル形状</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>トンネル半径: <span id="val-radius">35</span></label>
+          <input type="range" id="param-radius" min="10" max="100" step="1" value="35">
+        </div>
+        <div class="control-group">
+          <label>トンネル長さ: <span id="val-length">600</span></label>
+          <input type="range" id="param-length" min="200" max="1500" step="50" value="600">
+        </div>
+        <div class="control-group">
+          <label>霧の濃さ: <span id="val-fog">0.006</span></label>
+          <input type="range" id="param-fog" min="0" max="0.02" step="0.001" value="0.006">
+        </div>
       </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ 環境 & システム</div>
-      <div class="control-group">
-        <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
-        <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ カラー</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>色1（始点）</label>
+          <input type="color" id="param-color1" value="#00f0ff">
+        </div>
+        <div class="control-group">
+          <label>色2（中間）</label>
+          <input type="color" id="param-color2" value="#7800ff">
+        </div>
+        <div class="control-group">
+          <label>色3（終点）</label>
+          <input type="color" id="param-color3" value="#ff007f">
+        </div>
+        <div class="control-group">
+          <label>背景色</label>
+          <input type="color" id="param-bgcolor" value="#030308">
+        </div>
       </div>
-      <div class="control-group inline-row">
-        <label for="param-speedmeter">速度メーターを表示（左上）</label>
-        <input type="checkbox" id="param-speedmeter" checked>
+    </div>
+
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 移動 & 加速</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>巡航速度: <span id="val-basespeed">0.020</span></label>
+          <input type="range" id="param-basespeed" min="0" max="0.2" step="0.005" value="0.02">
+        </div>
+        <div class="control-group">
+          <label>長押し時の最大速度: <span id="val-maxspeed">98.0</span></label>
+          <input type="range" id="param-maxspeed" min="10" max="200" step="1" value="98">
+        </div>
+        <div class="control-group">
+          <label>長押し時の加速度: <span id="val-accel">0.020</span></label>
+          <input type="range" id="param-accel" min="0.005" max="0.1" step="0.005" value="0.02">
+        </div>
+        <div class="control-group">
+          <label>ダブルタップのワープ速度: <span id="val-warp">8.0</span></label>
+          <input type="range" id="param-warp" min="1.0" max="30.0" step="0.5" value="8.0">
+        </div>
+        <div class="control-group">
+          <label>基本視野角(FOV): <span id="val-basefov">75</span>°</label>
+          <input type="range" id="param-basefov" min="50" max="90" step="1" value="75">
+        </div>
+        <div class="control-group">
+          <label>ワープ時の最大視野角: <span id="val-maxfov">110</span>°</label>
+          <input type="range" id="param-maxfov" min="90" max="150" step="1" value="110">
+        </div>
+      </div>
+    </div>
+
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 環境 & システム</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
+          <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+        </div>
+        <div class="control-group inline-row">
+          <label for="param-speedmeter">速度メーターを表示（左上）</label>
+          <input type="checkbox" id="param-speedmeter" checked>
+        </div>
       </div>
     </div>
   </div>
@@ -692,6 +765,17 @@ function initUI() {
   const toggleBtn = document.getElementById('btn-toggle-panel');
   const resetBtn = document.getElementById('btn-reset-panel');
   const panelBody = document.getElementById('panel-body');
+
+  // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
+  document.querySelectorAll('.control-section').forEach(section => {
+    const toggle = section.querySelector('.section-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isCollapsed = section.classList.toggle('is-collapsed');
+      toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    });
+  });
 
   // パネル上での操作がトンネルの加速操作（ウィンドウ全体のmousedown/touchstart）に
   // 伝わってしまわないようにブロックする

@@ -323,6 +323,43 @@
       border-bottom: 1px solid var(--line-soft);
     }
 
+    /* セクション見出しのアコーディオン化 */
+    .section-toggle {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      color: var(--dim);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .section-toggle .section-title {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .section-chevron {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      transition: transform 0.2s ease;
+    }
+
+    .control-section:not(.is-collapsed) .section-chevron {
+      transform: rotate(180deg);
+    }
+
+    .control-section.is-collapsed .section-body {
+      display: none;
+    }
+
     .control-panel .control-group {
       margin-bottom: 14px;
     }
@@ -640,6 +677,10 @@
         margin-bottom: 8px;
       }
 
+      .section-toggle {
+        margin-bottom: 8px;
+      }
+
       .control-panel .control-group {
         margin-bottom: 10px;
       }
@@ -700,102 +741,123 @@
 
     <div class="panel-content" id="panelBody">
 
-      <div class="control-section">
-        <div class="section-title">■ パーティクル</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ パーティクル</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
 
-        <div class="control-group control-style is-rainbow" id="styleControlGroup">
-          <div class="range-label">
-            <span class="control-label" for="styleSelect">Particle Style</span>
+        <div class="section-body">
+          <div class="control-group control-style is-rainbow" id="styleControlGroup">
+            <div class="range-label">
+              <span class="control-label" for="styleSelect">Particle Style</span>
+            </div>
+            <div class="select-wrapper">
+              <select id="styleSelect">
+                <option value="magicDust">Magic Dust</option>
+                <option value="rainbowSparkles" selected>Rainbow Sparkles</option>
+                <option value="cosmicRays">Cosmic Rays</option>
+              </select>
+            </div>
           </div>
-          <div class="select-wrapper">
-            <select id="styleSelect">
-              <option value="magicDust">Magic Dust</option>
-              <option value="rainbowSparkles" selected>Rainbow Sparkles</option>
-              <option value="cosmicRays">Cosmic Rays</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="control-group control-speed">
-          <div class="range-label">
-            <span class="control-label">Speed</span>
-            <span class="value-badge" id="speedVal">5</span>
+          <div class="control-group control-speed">
+            <div class="range-label">
+              <span class="control-label">Speed</span>
+              <span class="value-badge" id="speedVal">5</span>
+            </div>
+            <input type="range" id="speedRange" min="1" max="10" step="1" value="5">
           </div>
-          <input type="range" id="speedRange" min="1" max="10" step="1" value="5">
-        </div>
 
-        <div class="control-group control-size">
-          <div class="range-label">
-            <span class="control-label">Size</span>
-            <span class="value-badge" id="sizeVal">1.0</span>
+          <div class="control-group control-size">
+            <div class="range-label">
+              <span class="control-label">Size</span>
+              <span class="value-badge" id="sizeVal">1.0</span>
+            </div>
+            <input type="range" id="sizeRange" min="0.3" max="3" step="0.1" value="1">
           </div>
-          <input type="range" id="sizeRange" min="0.3" max="3" step="0.1" value="1">
-        </div>
 
-        <div class="control-group control-gravity">
-          <div class="range-label">
-            <span class="control-label">Gravity</span>
-            <span class="value-badge" id="gravityVal">-0.35</span>
+          <div class="control-group control-gravity">
+            <div class="range-label">
+              <span class="control-label">Gravity</span>
+              <span class="value-badge" id="gravityVal">-0.35</span>
+            </div>
+            <input type="range" id="gravityRange" min="-1" max="1" step="0.05" value="-0.35">
           </div>
-          <input type="range" id="gravityRange" min="-1" max="1" step="0.05" value="-0.35">
         </div>
       </div>
 
-      <div class="control-section">
-        <div class="section-title">■ 図形の管理</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ 図形の管理</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
 
-        <div class="control-group control-shape-circle inline-row">
-          <span class="control-label">Circle</span>
-          <label class="switch">
-            <input type="checkbox" class="shape-toggle" data-shape="circle" checked>
-            <span class="slider-toggle"></span>
-          </label>
+        <div class="section-body">
+          <div class="control-group control-shape-circle inline-row">
+            <span class="control-label">Circle</span>
+            <label class="switch">
+              <input type="checkbox" class="shape-toggle" data-shape="circle" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="control-group control-shape-star inline-row">
+            <span class="control-label">Star</span>
+            <label class="switch">
+              <input type="checkbox" class="shape-toggle" data-shape="star" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="control-group control-shape-sparkle inline-row">
+            <span class="control-label">Sparkle</span>
+            <label class="switch">
+              <input type="checkbox" class="shape-toggle" data-shape="sparkle" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="control-group control-shape-ray inline-row">
+            <span class="control-label">Ray</span>
+            <label class="switch">
+              <input type="checkbox" class="shape-toggle" data-shape="ray" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <p class="hint-text">オフにした形は表示されなくなります。最低ひとつは有効にしてください。</p>
         </div>
-
-        <div class="control-group control-shape-star inline-row">
-          <span class="control-label">Star</span>
-          <label class="switch">
-            <input type="checkbox" class="shape-toggle" data-shape="star" checked>
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group control-shape-sparkle inline-row">
-          <span class="control-label">Sparkle</span>
-          <label class="switch">
-            <input type="checkbox" class="shape-toggle" data-shape="sparkle" checked>
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group control-shape-ray inline-row">
-          <span class="control-label">Ray</span>
-          <label class="switch">
-            <input type="checkbox" class="shape-toggle" data-shape="ray" checked>
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <p class="hint-text">オフにした形は表示されなくなります。最低ひとつは有効にしてください。</p>
       </div>
 
-      <div class="control-section">
-        <div class="section-title">■ システム</div>
+      <div class="control-section is-collapsed">
+        <button class="section-toggle" type="button" aria-expanded="false">
+          <span class="section-title">■ システム</span>
+          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
 
-        <div class="control-group control-opacity">
-          <div class="range-label">
-            <span class="control-label">パネルの透明度</span>
-            <span class="value-badge" id="panelOpacityValue">0%</span>
+        <div class="section-body">
+          <div class="control-group control-opacity">
+            <div class="range-label">
+              <span class="control-label">パネルの透明度</span>
+              <span class="value-badge" id="panelOpacityValue">0%</span>
+            </div>
+            <input type="range" id="panelOpacitySlider" min="0" max="100" step="5" value="0">
           </div>
-          <input type="range" id="panelOpacitySlider" min="0" max="100" step="5" value="0">
-        </div>
 
-        <div class="control-group control-hidedelay">
-          <div class="range-label">
-            <span class="control-label">パネルが消える時間</span>
-            <span class="value-badge" id="hideDelayValue">4s</span>
+          <div class="control-group control-hidedelay">
+            <div class="range-label">
+              <span class="control-label">パネルが消える時間</span>
+              <span class="value-badge" id="hideDelayValue">4s</span>
+            </div>
+            <input type="range" id="hideDelaySlider" min="1" max="15" step="1" value="4">
           </div>
-          <input type="range" id="hideDelaySlider" min="1" max="15" step="1" value="4">
         </div>
       </div>
 
@@ -1183,6 +1245,17 @@
 
       hideDelaySlider.value = defaults.hideDelay;
       hideDelayValue.textContent = defaults.hideDelay + 's';
+    });
+
+    // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
+    document.querySelectorAll('.control-section').forEach(section => {
+      const toggle = section.querySelector('.section-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      });
     });
 
     // ===== 格納式パネルの挙動（表示/非表示・自動退避・ドラッグ移動） =====

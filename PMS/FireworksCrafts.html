@@ -163,6 +163,40 @@
       margin-bottom: 8px;
     }
 
+    /* セクション見出しのアコーディオン化 */
+    .section-toggle {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .section-toggle .section-title {
+      margin-bottom: 0;
+    }
+
+    .section-chevron {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      color: #9ca3af;
+      transition: transform 0.2s ease;
+    }
+
+    .control-section:not(.is-collapsed) .section-chevron {
+      transform: rotate(180deg);
+    }
+
+    .control-section.is-collapsed .section-body {
+      display: none;
+    }
+
     .control-group {
       margin-bottom: 12px;
     }
@@ -233,6 +267,10 @@
         margin-bottom: 5px;
       }
 
+      .section-toggle {
+        margin-bottom: 5px;
+      }
+
       .control-group {
         margin-bottom: 6px;
       }
@@ -271,79 +309,121 @@
   </div>
 
   <div class="panel-content" id="panel-body">
-    <div class="control-section">
-      <div class="section-title">■ 打ち上げ</div>
-      <div class="control-group">
-        <label>打ち上げ頻度: <span id="val-launchrate">1.0</span>倍</label>
-        <input type="range" id="param-launchrate" min="0.2" max="3.0" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>菊(尾を引く型)の割合: <span id="val-kikuratio">55</span>%</label>
-        <input type="range" id="param-kikuratio" min="0" max="100" value="55">
-      </div>
-    </div>
-
-    <div class="control-section">
-      <div class="section-title">■ 数と大きさ</div>
-      <div class="control-group">
-        <label>光の粒の数: <span id="val-particle">1.0</span>倍</label>
-        <input type="range" id="param-particle" min="0.3" max="2.5" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>粒の大きさ: <span id="val-size">1.0</span>倍</label>
-        <input type="range" id="param-size" min="0.3" max="3.0" step="0.1" value="1.0">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 打ち上げ</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>打ち上げ頻度: <span id="val-launchrate">1.0</span>倍</label>
+          <input type="range" id="param-launchrate" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>菊(尾を引く型)の割合: <span id="val-kikuratio">55</span>%</label>
+          <input type="range" id="param-kikuratio" min="0" max="100" value="55">
+        </div>
       </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ 開き方</div>
-      <div class="control-group">
-        <label>広がる勢い: <span id="val-burstspeed">1.0</span>倍</label>
-        <input type="range" id="param-burstspeed" min="0.3" max="2.5" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>尾の長さ: <span id="val-trail">1.0</span>倍</label>
-        <input type="range" id="param-trail" min="0.2" max="3.0" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>しだれ具合(重力): <span id="val-gravity">1.0</span>倍</label>
-        <input type="range" id="param-gravity" min="0.0" max="3.0" step="0.1" value="1.0">
-      </div>
-    </div>
-
-    <div class="control-section">
-      <div class="section-title">■ 色と光</div>
-      <div class="control-group">
-        <label>変化菊(色が変わる)の割合: <span id="val-colorshift">40</span>%</label>
-        <input type="range" id="param-colorshift" min="0" max="100" value="40">
-      </div>
-      <div class="control-group">
-        <label>開いた瞬間の閃光: <span id="val-flash">1.0</span>倍</label>
-        <input type="range" id="param-flash" min="0.0" max="2.5" step="0.1" value="1.0">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 数と大きさ</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>光の粒の数: <span id="val-particle">1.0</span>倍</label>
+          <input type="range" id="param-particle" min="0.3" max="2.5" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>粒の大きさ: <span id="val-size">1.0</span>倍</label>
+          <input type="range" id="param-size" min="0.3" max="3.0" step="0.1" value="1.0">
+        </div>
       </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ 消え方と余韻</div>
-      <div class="control-group">
-        <label>消える速さ: <span id="val-decay">1.0</span>倍</label>
-        <input type="range" id="param-decay" min="0.3" max="3.0" step="0.1" value="1.0">
-      </div>
-      <div class="control-group">
-        <label>煙の余韻: <span id="val-afterglow">1.0</span>倍</label>
-        <input type="range" id="param-afterglow" min="0.2" max="3.0" step="0.1" value="1.0">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 開き方</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>広がる勢い: <span id="val-burstspeed">1.0</span>倍</label>
+          <input type="range" id="param-burstspeed" min="0.3" max="2.5" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>尾の長さ: <span id="val-trail">1.0</span>倍</label>
+          <input type="range" id="param-trail" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>しだれ具合(重力): <span id="val-gravity">1.0</span>倍</label>
+          <input type="range" id="param-gravity" min="0.0" max="3.0" step="0.1" value="1.0">
+        </div>
       </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ 環境とシステム</div>
-      <div class="control-group">
-        <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
-        <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 色と光</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>変化菊(色が変わる)の割合: <span id="val-colorshift">40</span>%</label>
+          <input type="range" id="param-colorshift" min="0" max="100" value="40">
+        </div>
+        <div class="control-group">
+          <label>開いた瞬間の閃光: <span id="val-flash">1.0</span>倍</label>
+          <input type="range" id="param-flash" min="0.0" max="2.5" step="0.1" value="1.0">
+        </div>
       </div>
-      <div class="control-group">
-        <label>背景の色</label>
-        <input type="color" id="param-bgcolor" value="#05050d">
+    </div>
+
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 消え方と余韻</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>消える速さ: <span id="val-decay">1.0</span>倍</label>
+          <input type="range" id="param-decay" min="0.3" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+          <label>煙の余韻: <span id="val-afterglow">1.0</span>倍</label>
+          <input type="range" id="param-afterglow" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+      </div>
+    </div>
+
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 環境とシステム</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <div class="control-group">
+          <label>パネルが消える時間: <span id="val-hidedelay">3</span>秒</label>
+          <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+        </div>
+        <div class="control-group">
+          <label>背景の色</label>
+          <input type="color" id="param-bgcolor" value="#05050d">
+        </div>
       </div>
     </div>
   </div>
@@ -418,6 +498,17 @@
     const panelBody = document.getElementById('panel-body');
     const panel = document.getElementById('draggable-panel');
     const canvas = document.getElementById('effect-canvas');
+
+    // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
+    document.querySelectorAll('.control-section').forEach(section => {
+      const toggle = section.querySelector('.section-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      });
+    });
 
     // リセットボタン押下時
     resetBtn.addEventListener('click', (e) => {
