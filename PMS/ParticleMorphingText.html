@@ -396,6 +396,25 @@
       margin-bottom: 0;
     }
 
+    .section-toggle {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .section-toggle:focus-visible {
+      outline: 2px solid var(--p-blue);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
     .section-title {
       font-family: var(--font-mono);
       font-size: 0.68rem;
@@ -403,9 +422,23 @@
       color: var(--dim);
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .section-chevron {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      color: var(--dim);
+      transition: transform 0.2s ease;
+    }
+
+    .control-section:not(.is-collapsed) .section-chevron {
+      transform: rotate(180deg);
+    }
+
+    .control-section.is-collapsed .section-body {
+      display: none;
     }
 
     .control-panel .control-group {
@@ -1031,9 +1064,12 @@
         margin-bottom: 14px;
       }
 
+      .section-toggle {
+        margin-bottom: 8px;
+      }
+
       .section-title {
         font-size: 0.62rem;
-        margin-bottom: 8px;
       }
 
       .control-panel .control-group {
@@ -1120,8 +1156,14 @@
 
   <div class="panel-content" id="panelBody">
 
-    <div class="control-section">
-      <div class="section-title">■ テキスト</div>
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ テキスト</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
 
       <div class="control-group control-pattern">
         <div class="range-label">
@@ -1182,10 +1224,18 @@
           <button type="button" class="pattern-btn" id="styleOutlineBtn" data-style="outline">アウトライン</button>
         </div>
       </div>
+
+      </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ パーティクル</div>
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ パーティクル</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
 
       <div class="control-group control-scatter">
         <div class="range-label">
@@ -1234,10 +1284,18 @@
         </div>
         <input type="range" id="glowStrengthSlider" min="2" max="20" step="1" value="8">
       </div>
+
+      </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ カラー</div>
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ カラー</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
 
       <div class="control-group control-mono inline-row">
         <span class="control-label">単色モード</span>
@@ -1279,10 +1337,18 @@
         <span class="control-label">背景色</span>
         <input type="color" id="bgColorPicker" value="#000000">
       </div>
+
+      </div>
     </div>
 
-    <div class="control-section">
-      <div class="section-title">■ システム</div>
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ システム</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
 
       <div class="control-group control-opacity">
         <div class="range-label">
@@ -1298,6 +1364,8 @@
           <span class="value-badge" id="hideDelayValue">4s</span>
         </div>
         <input type="range" id="hideDelaySlider" min="1" max="15" step="1" value="4">
+      </div>
+
       </div>
     </div>
 
@@ -2133,6 +2201,20 @@
     }
   }
 
+  // 設定パネルの各セクション（■ テキスト／■ パーティクル／■ カラー／■ システム）を
+  // 見出しクリックで個別に開閉できるアコーディオンにする（排他制御なし）
+  function initAccordion() {
+    document.querySelectorAll(".control-section").forEach((section) => {
+      const toggle = section.querySelector(".section-toggle");
+      if (!toggle) return;
+      toggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle("is-collapsed");
+        toggle.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+      });
+    });
+  }
+
   // ===== テキスト管理モーダル =====
   function renderModalList() {
     modalWordList.innerHTML = "";
@@ -2272,6 +2354,7 @@
   resetTimer();
   initDraggable();
   initSliderTouchPrevention();
+  initAccordion();
   if (config.morphPattern === "shatter") {
     startShatterCycle();
   }
