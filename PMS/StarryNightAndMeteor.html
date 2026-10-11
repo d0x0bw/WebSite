@@ -102,7 +102,7 @@
 
         .panel-header h3 {
             margin: 0;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #8ab4f8;
             pointer-events: none;
         }
@@ -147,8 +147,8 @@
             color: #8ab4f8;
             border-radius: 6px;
             padding: 3px 10px;
-            font-size: 0.75rem;
-            height: 26px;
+            font-size: 0.81rem;
+            height: 28px;
             cursor: pointer;
         }
 
@@ -160,6 +160,22 @@
 
         .control-section {
             margin-bottom: 14px;
+            padding: 7px 9px 1px;
+            border: 1px solid transparent;
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* 今開いている項目：背景色と左のアクセントラインで強調 */
+        .control-section:not(.is-collapsed) {
+            background: rgba(138, 180, 248, 0.13);
+            border-color: rgba(138, 180, 248, 0.35);
+            border-left-color: #8ab4f8;
+        }
+
+        .control-section:not(.is-collapsed) .section-title {
+            color: #dbe7ff;
         }
 
         .section-toggle {
@@ -195,7 +211,7 @@
         }
 
         .section-title {
-            font-size: 0.75rem;
+            font-size: 0.81rem;
             font-weight: bold;
             color: #9ca3af;
             text-transform: uppercase;
@@ -210,7 +226,7 @@
         .control-group label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.78rem;
+            font-size: 0.84rem;
             margin-bottom: 4px;
             color: #e5e7eb;
         }
@@ -261,11 +277,12 @@
             }
 
             .panel-header h3 {
-                font-size: 0.82rem;
+                font-size: 0.88rem;
             }
 
             .control-section {
                 margin-bottom: 8px;
+                padding: 5px 7px 1px;
             }
 
             .section-toggle {
@@ -273,7 +290,7 @@
             }
 
             .section-title {
-                font-size: 0.66rem;
+                font-size: 0.72rem;
             }
 
             .control-group {
@@ -281,7 +298,7 @@
             }
 
             .control-group label {
-                font-size: 0.72rem;
+                font-size: 0.78rem;
                 margin-bottom: 2px;
             }
 
@@ -325,7 +342,7 @@
                 <div class="section-body">
                 <div class="control-group">
                     <label>星の数: <span id="val-star-count">400</span>個</label>
-                    <input type="range" id="param-star-count" min="10" max="1000" value="400">
+                    <input type="range" id="param-star-count" min="0" max="1000" value="400">
                 </div>
                 <div class="control-group">
                     <label>最小サイズ: <span id="val-star-min-size">0.2</span>px</label>
@@ -393,10 +410,27 @@
                 <div class="section-body">
                 <div class="control-group">
                     <label style="margin-bottom:6px;">どの星を画面中心に置くか</label>
-                    <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.78rem;">
-                        <optgroup label="恒星">
-                            <option value="polaris">北極星（ポラリス）</option>
+                    <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.84rem;">
+                        <optgroup label="🌸 春を代表する恒星">
+                            <option value="arcturus">アークトゥルス</option>
+                            <option value="spica">スピカ</option>
+                        </optgroup>
+                        <optgroup label="☀️ 夏を代表する恒星">
+                            <option value="summer_triangle">夏の大三角</option>
+                            <option value="vega">ベガ</option>
+                            <option value="altair">アルタイル</option>
+                            <option value="antares">アンタレス</option>
+                        </optgroup>
+                        <optgroup label="🍁 秋を代表する恒星">
+                            <option value="fomalhaut">フォーマルハウト</option>
+                            <option value="polaris" selected>ポラリス（北極星）</option>
+                        </optgroup>
+                        <optgroup label="❄️ 冬を代表する恒星">
                             <option value="sirius">シリウス</option>
+                            <option value="betelgeuse">ベテルギウス</option>
+                            <option value="procyon">プロキオン</option>
+                            <option value="rigel">リゲル</option>
+                            <option value="canopus">カノープス</option>
                         </optgroup>
                         <optgroup label="黄道十二星座">
                             <option value="aries">おひつじ座</option>
@@ -411,6 +445,84 @@
                             <option value="capricornus">やぎ座</option>
                             <option value="aquarius">みずがめ座</option>
                             <option value="pisces">うお座</option>
+                        </optgroup>
+                        <optgroup label="その他の星">
+                            <option value="andromeda">アンドロメダ座</option>
+                            <option value="monoceros">いっかくじゅう座</option>
+                            <option value="delphinus">いるか座</option>
+                            <option value="indus">インディアン座</option>
+                            <option value="lepus">うさぎ座</option>
+                            <option value="bootes">うしかい座</option>
+                            <option value="hydra">うみへび座</option>
+                            <option value="eridanus">エリダヌス座</option>
+                            <option value="canis_major">おおいぬ座</option>
+                            <option value="lupus">おおかみ座</option>
+                            <option value="ursa_major">おおぐま座</option>
+                            <option value="orion">オリオン座</option>
+                            <option value="pictor">がか座</option>
+                            <option value="cassiopeia">カシオペヤ座</option>
+                            <option value="dorado">かじき座</option>
+                            <option value="coma_berenices">かみのけ座</option>
+                            <option value="chamaeleon">カメレオン座</option>
+                            <option value="corvus">からす座</option>
+                            <option value="corona_borealis">かんむり座</option>
+                            <option value="tucana">きょしちょう座</option>
+                            <option value="auriga">ぎょしゃ座</option>
+                            <option value="camelopardalis">きりん座</option>
+                            <option value="pavo">くじゃく座</option>
+                            <option value="cetus">くじら座</option>
+                            <option value="cepheus">ケフェウス座</option>
+                            <option value="centaurus">ケンタウルス座</option>
+                            <option value="microscopium">けんびきょう座</option>
+                            <option value="canis_minor">こいぬ座</option>
+                            <option value="equuleus">こうま座</option>
+                            <option value="vulpecula">こぎつね座</option>
+                            <option value="ursa_minor">こぐま座</option>
+                            <option value="leo_minor">こじし座</option>
+                            <option value="crater">コップ座</option>
+                            <option value="lyra">こと座</option>
+                            <option value="circinus">コンパス座</option>
+                            <option value="ara">さいだん座</option>
+                            <option value="triangulum">さんかく座</option>
+                            <option value="norma">じょうぎ座</option>
+                            <option value="scutum">たて座</option>
+                            <option value="caelum">ちょうこくぐ座</option>
+                            <option value="sculptor">ちょうこくしつ座</option>
+                            <option value="grus">つる座</option>
+                            <option value="mensa">テーブルさん座</option>
+                            <option value="lacerta">とかげ座</option>
+                            <option value="horologium">とけい座</option>
+                            <option value="volans">とびうお座</option>
+                            <option value="puppis">とも座</option>
+                            <option value="musca">はえ座</option>
+                            <option value="cygnus">はくちょう座</option>
+                            <option value="octans">はちぶんぎ座</option>
+                            <option value="columba">はと座</option>
+                            <option value="apus">ふうちょう座</option>
+                            <option value="pegasus">ペガスス座</option>
+                            <option value="serpens">へび座</option>
+                            <option value="ophiuchus">へびつかい座</option>
+                            <option value="hercules">ヘルクレス座</option>
+                            <option value="perseus">ペルセウス座</option>
+                            <option value="vela">ほ座</option>
+                            <option value="telescopium">ぼうえんきょう座</option>
+                            <option value="phoenix">ほうおう座</option>
+                            <option value="antlia">ポンプ座</option>
+                            <option value="hydrus">みずへび座</option>
+                            <option value="crux">みなみじゅうじ座</option>
+                            <option value="piscis_austrinus">みなみのうお座</option>
+                            <option value="corona_australis">みなみのかんむり座</option>
+                            <option value="triangulum_australe">みなみのさんかく座</option>
+                            <option value="sagitta">や座</option>
+                            <option value="lynx">やまねこ座</option>
+                            <option value="pyxis">らしんばん座</option>
+                            <option value="draco">りゅう座</option>
+                            <option value="carina">りゅうこつ座</option>
+                            <option value="canes_venatici">りょうけん座</option>
+                            <option value="reticulum">レチクル座</option>
+                            <option value="fornax">ろ座</option>
+                            <option value="sextans">ろくぶんぎ座</option>
+                            <option value="aquila">わし座</option>
                         </optgroup>
                     </select>
                 </div>
@@ -428,7 +540,7 @@
                 <div class="section-body">
                 <div class="control-group">
                     <label>☀️ 太陽を表示
-                        <button class="toggle-btn" id="btn-toggle-sun" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                        <button class="toggle-btn" id="btn-toggle-sun" style="padding:2px 8px;font-size:0.78rem;height:25px;">非表示</button>
                     </label>
                 </div>
                 <div class="control-group">
@@ -454,7 +566,7 @@
 
                 <div class="control-group" style="margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
                     <label>🌙 月を表示
-                        <button class="toggle-btn" id="btn-toggle-moon" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                        <button class="toggle-btn" id="btn-toggle-moon" style="padding:2px 8px;font-size:0.78rem;height:25px;">非表示</button>
                     </label>
                 </div>
                 <div class="control-group">
@@ -475,7 +587,7 @@
                 </div>
                 <div class="control-group">
                     <label>満ち欠けの進み方
-                        <button class="toggle-btn" id="btn-toggle-moon-auto" style="padding:2px 8px;font-size:0.72rem;height:22px;">手動</button>
+                        <button class="toggle-btn" id="btn-toggle-moon-auto" style="padding:2px 8px;font-size:0.78rem;height:25px;">手動</button>
                     </label>
                 </div>
                 <div class="control-group">
@@ -484,7 +596,7 @@
                 </div>
                 <div class="control-group">
                     <label>満ちていく／欠けていく
-                        <button class="toggle-btn" id="btn-toggle-moon-waxing" style="padding:2px 8px;font-size:0.72rem;height:22px;">満ちていく</button>
+                        <button class="toggle-btn" id="btn-toggle-moon-waxing" style="padding:2px 8px;font-size:0.78rem;height:25px;">満ちていく</button>
                     </label>
                 </div>
                 <div class="control-group">
@@ -505,7 +617,7 @@
                 <div class="section-body">
                 <div class="control-group">
                     <label>星座線
-                        <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.72rem;height:22px;">表示中</button>
+                        <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
                     </label>
                 </div>
                 <div class="control-group">
@@ -531,13 +643,13 @@
                 <div class="control-group">
                     <label>
                         <span id="con-toggle-summary">星座を選択</span>
-                        <button class="toggle-btn" id="btn-toggle-con-list" style="padding:2px 8px;font-size:0.72rem;height:22px;">開く</button>
+                        <button class="toggle-btn" id="btn-toggle-con-list" style="padding:2px 8px;font-size:0.78rem;height:25px;">開く</button>
                     </label>
                 </div>
                 <div id="constellation-list" style="display:none; max-height:200px; overflow-y:auto; margin-top:4px; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;">
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <button class="toggle-btn" id="btn-con-all" style="flex:1; height:24px; font-size:0.72rem;">すべて表示</button>
-                        <button class="toggle-btn" id="btn-con-none" style="flex:1; height:24px; font-size:0.72rem;">すべて非表示</button>
+                        <button class="toggle-btn" id="btn-con-all" style="flex:1; height:27px; font-size:0.78rem;">すべて表示</button>
+                        <button class="toggle-btn" id="btn-con-none" style="flex:1; height:27px; font-size:0.78rem;">すべて非表示</button>
                     </div>
                     <div id="constellation-checkboxes"></div>
                 </div>
@@ -588,13 +700,13 @@
             realStarScale: 1.5,
             rotationSpeed: 0.3,
             centerStar: 'polaris',
-            showSun: true,
+            showSun: false,
             sunSize: 45,
             sunGlow: 1.2,
             sunX: 15,
             sunY: 14,
             sunColor: '#ffb84d',
-            showMoon: true,
+            showMoon: false,
             moonSize: 38,
             moonGlow: 1.0,
             moonX: 50,
@@ -1125,6 +1237,18 @@
         const CENTER_PRESETS = {
             polaris: { label: '北極星（ポラリス）', ra: 2.530, dec: 89.264 },
             sirius: { label: 'シリウス', ra: 6.752, dec: -16.716 },
+            // 季節を代表する恒星
+            arcturus: { label: 'アークトゥルス', ra: 14.261, dec: 19.182 },
+            spica: { label: 'スピカ', ra: 13.420, dec: -11.161 },
+            summer_triangle: { label: '夏の大三角（ベガ・アルタイル・デネブの中心）', ra: 19.700, dec: 31.685 },
+            vega: { label: 'ベガ', ra: 18.615, dec: 38.784 },
+            altair: { label: 'アルタイル', ra: 19.847, dec: 8.868 },
+            antares: { label: 'アンタレス', ra: 16.490, dec: -26.432 },
+            fomalhaut: { label: 'フォーマルハウト', ra: 22.961, dec: -29.622 },
+            betelgeuse: { label: 'ベテルギウス', ra: 5.920, dec: 7.407 },
+            procyon: { label: 'プロキオン', ra: 7.655, dec: 5.225 },
+            rigel: { label: 'リゲル', ra: 5.242, dec: -8.202 },
+            canopus: { label: 'カノープス', ra: 6.399, dec: -52.696 },
             // 黄道十二星座：各星座を代表する目印の恒星を中心に採用
             aries: { label: 'おひつじ座（ハマル）', ra: 2.1195, dec: 23.4625 },
             taurus: { label: 'おうし座（アルデバラン）', ra: 4.5987, dec: 16.5092 },
@@ -1137,69 +1261,90 @@
             sagittarius: { label: 'いて座（カウス・アウストラリス）', ra: 18.4028, dec: -34.3847 },
             capricornus: { label: 'やぎ座（デネブ・アルゲディ）', ra: 21.7840, dec: -16.1272 },
             aquarius: { label: 'みずがめ座（サダルスード）', ra: 21.5259, dec: -5.5711 },
-            pisces: { label: 'うお座（アルレシャ）', ra: 2.0341, dec: 2.7636 }
+            pisces: { label: 'うお座（アルレシャ）', ra: 2.0341, dec: 2.7636 },
+            // その他の星座：各星座の中心付近にある明るめの星を中心に採用（五十音順）
+            andromeda: { label: 'アンドロメダ座', ra: 1.1620, dec: 35.6210 },
+            monoceros: { label: 'いっかくじゅう座', ra: 6.4800, dec: -7.0330 },
+            delphinus: { label: 'いるか座', ra: 20.7250, dec: 15.0700 },
+            indus: { label: 'インディアン座', ra: 20.9120, dec: -58.4540 },
+            lepus: { label: 'うさぎ座', ra: 5.5450, dec: -17.8220 },
+            bootes: { label: 'うしかい座', ra: 14.2610, dec: 19.1820 },
+            hydra: { label: 'うみへび座', ra: 9.4600, dec: -8.6590 },
+            eridanus: { label: 'エリダヌス座', ra: 1.6290, dec: -57.2370 },
+            canis_major: { label: 'おおいぬ座', ra: 6.7520, dec: -16.7160 },
+            lupus: { label: 'おおかみ座', ra: 14.9760, dec: -43.1340 },
+            ursa_major: { label: 'おおぐま座', ra: 11.0310, dec: 56.3820 },
+            orion: { label: 'オリオン座', ra: 5.2420, dec: -8.2020 },
+            pictor: { label: 'がか座', ra: 5.7880, dec: -51.0670 },
+            cassiopeia: { label: 'カシオペヤ座', ra: 0.9450, dec: 60.7170 },
+            dorado: { label: 'かじき座', ra: 4.5670, dec: -55.0450 },
+            coma_berenices: { label: 'かみのけ座', ra: 13.1980, dec: 27.8780 },
+            chamaeleon: { label: 'カメレオン座', ra: 10.5910, dec: -78.6080 },
+            corvus: { label: 'からす座', ra: 12.2640, dec: -17.5420 },
+            corona_borealis: { label: 'かんむり座', ra: 15.5780, dec: 26.7150 },
+            tucana: { label: 'きょしちょう座', ra: 22.3080, dec: -60.2600 },
+            auriga: { label: 'ぎょしゃ座', ra: 5.2780, dec: 45.9980 },
+            camelopardalis: { label: 'きりん座', ra: 4.9020, dec: 66.3430 },
+            pavo: { label: 'くじゃく座', ra: 20.4280, dec: -56.7350 },
+            cetus: { label: 'くじら座', ra: 3.0380, dec: 4.0900 },
+            cepheus: { label: 'ケフェウス座', ra: 21.3100, dec: 62.5850 },
+            centaurus: { label: 'ケンタウルス座', ra: 14.0640, dec: -60.3730 },
+            microscopium: { label: 'けんびきょう座', ra: 21.0210, dec: -32.2580 },
+            canis_minor: { label: 'こいぬ座', ra: 7.6550, dec: 5.2250 },
+            equuleus: { label: 'こうま座', ra: 21.2410, dec: 10.0070 },
+            vulpecula: { label: 'こぎつね座', ra: 19.4780, dec: 24.6650 },
+            ursa_minor: { label: 'こぐま座', ra: 14.8450, dec: 74.1550 },
+            leo_minor: { label: 'こじし座', ra: 10.8890, dec: 34.2150 },
+            crater: { label: 'コップ座', ra: 11.4150, dec: -17.6840 },
+            lyra: { label: 'こと座', ra: 18.6150, dec: 38.7840 },
+            circinus: { label: 'コンパス座', ra: 15.2840, dec: -58.8040 },
+            ara: { label: 'さいだん座', ra: 17.4220, dec: -55.5300 },
+            triangulum: { label: 'さんかく座', ra: 2.1580, dec: 34.9870 },
+            norma: { label: 'じょうぎ座', ra: 16.3190, dec: -50.1560 },
+            scutum: { label: 'たて座', ra: 18.7040, dec: -9.0520 },
+            caelum: { label: 'ちょうこくぐ座', ra: 4.6990, dec: -37.1440 },
+            sculptor: { label: 'ちょうこくしつ座', ra: 23.8150, dec: -28.1300 },
+            grus: { label: 'つる座', ra: 22.1370, dec: -46.9610 },
+            mensa: { label: 'テーブルさん座', ra: 6.1710, dec: -74.7530 },
+            lacerta: { label: 'とかげ座', ra: 22.5210, dec: 50.2830 },
+            horologium: { label: 'とけい座', ra: 4.2340, dec: -42.2940 },
+            volans: { label: 'とびうお座', ra: 8.1330, dec: -68.6170 },
+            puppis: { label: 'とも座', ra: 8.0590, dec: -40.0030 },
+            musca: { label: 'はえ座', ra: 12.6190, dec: -69.1360 },
+            cygnus: { label: 'はくちょう座', ra: 20.3700, dec: 40.2570 },
+            octans: { label: 'はちぶんぎ座', ra: 22.7680, dec: -81.3820 },
+            columba: { label: 'はと座', ra: 5.8500, dec: -35.7680 },
+            apus: { label: 'ふうちょう座', ra: 16.3420, dec: -78.6930 },
+            pegasus: { label: 'ペガスス座', ra: 23.0630, dec: 28.0830 },
+            serpens: { label: 'へび座', ra: 15.7380, dec: 6.4260 },
+            ophiuchus: { label: 'へびつかい座', ra: 17.5820, dec: 12.5600 },
+            hercules: { label: 'ヘルクレス座', ra: 16.6880, dec: 31.6030 },
+            perseus: { label: 'ペルセウス座', ra: 3.1360, dec: 40.9560 },
+            vela: { label: 'ほ座', ra: 8.7450, dec: -54.7090 },
+            telescopium: { label: 'ぼうえんきょう座', ra: 18.4490, dec: -45.9680 },
+            phoenix: { label: 'ほうおう座', ra: 1.1010, dec: -46.7180 },
+            antlia: { label: 'ポンプ座', ra: 10.4530, dec: -31.0680 },
+            hydrus: { label: 'みずへび座', ra: 3.7870, dec: -74.2390 },
+            crux: { label: 'みなみじゅうじ座', ra: 12.7950, dec: -59.6890 },
+            piscis_austrinus: { label: 'みなみのうお座', ra: 22.9610, dec: -29.6220 },
+            corona_australis: { label: 'みなみのかんむり座', ra: 19.1580, dec: -37.9040 },
+            triangulum_australe: { label: 'みなみのさんかく座', ra: 15.9190, dec: -63.4310 },
+            sagitta: { label: 'や座', ra: 19.7890, dec: 18.5340 },
+            lynx: { label: 'やまねこ座', ra: 9.3140, dec: 36.8030 },
+            pyxis: { label: 'らしんばん座', ra: 8.7270, dec: -33.1860 },
+            draco: { label: 'りゅう座', ra: 17.1460, dec: 65.7140 },
+            carina: { label: 'りゅうこつ座', ra: 6.3990, dec: -52.6960 },
+            canes_venatici: { label: 'りょうけん座', ra: 12.9340, dec: 38.3180 },
+            reticulum: { label: 'レチクル座', ra: 4.2400, dec: -62.4740 },
+            fornax: { label: 'ろ座', ra: 3.2010, dec: -28.9880 },
+            sextans: { label: 'ろくぶんぎ座', ra: 10.1330, dec: -0.3720 },
+            aquila: { label: 'わし座', ra: 19.8470, dec: 8.8680 }
         };
         const MAX_ANG_DEG = 115; // 中心からこの角距離までを描画範囲とする
 
         // --- 実在の星図データ（J2000元期・簡略値／赤経:時, 赤緯:度, 等級） ---
-        // 北天の周極星座を中心に、冬の星座やシリウス周辺の南天の主要な恒星・
-        // 星座線（アステリズム）も収録
+        // 全88星座を五十音順に収録（主要な恒星と星座線の簡略データ）
         const SKY_DATA = [
-            { name: "こぐま座", stars: [
-                [2.530, 89.264, 1.98, true],  // ポラリス
-                [14.845, 74.155, 2.08],       // コカブ
-                [15.345, 71.834, 3.05],       // フェルカド
-                [17.537, 86.586, 4.36],
-                [16.766, 82.037, 4.23],
-                [15.735, 77.794, 4.32],
-                [16.292, 75.755, 4.95]
-            ], lines: [[0,3],[3,4],[4,5],[5,1],[1,2],[2,6],[6,5]] },
-
-            { name: "おおぐま座", stars: [
-                [11.062, 61.751, 1.79],  // ドゥベ
-                [11.031, 56.382, 2.37],  // メラク
-                [11.897, 53.695, 2.44],  // フェクダ
-                [12.257, 57.033, 3.31],  // メグレズ
-                [12.900, 55.960, 1.77],  // アリオト
-                [13.398, 54.925, 2.23],  // ミザール
-                [13.792, 49.313, 1.85],  // アルカイド
-                [8.986, 48.042, 3.14],
-                [8.505, 60.718, 3.36]
-            ], lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]] },
-
-            { name: "カシオペヤ座", stars: [
-                [0.153, 59.150, 2.27],
-                [0.675, 56.540, 2.24],
-                [0.945, 60.717, 2.47],
-                [1.430, 60.235, 2.68],
-                [1.907, 63.670, 3.35]
-            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
-
-            { name: "ケフェウス座", stars: [
-                [21.310, 62.585, 2.44],
-                [21.478, 70.561, 3.23],
-                [23.655, 77.632, 3.21],
-                [22.182, 58.202, 3.35],
-                [22.487, 58.415, 3.50],
-                [22.828, 66.203, 3.50],
-                [20.755, 61.839, 3.40]
-            ], lines: [[0,1],[1,2],[2,5],[5,3],[3,4],[4,0]] },
-
-            { name: "きりん座", stars: [
-                [5.057, 60.443, 4.03],
-                [4.902, 66.343, 4.29],
-                [3.837, 71.333, 4.63]
-            ] },
-
-            { name: "ペルセウス座", stars: [
-                [3.405, 49.861, 1.79],  // ミルファク
-                [3.136, 40.956, 2.12],  // アルゴル
-                [3.902, 31.884, 2.85],
-                [3.965, 40.010, 2.89],
-                [3.080, 53.506, 2.93],
-                [3.715, 47.788, 3.01]
-            ], lines: [[4,0],[0,5],[5,3],[3,2]] },
-
             { name: "アンドロメダ座", stars: [
                 [0.140, 29.090, 2.06],  // アルフェラッツ
                 [0.655, 30.861, 3.27],
@@ -1207,23 +1352,72 @@
                 [2.065, 42.330, 2.10]   // アルマク
             ], lines: [[0,1],[1,2],[2,3]] },
 
-            { name: "ペガスス座", stars: [
-                [23.079, 15.205, 2.49], // マルカブ
-                [23.063, 28.083, 2.42], // シェアト
-                [0.220, 15.183, 2.83],  // アルゲニブ
-                [0.140, 29.090, 2.06]   // アルフェラッツ（アンドロメダ座と共有）
+            { name: "いっかくじゅう座", stars: [
+                [6.480, -7.033, 3.74],
+                [7.687, -9.551, 3.93],
+                [6.247, -6.275, 3.98],
+                [7.198, -0.493, 4.15]
+            ], lines: [[2,0],[0,3],[0,1]] },
+
+            { name: "いて座", stars: [
+                [18.403, -34.384, 1.85],
+                [18.921, -26.297, 2.05],
+                [19.045, -29.880, 2.60]
+            ], lines: [[0,1],[1,2]] },
+
+            { name: "いるか座", stars: [
+                [20.660, 15.912, 3.77],
+                [20.625, 14.595, 3.63],
+                [20.778, 16.123, 3.90],
+                [20.725, 15.070, 4.43]
             ], lines: [[0,1],[1,3],[3,2],[2,0]] },
 
-            { name: "さんかく座", stars: [
-                [2.158, 34.987, 3.00],
-                [1.885, 29.579, 3.41]
+            { name: "インディアン座", stars: [
+                [20.626, -47.292, 3.11],
+                [20.912, -58.454, 3.65],
+                [21.965, -54.993, 4.40],
+                [21.326, -53.449, 4.39],
+                [22.056, -56.786, 4.69]
+            ], lines: [[0,3],[3,2],[3,1],[2,4]] },
+
+            { name: "うお座", stars: [
+                [2.034, 2.764, 3.82],    // アルレシャ
+                [1.525, 15.346, 3.62],
+                [23.287, 3.282, 3.69],
+                [23.066, 3.820, 4.48],
+                [23.989, 6.863, 4.01],
+                [23.666, 5.626, 4.13],
+                [1.758, 9.158, 4.26],
+                [1.049, 7.890, 4.28],
+                [0.811, 7.585, 4.43],
+                [1.688, 5.488, 4.44]
+            ], lines: [[0,7],[7,8],[8,4],[4,5],[5,2],[2,3],[0,9],[9,6],[6,1]] },
+
+            { name: "うさぎ座", stars: [
+                [5.545, -17.822, 2.58],  // アルネブ
+                [5.471, -20.759, 2.81]   // ニハル
+            ], lines: [[0,1]] },
+
+            { name: "うしかい座", stars: [
+                [14.261, 19.182, -0.05], // アークトゥルス
+                [14.750, 27.074, 2.35],
+                [14.535, 38.308, 3.03],
+                [14.530, 30.371, 3.58],
+                [15.258, 33.315, 3.48],
+                [15.032, 40.391, 3.50],
+                [13.912, 18.398, 2.68]
             ] },
 
-            { name: "おひつじ座", stars: [
-                [2.119, 23.462, 2.00],  // ハマル
-                [1.911, 20.808, 2.64],
-                [1.892, 19.294, 3.90]
-            ], lines: [[0,1],[1,2]] },
+            { name: "うみへび座", stars: [
+                [9.460, -8.659, 1.98]    // アルファルド
+            ] },
+
+            { name: "エリダヌス座", stars: [
+                [5.131, -5.086, 2.79],
+                [3.967, -13.509, 2.95],
+                [2.971, -40.305, 2.88],
+                [1.629, -57.237, 0.46]
+            ], lines: [[0,1],[1,2],[2,3]] },
 
             { name: "おうし座", stars: [
                 [4.599, 16.509, 0.85],  // アルデバラン
@@ -1239,32 +1433,44 @@
                 [3.754, 24.467, 4.30]
             ], lines: [[0,5],[5,4],[4,3]] },
 
-            { name: "ぎょしゃ座", stars: [
-                [5.278, 45.998, 0.08],  // カペラ
-                [5.992, 44.947, 1.90],
-                [5.995, 37.213, 2.62],
-                [4.949, 33.166, 2.69],
-                [5.027, 43.823, 3.00]
-            ], lines: [[0,4],[4,3],[3,2],[2,1],[1,0]] },
+            { name: "おおいぬ座", stars: [
+                [6.752, -16.716, -1.46], // シリウス
+                [6.378, -17.956, 1.98],  // ムルジム
+                [7.140, -26.393, 1.83],  // ウェズン
+                [6.977, -28.972, 1.50],  // アダラ
+                [7.402, -29.303, 2.45]   // アルドラ
+            ], lines: [[0,1],[1,2],[2,3],[2,4]] },
 
-            { name: "ふたご座", stars: [
-                [7.577, 31.888, 1.58],  // カストル
-                [7.755, 28.026, 1.14],  // ポルックス
-                [6.629, 16.399, 1.93]
-            ], lines: [[0,1],[1,2]] },
+            { name: "おおかみ座", stars: [
+                [14.699, -47.388, 2.30],
+                [14.976, -43.134, 2.68],
+                [15.586, -41.167, 2.78],
+                [15.356, -40.648, 3.22],
+                [15.379, -44.690, 3.37],
+                [15.205, -52.099, 3.41]
+            ], lines: [[0,1],[1,3],[3,2],[1,4],[0,5]] },
 
-            { name: "しし座", stars: [
-                [10.140, 11.967, 1.35], // レグルス
-                [11.818, 14.572, 2.14], // デネボラ
-                [10.333, 19.842, 2.08],
-                [10.278, 23.417, 3.44],
-                [11.235, 20.523, 2.56],
-                [11.237, 15.430, 3.34]
-            ], lines: [[0,2],[2,3],[2,4],[4,1],[4,5]] },
+            { name: "おおぐま座", stars: [
+                [11.062, 61.751, 1.79],  // ドゥベ
+                [11.031, 56.382, 2.37],  // メラク
+                [11.897, 53.695, 2.44],  // フェクダ
+                [12.257, 57.033, 3.31],  // メグレズ
+                [12.900, 55.960, 1.77],  // アリオト
+                [13.398, 54.925, 2.23],  // ミザール
+                [13.792, 49.313, 1.85],  // アルカイド
+                [8.986, 48.042, 3.14],
+                [8.505, 60.718, 3.36]
+            ], lines: [[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]] },
 
-            { name: "こいぬ座", stars: [
-                [7.655, 5.225, 0.34]     // プロキオン
+            { name: "おとめ座", stars: [
+                [13.420, -11.161, 0.97]  // スピカ
             ] },
+
+            { name: "おひつじ座", stars: [
+                [2.119, 23.462, 2.00],  // ハマル
+                [1.911, 20.808, 2.64],
+                [1.892, 19.294, 3.90]
+            ], lines: [[0,1],[1,2]] },
 
             { name: "オリオン座", stars: [
                 [5.920, 7.407, 0.50],    // ベテルギウス
@@ -1276,50 +1482,47 @@
                 [5.795, -9.670, 2.06]
             ], lines: [[0,5],[2,3],[3,4],[4,5],[5,6],[3,1]] },
 
-            { name: "おおいぬ座", stars: [
-                [6.752, -16.716, -1.46], // シリウス
-                [6.378, -17.956, 1.98],  // ムルジム
-                [7.140, -26.393, 1.83],  // ウェズン
-                [6.977, -28.972, 1.50],  // アダラ
-                [7.402, -29.303, 2.45]   // アルドラ
-            ], lines: [[0,1],[1,2],[2,3],[2,4]] },
+            { name: "がか座", stars: [
+                [6.803, -61.941, 3.27],
+                [5.788, -51.067, 3.86],
+                [5.830, -56.167, 4.51]
+            ], lines: [[1,2],[2,0]] },
 
-            { name: "うさぎ座", stars: [
-                [5.545, -17.822, 2.58],  // アルネブ
-                [5.471, -20.759, 2.81]   // ニハル
-            ], lines: [[0,1]] },
+            { name: "カシオペヤ座", stars: [
+                [0.153, 59.150, 2.27],
+                [0.675, 56.540, 2.24],
+                [0.945, 60.717, 2.47],
+                [1.430, 60.235, 2.68],
+                [1.907, 63.670, 3.35]
+            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
 
-            { name: "はと座", stars: [
-                [5.660, -34.074, 2.65],  // ファクト
-                [5.850, -35.768, 3.12]
-            ], lines: [[0,1]] },
+            { name: "かじき座", stars: [
+                [4.567, -55.045, 3.27],
+                [5.560, -62.490, 3.76],
+                [4.267, -51.487, 4.25],
+                [5.741, -65.736, 4.34]
+            ], lines: [[2,0],[0,1],[1,3]] },
 
-            { name: "とも座", stars: [
-                [8.059, -40.003, 2.25],  // ナオス
-                [7.291, -37.097, 2.70],
-                [8.128, -24.304, 2.81]
-            ] },
+            { name: "かに座", stars: [
+                [8.275, 9.186, 3.52],   // アルタルフ
+                [8.745, 18.154, 3.94],  // アセルス・アウストラリス
+                [8.722, 21.469, 4.66],  // アセルス・ボレアリス
+                [8.975, 11.858, 4.25],  // アクベンス
+                [8.778, 28.760, 4.02]
+            ], lines: [[0,1],[1,2],[1,3],[2,4]] },
 
-            { name: "ほ座", stars: [
-                [8.159, -47.337, 1.75],  // レゴル
-                [8.745, -54.709, 1.96]
-            ], lines: [[0,1]] },
+            { name: "かみのけ座", stars: [
+                [13.198, 27.878, 4.26],
+                [13.167, 17.529, 4.32],
+                [12.450, 28.269, 4.36]
+            ], lines: [[1,0],[0,2]] },
 
-            { name: "りゅうこつ座", stars: [
-                [6.399, -52.696, -0.72]  // カノープス（全天2位の明るさ）
-            ] },
-
-            { name: "みなみじゅうじ座", stars: [
-                [12.443, -63.099, 0.77], // アクルックス
-                [12.795, -59.689, 1.25], // ミモザ
-                [12.519, -57.113, 1.63], // ガクルックス
-                [12.252, -58.749, 2.79]
-            ], lines: [[0,2],[1,3]] },
-
-            { name: "ケンタウルス座", stars: [
-                [14.660, -60.833, -0.27], // リギル・ケンタウルス（太陽系から最も近い恒星系）
-                [14.064, -60.373, 0.61]   // ハダル
-            ], lines: [[0,1]] },
+            { name: "カメレオン座", stars: [
+                [8.308, -76.920, 4.07],
+                [10.591, -78.608, 4.11],
+                [10.764, -80.540, 4.45],
+                [12.307, -79.313, 4.26]
+            ], lines: [[0,1],[1,2],[1,3]] },
 
             { name: "からす座", stars: [
                 [12.264, -17.542, 2.59],
@@ -1328,23 +1531,103 @@
                 [12.577, -23.397, 2.65]
             ], lines: [[0,1],[1,3],[3,2],[2,0]] },
 
-            { name: "うみへび座", stars: [
-                [9.460, -8.659, 1.98]    // アルファルド
+            { name: "かんむり座", stars: [
+                [15.463, 29.106, 3.68],
+                [15.548, 31.360, 4.14],
+                [15.578, 26.715, 2.23],
+                [15.712, 26.297, 3.84]
+            ], lines: [[0,1],[1,2],[2,3]] },
+
+            { name: "きょしちょう座", stars: [
+                [22.308, -60.260, 2.86],
+                [23.290, -58.236, 3.99],
+                [0.526, -62.958, 4.37],
+                [0.335, -64.875, 4.23]
+            ], lines: [[0,1],[1,2],[2,3]] },
+
+            { name: "ぎょしゃ座", stars: [
+                [5.278, 45.998, 0.08],  // カペラ
+                [5.992, 44.947, 1.90],
+                [5.995, 37.213, 2.62],
+                [4.949, 33.166, 2.69],
+                [5.027, 43.823, 3.00]
+            ], lines: [[0,4],[4,3],[3,2],[2,1],[1,0]] },
+
+            { name: "きりん座", stars: [
+                [5.057, 60.443, 4.03],
+                [4.902, 66.343, 4.29],
+                [3.837, 71.333, 4.63]
             ] },
 
-            { name: "さそり座", stars: [
-                [16.090, -19.805, 2.56],
-                [16.005, -22.622, 2.29],
-                [16.490, -26.432, 0.96],  // アンタレス
-                [17.622, -42.998, 1.87],
-                [17.560, -37.104, 1.62]
-            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+            { name: "くじゃく座", stars: [
+                [20.428, -56.735, 1.94],
+                [20.749, -66.203, 3.42],
+                [20.146, -66.182, 3.55],
+                [21.447, -65.366, 4.22]
+            ], lines: [[2,0],[0,1],[1,2],[1,3]] },
 
-            { name: "いて座", stars: [
-                [18.403, -34.384, 1.85],
-                [18.921, -26.297, 2.05],
-                [19.045, -29.880, 2.60]
+            { name: "くじら座", stars: [
+                [3.038, 4.090, 2.54],
+                [0.726, -17.987, 2.04]
+            ] },
+
+            { name: "ケフェウス座", stars: [
+                [21.310, 62.585, 2.44],
+                [21.478, 70.561, 3.23],
+                [23.655, 77.632, 3.21],
+                [22.182, 58.202, 3.35],
+                [22.487, 58.415, 3.50],
+                [22.828, 66.203, 3.50],
+                [20.755, 61.839, 3.40]
+            ], lines: [[0,1],[1,2],[2,5],[5,3],[3,4],[4,0]] },
+
+            { name: "ケンタウルス座", stars: [
+                [14.660, -60.833, -0.27], // リギル・ケンタウルス（太陽系から最も近い恒星系）
+                [14.064, -60.373, 0.61]   // ハダル
+            ], lines: [[0,1]] },
+
+            { name: "けんびきょう座", stars: [
+                [21.021, -32.258, 4.67],
+                [21.292, -32.172, 4.71],
+                [20.834, -33.780, 4.90]
+            ], lines: [[2,0],[0,1]] },
+
+            { name: "こいぬ座", stars: [
+                [7.655, 5.225, 0.34]     // プロキオン
+            ] },
+
+            { name: "こうま座", stars: [
+                [21.264, 5.248, 3.92],
+                [21.241, 10.007, 4.49],
+                [21.173, 10.132, 4.69]
             ], lines: [[0,1],[1,2]] },
+
+            { name: "こぎつね座", stars: [
+                [19.478, 24.665, 4.44]
+            ] },
+
+            { name: "こぐま座", stars: [
+                [2.530, 89.264, 1.98, true],  // ポラリス
+                [14.845, 74.155, 2.08],       // コカブ
+                [15.345, 71.834, 3.05],       // フェルカド
+                [17.537, 86.586, 4.36],
+                [16.766, 82.037, 4.23],
+                [15.735, 77.794, 4.32],
+                [16.292, 75.755, 4.95]
+            ], lines: [[0,3],[3,4],[4,5],[5,1],[1,2],[2,6],[6,5]] },
+
+            { name: "こじし座", stars: [
+                [10.889, 34.215, 3.83],
+                [10.457, 36.707, 4.21]
+            ], lines: [[0,1]] },
+
+            { name: "コップ座", stars: [
+                [10.996, -18.299, 4.08],
+                [11.194, -22.826, 4.48],
+                [11.415, -17.684, 4.08],
+                [11.322, -14.779, 3.56],
+                [11.746, -18.350, 4.73]
+            ], lines: [[0,1],[1,2],[0,3],[3,2],[2,4]] },
 
             { name: "こと座", stars: [
                 [18.615, 38.784, 0.03], // ベガ
@@ -1354,6 +1637,125 @@
                 [18.982, 32.690, 3.24]
             ], lines: [[0,2],[2,3],[3,4],[4,1],[1,2]] },
 
+            { name: "コンパス座", stars: [
+                [14.708, -64.975, 3.19],
+                [15.284, -58.804, 4.07],
+                [15.389, -59.320, 4.51]
+            ], lines: [[0,1],[0,2]] },
+
+            { name: "さいだん座", stars: [
+                [17.531, -49.876, 2.95],
+                [17.422, -55.530, 2.85],
+                [17.422, -56.378, 3.34],
+                [16.977, -55.990, 3.13],
+                [16.977, -53.160, 4.06],
+                [17.519, -60.684, 3.62]
+            ], lines: [[0,1],[1,2],[2,3],[3,4],[4,0],[2,5]] },
+
+            { name: "さそり座", stars: [
+                [16.090, -19.805, 2.56],
+                [16.005, -22.622, 2.29],
+                [16.490, -26.432, 0.96],  // アンタレス
+                [17.622, -42.998, 1.87],
+                [17.560, -37.104, 1.62]
+            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+
+            { name: "さんかく座", stars: [
+                [2.158, 34.987, 3.00],
+                [1.885, 29.579, 3.41]
+            ] },
+
+            { name: "しし座", stars: [
+                [10.140, 11.967, 1.35], // レグルス
+                [11.818, 14.572, 2.14], // デネボラ
+                [10.333, 19.842, 2.08],
+                [10.278, 23.417, 3.44],
+                [11.235, 20.523, 2.56],
+                [11.237, 15.430, 3.34]
+            ], lines: [[0,2],[2,3],[2,4],[4,1],[4,5]] },
+
+            { name: "じょうぎ座", stars: [
+                [16.319, -50.156, 4.02],
+                [16.452, -47.555, 4.47],
+                [16.052, -49.230, 4.65]
+            ], lines: [[2,0],[0,1]] },
+
+            { name: "たて座", stars: [
+                [18.587, -8.244, 3.85],
+                [18.787, -4.748, 4.22],
+                [18.704, -9.052, 4.72],
+                [18.487, -14.564, 4.70]
+            ], lines: [[1,2],[2,0],[0,3]] },
+
+            { name: "ちょうこくぐ座", stars: [
+                [4.677, -41.864, 4.45],
+                [5.072, -35.483, 4.55],
+                [4.699, -37.144, 5.05]
+            ], lines: [[1,2],[2,0]] },
+
+            { name: "ちょうこくしつ座", stars: [
+                [0.977, -29.357, 4.31],
+                [23.549, -37.818, 4.38],
+                [23.314, -32.532, 4.41],
+                [23.815, -28.130, 4.57]
+            ], lines: [[0,3],[3,2],[2,1]] },
+
+            { name: "つる座", stars: [
+                [22.137, -46.961, 1.74],
+                [22.711, -46.885, 2.10],
+                [21.899, -37.365, 3.01],
+                [22.488, -51.317, 3.49],
+                [22.488, -43.496, 3.97]
+            ], lines: [[2,0],[0,4],[4,1],[1,3]] },
+
+            { name: "テーブルさん座", stars: [
+                [6.171, -74.753, 5.09],
+                [5.531, -76.341, 5.19],
+                [5.531, -71.314, 5.31]
+            ], lines: [[0,1],[1,2]] },
+
+            { name: "てんびん座", stars: [
+                [14.848, -16.042, 2.75], // ズベンエルゲヌビ
+                [15.283, -9.383, 2.61],  // ズベンエスカマリ
+                [15.592, -14.789, 3.91],
+                [15.068, -25.282, 3.29],
+                [15.618, -28.135, 3.58]
+            ], lines: [[0,1],[1,2],[2,0],[0,3],[2,4]] },
+
+            { name: "とかげ座", stars: [
+                [22.521, 50.283, 3.77],
+                [22.392, 52.229, 4.43],
+                [22.501, 47.707, 4.36]
+            ], lines: [[1,0],[0,2]] },
+
+            { name: "とけい座", stars: [
+                [4.234, -42.294, 3.85],
+                [2.982, -64.071, 4.99]
+            ], lines: [[0,1]] },
+
+            { name: "とびうお座", stars: [
+                [8.429, -66.137, 3.77],
+                [7.281, -67.957, 3.98],
+                [7.146, -70.499, 3.78],
+                [8.133, -68.617, 4.35],
+                [9.046, -66.396, 4.00],
+                [7.697, -72.606, 3.93]
+            ], lines: [[4,0],[0,3],[3,1],[1,2],[2,5],[5,3]] },
+
+            { name: "とも座", stars: [
+                [8.059, -40.003, 2.25],  // ナオス
+                [7.291, -37.097, 2.70],
+                [8.128, -24.304, 2.81]
+            ] },
+
+            { name: "はえ座", stars: [
+                [12.619, -69.136, 2.69],
+                [12.771, -68.108, 3.05],
+                [12.541, -72.133, 3.87],
+                [13.038, -71.549, 3.62],
+                [12.285, -67.960, 4.11]
+            ], lines: [[0,1],[1,3],[3,2],[2,0],[4,0]] },
+
             { name: "はくちょう座", stars: [
                 [20.690, 45.280, 1.25], // デネブ
                 [20.370, 40.257, 2.23],
@@ -1362,35 +1764,44 @@
                 [19.512, 27.960, 3.18]  // アルビレオ
             ], lines: [[0,1],[1,4],[1,3],[1,2]] },
 
-            { name: "わし座", stars: [
-                [19.847, 8.868, 0.77],  // アルタイル
-                [19.921, 6.407, 3.71],
-                [19.772, 10.613, 2.72]
-            ], lines: [[1,0],[0,2]] },
+            { name: "はちぶんぎ座", stars: [
+                [21.691, -77.390, 3.76],
+                [22.768, -81.382, 4.13],
+                [14.449, -83.668, 4.31]
+            ], lines: [[0,1],[1,2],[2,0]] },
 
-            { name: "いるか座", stars: [
-                [20.660, 15.912, 3.77],
-                [20.625, 14.595, 3.63],
-                [20.778, 16.123, 3.90],
-                [20.725, 15.070, 4.43]
+            { name: "はと座", stars: [
+                [5.660, -34.074, 2.65],  // ファクト
+                [5.850, -35.768, 3.12]
+            ], lines: [[0,1]] },
+
+            { name: "ふうちょう座", stars: [
+                [14.797, -79.045, 3.83],
+                [16.558, -78.897, 3.89],
+                [16.341, -77.517, 4.24],
+                [16.342, -78.693, 4.68]
+            ], lines: [[0,3],[3,1],[3,2]] },
+
+            { name: "ふたご座", stars: [
+                [7.577, 31.888, 1.58],  // カストル
+                [7.755, 28.026, 1.14],  // ポルックス
+                [6.629, 16.399, 1.93]
+            ], lines: [[0,1],[1,2]] },
+
+            { name: "ペガスス座", stars: [
+                [23.079, 15.205, 2.49], // マルカブ
+                [23.063, 28.083, 2.42], // シェアト
+                [0.220, 15.183, 2.83],  // アルゲニブ
+                [0.140, 29.090, 2.06]   // アルフェラッツ（アンドロメダ座と共有）
             ], lines: [[0,1],[1,3],[3,2],[2,0]] },
 
-            { name: "うしかい座", stars: [
-                [14.261, 19.182, -0.05], // アークトゥルス
-                [14.750, 27.074, 2.35],
-                [14.535, 38.308, 3.03],
-                [14.530, 30.371, 3.58],
-                [15.258, 33.315, 3.48],
-                [15.032, 40.391, 3.50],
-                [13.912, 18.398, 2.68]
+            { name: "へび座", stars: [
+                [15.738, 6.426, 2.63]
             ] },
 
-            { name: "かんむり座", stars: [
-                [15.463, 29.106, 3.68],
-                [15.548, 31.360, 4.14],
-                [15.578, 26.715, 2.23],
-                [15.712, 26.297, 3.84]
-            ], lines: [[0,1],[1,2],[2,3]] },
+            { name: "へびつかい座", stars: [
+                [17.582, 12.560, 2.08]
+            ] },
 
             { name: "ヘルクレス座", stars: [
                 [16.503, 21.489, 2.77],
@@ -1403,22 +1814,114 @@
                 [16.715, 38.922, 3.85]
             ], lines: [[1,5],[5,4],[4,7],[7,1],[0,1],[3,4]] },
 
-            { name: "へびつかい座", stars: [
-                [17.582, 12.560, 2.08]
-            ] },
+            { name: "ペルセウス座", stars: [
+                [3.405, 49.861, 1.79],  // ミルファク
+                [3.136, 40.956, 2.12],  // アルゴル
+                [3.902, 31.884, 2.85],
+                [3.965, 40.010, 2.89],
+                [3.080, 53.506, 2.93],
+                [3.715, 47.788, 3.01]
+            ], lines: [[4,0],[0,5],[5,3],[3,2]] },
 
-            { name: "へび座", stars: [
-                [15.738, 6.426, 2.63]
-            ] },
+            { name: "ほ座", stars: [
+                [8.159, -47.337, 1.75],  // レゴル
+                [8.745, -54.709, 1.96]
+            ], lines: [[0,1]] },
 
-            { name: "おとめ座", stars: [
-                [13.420, -11.161, 0.97]  // スピカ
-            ] },
+            { name: "ぼうえんきょう座", stars: [
+                [18.449, -45.968, 3.51],
+                [18.480, -49.070, 4.13],
+                [18.187, -45.955, 4.52]
+            ], lines: [[2,0],[0,1]] },
 
-            { name: "くじら座", stars: [
-                [3.038, 4.090, 2.54],
-                [0.726, -17.987, 2.04]
-            ] },
+            { name: "ほうおう座", stars: [
+                [0.151, -45.747, 3.88],
+                [0.438, -42.306, 2.39],
+                [1.101, -46.718, 3.31],
+                [1.473, -43.318, 3.41]
+            ], lines: [[0,1],[1,2],[2,3]] },
+
+            { name: "ポンプ座", stars: [
+                [10.453, -31.068, 4.25],
+                [9.487, -35.951, 4.51],
+                [10.946, -37.138, 4.60]
+            ], lines: [[1,0],[0,2]] },
+
+            { name: "みずがめ座", stars: [
+                [21.526, -5.571, 2.91],  // サダルスード
+                [22.096, -0.320, 2.96],  // サダルメリク
+                [22.911, -15.821, 3.27], // スカト
+                [22.361, -1.387, 3.84],
+                [22.480, -0.020, 3.65],
+                [22.588, -0.118, 4.02],
+                [22.421, 1.379, 4.66],
+                [20.795, -9.496, 3.77]
+            ], lines: [[7,0],[0,1],[1,3],[3,4],[4,5],[4,6],[3,2]] },
+
+            { name: "みずへび座", stars: [
+                [1.979, -61.570, 2.86],
+                [0.429, -77.254, 2.82],
+                [3.787, -74.239, 3.24]
+            ], lines: [[0,1],[1,2],[2,0]] },
+
+            { name: "みなみじゅうじ座", stars: [
+                [12.443, -63.099, 0.77], // アクルックス
+                [12.795, -59.689, 1.25], // ミモザ
+                [12.519, -57.113, 1.63], // ガクルックス
+                [12.252, -58.749, 2.79]
+            ], lines: [[0,2],[1,3]] },
+
+            { name: "みなみのうお座", stars: [
+                [22.961, -29.622, 1.16],
+                [22.677, -27.044, 4.17],
+                [22.876, -32.875, 4.46],
+                [22.526, -32.346, 4.29]
+            ], lines: [[1,0],[0,2],[2,3]] },
+
+            { name: "みなみのかんむり座", stars: [
+                [18.979, -37.108, 4.87],
+                [19.094, -37.063, 4.21],
+                [19.158, -37.904, 4.10],
+                [19.167, -39.340, 4.11],
+                [19.163, -40.497, 4.62]
+            ], lines: [[0,1],[1,2],[2,3],[3,4]] },
+
+            { name: "みなみのさんかく座", stars: [
+                [16.811, -69.028, 1.92],
+                [15.919, -63.431, 2.85],
+                [15.315, -68.680, 2.89]
+            ], lines: [[0,1],[1,2],[2,0]] },
+
+            { name: "や座", stars: [
+                [19.979, 19.492, 3.47],
+                [19.789, 18.534, 3.82],
+                [19.668, 18.014, 4.37],
+                [19.685, 17.477, 4.37]
+            ], lines: [[0,1],[1,2],[1,3]] },
+
+            { name: "やぎ座", stars: [
+                [21.784, -16.127, 2.87], // デネブ・アルゲディ
+                [21.668, -16.662, 3.68],
+                [21.444, -22.411, 3.74],
+                [20.864, -26.919, 4.11],
+                [20.768, -25.271, 4.13],
+                [20.350, -14.781, 3.08], // ダビー
+                [20.294, -12.545, 3.57], // アルゲディ
+                [21.099, -17.233, 4.07],
+                [21.100, -16.835, 4.28]
+            ], lines: [[6,5],[5,4],[4,3],[3,2],[2,0],[0,1],[1,8],[8,7],[7,5]] },
+
+            { name: "やまねこ座", stars: [
+                [9.351, 34.393, 3.13],
+                [9.314, 36.803, 3.82],
+                [8.381, 43.188, 4.25]
+            ], lines: [[2,1],[1,0]] },
+
+            { name: "らしんばん座", stars: [
+                [8.727, -33.186, 3.68],
+                [8.668, -35.308, 3.97],
+                [8.841, -27.710, 4.01]
+            ], lines: [[2,0],[0,1]] },
 
             { name: "りゅう座", stars: [
                 [14.073, 64.376, 3.65], // トゥバン（かつての北極星）
@@ -1434,7 +1937,40 @@
                 [11.523, 69.331, 3.84],
                 [12.558, 69.789, 3.85],
                 [15.415, 58.966, 3.29]
-            ] }
+            ] },
+
+            { name: "りゅうこつ座", stars: [
+                [6.399, -52.696, -0.72]  // カノープス（全天2位の明るさ）
+            ] },
+
+            { name: "りょうけん座", stars: [
+                [12.934, 38.318, 2.90],
+                [12.562, 41.358, 4.26]
+            ], lines: [[0,1]] },
+
+            { name: "レチクル座", stars: [
+                [4.240, -62.474, 3.35],
+                [3.737, -64.807, 3.85],
+                [4.275, -61.400, 4.56],
+                [4.273, -59.302, 4.44]
+            ], lines: [[1,0],[0,2],[2,3]] },
+
+            { name: "ろ座", stars: [
+                [3.201, -28.988, 3.87],
+                [2.818, -32.406, 4.46]
+            ], lines: [[0,1]] },
+
+            { name: "ろくぶんぎ座", stars: [
+                [10.133, -0.372, 4.49],
+                [9.859, -8.109, 5.07],
+                [10.505, -0.637, 5.09]
+            ], lines: [[1,0],[0,2]] },
+
+            { name: "わし座", stars: [
+                [19.847, 8.868, 0.77],  // アルタイル
+                [19.921, 6.407, 3.71],
+                [19.772, 10.613, 2.72]
+            ], lines: [[1,0],[0,2]] }
         ];
 
         const realStars = [];
@@ -1584,16 +2120,18 @@
                 row.style.marginBottom = '4px';
 
                 const label = document.createElement('label');
-                label.style.fontSize = '0.76rem';
-
-                const span = document.createElement('span');
-                span.textContent = con.name;
-                label.appendChild(span);
+                label.style.fontSize = '0.82rem';
+                label.style.justifyContent = 'flex-start';
+                label.style.alignItems = 'center';
+                label.style.gap = '8px';
+                label.style.cursor = 'pointer';
 
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.checked = true;
                 cb.style.width = 'auto';
+                cb.style.margin = '0';
+                cb.style.flexShrink = '0';
                 cb.style.accentColor = '#8ab4f8';
                 cb.style.cursor = 'pointer';
                 cb.addEventListener('change', () => {
@@ -1601,6 +2139,10 @@
                     updateConstellationSummary();
                 });
                 label.appendChild(cb);
+
+                const span = document.createElement('span');
+                span.textContent = con.name;
+                label.appendChild(span);
 
                 row.appendChild(label);
                 container.appendChild(row);
