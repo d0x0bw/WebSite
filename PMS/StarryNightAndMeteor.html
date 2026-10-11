@@ -310,11 +310,98 @@
                 height: 24px;
             }
         }
+        /* 星座の説明カード（星座をクリック／タップで表示） */
+        .con-info {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            z-index: 9;
+            box-sizing: border-box;
+            width: min(340px, calc(100vw - 32px));
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 14px 40px 14px 16px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 214, 120, 0.45);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+        }
+
+        .con-info.is-open {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+        }
+
+        .con-info h4 {
+            margin: 0 0 2px;
+            font-size: 1.1rem;
+            color: #ffd78a;
+        }
+
+        .con-info-en {
+            font-size: 0.82rem;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .con-info-view {
+            font-size: 0.84rem;
+            color: #8ab4f8;
+            margin-bottom: 8px;
+        }
+
+        .con-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .con-info-close {
+            all: unset;
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            padding: 4px 9px;
+            font-size: 1.3rem;
+            line-height: 1;
+            color: #9ca3af;
+            cursor: pointer;
+        }
+
+        .con-info-close:hover {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .con-info {
+                top: 12px;
+                bottom: auto;
+                left: 12px;
+                right: 12px;
+                width: auto;
+                max-height: 40vh;
+            }
+        }
     </style>
 </head>
 <body>
 
     <canvas id="skyCanvas"></canvas>
+
+    <div class="con-info" id="con-info" role="dialog" aria-live="polite" aria-label="星座の説明">
+        <button class="con-info-close" id="con-info-close" type="button" aria-label="閉じる">×</button>
+        <h4 id="con-info-name"></h4>
+        <div class="con-info-en" id="con-info-en"></div>
+        <div class="con-info-view" id="con-info-view"></div>
+        <p id="con-info-text"></p>
+    </div>
 
     <div class="control-panel" id="draggable-panel">
         <div class="panel-header" id="panel-header">
@@ -2215,6 +2302,9 @@
                 rs.draw();
             });
 
+            // 選択中の星座を強調
+            drawSelectedConstellation();
+
             // 4.5 太陽・月（近くの天体として星の手前に描画）
             drawSun();
             drawMoon();
@@ -2233,6 +2323,558 @@
             requestAnimationFrame(animate);
         }
 
+        // --- 星座の説明（星座をクリック／タップすると表示） ---
+        const CONSTELLATION_INFO = {
+            "アンドロメダ座": {
+                "en": "Andromeda",
+                "view": "見ごろ：秋",
+                "text": "エチオピアの王女の名をもつ星座です。ペガスス座の秋の四辺形から伸びる星の列が目印で、M31（アンドロメダ銀河）は約250万光年のかなたにあり、暗い空なら肉眼でもぼんやり見えます。"
+            },
+            "いっかくじゅう座": {
+                "en": "Monoceros",
+                "view": "見ごろ：冬",
+                "text": "オリオン座・おおいぬ座・こいぬ座に囲まれた、明るい星の少ない星座です。天の川の中にあり、バラ星雲（ロゼッタ星雲）などの散光星雲や散開星団があります。"
+            },
+            "いて座": {
+                "en": "Sagittarius",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "黄道十二星座のひとつで、半人半馬の射手の姿とされます。ひしゃく形の南斗六星が目印で、天の川の中心方向にあたるため、星雲や星団が多く集まっています。"
+            },
+            "いるか座": {
+                "en": "Delphinus",
+                "view": "見ごろ：夏",
+                "text": "小さな星座ですが、4つの星が作るひし形が目を引きます。海の神ポセイドンの妻探しを助けたイルカの神話に由来します。"
+            },
+            "インディアン座": {
+                "en": "Indus",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "16世紀末に航海者の観測をもとに作られた南天の星座です。明るい星は少なく、日本では南の低い空にわずかに見える程度です。"
+            },
+            "うお座": {
+                "en": "Pisces",
+                "view": "見ごろ：秋",
+                "text": "黄道十二星座のひとつで、2匹の魚がひもで結ばれた姿です。暗い星が多く見つけにくい星座ですが、現在の春分点はこの星座の中にあります。"
+            },
+            "うさぎ座": {
+                "en": "Lepus",
+                "view": "見ごろ：冬",
+                "text": "オリオン座の足元にある小さな星座で、オリオンの猟犬に追われるウサギの姿とされます。α星アルネブは約2.6等です。"
+            },
+            "うしかい座": {
+                "en": "Bootes",
+                "view": "見ごろ：春〜初夏",
+                "text": "オレンジ色の1等星アークトゥルスが目印です。北斗七星の柄のカーブを延ばしてたどる「春の大曲線」で見つけられます。"
+            },
+            "うみへび座": {
+                "en": "Hydra",
+                "view": "見ごろ：春",
+                "text": "88星座の中で最も大きい星座で、長い体が空を大きく横切ります。2等星のα星アルファルドは周囲に明るい星が少なく、「孤独な星」とも呼ばれます。"
+            },
+            "エリダヌス座": {
+                "en": "Eridanus",
+                "view": "見ごろ：冬（日本では南の低い空）",
+                "text": "オリオン座のリゲル付近から南へ蛇行して流れる、川の星座です。南の端の1等星アケルナルは「川の果て」を意味しますが、日本の大部分では見えません。"
+            },
+            "おうし座": {
+                "en": "Taurus",
+                "view": "見ごろ：冬",
+                "text": "黄道十二星座のひとつで、赤っぽい1等星アルデバランが牡牛の目にあたります。プレアデス星団（すばる）とヒアデス星団があり、どちらも肉眼で楽しめます。"
+            },
+            "おおいぬ座": {
+                "en": "Canis Major",
+                "view": "見ごろ：冬",
+                "text": "全天で最も明るい恒星シリウス（−1.5等）をもつ星座です。シリウスは冬の大三角の一角で、オリオンに従う猟犬の姿とされます。"
+            },
+            "おおかみ座": {
+                "en": "Lupus",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "天の川の中にある南天の星座で、ケンタウルス座の隣にあります。古代にはケンタウルスが捕らえた獣の姿とされました。"
+            },
+            "おおぐま座": {
+                "en": "Ursa Major",
+                "view": "見ごろ：春",
+                "text": "北斗七星はこの星座の背中から尾にあたる部分です。ひしゃくの先の2星（ドゥベとメラク）の間隔を5倍延ばすと北極星に行き着きます。"
+            },
+            "おとめ座": {
+                "en": "Virgo",
+                "view": "見ごろ：春",
+                "text": "黄道十二星座のひとつで、青白い1等星スピカが麦の穂先を表します。春の大曲線の終点で、おとめ座銀河団という多数の銀河の集まりがあることでも知られます。"
+            },
+            "おひつじ座": {
+                "en": "Aries",
+                "view": "見ごろ：秋",
+                "text": "黄道十二星座のひとつで、2等星ハマルが目印です。金色の羊の神話に由来し、古代には春分点がこの星座にありました。"
+            },
+            "オリオン座": {
+                "en": "Orion",
+                "view": "見ごろ：冬",
+                "text": "赤いベテルギウスと青白いリゲルが目印の、冬を代表する星座です。中央に並ぶ三つ星の下にはオリオン大星雲（M42）があり、肉眼でもぼんやり見えます。"
+            },
+            "がか座": {
+                "en": "Pictor",
+                "view": "見ごろ：冬（日本ではほとんど見えません）",
+                "text": "18世紀にラカイユが設けた南天の星座で、画家のイーゼルを表します。β星のまわりには塵の円盤と惑星が見つかっています。"
+            },
+            "かじき座": {
+                "en": "Dorado",
+                "view": "見ごろ：冬（日本ではほとんど見えません）",
+                "text": "大マゼラン雲の大部分を含む南天の星座です。名前は魚のかじき（旗魚）を表します。"
+            },
+            "かに座": {
+                "en": "Cancer",
+                "view": "見ごろ：春",
+                "text": "黄道十二星座のひとつですが、明るい星がなく見つけにくい星座です。中央のプレセペ星団（M44）は、暗い空では肉眼でもぼんやり見えます。"
+            },
+            "カシオペヤ座": {
+                "en": "Cassiopeia",
+                "view": "北の空に一年中（秋に高く昇る）",
+                "text": "5つの星がWの字（Mの字）に並ぶ、北天の代表的な星座です。北斗七星の反対側にあり、北極星を探す目印にもなります。"
+            },
+            "かみのけ座": {
+                "en": "Coma Berenices",
+                "view": "見ごろ：春",
+                "text": "暗い星座ですが、肉眼で見える星の集まり（散開星団）があります。古代エジプトの王妃ベレニケが髪を捧げた故事に由来します。"
+            },
+            "カメレオン座": {
+                "en": "Chamaeleon",
+                "view": "南天の星座（日本では見えません）",
+                "text": "天の南極に近い小さな星座で、16世紀末に航海者の観測をもとに作られました。"
+            },
+            "からす座": {
+                "en": "Corvus",
+                "view": "見ごろ：春",
+                "text": "おとめ座のスピカの近くにある、4つの星が作る小さな四辺形が目印です。神話では太陽神アポロンの使いのカラスとされます。"
+            },
+            "かんむり座": {
+                "en": "Corona Borealis",
+                "view": "見ごろ：初夏",
+                "text": "半円形に並ぶ星が冠のように見える星座です。いちばん明るいα星ゲンマ（アルフェッカ）は約2.2等です。"
+            },
+            "きょしちょう座": {
+                "en": "Tucana",
+                "view": "見ごろ：秋（日本ではほとんど見えません）",
+                "text": "小マゼラン雲と、球状星団47 Tuc（NGC 104）がある南天の星座です。"
+            },
+            "ぎょしゃ座": {
+                "en": "Auriga",
+                "view": "見ごろ：冬",
+                "text": "黄色い1等星カペラが目印で、五角形に星が並びます。カペラは冬のダイヤモンドの一角です。"
+            },
+            "きりん座": {
+                "en": "Camelopardalis",
+                "view": "北の空に一年中",
+                "text": "北極星の近くに広がる暗い星座です。17世紀初めに設けられました。"
+            },
+            "くじゃく座": {
+                "en": "Pavo",
+                "view": "見ごろ：夏〜秋（日本ではほとんど見えません）",
+                "text": "2等星に近い明るさのα星「ピーコック」（約1.9等）をもつ南天の星座です。"
+            },
+            "くじら座": {
+                "en": "Cetus",
+                "view": "見ごろ：秋",
+                "text": "大きな星座で、ペルセウスに退治されたとされる海の怪物です。ο星ミラは約332日の周期で明るさを大きく変える変光星として有名です。"
+            },
+            "ケフェウス座": {
+                "en": "Cepheus",
+                "view": "北の空に一年中（秋に高く昇る）",
+                "text": "家のような五角形が目印の星座で、エチオピアの王とされます。δ星は、変光星の一種「セファイド」の名前の由来です。"
+            },
+            "ケンタウルス座": {
+                "en": "Centaurus",
+                "view": "見ごろ：春〜夏（日本では南の低い空）",
+                "text": "半人半馬の姿の星座です。α星は太陽系に最も近い恒星系（約4.4光年）で、ω星団は最大級の球状星団です。日本の多くの地域ではα星は見えません。"
+            },
+            "けんびきょう座": {
+                "en": "Microscopium",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、顕微鏡を表します。"
+            },
+            "こいぬ座": {
+                "en": "Canis Minor",
+                "view": "見ごろ：冬",
+                "text": "1等星プロキオンをもつ小さな星座で、冬の大三角の一角です。"
+            },
+            "こうま座": {
+                "en": "Equuleus",
+                "view": "見ごろ：秋",
+                "text": "全天で2番目に小さい星座です。ペガスス座の近くにある、小さな馬の姿とされます。"
+            },
+            "こぎつね座": {
+                "en": "Vulpecula",
+                "view": "見ごろ：夏",
+                "text": "暗い星座ですが、亜鈴状星雲（M27）があり、1967年には最初のパルサーが見つかりました。17世紀にヘヴェリウスが設けました。"
+            },
+            "こぐま座": {
+                "en": "Ursa Minor",
+                "view": "北の空に一年中",
+                "text": "しっぽの先の2等星が北極星（ポラリス）です。7つの星がひしゃくの形に並び、「小北斗七星」とも呼ばれます。"
+            },
+            "こじし座": {
+                "en": "Leo Minor",
+                "view": "見ごろ：春",
+                "text": "しし座の北にある暗い小さな星座で、17世紀にヘヴェリウスが設けました。"
+            },
+            "コップ座": {
+                "en": "Crater",
+                "view": "見ごろ：春",
+                "text": "うみへび座の背に乗る暗い星座で、アポロンの杯とされます。"
+            },
+            "こと座": {
+                "en": "Lyra",
+                "view": "見ごろ：夏",
+                "text": "織姫星ベガをもつ、夏の大三角の一角です。ベガのそばには、輪の形に見える環状星雲（M57）があります。"
+            },
+            "コンパス座": {
+                "en": "Circinus",
+                "view": "南天の星座（日本ではほとんど見えません）",
+                "text": "18世紀にラカイユが設けた小さな星座で、製図用のコンパスを表します。"
+            },
+            "さいだん座": {
+                "en": "Ara",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "天の川の中にある南天の星座で、神々が誓いを立てた祭壇を表します。"
+            },
+            "さそり座": {
+                "en": "Scorpius",
+                "view": "見ごろ：夏",
+                "text": "赤い1等星アンタレスが心臓にあたる、S字形の大きな星座です。アンタレスは「火星に対抗するもの」を意味します。"
+            },
+            "さんかく座": {
+                "en": "Triangulum",
+                "view": "見ごろ：秋",
+                "text": "小さな三角形の星座で、さんかく座銀河（M33）があります。"
+            },
+            "じょうぎ座": {
+                "en": "Norma",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、直角定規を表します。"
+            },
+            "しし座": {
+                "en": "Leo",
+                "view": "見ごろ：春",
+                "text": "黄道十二星座のひとつで、1等星レグルスを心臓とする、ししの姿です。疑問符を裏返した形に星が並ぶ部分は「ししの大鎌」と呼ばれ、11月中旬にはしし座流星群が活動します。"
+            },
+            "たて座": {
+                "en": "Scutum",
+                "view": "見ごろ：夏",
+                "text": "天の川の濃い部分にある小さな星座で、野鴨星団（M11）があります。17世紀にヘヴェリウスが設けました。"
+            },
+            "ちょうこくぐ座": {
+                "en": "Caelum",
+                "view": "見ごろ：冬（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、彫刻用のたがねを表します。"
+            },
+            "ちょうこくしつ座": {
+                "en": "Sculptor",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "南の低い空にある暗い星座で、南の銀極（銀河面から最も遠い方向）を含みます。"
+            },
+            "つる座": {
+                "en": "Grus",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "南の低い空にある星座で、約1.7等のα星アルナイルが目印です。"
+            },
+            "テーブルさん座": {
+                "en": "Mensa",
+                "view": "南天の星座（日本では見えません）",
+                "text": "88星座で最も暗い星座です。南アフリカのテーブルマウンテンにちなみ、大マゼラン雲の一部を含みます。"
+            },
+            "てんびん座": {
+                "en": "Libra",
+                "view": "見ごろ：初夏",
+                "text": "黄道十二星座のひとつで、古代にはさそり座のはさみの部分とされていました。"
+            },
+            "とかげ座": {
+                "en": "Lacerta",
+                "view": "見ごろ：秋",
+                "text": "カシオペヤ座とはくちょう座のあいだにある、W字形の小さな暗い星座です。17世紀にヘヴェリウスが設けました。"
+            },
+            "とけい座": {
+                "en": "Horologium",
+                "view": "見ごろ：冬（日本ではほとんど見えません）",
+                "text": "18世紀にラカイユが設けた暗い南天の星座で、振り子時計を表します。"
+            },
+            "とびうお座": {
+                "en": "Volans",
+                "view": "南天の星座（日本ではほとんど見えません）",
+                "text": "16世紀末に航海者の観測をもとに作られた星座で、海面を飛ぶ「とびうお」を表します。"
+            },
+            "とも座": {
+                "en": "Puppis",
+                "view": "見ごろ：冬",
+                "text": "かつての「アルゴ船座」の船尾にあたる星座です。天の川の中にあり、散開星団が多くあります。"
+            },
+            "はえ座": {
+                "en": "Musca",
+                "view": "南天の星座（日本では見えません）",
+                "text": "南十字星のそばにある小さな星座です。16世紀末に航海者の観測をもとに作られました。"
+            },
+            "はくちょう座": {
+                "en": "Cygnus",
+                "view": "見ごろ：夏",
+                "text": "天の川に沿って翼を広げた白鳥の姿で、星が十字を作るため「北十字」とも呼ばれます。尾のデネブは夏の大三角の一角です。"
+            },
+            "はちぶんぎ座": {
+                "en": "Octans",
+                "view": "南天の星座（日本では見えません）",
+                "text": "天の南極を含む星座です。南極星にあたるσ星は約5.4等と暗い星です。"
+            },
+            "はと座": {
+                "en": "Columba",
+                "view": "見ごろ：冬（日本では南の低い空）",
+                "text": "おおいぬ座の南にある星座で、ノアの箱舟から放たれたはとの姿とされます。"
+            },
+            "ふうちょう座": {
+                "en": "Apus",
+                "view": "南天の星座（日本では見えません）",
+                "text": "天の南極の近くにある暗い星座で、極楽鳥を表します。"
+            },
+            "ふたご座": {
+                "en": "Gemini",
+                "view": "見ごろ：冬",
+                "text": "黄道十二星座のひとつで、2つの明るい星カストルとポルックスが双子の頭にあたります。12月中旬にはふたご座流星群が活動します。"
+            },
+            "ペガスス座": {
+                "en": "Pegasus",
+                "view": "見ごろ：秋",
+                "text": "翼をもつ天馬の星座です。秋の四辺形は、秋の星空を探す目印になります。"
+            },
+            "へび座": {
+                "en": "Serpens",
+                "view": "見ごろ：夏",
+                "text": "へびつかい座をはさんで、頭部と尾部に分かれている唯一の星座です。尾部には、わし星雲（M16）があります。"
+            },
+            "へびつかい座": {
+                "en": "Ophiuchus",
+                "view": "見ごろ：夏",
+                "text": "大きなヘビを持つ男の姿の星座で、黄道が通る13番目の星座でもあります。"
+            },
+            "ヘルクレス座": {
+                "en": "Hercules",
+                "view": "見ごろ：夏",
+                "text": "ギリシャ神話の英雄ヘラクレスの星座です。球状星団M13は、北天で最も有名な球状星団のひとつです。"
+            },
+            "ペルセウス座": {
+                "en": "Perseus",
+                "view": "見ごろ：秋の終わり〜冬",
+                "text": "アンドロメダ姫を救った英雄の星座です。「悪魔の星」ともいわれる変光星アルゴルがあり、8月中旬にはペルセウス座流星群が活動します。"
+            },
+            "ほ座": {
+                "en": "Vela",
+                "view": "見ごろ：冬〜春（日本では南の低い空）",
+                "text": "かつての「アルゴ船座」の帆にあたる星座です。天の川の中にあり、超新星爆発の残骸が見つかっています。"
+            },
+            "ぼうえんきょう座": {
+                "en": "Telescopium",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、望遠鏡を表します。"
+            },
+            "ほうおう座": {
+                "en": "Phoenix",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "不死鳥の星座です。いちばん明るいα星アンカアは約2.4等です。"
+            },
+            "ポンプ座": {
+                "en": "Antlia",
+                "view": "見ごろ：春（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、空気ポンプを表します。"
+            },
+            "みずがめ座": {
+                "en": "Aquarius",
+                "view": "見ごろ：秋",
+                "text": "黄道十二星座のひとつで、水がめから水が流れ出す姿の星座です。土星状星雲やらせん星雲などの天体があります。"
+            },
+            "みずへび座": {
+                "en": "Hydrus",
+                "view": "南天の星座（日本では見えません）",
+                "text": "16世紀末に航海者の観測をもとに作られた、南天の小さな星座です。"
+            },
+            "みなみじゅうじ座": {
+                "en": "Crux",
+                "view": "南天の星座（日本の多くの地域では見えません）",
+                "text": "全天で最も小さい星座で、4つの明るい星が十字を作ります。南十字星として知られ、南半球では方角の目印として親しまれています。"
+            },
+            "みなみのうお座": {
+                "en": "Piscis Austrinus",
+                "view": "見ごろ：秋（日本では南の低い空）",
+                "text": "1等星フォーマルハウトをもつ星座です。秋の南の低い空で、ほかに1等星が見当たらないため「秋の一つ星」とも呼ばれます。"
+            },
+            "みなみのかんむり座": {
+                "en": "Corona Australis",
+                "view": "見ごろ：夏（日本では南の低い空）",
+                "text": "いて座の南にある、半円形に星が並ぶ小さな星座です。"
+            },
+            "みなみのさんかく座": {
+                "en": "Triangulum Australe",
+                "view": "南天の星座（日本ではほとんど見えません）",
+                "text": "3つの明るい星が三角形を作る南天の星座です。"
+            },
+            "や座": {
+                "en": "Sagitta",
+                "view": "見ごろ：夏",
+                "text": "全天で3番目に小さい星座で、矢の形に星が並びます。"
+            },
+            "やぎ座": {
+                "en": "Capricornus",
+                "view": "見ごろ：秋の初め",
+                "text": "黄道十二星座のひとつで、上半身がヤギ、下半身が魚の姿をしています。"
+            },
+            "やまねこ座": {
+                "en": "Lynx",
+                "view": "見ごろ：冬〜春",
+                "text": "暗い星が多く、「やまねこの目をもたなければ見えない」といわれた星座です。17世紀にヘヴェリウスが設けました。"
+            },
+            "らしんばん座": {
+                "en": "Pyxis",
+                "view": "見ごろ：春",
+                "text": "もとは「アルゴ船座」の一部だった、船の羅針盤を表す暗い星座です。"
+            },
+            "りゅう座": {
+                "en": "Draco",
+                "view": "北の空に一年中",
+                "text": "北極星のまわりを取り巻くように伸びる長い星座です。トゥバンは約4700年前の北極星だったとされます。"
+            },
+            "りゅうこつ座": {
+                "en": "Carina",
+                "view": "見ごろ：冬〜春（日本では南の低い空）",
+                "text": "かつての「アルゴ船座」の竜骨にあたる星座です。全天で2番目に明るい恒星カノープスをもち、日本でも南の地平線近くに見えることがあります。"
+            },
+            "りょうけん座": {
+                "en": "Canes Venatici",
+                "view": "見ごろ：春",
+                "text": "うしかい座の猟犬とされる暗い星座です。2つの星からなるコル・カロリや、子持ち銀河（M51）があります。"
+            },
+            "レチクル座": {
+                "en": "Reticulum",
+                "view": "南天の星座（日本ではほとんど見えません）",
+                "text": "18世紀にラカイユが設けた小さな星座で、望遠鏡の十字線を表します。"
+            },
+            "ろ座": {
+                "en": "Fornax",
+                "view": "見ごろ：冬（日本では南の低い空）",
+                "text": "18世紀にラカイユが設けた暗い星座で、化学実験用の炉を表します。"
+            },
+            "ろくぶんぎ座": {
+                "en": "Sextans",
+                "view": "見ごろ：春",
+                "text": "しし座の近くにある暗い星座で、天体の位置測定に使う六分儀を表します。17世紀にヘヴェリウスが設けました。"
+            },
+            "わし座": {
+                "en": "Aquila",
+                "view": "見ごろ：夏",
+                "text": "彦星アルタイルをもつ、夏の大三角の一角です。大きく翼を広げたワシの姿とされます。"
+            }
+        };
+
+        let selectedCon = -1; // 選択中の星座（SKY_DATAのインデックス。未選択は-1）
+        const conStarIdx = [];
+        const conSegPairs = [];
+
+        function ensureConIndex() {
+            if (conStarIdx.length) return;
+            SKY_DATA.forEach(() => { conStarIdx.push([]); conSegPairs.push([]); });
+            realStars.forEach((rs, i) => conStarIdx[rs.conIndex].push(i));
+            lineSegments.forEach(seg => conSegPairs[seg.ci].push([seg.a, seg.b]));
+        }
+
+        function distToSegment(px, py, x1, y1, x2, y2) {
+            const dx = x2 - x1, dy = y2 - y1;
+            const len2 = dx * dx + dy * dy;
+            let t = len2 ? ((px - x1) * dx + (py - y1) * dy) / len2 : 0;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+        }
+
+        // クリック位置に最も近い（表示中の）星座を返す。近くに無ければ-1
+        function findConstellationAt(px, py) {
+            ensureConIndex();
+            const limit = window.matchMedia('(pointer: coarse)').matches ? 28 : 18;
+            let best = -1;
+            let bestD = limit;
+            for (let ci = 0; ci < SKY_DATA.length; ci++) {
+                if (!constellationVisible[ci]) continue;
+                for (const i of conStarIdx[ci]) {
+                    const d = Math.hypot(realStars[i].x - px, realStars[i].y - py);
+                    if (d < bestD) { bestD = d; best = ci; }
+                }
+                if (config.showLines) {
+                    for (const [a, b] of conSegPairs[ci]) {
+                        const d = distToSegment(px, py, realStars[a].x, realStars[a].y, realStars[b].x, realStars[b].y);
+                        if (d < bestD) { bestD = d; best = ci; }
+                    }
+                }
+            }
+            return best;
+        }
+
+        function openConstellationInfo(ci) {
+            const name = SKY_DATA[ci].name;
+            const info = CONSTELLATION_INFO[name] || { en: '', view: '', text: '説明は準備中です。' };
+            document.getElementById('con-info-name').textContent = name;
+            document.getElementById('con-info-en').textContent = info.en;
+            document.getElementById('con-info-view').textContent = info.view;
+            document.getElementById('con-info-text').textContent = info.text;
+            document.getElementById('con-info').classList.add('is-open');
+            selectedCon = ci;
+        }
+
+        function closeConstellationInfo() {
+            selectedCon = -1;
+            document.getElementById('con-info').classList.remove('is-open');
+        }
+
+        // 選択中の星座を強調表示（線を太く明るく、星に光の輪を重ねる）
+        function drawSelectedConstellation() {
+            if (selectedCon < 0) return;
+            if (!constellationVisible[selectedCon]) { closeConstellationInfo(); return; }
+            ensureConIndex();
+            ctx.save();
+            ctx.lineCap = 'round';
+            if (config.showLines) {
+                ctx.strokeStyle = 'rgba(255, 214, 120, 0.95)';
+                ctx.lineWidth = 2;
+                conSegPairs[selectedCon].forEach(([a, b]) => {
+                    ctx.beginPath();
+                    ctx.moveTo(realStars[a].x, realStars[a].y);
+                    ctx.lineTo(realStars[b].x, realStars[b].y);
+                    ctx.stroke();
+                });
+            }
+            ctx.globalAlpha = 0.65 + 0.35 * Math.sin(Date.now() / 350);
+            ctx.strokeStyle = '#ffd78a';
+            ctx.lineWidth = 1.5;
+            conStarIdx[selectedCon].forEach(i => {
+                const rs = realStars[i];
+                const r = (0.5 + rs.brightness * 2.6) * config.realStarScale + 5;
+                ctx.beginPath();
+                ctx.arc(rs.x, rs.y, r, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
+        function initConstellationInfo() {
+            // initUI()のキャンバスのクリック処理（パネル再表示）より先に登録すること。
+            // 星座に当たったときは説明を表示し、パネルの再表示は行わない。
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                const ci = findConstellationAt(x, y);
+                if (ci >= 0) {
+                    e.stopImmediatePropagation();
+                    openConstellationInfo(ci);
+                } else if (selectedCon >= 0) {
+                    closeConstellationInfo();
+                }
+            });
+            document.getElementById('con-info-close').addEventListener('click', closeConstellationInfo);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeConstellationInfo();
+            });
+        }
+
         // --- リサイズイベント ---
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
@@ -2243,6 +2885,7 @@
 
         // 実行開始
         window.addEventListener('DOMContentLoaded', () => {
+            initConstellationInfo(); // initUI()より先に（クリック処理の順序のため）
             initUI();
             updateBgColor();
             buildSky();
