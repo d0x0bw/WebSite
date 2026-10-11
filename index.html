@@ -128,7 +128,7 @@
       --fill-opacity: 0.6;
     }
 
-    /* 星空・流れ星（デフォルト9/1〜9/30）ぼかしなし */
+    /* 星空・流れ星（デフォルト10/1〜11/30）ぼかしなし */
     body.is-starrynight {
       --bg: #05070f;
       --text: #ffffff;
@@ -691,13 +691,13 @@
   // ==========================================
   const PERIOD_STORAGE_KEY = 'event_period_settings';
 
-  // デフォルトの有効期間（元々コードに直書きされていた期間）
+  // デフォルトの有効期間
   const DEFAULT_EVENT_SETTINGS = {
     christmas:   { startMonth: 12, startDay: 24, endMonth: 1,  endDay: 6,  label: 'クリスマス' },
     sakura:      { startMonth: 3,  startDay: 27, endMonth: 4,  endDay: 7,  label: '桜' },
     firefly:     { startMonth: 5,  startDay: 9,  endMonth: 5,  endDay: 23, label: '蛍' },
     fireworks:   { startMonth: 8,  startDay: 21,  endMonth: 8,  endDay: 25, label: '花火' },
-    starrynight: { startMonth: 9,  startDay: 1,  endMonth: 9,  endDay: 30, label: '星空・流れ星' } // 七夕の時期を仮の初期値として設定。パネルから変更可
+    starrynight: { startMonth: 10,  startDay: 1,  endMonth: 11,  endDay: 30, label: '星空・流れ星' } // 七夕の時期を仮の初期値として設定。パネルから変更可
   };
 
   function cloneDefaultSettings() {
@@ -783,7 +783,7 @@
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
   }
 
-  // 5. 星空・流れ星イベント判定（設定可能・デフォルト9月1日〜9月30日）
+  // 5. 星空・流れ星イベント判定（設定可能・デフォルト10月1日〜11月30日）
   function isStarryNightSeason(date) {
     const s = eventSettings.starrynight;
     return isDateInRange(date, s.startMonth, s.startDay, s.endMonth, s.endDay);
