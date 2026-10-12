@@ -44,7 +44,7 @@
             top: 16px;
             right: 16px;
             z-index: 10;
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(15, 23, 42, var(--panel-alpha, 0.88));
             color: #ffffff;
             border: 1px solid rgba(138, 180, 248, 0.3);
             border-radius: 12px;
@@ -91,7 +91,7 @@
             padding: 16px 18px 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             cursor: move;
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(15, 23, 42, var(--panel-alpha, 0.88));
             backdrop-filter: blur(10px);
             border-radius: 12px 12px 0 0;
         }
@@ -162,7 +162,7 @@
             margin-bottom: 14px;
             padding: 7px 9px 1px;
             border: 1px solid transparent;
-            border-left: 3px solid transparent;
+            border-left: 1px solid transparent;
             border-radius: 8px;
             transition: background 0.2s ease, border-color 0.2s ease;
         }
@@ -421,7 +421,7 @@
             <!-- 1. 星：数量 & サイズ -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 星（数量 & サイズ）</span>
+                    <span class="section-title">● 星の数と大きさ</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -445,7 +445,7 @@
             <!-- 2. 星：瞬き & 輝き -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 星（瞬き & 輝き）</span>
+                    <span class="section-title">● 星の瞬きと輝き</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -465,7 +465,7 @@
             <!-- 3. 流れ星：頻度 & 物理 -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 流れ星（頻度 & 物理）</span>
+                    <span class="section-title">● 流れ星</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -489,7 +489,7 @@
             <!-- 4. 星空の中心 -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 星空の中心</span>
+                    <span class="section-title">● 星空の中心</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -616,10 +616,48 @@
                 </div>
             </div>
 
-            <!-- 4.5 太陽と月 -->
+            <!-- 5. 88星座（実在の星座のリアル再現 ＋ 表示する星座） -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 太陽と月</span>
+                    <span class="section-title">● 88星座</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="control-group">
+                    <label>星座線
+                        <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>星の明るさスケール: <span id="val-real-scale">1.5</span>倍</label>
+                    <input type="range" id="param-real-scale" min="0.5" max="3.0" step="0.1" value="1.5">
+                </div>
+                <div class="control-group">
+                    <label>自転速度（±で回転方向）: <span id="val-rotation-speed">0.3</span>度/秒</label>
+                    <input type="range" id="param-rotation-speed" min="-2.0" max="2.0" step="0.05" value="0.3">
+                </div>
+                <div class="control-group">
+                    <label>
+                        <span id="con-toggle-summary">星座を選択</span>
+                        <button class="toggle-btn" id="btn-toggle-con-list" style="padding:2px 8px;font-size:0.78rem;height:25px;">開く</button>
+                    </label>
+                </div>
+                <div id="constellation-list" style="display:none; max-height:200px; overflow-y:auto; margin-top:4px; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;">
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <button class="toggle-btn" id="btn-con-all" style="flex:1; height:27px; font-size:0.78rem;">すべて表示</button>
+                        <button class="toggle-btn" id="btn-con-none" style="flex:1; height:27px; font-size:0.78rem;">すべて非表示</button>
+                    </div>
+                    <div id="constellation-checkboxes"></div>
+                </div>
+                </div>
+            </div>
+
+            <!-- 6. 太陽と月 -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 太陽と月</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -693,60 +731,10 @@
                 </div>
             </div>
 
-            <!-- 5. 実在の星座（リアル再現） -->
+            <!-- 7. 環境 & システム設定 -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 実在の星座（リアル再現）</span>
-                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
-                <div class="section-body">
-                <div class="control-group">
-                    <label>星座線
-                        <button class="toggle-btn" id="btn-toggle-lines" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
-                    </label>
-                </div>
-                <div class="control-group">
-                    <label>星の明るさスケール: <span id="val-real-scale">1.5</span>倍</label>
-                    <input type="range" id="param-real-scale" min="0.5" max="3.0" step="0.1" value="1.5">
-                </div>
-                <div class="control-group">
-                    <label>自転速度（±で回転方向）: <span id="val-rotation-speed">0.3</span>度/秒</label>
-                    <input type="range" id="param-rotation-speed" min="-2.0" max="2.0" step="0.05" value="0.3">
-                </div>
-                </div>
-            </div>
-
-            <!-- 6. 表示する星座 -->
-            <div class="control-section is-collapsed">
-                <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 表示する星座</span>
-                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
-                <div class="section-body">
-                <div class="control-group">
-                    <label>
-                        <span id="con-toggle-summary">星座を選択</span>
-                        <button class="toggle-btn" id="btn-toggle-con-list" style="padding:2px 8px;font-size:0.78rem;height:25px;">開く</button>
-                    </label>
-                </div>
-                <div id="constellation-list" style="display:none; max-height:200px; overflow-y:auto; margin-top:4px; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;">
-                    <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <button class="toggle-btn" id="btn-con-all" style="flex:1; height:27px; font-size:0.78rem;">すべて表示</button>
-                        <button class="toggle-btn" id="btn-con-none" style="flex:1; height:27px; font-size:0.78rem;">すべて非表示</button>
-                    </div>
-                    <div id="constellation-checkboxes"></div>
-                </div>
-                </div>
-            </div>
-
-            <!-- 5. 環境 & システム設定 -->
-            <div class="control-section is-collapsed">
-                <button class="section-toggle" type="button" aria-expanded="false">
-                    <span class="section-title">■ 環境 & システム</span>
+                    <span class="section-title">● 環境＆システム</span>
                     <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -755,6 +743,10 @@
                 <div class="control-group">
                     <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
                     <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+                </div>
+                <div class="control-group">
+                    <label>パネルの透明度: <span id="val-panel-transparency">12</span>%</label>
+                    <input type="range" id="param-panel-transparency" min="0" max="90" step="1" value="12">
                 </div>
                 <div class="control-group">
                     <label>背景カラー（上部/中央）</label>
@@ -781,6 +773,7 @@
             meteorSpeed: 1.6,
             meteorLength: 2.4,
             hideDelay: 3,
+            panelTransparency: 12,
             bgCenter: '#0d1a33',
             bgOuter: '#000000',
             showLines: true,
@@ -819,6 +812,7 @@
             { id: 'param-real-scale', key: 'realStarScale', valId: 'val-real-scale', type: 'float' },
             { id: 'param-rotation-speed', key: 'rotationSpeed', valId: 'val-rotation-speed', type: 'float' },
             { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
+            { id: 'param-panel-transparency', key: 'panelTransparency', valId: 'val-panel-transparency', type: 'int', onChange: applyPanelTransparency },
             { id: 'param-bgcenter', key: 'bgCenter', type: 'color', onChange: updateBgColor },
             { id: 'param-bgouter', key: 'bgOuter', type: 'color', onChange: updateBgColor },
             { id: 'param-sun-size', key: 'sunSize', valId: 'val-sun-size', type: 'int' },
@@ -1121,6 +1115,11 @@
                     }
                 }, { passive: false });
             });
+        }
+
+        // 設定パネルの背景の透明度を反映（透明度0%＝不透明度1.0）
+        function applyPanelTransparency() {
+            document.documentElement.style.setProperty('--panel-alpha', (1 - config.panelTransparency / 100).toFixed(2));
         }
 
         function updateBgColor() {
@@ -2885,6 +2884,7 @@
 
         // 実行開始
         window.addEventListener('DOMContentLoaded', () => {
+            applyPanelTransparency();
             initConstellationInfo(); // initUI()より先に（クリック処理の順序のため）
             initUI();
             updateBgColor();
