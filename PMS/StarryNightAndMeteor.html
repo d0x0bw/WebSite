@@ -49,12 +49,12 @@
             border: 1px solid rgba(138, 180, 248, 0.3);
             border-radius: 12px;
             padding: 0; /* ヘッダーを固定表示にするため、パディングはヘッダー／本文側に持たせる */
-            width: 320px;
+            width: 380px;
             max-height: calc(100vh - 32px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(0px);
             user-select: none;
             touch-action: pan-y;
             opacity: 1;
@@ -97,7 +97,7 @@
         }
 
         .panel-content {
-            padding: 0 18px 16px;
+            padding: 0 10px 16px;
         }
 
         .panel-header h3 {
@@ -171,7 +171,7 @@
         .control-section:not(.is-collapsed) {
             background: rgba(138, 180, 248, 0.13);
             border-color: rgba(138, 180, 248, 0.35);
-            border-left-color: #8ab4f8;
+            border-left-color: none;
         }
 
         .control-section:not(.is-collapsed) .section-title,
@@ -212,7 +212,7 @@
         }
 
         .section-title {
-            font-size: 0.81rem;
+            font-size: 1.0rem;
             font-weight: bold;
             color: #9ca3af;
             text-transform: uppercase;
@@ -227,7 +227,7 @@
         .control-group label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.84rem;
+            font-size: 0.88rem;
             margin-bottom: 4px;
             color: #e5e7eb;
         }
@@ -390,6 +390,49 @@
                 max-height: 40vh;
             }
         }
+
+        /* 観測モード（観測場所と日時） */
+        .obs-help, .obs-msg {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            line-height: 1.55;
+            margin: 2px 0 10px;
+        }
+
+        .obs-msg { margin: 6px 0 0; }
+
+        .obs-note {
+            display: none;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #8ab4f8;
+            margin: 0 0 10px;
+        }
+
+        .observe-on .obs-note { display: block; }
+
+        .observe-on.obs-realsize .obs-size-inactive {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .observe-on .obs-inactive {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .obs-num {
+            width: 100%;
+            background: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            border-radius: 6px;
+            padding: 5px;
+            font-size: 0.84rem;
+            font-family: inherit;
+        }
+
+        #skyCanvas { touch-action: none; }
     </style>
 </head>
 <body>
@@ -496,7 +539,8 @@
                     </svg>
                 </button>
                 <div class="section-body">
-                <div class="control-group">
+                <div class="obs-note">観測モード中は、空の向きが「観測場所と日時」の図法で決まるため、この設定は使われません。</div>
+                <div class="control-group obs-inactive">
                     <label style="margin-bottom:6px;">どの星を画面中心に置くか</label>
                     <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.84rem;">
                         <optgroup label="🌸 春を代表する恒星">
@@ -617,6 +661,145 @@
                 </div>
             </div>
 
+            <!-- 観測場所と日時 -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 観測場所と日時</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="control-group">
+                    <label>🔭 観測モード（実際の空を再現）
+                        <button class="toggle-btn" id="btn-toggle-observe" style="padding:2px 8px;font-size:0.78rem;height:25px;">オフ</button>
+                    </label>
+                </div>
+                <div class="obs-help">オンにすると、下で選んだ場所・日時に見える空を再現します。</div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">図法</label>
+                    <select id="param-obs-proj" class="obs-num">
+                        <option value="equidistant" selected>正距方位図法（全天を円形に）</option>
+                        <option value="stereographic">ステレオ図法（形が歪みにくい）</option>
+                        <option value="equalarea">正積方位図法（面積が正確）</option>
+                        <option value="perspective">透視図法（向きを選んで見る）</option>
+                    </select>
+                </div>
+                <div class="obs-help">全天を円形に表す図法は、真上（天頂）が画面の中心で、上が北・左が東です。透視図法は、カメラで空を見るように、向き・見上げ角・画角を選んで見ます。</div>
+                <div id="obs-persp-controls" style="display:none;">
+                    <div class="control-group">
+                        <label style="margin-bottom:6px;">すばやく向きを変える（地平線を見る）</label>
+                        <div style="display:flex;gap:6px;">
+                            <button class="toggle-btn" id="btn-obs-look-n" type="button" style="flex:1;height:28px;font-size:0.8rem;">北</button>
+                            <button class="toggle-btn" id="btn-obs-look-e" type="button" style="flex:1;height:28px;font-size:0.8rem;">東</button>
+                            <button class="toggle-btn" id="btn-obs-look-s" type="button" style="flex:1;height:28px;font-size:0.8rem;">南</button>
+                            <button class="toggle-btn" id="btn-obs-look-w" type="button" style="flex:1;height:28px;font-size:0.8rem;">西</button>
+                            <button class="toggle-btn" id="btn-obs-look-up" type="button" style="flex:1;height:28px;font-size:0.8rem;">真上</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>向き（方位）: <span id="val-obs-yaw">180</span>°（<span id="val-obs-yaw-name">南</span>）</label>
+                        <input type="range" id="param-obs-yaw" min="0" max="359" step="1" value="180">
+                    </div>
+                    <div class="control-group">
+                        <label>見上げ角: <span id="val-obs-pitch">15</span>°</label>
+                        <input type="range" id="param-obs-pitch" min="-20" max="90" step="1" value="15">
+                    </div>
+                    <div class="control-group">
+                        <label>画角（縦）: <span id="val-obs-fov">70</span>°</label>
+                        <input type="range" id="param-obs-fov" min="20" max="120" step="1" value="70">
+                    </div>
+                    <div class="obs-help">画面をドラッグすると向きを変えられ、マウスのホイールで画角（ズーム）を変えられます。</div>
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">観測場所</label>
+                    <select id="param-obs-place" class="obs-num">
+                        <optgroup label="日本">
+                            <option value="sapporo">札幌</option>
+                            <option value="sendai">仙台</option>
+                            <option value="tokyo" selected>東京</option>
+                            <option value="nagoya">名古屋</option>
+                            <option value="osaka">大阪</option>
+                            <option value="hiroshima">広島</option>
+                            <option value="fukuoka">福岡</option>
+                            <option value="kagoshima">鹿児島</option>
+                            <option value="naha">那覇</option>
+                            <option value="ishigaki">石垣島</option>
+                        </optgroup>
+                        <optgroup label="海外・極地">
+                            <option value="honolulu">ホノルル</option>
+                            <option value="singapore">シンガポール</option>
+                            <option value="london">ロンドン</option>
+                            <option value="newyork">ニューヨーク</option>
+                            <option value="sydney">シドニー</option>
+                            <option value="capetown">ケープタウン</option>
+                            <option value="buenosaires">ブエノスアイレス</option>
+                            <option value="northpole">北極点</option>
+                            <option value="southpole">南極点</option>
+                        </optgroup>
+                        <option value="custom">現在地・手入力</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="toggle-btn" id="btn-obs-geolocate" type="button" style="width:100%;height:28px;font-size:0.8rem;">📍 現在地を取得</button>
+                    <div class="obs-msg" id="obs-geo-msg"></div>
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">緯度（北が＋）: 度</label>
+                    <input type="number" id="param-obs-lat" class="obs-num" min="-90" max="90" step="0.01" value="35.68">
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">経度（東が＋）: 度</label>
+                    <input type="number" id="param-obs-lon" class="obs-num" min="-180" max="180" step="0.01" value="139.76">
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">日時（お使いの端末の時刻で入力）</label>
+                    <input type="datetime-local" id="param-obs-datetime" class="obs-num" step="1">
+                    <button class="toggle-btn" id="btn-obs-now" type="button" style="width:100%;height:28px;font-size:0.8rem;margin-top:6px;">現在時刻に合わせる</button>
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">時間の進み方</label>
+                    <select id="param-obs-speed" class="obs-num">
+                        <option value="1" selected>等倍（リアルタイム）</option>
+                        <option value="0">停止</option>
+                        <option value="60">×60（1秒＝1分）</option>
+                        <option value="600">×600（1秒＝10分）</option>
+                        <option value="3600">×3600（1秒＝1時間）</option>
+                        <option value="86400">×86400（1秒＝1日）</option>
+                        <option value="-3600">逆回し ×3600（1秒＝1時間）</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>地平線・方位・高度の目安
+                        <button class="toggle-btn" id="btn-toggle-obs-guides" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>昼間は星を隠す
+                        <button class="toggle-btn" id="btn-toggle-obs-daylight" style="padding:2px 8px;font-size:0.78rem;height:25px;">する</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>大気差（地平線付近の浮き上がり）
+                        <button class="toggle-btn" id="btn-toggle-obs-refraction" style="padding:2px 8px;font-size:0.78rem;height:25px;">する</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>空の色の変化（夕焼け・朝焼け）
+                        <button class="toggle-btn" id="btn-toggle-obs-skycolor" style="padding:2px 8px;font-size:0.78rem;height:25px;">する</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>太陽・月を実寸（約0.5°）で表示
+                        <button class="toggle-btn" id="btn-toggle-obs-realsize" style="padding:2px 8px;font-size:0.78rem;height:25px;">しない</button>
+                    </label>
+                </div>
+                <div class="obs-help">実寸にすると太陽・月はとても小さく見えます。透視図法で画角を狭めると大きく見えます。</div>
+                <div class="obs-msg" id="obs-time-readout"></div>
+                <div class="obs-msg" id="obs-sky-readout"></div>
+                </div>
+            </div>
+
             <!-- 5. 88星座（実在の星座のリアル再現 ＋ 表示する星座） -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
@@ -635,7 +818,8 @@
                     <label>星の明るさスケール: <span id="val-real-scale">1.5</span>倍</label>
                     <input type="range" id="param-real-scale" min="0.5" max="3.0" step="0.1" value="1.5">
                 </div>
-                <div class="control-group">
+                <div class="obs-note">観測モード中は自転速度は使われません。「観測場所と日時」の「時間の進み方」で動きを調整します。</div>
+                <div class="control-group obs-inactive">
                     <label>自転速度（±で回転方向）: <span id="val-rotation-speed">0.3</span>度/秒</label>
                     <input type="range" id="param-rotation-speed" min="-2.0" max="2.0" step="0.05" value="0.3">
                 </div>
@@ -664,12 +848,13 @@
                     </svg>
                 </button>
                 <div class="section-body">
+                <div class="obs-note">観測モード中は、太陽と月は実際の位置と月齢で表示されます（位置・満ち欠けの設定は使われません）。「観測場所と日時」で実寸表示を選ぶと、大きさの設定も使われません。</div>
                 <div class="control-group">
                     <label>☀️ 太陽を表示
                         <button class="toggle-btn" id="btn-toggle-sun" style="padding:2px 8px;font-size:0.78rem;height:25px;">非表示</button>
                     </label>
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-size-inactive">
                     <label>太陽の大きさ: <span id="val-sun-size">45</span>px</label>
                     <input type="range" id="param-sun-size" min="10" max="120" value="45">
                 </div>
@@ -677,11 +862,11 @@
                     <label>太陽の輝き（グロー）: <span id="val-sun-glow">1.2</span>倍</label>
                     <input type="range" id="param-sun-glow" min="0.0" max="3.0" step="0.1" value="1.2">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>太陽の位置（横）: <span id="val-sun-x">15</span>%</label>
                     <input type="range" id="param-sun-x" min="0" max="100" value="15">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>太陽の位置（縦）: <span id="val-sun-y">14</span>%</label>
                     <input type="range" id="param-sun-y" min="0" max="100" value="14">
                 </div>
@@ -695,7 +880,7 @@
                         <button class="toggle-btn" id="btn-toggle-moon" style="padding:2px 8px;font-size:0.78rem;height:25px;">非表示</button>
                     </label>
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-size-inactive">
                     <label>月の大きさ: <span id="val-moon-size">38</span>px</label>
                     <input type="range" id="param-moon-size" min="10" max="100" value="38">
                 </div>
@@ -703,24 +888,24 @@
                     <label>月の輝き（グロー）: <span id="val-moon-glow">1.0</span>倍</label>
                     <input type="range" id="param-moon-glow" min="0.0" max="3.0" step="0.1" value="1.0">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>月の位置（横）: <span id="val-moon-x">50</span>%</label>
                     <input type="range" id="param-moon-x" min="0" max="100" value="50">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>月の位置（縦）: <span id="val-moon-y">10</span>%</label>
                     <input type="range" id="param-moon-y" min="0" max="100" value="10">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>満ち欠けの進み方
                         <button class="toggle-btn" id="btn-toggle-moon-auto" style="padding:2px 8px;font-size:0.78rem;height:25px;">手動</button>
                     </label>
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>月の輝面比（満ち欠け）: <span id="val-moon-phase">70</span>%</label>
                     <input type="range" id="param-moon-phase" min="0" max="100" value="70">
                 </div>
-                <div class="control-group">
+                <div class="control-group obs-inactive">
                     <label>満ちていく／欠けていく
                         <button class="toggle-btn" id="btn-toggle-moon-waxing" style="padding:2px 8px;font-size:0.78rem;height:25px;">満ちていく</button>
                     </label>
@@ -775,6 +960,19 @@
             meteorLength: 2.4,
             hideDelay: 3,
             panelTransparency: 12,
+            observeMode: false,
+            obsLat: 35.68,
+            obsLon: 139.76,
+            obsSpeed: 1,
+            obsGuides: true,
+            obsDaylight: true,
+            obsProjection: 'equidistant',
+            obsYaw: 180,
+            obsPitch: 15,
+            obsRefraction: true,
+            obsSkyColor: true,
+            obsRealSize: false,
+            obsFov: 70,
             bgCenter: '#0d1a33',
             bgOuter: '#000000',
             showLines: true,
@@ -936,6 +1134,7 @@
                 setAllConstellations(true);
                 conList.style.display = 'none';
                 conListToggle.textContent = '開く';
+                resetObserveUI();
 
                 controls.forEach(item => {
                     const input = document.getElementById(item.id);
@@ -1136,6 +1335,12 @@
         const stars = [];
         let activeMeteor = null;
 
+        // 観測モード用の共有状態
+        let skyDim = 1;          // 昼間に星を薄くする係数（1=夜、0=昼）
+        let obsState = null;     // 観測モード中の毎フレームの計算結果（オフならnull）
+        // 空の円（地平線）の中心と半径、および図法とカメラ（透視図法）の情報
+        const skyGeom = { cx: 0, cy: 0, maxR: 0, mode: 'equidistant', F: [0, 1, 0], R: [1, 0, 0], U: [0, 0, 1], f: 1 };
+
         // --- 星(Star)クラス ---
         class Star {
             constructor() {
@@ -1164,7 +1369,7 @@
 
             draw() {
                 ctx.save();
-                ctx.globalAlpha = this.alpha;
+                ctx.globalAlpha = this.alpha * skyDim;
                 
                 // 輝き（グロー）効果の設定
                 if (config.glowScale > 0) {
@@ -1271,6 +1476,7 @@
                 this.flickerOffset = Math.random() * Math.PI * 2;
                 this.x = 0;
                 this.y = 0;
+                this.visible = true; // 観測モードで地平線の上にあるか
             }
 
             // 指定した中心天体(centerRaDeg, centerDecDeg)からの角距離・方位角を求め、
@@ -1296,6 +1502,29 @@
 
                 this.x = cx + r * Math.sin(theta);
                 this.y = cy - r * Math.cos(theta);
+                this.visible = true;
+            }
+
+            // 観測モード：観測地・日時から高度/方位を求め、選んだ図法で画面に配置する。
+            // 座標はJ2000なので、観測日までの歳差を一次近似で補正する。
+            updateHorizontal(st, latDeg) {
+                const raDeg0 = this.ra * 15;
+                const a = raDeg0 * DEG;
+                const dRa = (46.1 + 20.04 * Math.sin(a) * Math.tan(this.dec * DEG)) * st.years / 3600;
+                const dDec = 20.04 * Math.cos(a) * st.years / 3600;
+                const h = equatorialToHorizontal(raDeg0 + dRa, this.dec + dDec, st.lst, latDeg);
+                h.alt = refractAlt(h.alt);
+                const ca = Math.cos(h.alt * DEG);
+                // 局所座標の単位ベクトル：x=東, y=北, z=天頂
+                this.vx = ca * Math.sin(h.az * DEG);
+                this.vy = ca * Math.cos(h.az * DEG);
+                this.vz = Math.sin(h.alt * DEG);
+                const p = obsProj(this.vx, this.vy, this.vz);
+                this.visible = this.vz >= 0 && p !== null;
+                if (p) {
+                    this.x = p.x;
+                    this.y = p.y;
+                }
             }
 
             update() {
@@ -1307,7 +1536,7 @@
             draw() {
                 const size = (0.5 + this.brightness * 2.6) * config.realStarScale;
                 ctx.save();
-                ctx.globalAlpha = this.alpha;
+                ctx.globalAlpha = this.alpha * skyDim;
                 if (config.glowScale > 0) {
                     ctx.shadowBlur = (3 + this.brightness * 11) * config.glowScale;
                     ctx.shadowColor = "white";
@@ -2081,30 +2310,51 @@
         function drawConstellationLines() {
             if (!config.showLines) return;
             ctx.save();
+            ctx.globalAlpha = skyDim;
             ctx.strokeStyle = "rgba(150, 190, 255, 0.35)";
             ctx.lineWidth = 1;
             lineSegments.forEach(seg => {
                 if (!constellationVisible[seg.ci]) return;
-                const s1 = realStars[seg.a];
-                const s2 = realStars[seg.b];
+                const pts = segPoints(realStars[seg.a], realStars[seg.b]);
+                if (!pts) return;
                 ctx.beginPath();
-                ctx.moveTo(s1.x, s1.y);
-                ctx.lineTo(s2.x, s2.y);
+                ctx.moveTo(pts[0], pts[1]);
+                ctx.lineTo(pts[2], pts[3]);
                 ctx.stroke();
             });
             ctx.restore();
         }
 
         // --- 太陽 ---
+        // 観測モード：地平線より上の領域だけに描画を制限する（昇る・沈む天体が地平線で切れる）
+        function clipAboveHorizon() {
+            ctx.beginPath();
+            if (skyGeom.mode === 'perspective') {
+                ctx.rect(0, 0, width, Math.max(0, Math.min(height, horizonY())));
+            } else {
+                ctx.arc(skyGeom.cx, skyGeom.cy, skyGeom.maxR, 0, Math.PI * 2);
+            }
+            ctx.clip();
+        }
+
         function drawSun() {
             if (!config.showSun) return;
-            const cx = width * (config.sunX / 100);
-            const cy = height * (config.sunY / 100);
-            const r = config.sunSize;
+            let cx = width * (config.sunX / 100);
+            let cy = height * (config.sunY / 100);
+            if (obsState) { // 観測モード：実際の位置（地平線より十分下なら描かない。円盤は地平線で切る）
+                if (obsState.sun.alt < -15) return;
+                const p = obsProjectAltAz(obsState.sun.alt, obsState.sun.az);
+                if (!p) return;
+                cx = p.x;
+                cy = p.y;
+            }
+            let r = config.sunSize;
+            if (obsState && config.obsRealSize) r = obsDiscRadius(obsState.sun.alt, obsState.sun.az, 0.267);
 
             ctx.save();
+            if (obsState) clipAboveHorizon();
             if (config.sunGlow > 0) {
-                ctx.shadowBlur = 35 * config.sunGlow;
+                ctx.shadowBlur = 35 * config.sunGlow * Math.min(1, Math.max(0.25, r / config.sunSize));
                 ctx.shadowColor = config.sunColor;
             }
             const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
@@ -2124,14 +2374,45 @@
         let lastAutoMoonPct = -1;
         let lastAutoMoonDir = null;
 
+        // パネルの月齢表示を現在値に同期（値が変わった時だけDOM更新）
+        function syncMoonPanel(k, waxing) {
+            const pct = Math.round(k * 100);
+            if (pct !== lastAutoMoonPct) {
+                lastAutoMoonPct = pct;
+                const valEl = document.getElementById('val-moon-phase');
+                const sliderEl = document.getElementById('param-moon-phase');
+                if (valEl) valEl.textContent = pct;
+                if (sliderEl) sliderEl.value = pct;
+            }
+            const dir = waxing ? 1 : -1;
+            if (dir !== lastAutoMoonDir) {
+                lastAutoMoonDir = dir;
+                const waxBtn = document.getElementById('btn-toggle-moon-waxing');
+                if (waxBtn) waxBtn.textContent = dir === 1 ? '満ちていく' : '欠けていく';
+            }
+        }
+
         function drawMoon() {
             if (!config.showMoon) return;
-            const cx = width * (config.moonX / 100);
-            const cy = height * (config.moonY / 100);
-            const r = config.moonSize;
+            let cx = width * (config.moonX / 100);
+            let cy = height * (config.moonY / 100);
+            let r = config.moonSize;
+            let rot = 0; // 明るい側を太陽の方向へ向けるための回転（観測モードのみ）
 
             let k, dir;
-            if (config.moonAutoPhase) {
+            if (obsState) {
+                // 観測モード：実際の位置・月齢。明るい側は常に右として描き、太陽の方向へ回転させる
+                k = obsState.moon.k;
+                dir = 1;
+                syncMoonPanel(k, obsState.moon.waxing);
+                if (obsState.moon.alt < -15) return;
+                const mp = obsProjectAltAz(obsState.moon.alt, obsState.moon.az);
+                if (!mp) return;
+                cx = mp.x;
+                cy = mp.y;
+                if (config.obsRealSize) r = obsDiscRadius(obsState.moon.alt, obsState.moon.az, obsState.moon.semiDeg);
+                rot = moonToSunAngle(mp);
+            } else if (config.moonAutoPhase) {
                 // 自転速度(rotationDeg)に連動：星空が一周(360°)する間に新月→満月→新月を1サイクル
                 // rotationSpeedがマイナスなら満ち欠けの進行方向も自動的に逆になる
                 const deg = ((rotationDeg % 360) + 360) % 360;
@@ -2158,11 +2439,12 @@
             }
 
             ctx.save();
+            if (obsState) clipAboveHorizon();
 
-            // 輝き（グロー）：本体より先に、クリップしない状態で描く
+            // 輝き（グロー）：本体より先に、地平線以外ではクリップしない状態で描く
             if (config.moonGlow > 0) {
                 ctx.save();
-                ctx.shadowBlur = 22 * config.moonGlow;
+                ctx.shadowBlur = 22 * config.moonGlow * Math.min(1, Math.max(0.25, r / config.moonSize));
                 ctx.shadowColor = config.moonColor;
                 ctx.globalAlpha = 0.5 * Math.max(0.15, k);
                 ctx.fillStyle = config.moonColor;
@@ -2173,6 +2455,7 @@
             }
 
             ctx.translate(cx, cy);
+            ctx.rotate(rot);
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.clip();
@@ -2280,24 +2563,46 @@
 
             ctx.clearRect(0, 0, width, height);
 
+            const cx = width / 2;
+            const cy = height / 2;
+            const maxR = Math.min(width, height) * (config.observeMode ? 0.43 : 0.47);
+            setupObsProjection(cx, cy, maxR);
+
+            // 観測モード：シミュレーション時刻を進め、太陽・月・恒星時を計算する
+            if (config.observeMode) {
+                if (obsLive && config.obsSpeed === 1) obsSimMs = Date.now();
+                else obsSimMs += dt * 1000 * config.obsSpeed;
+                obsState = computeObserveState();
+                skyDim = config.obsDaylight ? Math.min(1, Math.max(0, (-obsState.sun.alt - 2) / 10)) : 1;
+                drawDaySky(cx, cy, maxR);
+            } else {
+                obsState = null;
+                skyDim = 1;
+            }
+
             // 1. 背景の淡い星（実在データを持たない演出用の星屑）
             stars.forEach(star => {
                 star.update();
                 star.draw();
             });
 
-            // 2. 選択中の中心星（北極星 or シリウス）を基準に実在の星図の位置を更新
-            const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
-            const centerRaDeg = center.ra * 15;
-            const cx = width / 2;
-            const cy = height / 2;
-            const maxR = Math.min(width, height) * 0.47;
-            realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
+            if (obsState) drawObserveGround(cx, cy, maxR);
+
+            // 2. 実在の星図の位置を更新
+            if (obsState) {
+                // 観測モード：観測地・日時から高度/方位を求め、天頂を中心に配置
+                realStars.forEach(rs => rs.updateHorizontal(obsState, config.obsLat));
+            } else {
+                // 通常：選択中の中心星（北極星 or シリウスなど）を基準に配置
+                const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
+                const centerRaDeg = center.ra * 15;
+                realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
+            }
 
             // 3. 星座線 → 4. 実在の星（表示ONの星座のみ描画）
             drawConstellationLines();
             realStars.forEach(rs => {
-                if (!constellationVisible[rs.conIndex]) return;
+                if (!constellationVisible[rs.conIndex] || !rs.visible) return;
                 rs.update();
                 rs.draw();
             });
@@ -2789,18 +3094,22 @@
         // クリック位置に最も近い（表示中の）星座を返す。近くに無ければ-1
         function findConstellationAt(px, py) {
             ensureConIndex();
+            if (obsState && skyGeom.mode !== 'perspective' && Math.hypot(px - skyGeom.cx, py - skyGeom.cy) > skyGeom.maxR) return -1;
             const limit = window.matchMedia('(pointer: coarse)').matches ? 28 : 18;
             let best = -1;
             let bestD = limit;
             for (let ci = 0; ci < SKY_DATA.length; ci++) {
                 if (!constellationVisible[ci]) continue;
                 for (const i of conStarIdx[ci]) {
+                    if (!realStars[i].visible) continue;
                     const d = Math.hypot(realStars[i].x - px, realStars[i].y - py);
                     if (d < bestD) { bestD = d; best = ci; }
                 }
                 if (config.showLines) {
                     for (const [a, b] of conSegPairs[ci]) {
-                        const d = distToSegment(px, py, realStars[a].x, realStars[a].y, realStars[b].x, realStars[b].y);
+                        const pts = segPoints(realStars[a], realStars[b]);
+                        if (!pts) continue;
+                        const d = distToSegment(px, py, pts[0], pts[1], pts[2], pts[3]);
                         if (d < bestD) { bestD = d; best = ci; }
                     }
                 }
@@ -2835,9 +3144,11 @@
                 ctx.strokeStyle = 'rgba(255, 214, 120, 0.95)';
                 ctx.lineWidth = 2;
                 conSegPairs[selectedCon].forEach(([a, b]) => {
+                    const pts = segPoints(realStars[a], realStars[b]);
+                    if (!pts) return;
                     ctx.beginPath();
-                    ctx.moveTo(realStars[a].x, realStars[a].y);
-                    ctx.lineTo(realStars[b].x, realStars[b].y);
+                    ctx.moveTo(pts[0], pts[1]);
+                    ctx.lineTo(pts[2], pts[3]);
                     ctx.stroke();
                 });
             }
@@ -2846,6 +3157,7 @@
             ctx.lineWidth = 1.5;
             conStarIdx[selectedCon].forEach(i => {
                 const rs = realStars[i];
+                if (!rs.visible) return;
                 const r = (0.5 + rs.brightness * 2.6) * config.realStarScale + 5;
                 ctx.beginPath();
                 ctx.arc(rs.x, rs.y, r, 0, Math.PI * 2);
@@ -2858,6 +3170,12 @@
             // initUI()のキャンバスのクリック処理（パネル再表示）より先に登録すること。
             // 星座に当たったときは説明を表示し、パネルの再表示は行わない。
             canvas.addEventListener('click', (e) => {
+                // 透視図法でドラッグして向きを変えた直後のクリックは無視する
+                if (obsDragMoved) {
+                    obsDragMoved = false;
+                    e.stopImmediatePropagation();
+                    return;
+                }
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 const y = (e.clientY - rect.top) * (canvas.height / rect.height);
@@ -2875,6 +3193,695 @@
             });
         }
 
+        // =====================================================================
+        // 観測モード：観測場所と日時から、その場所で見える空を再現する
+        // =====================================================================
+        const DEG = Math.PI / 180;
+
+        // 観測場所のプリセット（緯度・経度は度、tzはIANAタイムゾーン）
+        const OBS_PLACES = {
+            sapporo:     { lat: 43.06, lon: 141.35,  tz: 'Asia/Tokyo' },
+            sendai:      { lat: 38.27, lon: 140.87,  tz: 'Asia/Tokyo' },
+            tokyo:       { lat: 35.68, lon: 139.76,  tz: 'Asia/Tokyo' },
+            nagoya:      { lat: 35.18, lon: 136.91,  tz: 'Asia/Tokyo' },
+            osaka:       { lat: 34.69, lon: 135.50,  tz: 'Asia/Tokyo' },
+            hiroshima:   { lat: 34.39, lon: 132.46,  tz: 'Asia/Tokyo' },
+            fukuoka:     { lat: 33.59, lon: 130.40,  tz: 'Asia/Tokyo' },
+            kagoshima:   { lat: 31.60, lon: 130.56,  tz: 'Asia/Tokyo' },
+            naha:        { lat: 26.21, lon: 127.68,  tz: 'Asia/Tokyo' },
+            ishigaki:    { lat: 24.34, lon: 124.16,  tz: 'Asia/Tokyo' },
+            honolulu:    { lat: 21.31, lon: -157.86, tz: 'Pacific/Honolulu' },
+            singapore:   { lat: 1.35,  lon: 103.82,  tz: 'Asia/Singapore' },
+            london:      { lat: 51.51, lon: -0.13,   tz: 'Europe/London' },
+            newyork:     { lat: 40.71, lon: -74.01,  tz: 'America/New_York' },
+            sydney:      { lat: -33.87, lon: 151.21, tz: 'Australia/Sydney' },
+            capetown:    { lat: -33.92, lon: 18.42,  tz: 'Africa/Johannesburg' },
+            buenosaires: { lat: -34.60, lon: -58.38, tz: 'America/Argentina/Buenos_Aires' },
+            northpole:   { lat: 90,    lon: 0,       tz: 'UTC' },
+            southpole:   { lat: -90,   lon: 0,       tz: 'UTC' }
+        };
+
+        let obsSimMs = Date.now(); // シミュレーション上の現在時刻（UNIXミリ秒）
+        let obsLive = true;        // trueかつ等倍のあいだは端末の現在時刻に追従
+        let obsDragMoved = false;  // 透視図法でドラッグした直後（クリックの誤作動防止）
+        let resetObserveUI = () => {};
+
+        function julianDate(ms) { return ms / 86400000 + 2440587.5; }
+
+        // 大気差：真の高度（度）を、空気の屈折で浮き上がった見かけの高度に直す（Saemundssonの式）。
+        // 地平線で約0.5°、高度10°で約0.09°、高度45°で約0.02°。-1°より下は影響なし
+        function refractAlt(altDeg) {
+            if (!config.obsRefraction || altDeg < -1) return altDeg;
+            const r = 1.02 / Math.tan((altDeg + 10.3 / (altDeg + 5.11)) * DEG) / 60;
+            return altDeg + Math.max(0, r);
+        }
+
+        // 太陽の赤経・赤緯・黄経（低精度式。誤差は約0.01度）
+        function sunEquatorial(jd) {
+            const n = jd - 2451545.0;
+            const L = 280.460 + 0.9856474 * n;
+            const g = (357.528 + 0.9856003 * n) * DEG;
+            const lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG;
+            const eps = (23.439 - 0.0000004 * n) * DEG;
+            const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+            const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+            return { raDeg: (ra / DEG + 360) % 360, decDeg: dec / DEG, lonRad: lam };
+        }
+
+        // 月の赤経・赤緯・黄経・視差（天文年鑑の低精度式。位置の誤差は約0.3度）
+        function moonEquatorial(jd) {
+            const T = (jd - 2451545.0) / 36525;
+            const s = (a, b) => Math.sin((a + b * T) * DEG);
+            const c = (a, b) => Math.cos((a + b * T) * DEG);
+            const lam = (218.32 + 481267.881 * T + 6.29 * s(135.0, 477198.87) - 1.27 * s(259.3, -413335.36)
+                + 0.66 * s(235.7, 890534.22) + 0.21 * s(269.9, 954397.74) - 0.19 * s(357.5, 35999.05)
+                - 0.11 * s(186.5, 966404.03)) * DEG;
+            const bet = (5.13 * s(93.3, 483202.02) + 0.28 * s(228.2, 960400.89) - 0.28 * s(318.3, 6003.15)
+                - 0.17 * s(217.6, -407332.21)) * DEG;
+            const par = 0.9508 + 0.0518 * c(135.0, 477198.87) + 0.0095 * c(259.3, -413335.36)
+                + 0.0078 * c(235.7, 890534.22) + 0.0028 * c(269.9, 954397.74);
+            const l = Math.cos(bet) * Math.cos(lam);
+            const m = 0.9175 * Math.cos(bet) * Math.sin(lam) - 0.3978 * Math.sin(bet);
+            const n = 0.3978 * Math.cos(bet) * Math.sin(lam) + 0.9175 * Math.sin(bet);
+            return { raDeg: (Math.atan2(m, l) / DEG + 360) % 360, decDeg: Math.asin(n) / DEG, lonRad: lam, parDeg: par };
+        }
+
+        // 赤道座標 → 地平座標（高度・方位。方位は北=0°から東回り）
+        function equatorialToHorizontal(raDeg, decDeg, lstDeg, latDeg) {
+            const H = (lstDeg - raDeg) * DEG;
+            const d = decDeg * DEG;
+            const phi = latDeg * DEG;
+            const sinAlt = Math.sin(phi) * Math.sin(d) + Math.cos(phi) * Math.cos(d) * Math.cos(H);
+            const alt = Math.asin(Math.min(1, Math.max(-1, sinAlt)));
+            const az = Math.atan2(-Math.cos(d) * Math.sin(H), Math.sin(d) * Math.cos(phi) - Math.cos(d) * Math.sin(phi) * Math.cos(H));
+            return { alt: alt / DEG, az: (az / DEG + 360) % 360 };
+        }
+
+        // ---- 図法 ----
+        // 毎フレームの最初に、図法とカメラ（透視図法）の設定を反映する
+        function setupObsProjection(cx, cy, maxR) {
+            const g = skyGeom;
+            g.cx = cx;
+            g.cy = cy;
+            g.maxR = maxR;
+            g.mode = config.observeMode ? config.obsProjection : 'equidistant';
+            if (g.mode === 'perspective') {
+                const y = config.obsYaw * DEG;
+                const p = config.obsPitch * DEG;
+                g.F = [Math.cos(p) * Math.sin(y), Math.cos(p) * Math.cos(y), Math.sin(p)];  // 視線の向き
+                g.R = [Math.cos(y), -Math.sin(y), 0];                                      // 画面の右
+                g.U = [-Math.sin(y) * Math.sin(p), -Math.cos(y) * Math.sin(p), Math.cos(p)]; // 画面の上
+                g.f = (height / 2) / Math.tan(config.obsFov * DEG / 2);                     // 焦点距離(px)
+            }
+        }
+
+        // 局所座標（x=東, y=北, z=天頂）の単位ベクトルを画面座標に変換する。
+        // 全天を円で表す3つの図法は、天頂が中心・地平線が半径maxRの円（上が北、左が東）。
+        //   正距方位図法：r ∝ 天頂距離　／　ステレオ図法：r ∝ tan(天頂距離/2)
+        //   正積方位図法：r ∝ sin(天頂距離/2)
+        // 透視図法は、向き・見上げ角・画角で決まるカメラ視点（カメラの背後はnull）。
+        function obsProj(vx, vy, vz) {
+            const g = skyGeom;
+            if (g.mode === 'perspective') {
+                const d = vx * g.F[0] + vy * g.F[1] + vz * g.F[2];
+                if (d <= 0.05) return null;
+                const sx = vx * g.R[0] + vy * g.R[1] + vz * g.R[2];
+                const sy = vx * g.U[0] + vy * g.U[1] + vz * g.U[2];
+                return { x: g.cx + g.f * sx / d, y: g.cy - g.f * sy / d };
+            }
+            const zeta = Math.acos(Math.min(1, Math.max(-1, vz))); // 天頂からの角距離
+            let r;
+            if (g.mode === 'stereographic') r = g.maxR * Math.tan(Math.min(zeta, Math.PI * 0.97) / 2);
+            else if (g.mode === 'equalarea') r = g.maxR * Math.SQRT2 * Math.sin(zeta / 2);
+            else r = g.maxR * zeta / (Math.PI / 2);
+            const n = Math.hypot(vx, vy);
+            if (n < 1e-9) return { x: g.cx, y: g.cy };
+            return { x: g.cx - r * vx / n, y: g.cy - r * vy / n };
+        }
+
+        function obsProjectAltAz(altDeg, azDeg) {
+            const ca = Math.cos(altDeg * DEG);
+            return obsProj(ca * Math.sin(azDeg * DEG), ca * Math.cos(azDeg * DEG), Math.sin(altDeg * DEG));
+        }
+
+        // 2つの星を結ぶ線分を、地平線と（透視図法では）カメラの背後で切り取り、
+        // 画面上の両端 [x1, y1, x2, y2] を返す。まったく見えなければnull
+        function obsSegment(a, b) {
+            let t0 = 0, t1 = 1;
+            const clip = (na, nb) => {
+                if (na < 0 && nb < 0) return false;
+                if (na >= 0 && nb >= 0) return true;
+                const t = na / (na - nb);
+                if (na >= 0) t1 = Math.min(t1, t); else t0 = Math.max(t0, t);
+                return t0 <= t1;
+            };
+            if (!clip(a.vz, b.vz)) return null;
+            if (skyGeom.mode === 'perspective') {
+                const F = skyGeom.F;
+                const da = a.vx * F[0] + a.vy * F[1] + a.vz * F[2] - 0.06;
+                const db = b.vx * F[0] + b.vy * F[1] + b.vz * F[2] - 0.06;
+                if (!clip(da, db)) return null;
+            }
+            const pt = (t) => {
+                const x = a.vx + t * (b.vx - a.vx);
+                const y = a.vy + t * (b.vy - a.vy);
+                const z = a.vz + t * (b.vz - a.vz);
+                const n = Math.hypot(x, y, z) || 1;
+                return obsProj(x / n, y / n, z / n);
+            };
+            const p0 = pt(t0);
+            const p1 = pt(t1);
+            return p0 && p1 ? [p0.x, p0.y, p1.x, p1.y] : null;
+        }
+
+        // 星座線の画面上の端点（観測モードでは地平線などで切り取り済み）。見えなければnull
+        function segPoints(s1, s2) {
+            return obsState ? obsSegment(s1, s2) : [s1.x, s1.y, s2.x, s2.y];
+        }
+
+        // 月の明るい側が向く方向（画面上の角度）。太陽の方向へ少し進んだ点で求める
+        function moonToSunAngle(mp) {
+            const m = obsState.moon;
+            const s = obsState.sun;
+            const v = (alt, az) => [Math.cos(alt * DEG) * Math.sin(az * DEG), Math.cos(alt * DEG) * Math.cos(az * DEG), Math.sin(alt * DEG)];
+            const vm = v(m.alt, m.az);
+            const vs = v(s.alt, s.az);
+            const q = vm.map((c, i) => c + 0.05 * (vs[i] - c));
+            const n = Math.hypot(q[0], q[1], q[2]) || 1;
+            const sp = obsProj(q[0] / n, q[1] / n, q[2] / n);
+            return sp ? Math.atan2(sp.y - mp.y, sp.x - mp.x) : 0;
+        }
+
+        // 実寸表示：角半径semiDeg（度）の円盤が、いまの図法・視点で何pxになるか（高度方向と方位方向の平均。最小2px）
+        function obsDiscRadius(altDeg, azDeg, semiDeg) {
+            const p = obsProjectAltAz(altDeg, azDeg);
+            const alt2 = altDeg + semiDeg > 89.9 ? altDeg - semiDeg : altDeg + semiDeg;
+            const pa = obsProjectAltAz(alt2, azDeg);
+            const pz = obsProjectAltAz(altDeg, azDeg + semiDeg / Math.max(0.05, Math.cos(altDeg * DEG)));
+            if (!p || !pa || !pz) return 2;
+            const d1 = Math.hypot(pa.x - p.x, pa.y - p.y);
+            const d2 = Math.hypot(pz.x - p.x, pz.y - p.y);
+            return Math.max(2, (d1 + d2) / 2);
+        }
+
+        // 透視図法での地平線の画面上のy座標（視線が真上に近いときは画面の外）
+        function horizonY() {
+            const g = skyGeom;
+            if (Math.cos(config.obsPitch * DEG) < 1e-6) return Infinity;
+            return g.cy + g.f * Math.tan(config.obsPitch * DEG);
+        }
+
+        // 現在のシミュレーション時刻の恒星時・太陽・月を求める
+        function computeObserveState() {
+            const jd = julianDate(obsSimMs);
+            const d = jd - 2451545.0;
+            const gmst = (((280.46061837 + 360.98564736629 * d) % 360) + 360) % 360;
+            const lst = gmst + config.obsLon;
+            const sun = sunEquatorial(jd);
+            const moon = moonEquatorial(jd);
+            const sh = equatorialToHorizontal(sun.raDeg, sun.decDeg, lst, config.obsLat);
+            const mh = equatorialToHorizontal(moon.raDeg, moon.decDeg, lst, config.obsLat);
+            mh.alt -= moon.parDeg * Math.cos(mh.alt * DEG); // 月は近いので視差で高度が下がる
+            sh.alt = refractAlt(sh.alt);
+            mh.alt = refractAlt(mh.alt);
+            // 輝面比（太陽との離角から）と、満ちていく/欠けていくの判定
+            const cosPsi = Math.sin(sun.decDeg * DEG) * Math.sin(moon.decDeg * DEG)
+                + Math.cos(sun.decDeg * DEG) * Math.cos(moon.decDeg * DEG) * Math.cos((sun.raDeg - moon.raDeg) * DEG);
+            const k = (1 - Math.min(1, Math.max(-1, cosPsi))) / 2;
+            const waxing = Math.sin(moon.lonRad - sun.lonRad) > 0;
+            // 月の見かけの角半径は、視差（＝地球からの距離）から求める
+            return { lst, years: d / 365.25, sun: sh, moon: { alt: mh.alt, az: mh.az, k, waxing, semiDeg: 0.2725 * moon.parDeg } };
+        }
+
+        // 空の色：太陽の高度ごとの（天頂の色・地平線の色）。[太陽の高度, 天頂R,G,B,A, 地平線R,G,B,A]
+        const SKY_KEYS = [
+            [  8, 55, 115, 210, 0.62, 150, 190, 240, 0.66],  // 昼
+            [  2, 55, 105, 195, 0.58, 240, 190, 140, 0.66],  // 日の出・日の入り直前（金色）
+            [  0, 45,  80, 160, 0.52, 255, 150,  80, 0.66],  // 日の出・日の入り（橙）
+            [ -3, 30,  50, 120, 0.48, 240, 105,  85, 0.60],  // 夕焼け・朝焼け（赤橙）
+            [ -6, 20,  30,  85, 0.42, 170,  75, 105, 0.52],  // 常用薄明の終わり（赤紫）
+            [ -9, 12,  20,  60, 0.32,  95,  60, 115, 0.40],  // 航海薄明（紫）
+            [-12,  8,  12,  38, 0.20,  45,  50,  95, 0.28],  // 航海薄明の終わり（濃い青）
+            [-15,  5,   8,  25, 0.10,  25,  32,  70, 0.16],  // 天文薄明
+            [-18,  5,   8,  25, 0.00,  25,  32,  70, 0.00]   // 夜（空の色なし）
+        ];
+
+        // 太陽の高度に応じた（天頂・地平線）の色を、キーの間で補間して返す
+        function skyKeyColors(sunAlt) {
+            const last = SKY_KEYS[SKY_KEYS.length - 1];
+            if (sunAlt >= SKY_KEYS[0][0]) return SKY_KEYS[0].slice(1);
+            if (sunAlt <= last[0]) return last.slice(1);
+            for (let i = 0; i < SKY_KEYS.length - 1; i++) {
+                const a = SKY_KEYS[i];
+                const b = SKY_KEYS[i + 1];
+                if (sunAlt <= a[0] && sunAlt >= b[0]) {
+                    const t = (a[0] - sunAlt) / (a[0] - b[0]);
+                    return a.slice(1).map((v, j) => v + (b[j + 1] - v) * t);
+                }
+            }
+            return last.slice(1);
+        }
+
+        // 高度altの空の色（地平線に近いほど地平線の色、天頂に近いほど天頂の色）
+        function skyColorAt(k, alt) {
+            const t = Math.pow(Math.min(1, Math.max(0, alt / 90)), 0.55);
+            const m = (i) => k[4 + i] + (k[i] - k[4 + i]) * t;
+            return `rgba(${Math.round(m(0))}, ${Math.round(m(1))}, ${Math.round(m(2))}, ${m(3).toFixed(3)})`;
+        }
+
+        // 空の色（昼の青、夕焼け・朝焼けの赤橙と紫、太陽側の地平線の輝き）を地平線より上に描く
+        function drawDaySky(cx, cy, maxR) {
+            if (!config.obsSkyColor) return;
+            const sunAlt = obsState.sun.alt;
+            if (sunAlt <= -18) return;
+            const k = skyKeyColors(sunAlt);
+            const alts = [0, 5, 10, 20, 35, 50, 70, 85, 90];
+            ctx.save();
+            if (skyGeom.mode === 'perspective') {
+                const yEnd = Math.min(height, horizonY());
+                if (yEnd <= 0) { ctx.restore(); return; }
+                ctx.beginPath();
+                ctx.rect(0, 0, width, yEnd);
+                ctx.clip();
+                // 視線の方位の鉛直線上で、高度ごとの画面のy座標を求めてグラデーションにする
+                const pts = [];
+                alts.forEach(a => {
+                    const p = obsProjectAltAz(a, config.obsYaw);
+                    if (p) pts.push({ y: p.y, a });
+                });
+                if (pts.length >= 2 && Math.abs(pts[0].y - pts[pts.length - 1].y) > 1) {
+                    const yTop = pts[pts.length - 1].y;
+                    const yBot = pts[0].y;
+                    const g = ctx.createLinearGradient(0, yTop, 0, yBot);
+                    pts.forEach(pt => g.addColorStop(Math.min(1, Math.max(0, (pt.y - yTop) / (yBot - yTop))), skyColorAt(k, pt.a)));
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, width, yEnd);
+                } else if (pts.length >= 1) {
+                    ctx.fillStyle = skyColorAt(k, pts[pts.length - 1].a);
+                    ctx.fillRect(0, 0, width, yEnd);
+                }
+            } else {
+                ctx.beginPath();
+                ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+                ctx.clip();
+                const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+                alts.forEach(a => {
+                    const r = Math.abs(cy - obsProjectAltAz(a, 0).y);
+                    g.addColorStop(Math.min(1, r / maxR), skyColorAt(k, a));
+                });
+                ctx.fillStyle = g;
+                ctx.fillRect(cx - maxR, cy - maxR, maxR * 2, maxR * 2);
+            }
+
+            // 太陽のある方位の地平線付近が、日の出・日の入りの前後でぼんやり明るく染まる
+            const gl = Math.max(0, 1 - Math.abs(sunAlt + 1) / 10) * 0.55;
+            if (gl > 0.01) {
+                const p0 = obsProjectAltAz(0, obsState.sun.az);
+                const p5 = obsProjectAltAz(5, obsState.sun.az);
+                if (p0 && p5) {
+                    const R = Math.max(1, Math.hypot(p5.x - p0.x, p5.y - p0.y) / 5 * 38); // 角度で約38°ぶん
+                    const warm = sunAlt > 0 ? '255, 200, 130' : '255, 120, 85';
+                    const g2 = ctx.createRadialGradient(p0.x, p0.y, 0, p0.x, p0.y, R);
+                    g2.addColorStop(0, `rgba(${warm}, ${gl})`);
+                    g2.addColorStop(1, `rgba(${warm}, 0)`);
+                    ctx.fillStyle = g2;
+                    ctx.fillRect(0, 0, width, height);
+                }
+            }
+            ctx.restore();
+        }
+
+        // 地平線の外側（地面）を暗くし、方位・高度の目安を描く
+        function drawObserveGround(cx, cy, maxR) {
+            if (skyGeom.mode === 'perspective') { drawObserveGroundCamera(); return; }
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, width, height);
+            ctx.arc(cx, cy, maxR, 0, Math.PI * 2, true);
+            ctx.fillStyle = 'rgba(3, 6, 14, 0.82)';
+            ctx.fill('evenodd');
+
+            if (config.obsGuides) {
+                // 高度30°・60°の目安の輪（半径は選んだ図法で求める）
+                ctx.setLineDash([4, 6]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                [60, 30].forEach(alt => {
+                    const r = cy - obsProjectAltAz(alt, 0).y;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillText(alt + '°', cx, cy - r - 1);
+                });
+                ctx.setLineDash([]);
+
+                // 地平線
+                ctx.strokeStyle = 'rgba(138, 180, 248, 0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // 方位（上が北、左が東）
+                const fs = Math.round(Math.max(13, Math.min(20, maxR * 0.045)));
+                ctx.font = `bold ${fs}px sans-serif`;
+                ctx.textBaseline = 'middle';
+                const off = maxR + 15;
+                [['北', cx, cy - off, '#ffd78a'], ['東', cx - off, cy, '#cbd5e1'],
+                 ['南', cx, cy + off, '#cbd5e1'], ['西', cx + off, cy, '#cbd5e1']].forEach(([t, x, y, col]) => {
+                    ctx.fillStyle = col;
+                    ctx.fillText(t, x, y);
+                });
+            }
+            ctx.restore();
+        }
+
+        // 透視図法：地平線は水平な直線になる。その下側を地面として暗くする
+        function drawObserveGroundCamera() {
+            const hy = horizonY();
+            ctx.save();
+            if (hy < height) {
+                const y0 = Math.max(0, hy);
+                ctx.fillStyle = 'rgba(3, 6, 14, 0.82)';
+                ctx.fillRect(0, y0, width, height - y0);
+            }
+            if (config.obsGuides) {
+                // 高度30°・60°の線
+                ctx.setLineDash([4, 6]);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.lineWidth = 1;
+                [30, 60].forEach(alt => {
+                    ctx.beginPath();
+                    let pen = false;
+                    for (let az = 0; az <= 360; az += 2) {
+                        const p = obsProjectAltAz(alt, az);
+                        if (p && Math.abs(p.x) < 6000 && Math.abs(p.y) < 6000) {
+                            if (pen) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y);
+                            pen = true;
+                        } else {
+                            pen = false;
+                        }
+                    }
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+
+                // 地平線
+                if (hy >= -2 && hy <= height + 2) {
+                    ctx.strokeStyle = 'rgba(138, 180, 248, 0.55)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(0, hy);
+                    ctx.lineTo(width, hy);
+                    ctx.stroke();
+                }
+
+                // 方位（8方位）。地平線が画面の下に外れているときは、画面の下端に表示する
+                if (hy >= 0) {
+                    const names = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+                    ctx.font = 'bold 15px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+                    const ly = hy <= height - 24 ? hy + 6 : height - 24;
+                    for (let i = 0; i < 8; i++) {
+                        const p = obsProjectAltAz(0, i * 45);
+                        if (!p || p.x < -20 || p.x > width + 20) continue;
+                        ctx.fillStyle = i === 0 ? '#ffd78a' : '#cbd5e1';
+                        ctx.fillText(names[i], p.x, ly);
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        // 観測場所・日時・時間の進み方などのパネル操作
+        function initObserve() {
+            const $ = (id) => document.getElementById(id);
+            const modeBtn = $('btn-toggle-observe');
+            const placeSel = $('param-obs-place');
+            const geoBtn = $('btn-obs-geolocate');
+            const geoMsg = $('obs-geo-msg');
+            const latIn = $('param-obs-lat');
+            const lonIn = $('param-obs-lon');
+            const dtIn = $('param-obs-datetime');
+            const nowBtn = $('btn-obs-now');
+            const speedSel = $('param-obs-speed');
+            const guidesBtn = $('btn-toggle-obs-guides');
+            const dayBtn = $('btn-toggle-obs-daylight');
+            const timeOut = $('obs-time-readout');
+            const skyOut = $('obs-sky-readout');
+            let placeTz = OBS_PLACES.tokyo.tz; // 手入力・現在地のときはundefined（端末の時刻のみ表示）
+            const projSel = $('param-obs-proj');
+            const perspBox = $('obs-persp-controls');
+            const yawIn = $('param-obs-yaw');
+            const pitchIn = $('param-obs-pitch');
+            const fovIn = $('param-obs-fov');
+            const refrBtn = $('btn-toggle-obs-refraction');
+            const skyBtn = $('btn-toggle-obs-skycolor');
+            const sizeBtn = $('btn-toggle-obs-realsize');
+
+            const pad = (n) => String(n).padStart(2, '0');
+            const toLocalInput = (ms) => {
+                const d = new Date(ms);
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            };
+            const fmt = (ms, tz) => new Date(ms).toLocaleString('ja-JP', {
+                timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            });
+
+            function applyMode() {
+                modeBtn.textContent = config.observeMode ? 'オン' : 'オフ';
+                document.body.classList.toggle('observe-on', config.observeMode);
+            }
+
+            function setPlace(key) {
+                const pl = OBS_PLACES[key];
+                config.obsLat = pl.lat;
+                config.obsLon = pl.lon;
+                latIn.value = pl.lat;
+                lonIn.value = pl.lon;
+                placeTz = pl.tz;
+            }
+
+            function refreshReadout() {
+                if (!config.observeMode) { timeOut.textContent = ''; skyOut.textContent = ''; return; }
+                let t = '日時: ' + fmt(obsSimMs) + '（端末の時刻）';
+                if (placeTz) t += '\n現地: ' + fmt(obsSimMs, placeTz);
+                timeOut.textContent = t;
+                timeOut.style.whiteSpace = 'pre-line';
+                if (obsState) {
+                    const sa = obsState.sun.alt;
+                    const sunTxt = sa >= 0 ? `太陽: 高度${sa.toFixed(0)}°` : `太陽: 地平線の下（${sa.toFixed(0)}°）`;
+                    const ma = obsState.moon.alt;
+                    const moonTxt = `月: ${ma >= 0 ? '高度' + ma.toFixed(0) + '°' : '地平線の下'}・輝面比${Math.round(obsState.moon.k * 100)}%`;
+                    const phase = sa >= 0 ? '昼' : sa >= -6 ? '常用薄明（夕焼け・朝焼け）' : sa >= -12 ? '航海薄明' : sa >= -18 ? '天文薄明' : '夜';
+                    skyOut.textContent = sunTxt + '\n' + moonTxt + '\n空: ' + phase;
+                    skyOut.style.whiteSpace = 'pre-line';
+                }
+                if (document.activeElement !== dtIn) dtIn.value = toLocalInput(obsSimMs);
+            }
+
+            modeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.observeMode = !config.observeMode;
+                if (config.observeMode) {
+                    obsSimMs = Date.now();
+                    obsLive = config.obsSpeed === 1;
+                    dtIn.value = toLocalInput(obsSimMs);
+                } else {
+                    closeConstellationInfo();
+                }
+                applyMode();
+                refreshReadout();
+            });
+
+            placeSel.addEventListener('change', () => {
+                if (OBS_PLACES[placeSel.value]) setPlace(placeSel.value);
+            });
+
+            function onCoordInput() {
+                const lat = parseFloat(latIn.value);
+                const lon = parseFloat(lonIn.value);
+                if (Number.isFinite(lat)) config.obsLat = Math.max(-90, Math.min(90, lat));
+                if (Number.isFinite(lon)) config.obsLon = Math.max(-180, Math.min(180, lon));
+                placeSel.value = 'custom';
+                placeTz = undefined;
+            }
+            latIn.addEventListener('input', onCoordInput);
+            lonIn.addEventListener('input', onCoordInput);
+
+            geoBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!navigator.geolocation) {
+                    geoMsg.textContent = 'このブラウザでは現在地を取得できません。';
+                    return;
+                }
+                geoMsg.textContent = '現在地を取得しています…';
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    config.obsLat = Math.max(-90, Math.min(90, pos.coords.latitude));
+                    config.obsLon = Math.max(-180, Math.min(180, pos.coords.longitude));
+                    latIn.value = config.obsLat.toFixed(2);
+                    lonIn.value = config.obsLon.toFixed(2);
+                    placeSel.value = 'custom';
+                    placeTz = undefined;
+                    geoMsg.textContent = '現在地を取得しました。';
+                }, () => {
+                    geoMsg.textContent = '現在地を取得できませんでした（ブラウザの位置情報の許可が必要です。ファイルを直接開いている場合は使えないことがあります）。';
+                }, { timeout: 10000, maximumAge: 600000 });
+            });
+
+            dtIn.addEventListener('change', () => {
+                const ms = new Date(dtIn.value).getTime();
+                if (Number.isFinite(ms)) {
+                    obsSimMs = ms;
+                    obsLive = false;
+                }
+            });
+
+            nowBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                obsSimMs = Date.now();
+                obsLive = true;
+                config.obsSpeed = 1;
+                speedSel.value = '1';
+                dtIn.value = toLocalInput(obsSimMs);
+            });
+
+            speedSel.addEventListener('change', () => {
+                config.obsSpeed = parseFloat(speedSel.value);
+                if (config.obsSpeed !== 1) obsLive = false;
+            });
+
+            guidesBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.obsGuides = !config.obsGuides;
+                guidesBtn.textContent = config.obsGuides ? '表示中' : '非表示';
+            });
+
+            dayBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.obsDaylight = !config.obsDaylight;
+                dayBtn.textContent = config.obsDaylight ? 'する' : 'しない';
+            });
+
+            // ---- 図法と、透視図法の視点（向き・見上げ角・画角） ----
+            const dirNames = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+            function applyProjection() {
+                perspBox.style.display = config.obsProjection === 'perspective' ? 'block' : 'none';
+            }
+            function setView(yaw, pitch, fov) {
+                config.obsYaw = ((yaw % 360) + 360) % 360;
+                config.obsPitch = Math.max(-20, Math.min(90, pitch));
+                config.obsFov = Math.max(20, Math.min(120, fov));
+                yawIn.value = Math.round(config.obsYaw) % 360;
+                pitchIn.value = Math.round(config.obsPitch);
+                fovIn.value = Math.round(config.obsFov);
+                $('val-obs-yaw').textContent = Math.round(config.obsYaw) % 360;
+                $('val-obs-yaw-name').textContent = dirNames[Math.round(config.obsYaw / 45) % 8];
+                $('val-obs-pitch').textContent = Math.round(config.obsPitch);
+                $('val-obs-fov').textContent = Math.round(config.obsFov);
+            }
+            projSel.addEventListener('change', () => {
+                config.obsProjection = projSel.value;
+                applyProjection();
+            });
+            [yawIn, pitchIn, fovIn].forEach(el => el.addEventListener('input', () => {
+                setView(parseFloat(yawIn.value), parseFloat(pitchIn.value), parseFloat(fovIn.value));
+            }));
+
+            // 向きボタン：北・東・南・西は地平線を見る向き、真上は天頂を見上げる
+            [['btn-obs-look-n', 0], ['btn-obs-look-e', 90], ['btn-obs-look-s', 180], ['btn-obs-look-w', 270]].forEach(([id, yaw]) => {
+                $(id).addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setView(yaw, 15, config.obsFov);
+                });
+            });
+            $('btn-obs-look-up').addEventListener('click', (e) => {
+                e.stopPropagation();
+                setView(config.obsYaw, 90, config.obsFov);
+            });
+
+            refrBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.obsRefraction = !config.obsRefraction;
+                refrBtn.textContent = config.obsRefraction ? 'する' : 'しない';
+            });
+
+            skyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.obsSkyColor = !config.obsSkyColor;
+                skyBtn.textContent = config.obsSkyColor ? 'する' : 'しない';
+            });
+            sizeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.obsRealSize = !config.obsRealSize;
+                sizeBtn.textContent = config.obsRealSize ? 'する' : 'しない';
+                document.body.classList.toggle('obs-realsize', config.obsRealSize);
+            });
+
+            // 透視図法：ドラッグで向きを変え、ホイールで画角（ズーム）を変える
+            const canvasEl = $('skyCanvas');
+            const isPersp = () => config.observeMode && config.obsProjection === 'perspective';
+            let drag = null;
+            canvasEl.addEventListener('pointerdown', (e) => {
+                if (!isPersp()) return;
+                drag = { x: e.clientX, y: e.clientY, yaw: config.obsYaw, pitch: config.obsPitch, moved: false };
+            });
+            window.addEventListener('pointermove', (e) => {
+                if (!drag) return;
+                const dx = e.clientX - drag.x;
+                const dy = e.clientY - drag.y;
+                if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+                drag.moved = true;
+                const k = config.obsFov / height; // 1pxあたりの角度
+                setView(drag.yaw - dx * k, drag.pitch + dy * k, config.obsFov);
+            });
+            window.addEventListener('pointerup', () => {
+                if (drag && drag.moved) {
+                    obsDragMoved = true;
+                    setTimeout(() => { obsDragMoved = false; }, 80);
+                }
+                drag = null;
+            });
+            window.addEventListener('pointercancel', () => { drag = null; });
+            canvasEl.addEventListener('wheel', (e) => {
+                if (!isPersp()) return;
+                e.preventDefault();
+                setView(config.obsYaw, config.obsPitch, config.obsFov * Math.exp(e.deltaY * 0.001));
+            }, { passive: false });
+
+            // パネルのリセットボタンから呼ばれる（configは既に初期値に戻っている）
+            resetObserveUI = () => {
+                placeSel.value = 'tokyo';
+                setPlace('tokyo');
+                projSel.value = config.obsProjection;
+                setView(config.obsYaw, config.obsPitch, config.obsFov);
+                applyProjection();
+                speedSel.value = String(config.obsSpeed);
+                guidesBtn.textContent = config.obsGuides ? '表示中' : '非表示';
+                dayBtn.textContent = config.obsDaylight ? 'する' : 'しない';
+                refrBtn.textContent = config.obsRefraction ? 'する' : 'しない';
+                skyBtn.textContent = config.obsSkyColor ? 'する' : 'しない';
+                sizeBtn.textContent = config.obsRealSize ? 'する' : 'しない';
+                document.body.classList.toggle('obs-realsize', config.obsRealSize);
+                obsSimMs = Date.now();
+                obsLive = true;
+                dtIn.value = toLocalInput(obsSimMs);
+                geoMsg.textContent = '';
+                applyMode();
+                refreshReadout();
+            };
+
+            dtIn.value = toLocalInput(obsSimMs);
+            applyMode();
+            setInterval(refreshReadout, 500);
+        }
+
         // --- リサイズイベント ---
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
@@ -2888,6 +3895,7 @@
             applyPanelTransparency();
             initConstellationInfo(); // initUI()より先に（クリック処理の順序のため）
             initUI();
+            initObserve();
             updateBgColor();
             buildSky();
             buildConstellationCheckboxes();
