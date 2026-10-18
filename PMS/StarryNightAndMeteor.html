@@ -1244,6 +1244,7 @@
             dsoScale: 1,
             dsoLimit: 99,
             obsFov: 70,
+            viewZoom: 1, // 通常モードの拡大率（ピンチ／ホイールで変更）
             bgCenter: '#0d1a33',
             bgOuter: '#000000',
             showLines: true,
@@ -2032,7 +2033,11 @@
             sextans: { label: 'ろくぶんぎ座', ra: 10.1330, dec: -0.3720 },
             aquila: { label: 'わし座', ra: 19.8470, dec: 8.8680 }
         };
-        const MAX_ANG_DEG = 115; // 中心からこの角距離までを描画範囲とする
+        const MAX_ANG_DEG = 115; // 中心からこの角距離までを描画範囲とする（拡大率1倍のとき）
+        const ZOOM_MIN = 0.6;
+        const ZOOM_MAX = 8;
+        const clampZoom = (z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+        const viewAngDeg = () => MAX_ANG_DEG / config.viewZoom; // 拡大すると、画面の端までの角距離が小さくなる
 
         // --- 実在の星図データ（J2000元期・簡略値／赤経:時, 赤緯:度, 等級） ---
         // 全88星座を五十音順に収録（主要な恒星と星座線の簡略データ）
@@ -2973,8 +2978,9 @@
                 // 通常：選択中の中心星（北極星 or シリウスなど）を基準に配置
                 const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
                 const centerRaDeg = center.ra * 15;
-                realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
-                updateDeepSky(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
+                const viewAng = viewAngDeg();
+                realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, viewAng, rotationDeg));
+                updateDeepSky(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, viewAng, rotationDeg));
             }
 
             // 3. 星座線 → 4. 実在の星（表示ONの星座のみ描画）
@@ -4259,7 +4265,7 @@
                 const sy = -ddy;
                 const rpx = Math.hypot(sx, sy);
                 if (rpx < 1e-6) return;
-                const cr = (rpx / (skyGeom.maxR || 1) * MAX_ANG_DEG) * DEG;                 // 動かす角距離
+                const cr = (rpx / (skyGeom.maxR || 1) * viewAngDeg()) * DEG;                 // 動かす角距離
                 const brg = (Math.atan2(sx, -sy) / DEG - rotationDeg) * DEG;                 // 地図上の方位（自転を除く）
                 const ra0 = c.ra * 15 * DEG;
                 const dec0 = c.dec * DEG;
@@ -4269,7 +4275,46 @@
                 c.dec = dec1 / DEG;
             }
 
+            // ---- ピンチ（2本指）で拡大縮小 ----
+            // 透視図法：画角を変える（ホイールと同じ）／通常モード：拡大率を変える。
+            // 全天を円で表す図法（観測モードの正距・ステレオ・正積）は、全天が収まる図なので拡大縮小しない。
+            const canZoom = () => isPersp() || isPan();
+            const pointers = new Map(); // 画面に触れている指（pointerId → 座標）
+            let pinch = null;
+
+            function pinchDistance() {
+                const [a, b] = Array.from(pointers.values());
+                return Math.hypot(a.x - b.x, a.y - b.y);
+            }
+            function applyZoomFactor(factor) { // factor>1 で拡大
+                if (isPersp()) {
+                    setView(config.obsYaw, config.obsPitch, config.obsFov / factor);
+                } else if (isPan()) {
+                    config.viewZoom = clampZoom(config.viewZoom * factor);
+                }
+            }
+            function endPinchIfNeeded() {
+                if (pinch && pointers.size < 2) {
+                    pinch = null;
+                    // ピンチ直後に「タップ」と誤判定されないようにする（残った指ではドラッグも始めない）
+                    obsDragMoved = true;
+                    setTimeout(() => { obsDragMoved = false; }, 80);
+                }
+            }
+
             canvasEl.addEventListener('pointerdown', (e) => {
+                pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (pointers.size === 2 && canZoom()) {
+                    // 2本目の指が触れたらドラッグを中止してピンチを始める
+                    drag = null;
+                    pinch = {
+                        dist: Math.max(1, pinchDistance()),
+                        fov: config.obsFov,
+                        zoom: config.viewZoom
+                    };
+                    return;
+                }
+                if (pointers.size > 1) return;
                 if (isPersp()) {
                     drag = { mode: 'cam', x: e.clientX, y: e.clientY, yaw: config.obsYaw, pitch: config.obsPitch, moved: false };
                 } else if (isPan()) {
@@ -4277,6 +4322,17 @@
                 }
             });
             window.addEventListener('pointermove', (e) => {
+                if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                if (pinch) {
+                    if (pointers.size < 2) return;
+                    const ratio = pinchDistance() / pinch.dist; // 指の間隔が開くほど大きい
+                    if (isPersp()) {
+                        setView(config.obsYaw, config.obsPitch, pinch.fov / ratio);
+                    } else if (isPan()) {
+                        config.viewZoom = clampZoom(pinch.zoom * ratio);
+                    }
+                    return;
+                }
                 if (!drag) return;
                 const dx = e.clientX - drag.x;
                 const dy = e.clientY - drag.y;
@@ -4302,19 +4358,30 @@
                     drag.lastY = e.clientY;
                 }
             });
-            window.addEventListener('pointerup', () => {
+            window.addEventListener('pointerup', (e) => {
+                pointers.delete(e.pointerId);
+                if (pinch) {
+                    endPinchIfNeeded();
+                    return;
+                }
                 if (drag && drag.moved) {
                     obsDragMoved = true;
                     setTimeout(() => { obsDragMoved = false; }, 80);
                 }
                 drag = null;
             });
-            window.addEventListener('pointercancel', () => { drag = null; });
+            window.addEventListener('pointercancel', (e) => {
+                pointers.delete(e.pointerId);
+                drag = null;
+                endPinchIfNeeded();
+            });
             canvasEl.addEventListener('wheel', (e) => {
-                if (!isPersp()) return;
+                if (!canZoom()) return;
                 e.preventDefault();
-                setView(config.obsYaw, config.obsPitch, config.obsFov * Math.exp(e.deltaY * 0.001));
+                applyZoomFactor(Math.exp(-e.deltaY * 0.001)); // ホイールを奥へ回すと縮小
             }, { passive: false });
+            // iOS Safariのページ全体のピンチ拡大を止める
+            canvasEl.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
 
             // パネルのリセットボタンから呼ばれる（configは既に初期値に戻っている）
             resetObserveUI = () => {
