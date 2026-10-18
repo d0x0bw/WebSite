@@ -171,7 +171,7 @@
         .control-section:not(.is-collapsed) {
             background: rgba(138, 180, 248, 0.13);
             border-color: rgba(138, 180, 248, 0.35);
-            border-left-color: none;
+            border-left-color: rgba(138, 180, 248, 0.35);
         }
 
         .control-section:not(.is-collapsed) .section-title,
@@ -212,7 +212,7 @@
         }
 
         .section-title {
-            font-size: 1.0rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #9ca3af;
             text-transform: uppercase;
@@ -411,6 +411,11 @@
 
         .observe-on .obs-note { display: block; }
 
+        .observe-on:not(.obs-persp) .obs-center-inactive {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
         .observe-on.obs-realsize .obs-size-inactive {
             opacity: 0.4;
             pointer-events: none;
@@ -539,10 +544,11 @@
                     </svg>
                 </button>
                 <div class="section-body">
-                <div class="obs-note">観測モード中は、空の向きが「観測場所と日時」の図法で決まるため、この設定は使われません。</div>
-                <div class="control-group obs-inactive">
+                <div class="obs-note">観測モード中は、全天を円形に表す図法では天頂が中心になるため、この設定は使われません。透視図法では、選んだ天体の方向へ向きを変えます。</div>
+                <div class="control-group obs-center-inactive">
                     <label style="margin-bottom:6px;">どの星を画面中心に置くか</label>
                     <select id="param-center-star" style="width:100%; background:#1f2937; color:#e5e7eb; border:1px solid rgba(138,180,248,0.4); border-radius:6px; padding:5px; font-size:0.84rem;">
+                        <option value="custom">ドラッグで選んだ向き</option>
                         <optgroup label="🌸 春を代表する恒星">
                             <option value="arcturus">アークトゥルス</option>
                             <option value="spica">スピカ</option>
@@ -656,7 +662,53 @@
                             <option value="sextans">ろくぶんぎ座</option>
                             <option value="aquila">わし座</option>
                         </optgroup>
+                                            <optgroup label="🌌 星雲・星団・銀河">
+                            <option value="dso19">M1　かに星雲</option>
+                            <option value="dso13">M3　りょうけん座の球状星団</option>
+                            <option value="dso11">M4　さそり座の球状星団</option>
+                            <option value="dso12">M5　へび座の球状星団</option>
+                            <option value="dso7">M6　蝶々星団</option>
+                            <option value="dso6">M7　プトレマイオス星団</option>
+                            <option value="dso8">M8　干潟星雲</option>
+                            <option value="dso22">M11　野鴨星団</option>
+                            <option value="dso9">M13　ヘルクレス座球状星団</option>
+                            <option value="dso14">M15　ペガスス座の球状星団</option>
+                            <option value="dso21">M16　わし星雲</option>
+                            <option value="dso20">M17　オメガ星雲（白鳥星雲）</option>
+                            <option value="dso10">M22　いて座の球状星団</option>
+                            <option value="dso17">M27　あれい状星雲</option>
+                            <option value="dso0">M31　アンドロメダ銀河</option>
+                            <option value="dso1">M33　さんかく座銀河</option>
+                            <option value="dso32">M34　M34</option>
+                            <option value="dso23">M35　M35</option>
+                            <option value="dso24">M41　M41</option>
+                            <option value="dso4">M42　オリオン大星雲</option>
+                            <option value="dso5">M44　プレセペ星団（蜂の巣星団）</option>
+                            <option value="dso2">M45　プレアデス星団（すばる）</option>
+                            <option value="dso27">M51　子持ち銀河</option>
+                            <option value="dso18">M57　環状星雲（リング星雲）</option>
+                            <option value="dso25">M81　ボーデの銀河</option>
+                            <option value="dso26">M82　葉巻銀河</option>
+                            <option value="dso30">M87　M87（巨大楕円銀河）</option>
+                            <option value="dso28">M101　回転花火銀河</option>
+                            <option value="dso29">M104　ソンブレロ銀河</option>
+                            <option value="dso16">NGC 104　きょしちょう座47（47 Tuc）</option>
+                            <option value="dso39">SMC　小マゼラン雲</option>
+                            <option value="dso31">NGC 869/884　二重星団（ペルセウス座h・χ）</option>
+                            <option value="dso34">Mel 20　ペルセウス座α星団</option>
+                            <option value="dso3">Mel 25　ヒアデス星団</option>
+                            <option value="dso38">LMC　大マゼラン雲</option>
+                            <option value="dso37">NGC 2070　タランチュラ星雲</option>
+                            <option value="dso36">NGC 3372　カリーナ星雲</option>
+                            <option value="dso35">Mel 111　かみのけ座星団</option>
+                            <option value="dso41">石炭袋（コールサック）</option>
+                            <option value="dso40">NGC 4755　宝石箱星団</option>
+                            <option value="dso15">NGC 5139　ω星団（オメガ・ケンタウリ）</option>
+                            <option value="dso33">NGC 7000　北アメリカ星雲</option>
+                        </optgroup>
                     </select>
+                    <div class="obs-msg" id="obs-aim-msg"></div>
+                    <div class="obs-help" style="margin:6px 0 0;">観測モードでないときは、画面をドラッグ（スワイプ）して、星空の中心を動かせます。</div>
                 </div>
                 </div>
             </div>
@@ -839,6 +891,41 @@
                 </div>
             </div>
 
+            <!-- 星雲・星団・銀河 -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 星雲・星団・銀河</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="control-group">
+                    <label>星雲・星団・銀河を表示
+                        <button class="toggle-btn" id="btn-toggle-dso" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>名前を表示
+                        <button class="toggle-btn" id="btn-toggle-dso-labels" style="padding:2px 8px;font-size:0.78rem;height:25px;">表示中</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label style="margin-bottom:6px;">見え方で絞る</label>
+                    <select id="param-dso-limit" class="obs-num">
+                        <option value="99" selected>すべて（望遠鏡まで）</option>
+                        <option value="8.1">双眼鏡で見えるもの（約8等まで）</option>
+                        <option value="6.5">肉眼で見えるもの（約6.5等まで）</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>大きさの倍率: <span id="val-dso-scale">1.0</span>倍</label>
+                    <input type="range" id="param-dso-scale" min="0.5" max="4" step="0.1" value="1">
+                </div>
+                <div class="obs-help">タップすると説明が出ます。色と形: <span style="color:#ffb6c8">●銀河（楕円）</span>　<span style="color:#ffe89c">●散開星団（点線の円）</span>　<span style="color:#ffc27a">●球状星団（十字の円）</span>　<span style="color:#ff8fc0">●散光星雲（ぼんやり）</span>　<span style="color:#7fffd4">●惑星状星雲（輪）</span>　<span style="color:#aaaab9">●暗黒星雲（灰色の点線）</span></div>
+                </div>
+            </div>
+
             <!-- 6. 太陽と月 -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
@@ -930,6 +1017,7 @@
                     <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
                     <input type="range" id="param-hidedelay" min="1" max="10" value="3">
                 </div>
+                <div class="obs-help">パネルが隠れたときは、画面をダブルタップ（ダブルクリック）すると再表示できます。</div>
                 <div class="control-group">
                     <label>パネルの透明度: <span id="val-panel-transparency">12</span>%</label>
                     <input type="range" id="param-panel-transparency" min="0" max="90" step="1" value="12">
@@ -972,6 +1060,10 @@
             obsRefraction: true,
             obsSkyColor: true,
             obsRealSize: false,
+            showDso: true,
+            dsoLabels: true,
+            dsoScale: 1,
+            dsoLimit: 99,
             obsFov: 70,
             bgCenter: '#0d1a33',
             bgOuter: '#000000',
@@ -1135,6 +1227,7 @@
                 conList.style.display = 'none';
                 conListToggle.textContent = '開く';
                 resetObserveUI();
+                resetDsoUI();
 
                 controls.forEach(item => {
                     const input = document.getElementById(item.id);
@@ -1178,11 +1271,8 @@
                 }
             });
 
-            canvas.addEventListener('click', () => {
-                if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
-                    showPanel();
-                }
-            });
+            // 設定パネルの再表示は、画面のダブルタップ／ダブルクリックで行う（initConstellationInfoで検出）
+            showSettingsPanel = showPanel;
 
             initDraggable();
             initSliderTouchPrevention();
@@ -1477,6 +1567,7 @@
                 this.x = 0;
                 this.y = 0;
                 this.visible = true; // 観測モードで地平線の上にあるか
+                this.projOk = true;  // 画面に投影できたか（透視図法でカメラの背後ならfalse）
             }
 
             // 指定した中心天体(centerRaDeg, centerDecDeg)からの角距離・方位角を求め、
@@ -1503,6 +1594,7 @@
                 this.x = cx + r * Math.sin(theta);
                 this.y = cy - r * Math.cos(theta);
                 this.visible = true;
+                this.projOk = true;
             }
 
             // 観測モード：観測地・日時から高度/方位を求め、選んだ図法で画面に配置する。
@@ -1520,6 +1612,7 @@
                 this.vy = ca * Math.cos(h.az * DEG);
                 this.vz = Math.sin(h.alt * DEG);
                 const p = obsProj(this.vx, this.vy, this.vz);
+                this.projOk = p !== null;
                 this.visible = this.vz >= 0 && p !== null;
                 if (p) {
                     this.x = p.x;
@@ -2592,15 +2685,18 @@
             if (obsState) {
                 // 観測モード：観測地・日時から高度/方位を求め、天頂を中心に配置
                 realStars.forEach(rs => rs.updateHorizontal(obsState, config.obsLat));
+                updateDeepSky(rs => rs.updateHorizontal(obsState, config.obsLat));
             } else {
                 // 通常：選択中の中心星（北極星 or シリウスなど）を基準に配置
                 const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
                 const centerRaDeg = center.ra * 15;
                 realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
+                updateDeepSky(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, MAX_ANG_DEG, rotationDeg));
             }
 
             // 3. 星座線 → 4. 実在の星（表示ONの星座のみ描画）
             drawConstellationLines();
+            drawDeepSky(); // 星雲・星団・銀河（星より下の層）
             realStars.forEach(rs => {
                 if (!constellationVisible[rs.conIndex] || !rs.visible) return;
                 rs.update();
@@ -3073,6 +3169,8 @@
         };
 
         let selectedCon = -1; // 選択中の星座（SKY_DATAのインデックス。未選択は-1）
+        let showSettingsPanel = () => {}; // 設定パネルを再表示する（initUIで設定）
+        let selectedDso = -1; // 選択中の星雲・星団・銀河（deepSkyObjectsのインデックス。未選択は-1）
         const conStarIdx = [];
         const conSegPairs = [];
 
@@ -3126,10 +3224,12 @@
             document.getElementById('con-info-text').textContent = info.text;
             document.getElementById('con-info').classList.add('is-open');
             selectedCon = ci;
+            selectedDso = -1;
         }
 
         function closeConstellationInfo() {
             selectedCon = -1;
+            selectedDso = -1;
             document.getElementById('con-info').classList.remove('is-open');
         }
 
@@ -3167,23 +3267,42 @@
         }
 
         function initConstellationInfo() {
-            // initUI()のキャンバスのクリック処理（パネル再表示）より先に登録すること。
-            // 星座に当たったときは説明を表示し、パネルの再表示は行わない。
+            // 画面のクリック／タップ：ダブルタップで設定パネルを再表示。1回のタップなら、
+            // 星雲・星団・銀河や星座に当たったときに説明を表示する。
+            let lastTap = { t: 0, x: 0, y: 0 };
             canvas.addEventListener('click', (e) => {
-                // 透視図法でドラッグして向きを変えた直後のクリックは無視する
+                // ドラッグして向きを変えた直後のクリックは無視する
                 if (obsDragMoved) {
                     obsDragMoved = false;
+                    lastTap.t = 0;
                     e.stopImmediatePropagation();
                     return;
                 }
+                // ダブルタップ／ダブルクリック：設定パネルを再表示（1回目のタップで開いた説明は閉じる）
+                const now = performance.now();
+                if (now - lastTap.t < 350 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+                    lastTap.t = 0;
+                    e.stopImmediatePropagation();
+                    closeConstellationInfo();
+                    showSettingsPanel();
+                    return;
+                }
+                lastTap = { t: now, x: e.clientX, y: e.clientY };
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                // 星雲・星団・銀河を優先し、なければ星座を調べる
+                const di = findDeepSkyAt(x, y);
+                if (di >= 0) {
+                    e.stopImmediatePropagation();
+                    openDeepSkyInfo(di);
+                    return;
+                }
                 const ci = findConstellationAt(x, y);
                 if (ci >= 0) {
                     e.stopImmediatePropagation();
                     openConstellationInfo(ci);
-                } else if (selectedCon >= 0) {
+                } else if (selectedCon >= 0 || selectedDso >= 0) {
                     closeConstellationInfo();
                 }
             });
@@ -3640,6 +3759,7 @@
             const yawIn = $('param-obs-yaw');
             const pitchIn = $('param-obs-pitch');
             const fovIn = $('param-obs-fov');
+            const aimMsg = $('obs-aim-msg');
             const refrBtn = $('btn-toggle-obs-refraction');
             const skyBtn = $('btn-toggle-obs-skycolor');
             const sizeBtn = $('btn-toggle-obs-realsize');
@@ -3773,6 +3893,8 @@
             const dirNames = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
             function applyProjection() {
                 perspBox.style.display = config.obsProjection === 'perspective' ? 'block' : 'none';
+                document.body.classList.toggle('obs-persp', config.obsProjection === 'perspective');
+                aimMsg.textContent = '';
             }
             function setView(yaw, pitch, fov) {
                 config.obsYaw = ((yaw % 360) + 360) % 360;
@@ -3793,6 +3915,23 @@
             [yawIn, pitchIn, fovIn].forEach(el => el.addEventListener('input', () => {
                 setView(parseFloat(yawIn.value), parseFloat(pitchIn.value), parseFloat(fovIn.value));
             }));
+
+            // 透視図法：「星空の中心」で選んだ天体・星座の方向へ、カメラの向きを合わせる
+            function aimAt(ra, dec) {
+                if (!config.observeMode || config.obsProjection !== 'perspective') { aimMsg.textContent = ''; return; }
+                const st = computeObserveState();
+                const a = ra * 15 * DEG;
+                const dRa = (46.1 + 20.04 * Math.sin(a) * Math.tan(dec * DEG)) * st.years / 3600;
+                const dDec = 20.04 * Math.cos(a) * st.years / 3600;
+                const h = equatorialToHorizontal(ra * 15 + dRa, dec + dDec, st.lst, config.obsLat);
+                const alt = refractAlt(h.alt);
+                setView(h.az, alt, config.obsFov);
+                aimMsg.textContent = alt < 0 ? 'この天体は、いま地平線の下にあります（向きだけ合わせました）。' : '';
+            }
+            $('param-center-star').addEventListener('change', (e) => {
+                const pr = CENTER_PRESETS[e.target.value];
+                if (pr) aimAt(pr.ra, pr.dec);
+            });
 
             // 向きボタン：北・東・南・西は地平線を見る向き、真上は天頂を見上げる
             [['btn-obs-look-n', 0], ['btn-obs-look-e', 90], ['btn-obs-look-s', 180], ['btn-obs-look-w', 270]].forEach(([id, yaw]) => {
@@ -3827,19 +3966,58 @@
             // 透視図法：ドラッグで向きを変え、ホイールで画角（ズーム）を変える
             const canvasEl = $('skyCanvas');
             const isPersp = () => config.observeMode && config.obsProjection === 'perspective';
+            const isPan = () => !config.observeMode;
             let drag = null;
+
+            // 通常モード：ドラッグで星空の中心を動かす。指の動きと逆向きに中心が動き、星空が指についてくる
+            function panCenter(ddx, ddy) {
+                const c = CENTER_PRESETS.custom;
+                const sx = -ddx;
+                const sy = -ddy;
+                const rpx = Math.hypot(sx, sy);
+                if (rpx < 1e-6) return;
+                const cr = (rpx / (skyGeom.maxR || 1) * MAX_ANG_DEG) * DEG;                 // 動かす角距離
+                const brg = (Math.atan2(sx, -sy) / DEG - rotationDeg) * DEG;                 // 地図上の方位（自転を除く）
+                const ra0 = c.ra * 15 * DEG;
+                const dec0 = c.dec * DEG;
+                const dec1 = Math.asin(Math.sin(dec0) * Math.cos(cr) + Math.cos(dec0) * Math.sin(cr) * Math.cos(brg));
+                const ra1 = ra0 + Math.atan2(Math.sin(brg) * Math.sin(cr) * Math.cos(dec0), Math.cos(cr) - Math.sin(dec0) * Math.sin(dec1));
+                c.ra = (((ra1 / DEG / 15) % 24) + 24) % 24;
+                c.dec = dec1 / DEG;
+            }
+
             canvasEl.addEventListener('pointerdown', (e) => {
-                if (!isPersp()) return;
-                drag = { x: e.clientX, y: e.clientY, yaw: config.obsYaw, pitch: config.obsPitch, moved: false };
+                if (isPersp()) {
+                    drag = { mode: 'cam', x: e.clientX, y: e.clientY, yaw: config.obsYaw, pitch: config.obsPitch, moved: false };
+                } else if (isPan()) {
+                    drag = { mode: 'pan', x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, moved: false };
+                }
             });
             window.addEventListener('pointermove', (e) => {
                 if (!drag) return;
                 const dx = e.clientX - drag.x;
                 const dy = e.clientY - drag.y;
                 if (!drag.moved && Math.hypot(dx, dy) < 6) return;
-                drag.moved = true;
-                const k = config.obsFov / height; // 1pxあたりの角度
-                setView(drag.yaw - dx * k, drag.pitch + dy * k, config.obsFov);
+                if (drag.mode === 'cam') {
+                    drag.moved = true;
+                    const k = config.obsFov / height; // 1pxあたりの角度
+                    setView(drag.yaw - dx * k, drag.pitch + dy * k, config.obsFov);
+                } else {
+                    if (!drag.moved) {
+                        drag.moved = true;
+                        // 最初に動かしたとき、いまの中心を「ドラッグで選んだ向き」に引き継ぐ
+                        if (config.centerStar !== 'custom') {
+                            const cur = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
+                            CENTER_PRESETS.custom.ra = cur.ra;
+                            CENTER_PRESETS.custom.dec = cur.dec;
+                            config.centerStar = 'custom';
+                            $('param-center-star').value = 'custom';
+                        }
+                    }
+                    panCenter(e.clientX - drag.lastX, e.clientY - drag.lastY);
+                    drag.lastX = e.clientX;
+                    drag.lastY = e.clientY;
+                }
             });
             window.addEventListener('pointerup', () => {
                 if (drag && drag.moved) {
@@ -3882,6 +4060,908 @@
             setInterval(refreshReadout, 500);
         }
 
+        // =====================================================================
+        // 星雲・星団・銀河（肉眼や身近な観測で見える主な天体）
+        // 座標はJ2000（赤経は時、赤緯は度）、大きさは長径・短径（分角）、paは位置角（北から東回りの度）
+        // =====================================================================
+        const DEEP_SKY = [
+            {
+                "code": "M31",
+                "name": "アンドロメダ銀河",
+                "en": "Andromeda Galaxy",
+                "short": "アンドロメダ銀河",
+                "type": "galaxy",
+                "ra": 0.712,
+                "dec": 41.27,
+                "mag": 3.4,
+                "major": 190,
+                "minor": 60,
+                "pa": 35,
+                "con": "アンドロメダ座",
+                "season": "秋",
+                "text": "地球から約250万光年。肉眼で見える最も遠い天体のひとつで、暗い空では細長い光のしみに見えます。天の川銀河の隣にある大きな渦巻銀河です。"
+            },
+            {
+                "code": "M33",
+                "name": "さんかく座銀河",
+                "en": "Triangulum Galaxy",
+                "short": "M33",
+                "type": "galaxy",
+                "ra": 1.565,
+                "dec": 30.66,
+                "mag": 5.7,
+                "major": 70,
+                "minor": 40,
+                "pa": 23,
+                "con": "さんかく座",
+                "season": "秋",
+                "text": "約270万光年かなたの渦巻銀河です。面積が大きくて淡いため、肉眼では非常に暗い空でやっと見える、難易度の高い天体です。"
+            },
+            {
+                "code": "M45",
+                "name": "プレアデス星団（すばる）",
+                "en": "Pleiades",
+                "short": "すばる",
+                "type": "open",
+                "ra": 3.783,
+                "dec": 24.12,
+                "mag": 1.6,
+                "major": 110,
+                "minor": 110,
+                "pa": 0,
+                "con": "おうし座",
+                "season": "冬",
+                "text": "約440光年にある若い散開星団です。肉眼で6〜7個の星が見え、日本では「すばる」と呼ばれます。青白い星々が、淡い星雲に包まれています。"
+            },
+            {
+                "code": "Mel 25",
+                "name": "ヒアデス星団",
+                "en": "Hyades",
+                "short": "ヒアデス星団",
+                "type": "open",
+                "ra": 4.45,
+                "dec": 15.87,
+                "mag": 0.5,
+                "major": 330,
+                "minor": 330,
+                "pa": 0,
+                "con": "おうし座",
+                "season": "冬",
+                "text": "約150光年と、地球に最も近い散開星団のひとつです。おうし座のV字形をつくり、赤い1等星アルデバランは手前に重なって見えているだけです。"
+            },
+            {
+                "code": "M42",
+                "name": "オリオン大星雲",
+                "en": "Orion Nebula",
+                "short": "オリオン大星雲",
+                "type": "nebula",
+                "ra": 5.588,
+                "dec": -5.39,
+                "mag": 4.0,
+                "major": 65,
+                "minor": 60,
+                "pa": 0,
+                "con": "オリオン座",
+                "season": "冬",
+                "text": "オリオン座の三つ星の下にある、肉眼でもぼんやり見える明るい星雲です。約1340光年にあり、いま新しい星が生まれている場所です。"
+            },
+            {
+                "code": "M44",
+                "name": "プレセペ星団（蜂の巣星団）",
+                "en": "Beehive Cluster",
+                "short": "プレセペ",
+                "type": "open",
+                "ra": 8.673,
+                "dec": 19.67,
+                "mag": 3.7,
+                "major": 95,
+                "minor": 95,
+                "pa": 0,
+                "con": "かに座",
+                "season": "春",
+                "text": "約600光年にある散開星団で、暗い空では肉眼で淡い雲のように見えます。双眼鏡では、たくさんの星に分かれて見えます。"
+            },
+            {
+                "code": "M7",
+                "name": "プトレマイオス星団",
+                "en": "Ptolemy Cluster",
+                "short": "M7",
+                "type": "open",
+                "ra": 17.898,
+                "dec": -34.79,
+                "mag": 3.3,
+                "major": 80,
+                "minor": 80,
+                "pa": 0,
+                "con": "さそり座",
+                "season": "夏（日本では南の低い空）",
+                "text": "さそり座の尾の先の近くにある明るい散開星団です。2世紀の天文学者プトレマイオスが記録したことで知られ、肉眼でも見えます。"
+            },
+            {
+                "code": "M6",
+                "name": "蝶々星団",
+                "en": "Butterfly Cluster",
+                "short": "M6",
+                "type": "open",
+                "ra": 17.668,
+                "dec": -32.25,
+                "mag": 4.2,
+                "major": 25,
+                "minor": 25,
+                "pa": 0,
+                "con": "さそり座",
+                "season": "夏（日本では南の低い空）",
+                "text": "さそり座の尾の近くにある散開星団です。星の並びが、蝶が羽を広げた形に見えることからこう呼ばれます。"
+            },
+            {
+                "code": "M8",
+                "name": "干潟星雲",
+                "en": "Lagoon Nebula",
+                "short": "干潟星雲",
+                "type": "nebula",
+                "ra": 18.063,
+                "dec": -24.38,
+                "mag": 6.0,
+                "major": 90,
+                "minor": 40,
+                "pa": 90,
+                "con": "いて座",
+                "season": "夏",
+                "text": "いて座の天の川の中にある大きな散光星雲です。暗い空では肉眼で小さな雲のように見え、双眼鏡ではよく分かります。"
+            },
+            {
+                "code": "M13",
+                "name": "ヘルクレス座球状星団",
+                "en": "Great Hercules Cluster",
+                "short": "M13",
+                "type": "globular",
+                "ra": 16.695,
+                "dec": 36.46,
+                "mag": 5.8,
+                "major": 20,
+                "minor": 20,
+                "pa": 0,
+                "con": "ヘルクレス座",
+                "season": "夏",
+                "text": "北天で最も有名な球状星団です。約2万5000光年にあり、数十万個の星が球状に集まっています。双眼鏡では、丸いぼんやりした光に見えます。"
+            },
+            {
+                "code": "M22",
+                "name": "いて座の球状星団",
+                "en": "Sagittarius Cluster",
+                "short": "M22",
+                "type": "globular",
+                "ra": 18.607,
+                "dec": -23.9,
+                "mag": 5.1,
+                "major": 32,
+                "minor": 32,
+                "pa": 0,
+                "con": "いて座",
+                "season": "夏（日本では南の低い空）",
+                "text": "日本から見える球状星団の中でも特に明るく、肉眼でもぼんやり見えます。約1万光年にあります。"
+            },
+            {
+                "code": "M4",
+                "name": "さそり座の球状星団",
+                "en": "M4",
+                "short": "M4",
+                "type": "globular",
+                "ra": 16.393,
+                "dec": -26.53,
+                "mag": 5.6,
+                "major": 36,
+                "minor": 36,
+                "pa": 0,
+                "con": "さそり座",
+                "season": "夏（日本では南の低い空）",
+                "text": "アンタレスのすぐ西にある球状星団です。約7200光年と最も近い球状星団のひとつで、双眼鏡で見つけやすい天体です。"
+            },
+            {
+                "code": "M5",
+                "name": "へび座の球状星団",
+                "en": "M5",
+                "short": "M5",
+                "type": "globular",
+                "ra": 15.31,
+                "dec": 2.08,
+                "mag": 5.6,
+                "major": 23,
+                "minor": 23,
+                "pa": 0,
+                "con": "へび座",
+                "season": "夏",
+                "text": "約2万5000光年にある、大きく明るい球状星団です。双眼鏡や小さな望遠鏡で見ごたえがあります。"
+            },
+            {
+                "code": "M3",
+                "name": "りょうけん座の球状星団",
+                "en": "M3",
+                "short": "M3",
+                "type": "globular",
+                "ra": 13.703,
+                "dec": 28.38,
+                "mag": 6.2,
+                "major": 18,
+                "minor": 18,
+                "pa": 0,
+                "con": "りょうけん座",
+                "season": "春",
+                "text": "春を代表する球状星団で、約3万4000光年にあり、約50万個の星が集まっています。"
+            },
+            {
+                "code": "M15",
+                "name": "ペガスス座の球状星団",
+                "en": "M15",
+                "short": "M15",
+                "type": "globular",
+                "ra": 21.5,
+                "dec": 12.17,
+                "mag": 6.2,
+                "major": 18,
+                "minor": 18,
+                "pa": 0,
+                "con": "ペガスス座",
+                "season": "秋",
+                "text": "ペガスス座の鼻先の近くにある球状星団です。中心部に星がとくに密に集まっていることで知られます。"
+            },
+            {
+                "code": "NGC 5139",
+                "name": "ω星団（オメガ・ケンタウリ）",
+                "en": "Omega Centauri",
+                "short": "ω星団",
+                "type": "globular",
+                "ra": 13.446,
+                "dec": -47.48,
+                "mag": 3.7,
+                "major": 36,
+                "minor": 36,
+                "pa": 0,
+                "con": "ケンタウルス座",
+                "season": "春〜夏（日本では南の低い空）",
+                "text": "天の川銀河で最大級の球状星団で、肉眼でも星のように見えます。約1万7000光年にあります。日本では、南の低い空にわずかに見える程度です。"
+            },
+            {
+                "code": "NGC 104",
+                "name": "きょしちょう座47（47 Tuc）",
+                "en": "47 Tucanae",
+                "short": "47 Tuc",
+                "type": "globular",
+                "ra": 0.402,
+                "dec": -72.08,
+                "mag": 4.0,
+                "major": 50,
+                "minor": 50,
+                "pa": 0,
+                "con": "きょしちょう座",
+                "season": "秋（日本では見えません）",
+                "text": "ω星団に次いで明るい球状星団で、小マゼラン雲の近くに見えます。約1万6000光年にあります。"
+            },
+            {
+                "code": "M27",
+                "name": "あれい状星雲",
+                "en": "Dumbbell Nebula",
+                "short": "あれい状星雲",
+                "type": "planetary",
+                "ra": 19.993,
+                "dec": 22.72,
+                "mag": 7.5,
+                "major": 8,
+                "minor": 6,
+                "pa": 0,
+                "con": "こぎつね座",
+                "season": "夏",
+                "text": "ダンベルの形に見える惑星状星雲で、約1200光年にあります。双眼鏡で確認でき、望遠鏡ではっきり見えます。"
+            },
+            {
+                "code": "M57",
+                "name": "環状星雲（リング星雲）",
+                "en": "Ring Nebula",
+                "short": "環状星雲",
+                "type": "planetary",
+                "ra": 18.893,
+                "dec": 33.03,
+                "mag": 8.8,
+                "major": 1.4,
+                "minor": 1.1,
+                "pa": 0,
+                "con": "こと座",
+                "season": "夏",
+                "text": "こと座のβ星とγ星のあいだにある、小さな輪の形の惑星状星雲です。約2300光年にあり、望遠鏡で見えます。"
+            },
+            {
+                "code": "M1",
+                "name": "かに星雲",
+                "en": "Crab Nebula",
+                "short": "かに星雲",
+                "type": "nebula",
+                "ra": 5.575,
+                "dec": 22.01,
+                "mag": 8.4,
+                "major": 6,
+                "minor": 4,
+                "pa": 0,
+                "con": "おうし座",
+                "season": "冬",
+                "text": "西暦1054年に観測された超新星爆発の残骸です。約6500光年にあり、望遠鏡で見えます。",
+                "typeName": "超新星残骸（星雲）"
+            },
+            {
+                "code": "M17",
+                "name": "オメガ星雲（白鳥星雲）",
+                "en": "Omega Nebula",
+                "short": "オメガ星雲",
+                "type": "nebula",
+                "ra": 18.347,
+                "dec": -16.18,
+                "mag": 6.0,
+                "major": 11,
+                "minor": 9,
+                "pa": 0,
+                "con": "いて座",
+                "season": "夏（日本では南の低い空）",
+                "text": "いて座の天の川の中にある明るい散光星雲です。白鳥や、ギリシャ文字のΩのような形に見え、双眼鏡で見えます。"
+            },
+            {
+                "code": "M16",
+                "name": "わし星雲",
+                "en": "Eagle Nebula",
+                "short": "わし星雲",
+                "type": "nebula",
+                "ra": 18.313,
+                "dec": -13.8,
+                "mag": 6.0,
+                "major": 35,
+                "minor": 28,
+                "pa": 0,
+                "con": "へび座",
+                "season": "夏",
+                "text": "星が生まれている散光星雲です。中にある「創造の柱」が、ハッブル宇宙望遠鏡の写真で有名です。双眼鏡や小さな望遠鏡で、星団とともに見えます。"
+            },
+            {
+                "code": "M11",
+                "name": "野鴨星団",
+                "en": "Wild Duck Cluster",
+                "short": "野鴨星団",
+                "type": "open",
+                "ra": 18.852,
+                "dec": -6.27,
+                "mag": 6.3,
+                "major": 14,
+                "minor": 14,
+                "pa": 0,
+                "con": "たて座",
+                "season": "夏",
+                "text": "約6000光年にある、星が密集した散開星団です。星の並びが、飛ぶ野鴨の群れに見えることからこう呼ばれます。"
+            },
+            {
+                "code": "M35",
+                "name": "M35",
+                "en": "M35",
+                "short": "M35",
+                "type": "open",
+                "ra": 6.15,
+                "dec": 24.33,
+                "mag": 5.3,
+                "major": 28,
+                "minor": 28,
+                "pa": 0,
+                "con": "ふたご座",
+                "season": "冬",
+                "text": "ふたご座の足元にある大きな散開星団です。約2800光年にあり、暗い空では肉眼でも見えます。"
+            },
+            {
+                "code": "M41",
+                "name": "M41",
+                "en": "M41",
+                "short": "M41",
+                "type": "open",
+                "ra": 6.767,
+                "dec": -20.76,
+                "mag": 4.5,
+                "major": 38,
+                "minor": 38,
+                "pa": 0,
+                "con": "おおいぬ座",
+                "season": "冬",
+                "text": "シリウスのすぐ南にある散開星団です。肉眼でもぼんやり見え、双眼鏡では星がたくさん見えます。"
+            },
+            {
+                "code": "M81",
+                "name": "ボーデの銀河",
+                "en": "Bode's Galaxy",
+                "short": "M81",
+                "type": "galaxy",
+                "ra": 9.926,
+                "dec": 69.07,
+                "mag": 6.9,
+                "major": 27,
+                "minor": 14,
+                "pa": 157,
+                "con": "おおぐま座",
+                "season": "春",
+                "text": "約1200万光年の渦巻銀河です。近くのM82とペアで、双眼鏡でも見つけられます。"
+            },
+            {
+                "code": "M82",
+                "name": "葉巻銀河",
+                "en": "Cigar Galaxy",
+                "short": "M82",
+                "type": "galaxy",
+                "ra": 9.931,
+                "dec": 69.68,
+                "mag": 8.4,
+                "major": 11,
+                "minor": 4.5,
+                "pa": 65,
+                "con": "おおぐま座",
+                "season": "春",
+                "text": "細長い形から葉巻銀河と呼ばれる銀河です。M81の近くにあり、星が激しく生まれています。"
+            },
+            {
+                "code": "M51",
+                "name": "子持ち銀河",
+                "en": "Whirlpool Galaxy",
+                "short": "子持ち銀河",
+                "type": "galaxy",
+                "ra": 13.498,
+                "dec": 47.2,
+                "mag": 8.4,
+                "major": 11,
+                "minor": 7,
+                "pa": 163,
+                "con": "りょうけん座",
+                "season": "春",
+                "text": "渦巻の腕がはっきり見える銀河で、小さな伴銀河が寄り添うことから「子持ち銀河」と呼ばれます。約2300万光年にあります。"
+            },
+            {
+                "code": "M101",
+                "name": "回転花火銀河",
+                "en": "Pinwheel Galaxy",
+                "short": "M101",
+                "type": "galaxy",
+                "ra": 14.053,
+                "dec": 54.35,
+                "mag": 7.9,
+                "major": 29,
+                "minor": 27,
+                "pa": 0,
+                "con": "おおぐま座",
+                "season": "春",
+                "text": "北斗七星の柄の先の近くにある、正面を向いた大きな渦巻銀河です。面が淡いので、空の暗い場所で観察します。約2100万光年にあります。"
+            },
+            {
+                "code": "M104",
+                "name": "ソンブレロ銀河",
+                "en": "Sombrero Galaxy",
+                "short": "ソンブレロ銀河",
+                "type": "galaxy",
+                "ra": 12.667,
+                "dec": -11.62,
+                "mag": 8.0,
+                "major": 9,
+                "minor": 4,
+                "pa": 89,
+                "con": "おとめ座",
+                "season": "春",
+                "text": "つばの広い帽子のように見える銀河で、濃い暗黒帯が目立ちます。約2900万光年にあります。"
+            },
+            {
+                "code": "M87",
+                "name": "M87（巨大楕円銀河）",
+                "en": "M87",
+                "short": "M87",
+                "type": "galaxy",
+                "ra": 12.514,
+                "dec": 12.39,
+                "mag": 8.6,
+                "major": 7,
+                "minor": 7,
+                "pa": 0,
+                "con": "おとめ座",
+                "season": "春",
+                "text": "おとめ座銀河団の中心にある巨大な楕円銀河です。約5300万光年にあり、中心のブラックホールの撮影で知られます。"
+            },
+            {
+                "code": "NGC 869/884",
+                "name": "二重星団（ペルセウス座h・χ）",
+                "en": "Double Cluster",
+                "short": "二重星団",
+                "type": "open",
+                "ra": 2.333,
+                "dec": 57.13,
+                "mag": 3.7,
+                "major": 60,
+                "minor": 60,
+                "pa": 0,
+                "con": "ペルセウス座",
+                "season": "秋",
+                "text": "2つの散開星団が並んでいて、肉眼でも見えます。約7000光年にあり、双眼鏡で見ごたえのある天体です。"
+            },
+            {
+                "code": "M34",
+                "name": "M34",
+                "en": "M34",
+                "short": "M34",
+                "type": "open",
+                "ra": 2.7,
+                "dec": 42.78,
+                "mag": 5.5,
+                "major": 35,
+                "minor": 35,
+                "pa": 0,
+                "con": "ペルセウス座",
+                "season": "秋",
+                "text": "ペルセウス座にある散開星団で、暗い空では肉眼で見えます。約1500光年にあります。"
+            },
+            {
+                "code": "NGC 7000",
+                "name": "北アメリカ星雲",
+                "en": "North America Nebula",
+                "short": "北アメリカ星雲",
+                "type": "nebula",
+                "ra": 20.98,
+                "dec": 44.33,
+                "mag": 4.0,
+                "major": 120,
+                "minor": 100,
+                "pa": 0,
+                "con": "はくちょう座",
+                "season": "夏",
+                "text": "北アメリカ大陸の形に見える大きな散光星雲です。はくちょう座のデネブの近くにあり、写真では形がはっきり分かります。"
+            },
+            {
+                "code": "Mel 20",
+                "name": "ペルセウス座α星団",
+                "en": "Alpha Persei Cluster",
+                "short": "ペルセウスα星団",
+                "type": "open",
+                "ra": 3.45,
+                "dec": 49.0,
+                "mag": 1.2,
+                "major": 300,
+                "minor": 300,
+                "pa": 0,
+                "con": "ペルセウス座",
+                "season": "秋",
+                "text": "ペルセウス座α星（ミルファク）を中心にした大きな散開星団です。肉眼で多くの星が見え、双眼鏡で眺めるのに向いています。"
+            },
+            {
+                "code": "Mel 111",
+                "name": "かみのけ座星団",
+                "en": "Coma Star Cluster",
+                "short": "かみのけ座星団",
+                "type": "open",
+                "ra": 12.42,
+                "dec": 26.0,
+                "mag": 1.8,
+                "major": 275,
+                "minor": 275,
+                "pa": 0,
+                "con": "かみのけ座",
+                "season": "春",
+                "text": "約290光年と近く、肉眼で淡い星の集まりに見える散開星団です。"
+            },
+            {
+                "code": "NGC 3372",
+                "name": "カリーナ星雲",
+                "en": "Carina Nebula",
+                "short": "カリーナ星雲",
+                "type": "nebula",
+                "ra": 10.752,
+                "dec": -59.87,
+                "mag": 1.0,
+                "major": 120,
+                "minor": 120,
+                "pa": 0,
+                "con": "りゅうこつ座",
+                "season": "冬〜春（日本ではほとんど見えません）",
+                "text": "南天で最も見ごたえのある散光星雲のひとつです。エータ・カリーナという巨大な星を含み、約7500光年にあります。"
+            },
+            {
+                "code": "NGC 2070",
+                "name": "タランチュラ星雲",
+                "en": "Tarantula Nebula",
+                "short": "タランチュラ星雲",
+                "type": "nebula",
+                "ra": 5.645,
+                "dec": -69.1,
+                "mag": 8.0,
+                "major": 40,
+                "minor": 40,
+                "pa": 0,
+                "con": "かじき座",
+                "season": "冬（日本では見えません）",
+                "text": "大マゼラン雲の中にある巨大な星形成領域で、約16万光年かなたにあります。"
+            },
+            {
+                "code": "LMC",
+                "name": "大マゼラン雲",
+                "en": "Large Magellanic Cloud",
+                "short": "大マゼラン雲",
+                "type": "galaxy",
+                "ra": 5.393,
+                "dec": -69.75,
+                "mag": 0.9,
+                "major": 645,
+                "minor": 550,
+                "pa": 170,
+                "con": "かじき座",
+                "season": "冬（日本では見えません）",
+                "text": "天の川銀河の近くにある不規則な形の伴銀河で、約16万光年にあります。南半球では肉眼で雲のように見えます。"
+            },
+            {
+                "code": "SMC",
+                "name": "小マゼラン雲",
+                "en": "Small Magellanic Cloud",
+                "short": "小マゼラン雲",
+                "type": "galaxy",
+                "ra": 0.878,
+                "dec": -72.83,
+                "mag": 2.7,
+                "major": 320,
+                "minor": 185,
+                "pa": 45,
+                "con": "きょしちょう座",
+                "season": "秋（日本では見えません）",
+                "text": "大マゼラン雲と並ぶ伴銀河で、約20万光年にあります。南半球では肉眼で見えます。"
+            },
+            {
+                "code": "NGC 4755",
+                "name": "宝石箱星団",
+                "en": "Jewel Box",
+                "short": "宝石箱星団",
+                "type": "open",
+                "ra": 12.893,
+                "dec": -60.35,
+                "mag": 4.2,
+                "major": 10,
+                "minor": 10,
+                "pa": 0,
+                "con": "みなみじゅうじ座",
+                "season": "春（日本では見えません）",
+                "text": "みなみじゅうじ座のβ星の近くにある、色の違う星が宝石のように並ぶ散開星団です。"
+            },
+            {
+                "code": "Coalsack",
+                "name": "石炭袋（コールサック）",
+                "en": "Coalsack Nebula",
+                "short": "石炭袋",
+                "type": "dark",
+                "ra": 12.89,
+                "dec": -63.0,
+                "mag": 5.0,
+                "major": 400,
+                "minor": 300,
+                "pa": 0,
+                "con": "みなみじゅうじ座",
+                "season": "春（日本では見えません）",
+                "text": "みなみじゅうじ座のそばにある暗黒星雲です。天の川の明るい帯の中の黒いしみとして、肉眼で見えます。"
+            }
+        ];
+
+        const DSO_STYLE = {
+            galaxy:    { rgb: '255, 182, 200', name: '銀河' },
+            open:      { rgb: '255, 232, 156', name: '散開星団' },
+            globular:  { rgb: '255, 194, 122', name: '球状星団' },
+            nebula:    { rgb: '255, 143, 192', name: '散光星雲' },
+            planetary: { rgb: '127, 255, 212', name: '惑星状星雲' },
+            dark:      { rgb: '170, 170, 185', name: '暗黒星雲' }
+        };
+        const DSO_AXIS_DEG = 0.5; // 向きと縮尺を求めるための補助点を、位置角の方向へずらす距離（度）
+        let resetDsoUI = () => {};
+
+        // 各天体は、中心の位置と、位置角の方向へ少しずらした補助点を持つ。
+        // 2点を同じ投影で画面に置き、その距離から縮尺（px/度）を、向きから楕円の傾きを求める
+        const deepSkyObjects = DEEP_SKY.map(d => {
+            const pa = d.pa * DEG;
+            const axisRa = d.ra + (DSO_AXIS_DEG * Math.sin(pa) / Math.cos(d.dec * DEG)) / 15;
+            const axisDec = d.dec + DSO_AXIS_DEG * Math.cos(pa);
+            return {
+                data: d,
+                pos: new RealStar(d.ra, d.dec, 5, -1),
+                axis: new RealStar(axisRa, axisDec, 5, -1),
+                pxPerDeg: 3, angle: 0, geomOk: false, shown: false, rMax: 0
+            };
+        });
+
+        // 「星空の中心」のプルダウンから選べるように、各天体を中心のプリセットに登録する（dso0〜dso41）
+        DEEP_SKY.forEach((d, i) => {
+            CENTER_PRESETS['dso' + i] = { label: d.name, ra: d.ra, dec: d.dec };
+        });
+
+        // ドラッグ（スワイプ）で選んだ向き。通常モードで星空の中心をつかんで動かすと、この値が更新される
+        CENTER_PRESETS.custom = { label: 'ドラッグで選んだ向き', ra: CENTER_PRESETS.polaris.ra, dec: CENTER_PRESETS.polaris.dec };
+
+        // placeは、RealStarを現在の図法で画面に置く関数
+        function updateDeepSky(place) {
+            deepSkyObjects.forEach(o => {
+                place(o.pos);
+                place(o.axis);
+                const dx = o.axis.x - o.pos.x;
+                const dy = o.axis.y - o.pos.y;
+                const len = Math.hypot(dx, dy);
+                o.geomOk = o.pos.projOk && o.axis.projOk && len > 0.01;
+                if (o.geomOk) {
+                    o.pxPerDeg = len / DSO_AXIS_DEG;
+                    o.angle = Math.atan2(dy, dx);
+                }
+            });
+        }
+
+        function drawDeepSky() {
+            if (!config.showDso) {
+                deepSkyObjects.forEach(o => { o.shown = false; });
+                if (selectedDso >= 0) closeConstellationInfo();
+                return;
+            }
+            const scale = config.dsoScale;
+            deepSkyObjects.forEach((o, i) => {
+                const d = o.data;
+                o.shown = false;
+                if (d.mag > config.dsoLimit || !o.pos.visible || !o.pos.projOk) return;
+                const k = o.geomOk ? o.pxPerDeg : 3;
+                const rx = Math.min(4000, Math.max(5, 0.5 * d.major / 60 * k * scale));
+                const ry = Math.min(4000, Math.max(Math.min(rx, 3), 0.5 * d.minor / 60 * k * scale));
+                const rr = Math.max(rx, ry);
+                const x = o.pos.x;
+                const y = o.pos.y;
+                if (x < -rr - 60 || x > width + rr + 60 || y < -rr - 60 || y > height + rr + 60) return;
+                o.shown = true;
+                o.rMax = rr;
+
+                const rgb = DSO_STYLE[d.type].rgb;
+                const al = Math.min(0.95, Math.max(0.5, 1.05 - Math.min(d.mag, 9) * 0.07)) * skyDim;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(o.geomOk ? o.angle : 0);
+                ctx.lineWidth = 1.2;
+                if (d.type === 'galaxy' || d.type === 'nebula') {
+                    // やわらかい光のにじみ＋薄い輪郭
+                    ctx.save();
+                    ctx.scale(1, ry / rx);
+                    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+                    g.addColorStop(0, `rgba(${rgb}, ${0.55 * al})`);
+                    g.addColorStop(1, `rgba(${rgb}, 0)`);
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, rx, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    ctx.strokeStyle = `rgba(${rgb}, ${0.55 * al})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx * 0.8, ry * 0.8, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else if (d.type === 'open') {
+                    // 点線の円
+                    ctx.setLineDash([3, 3]);
+                    ctx.fillStyle = `rgba(${rgb}, ${0.08 * al})`;
+                    ctx.strokeStyle = `rgba(${rgb}, ${al})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (d.type === 'globular') {
+                    // 円に十字
+                    ctx.fillStyle = `rgba(${rgb}, ${0.18 * al})`;
+                    ctx.strokeStyle = `rgba(${rgb}, ${al})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(-rx, 0);
+                    ctx.lineTo(rx, 0);
+                    ctx.moveTo(0, -ry);
+                    ctx.lineTo(0, ry);
+                    ctx.stroke();
+                } else if (d.type === 'planetary') {
+                    // 輪と中心の点
+                    ctx.strokeStyle = `rgba(${rgb}, ${al})`;
+                    ctx.fillStyle = `rgba(${rgb}, ${al})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 1.3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // 暗黒星雲：灰色の点線の楕円
+                    ctx.setLineDash([4, 4]);
+                    ctx.fillStyle = `rgba(0, 0, 0, ${0.25 * al})`;
+                    ctx.strokeStyle = `rgba(${rgb}, ${0.75 * al})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                if (i === selectedDso) { // 選択中の天体を金色の輪で強調
+                    ctx.setLineDash([]);
+                    ctx.globalAlpha = 0.65 + 0.35 * Math.sin(Date.now() / 350);
+                    ctx.strokeStyle = '#ffd78a';
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rx + 5, ry + 5, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                if (config.dsoLabels) {
+                    ctx.save();
+                    ctx.font = '11px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = `rgba(${rgb}, ${Math.min(1, al + 0.1)})`;
+                    ctx.fillText(d.short, x + rr + 5, y);
+                    ctx.restore();
+                }
+            });
+            if (selectedDso >= 0 && !deepSkyObjects[selectedDso].shown) closeConstellationInfo();
+        }
+
+        // クリック位置に最も近い（表示中の）星雲・星団・銀河を返す。なければ-1
+        function findDeepSkyAt(px, py) {
+            if (!config.showDso) return -1;
+            const base = window.matchMedia('(pointer: coarse)').matches ? 26 : 16;
+            let best = -1;
+            let bestD = Infinity;
+            deepSkyObjects.forEach((o, i) => {
+                if (!o.shown) return;
+                const lim = Math.max(base, Math.min(o.rMax, 60));
+                const dist = Math.hypot(o.pos.x - px, o.pos.y - py);
+                if (dist <= lim && dist < bestD) { bestD = dist; best = i; }
+            });
+            return best;
+        }
+
+        function openDeepSkyInfo(i) {
+            const d = deepSkyObjects[i].data;
+            const size = d.major >= 60 ? (d.major / 60).toFixed(1) + '°' : d.major + '′';
+            const typeName = d.typeName || DSO_STYLE[d.type].name;
+            const magTxt = d.mag < 90 ? '約' + d.mag.toFixed(1) + '等／' : '';
+            document.getElementById('con-info-name').textContent = d.code + '　' + d.name;
+            document.getElementById('con-info-en').textContent = d.code + ' ／ ' + d.en;
+            document.getElementById('con-info-view').textContent =
+                typeName + '／' + d.con + '／' + magTxt + '見かけの大きさ 約' + size + '／見ごろ：' + d.season;
+            document.getElementById('con-info-text').textContent = d.text;
+            document.getElementById('con-info').classList.add('is-open');
+            selectedDso = i;
+            selectedCon = -1;
+        }
+
+        function initDeepSky() {
+            const $ = (id) => document.getElementById(id);
+            const showBtn = $('btn-toggle-dso');
+            const labelBtn = $('btn-toggle-dso-labels');
+            const limitSel = $('param-dso-limit');
+            const scaleIn = $('param-dso-scale');
+            const scaleVal = $('val-dso-scale');
+            showBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.showDso = !config.showDso;
+                showBtn.textContent = config.showDso ? '表示中' : '非表示';
+            });
+            labelBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config.dsoLabels = !config.dsoLabels;
+                labelBtn.textContent = config.dsoLabels ? '表示中' : '非表示';
+            });
+            limitSel.addEventListener('change', () => { config.dsoLimit = parseFloat(limitSel.value); });
+            scaleIn.addEventListener('input', () => {
+                config.dsoScale = parseFloat(scaleIn.value);
+                scaleVal.textContent = config.dsoScale.toFixed(1);
+            });
+            // パネルのリセットボタンから呼ばれる（configは既に初期値に戻っている）
+            resetDsoUI = () => {
+                showBtn.textContent = config.showDso ? '表示中' : '非表示';
+                labelBtn.textContent = config.dsoLabels ? '表示中' : '非表示';
+                limitSel.value = String(config.dsoLimit);
+                scaleIn.value = config.dsoScale;
+                scaleVal.textContent = config.dsoScale.toFixed(1);
+            };
+        }
+
         // --- リサイズイベント ---
         window.addEventListener('resize', () => {
             width = canvas.width = window.innerWidth;
@@ -3896,6 +4976,7 @@
             initConstellationInfo(); // initUI()より先に（クリック処理の順序のため）
             initUI();
             initObserve();
+            initDeepSky();
             updateBgColor();
             buildSky();
             buildConstellationCheckboxes();
