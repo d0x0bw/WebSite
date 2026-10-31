@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Starry Night & Meteor</title>
     <link rel="icon" href="../icon/favicon.png" type="image/png">
 
@@ -10,6 +10,12 @@
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ページの拡大（ピンチ）はできるようにしつつ、ダブルタップでの拡大だけを止める
+           （画面のダブルタップは設定パネルの再表示に使うため） */
+        html {
+            touch-action: manipulation;
         }
 
         /* 深みのある夜空のグラデーション */
@@ -1236,6 +1242,7 @@
             hideDelay: 3,
             panelTransparency: 12,
             observeMode: false,
+            obsPlace: 'tokyo', // 観測場所のプリセット（手入力・現在地は 'custom'）
             obsLat: 35.68,
             obsLon: 139.76,
             obsSpeed: 1,
@@ -1310,6 +1317,41 @@
 
         let hideTimerId = null;
 
+        // 「表示中／非表示」のように、押すたびにオン・オフが切り替わるボタン。
+        // config[key] と結びつけ、ボタンの文字（と、必要なら追加の処理 onChange）を config に合わせる
+        const toggleBindings = [];
+        function bindToggle(id, key, onText, offText, onChange) {
+            const btn = document.getElementById(id);
+            const b = {
+                sync() {
+                    btn.textContent = config[key] ? onText : offText;
+                    if (onChange) onChange(config[key]);
+                }
+            };
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                config[key] = !config[key];
+                b.sync();
+            });
+            toggleBindings.push(b);
+            return b;
+        }
+
+        // スライダー・色の入力欄を config の値に合わせる
+        function syncControls() {
+            controls.forEach(item => {
+                const input = document.getElementById(item.id);
+                const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+                const val = config[item.key];
+                input.value = val;
+                if (valDisplay) valDisplay.textContent = item.type === 'float' ? Number(val).toFixed(1) : val;
+                if (item.onChange) item.onChange();
+            });
+        }
+
+        // パネル全体の表示を config に合わせる（リセット時と、保存した設定を読み込んだとき）
+        let syncAllUI = () => {};
+
         function initUI() {
             controls.forEach(item => {
                 const input = document.getElementById(item.id);
@@ -1340,52 +1382,32 @@
             const closeModalBtn = document.getElementById('btn-close-modal');
             const mobileMQ = window.matchMedia('(max-width: 768px)'); // CSSのモバイル表示と同じ条件
             const canvas = document.getElementById('skyCanvas');
-            const linesBtn = document.getElementById('btn-toggle-lines');
             const centerSelect = document.getElementById('param-center-star');
-            const sunBtn = document.getElementById('btn-toggle-sun');
-            const moonBtn = document.getElementById('btn-toggle-moon');
             const moonWaxingBtn = document.getElementById('btn-toggle-moon-waxing');
-            const moonAutoBtn = document.getElementById('btn-toggle-moon-auto');
             const moonPhaseSlider = document.getElementById('param-moon-phase');
             const conListToggle = document.getElementById('btn-toggle-con-list');
             const conList = document.getElementById('constellation-list');
             const conAllBtn = document.getElementById('btn-con-all');
             const conNoneBtn = document.getElementById('btn-con-none');
 
-            linesBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.showLines = !config.showLines;
-                linesBtn.textContent = config.showLines ? '表示中' : '非表示';
+            bindToggle('btn-toggle-lines', 'showLines', '表示中', '非表示');
+            bindToggle('btn-toggle-sun', 'showSun', '表示中', '非表示');
+            bindToggle('btn-toggle-moon', 'showMoon', '表示中', '非表示');
+            bindToggle('btn-toggle-moon-waxing', 'moonWaxing', '満ちていく', '欠けていく');
+            bindToggle('btn-toggle-moon-auto', 'moonAutoPhase', '自転と連動', '手動', (on) => {
+                moonPhaseSlider.disabled = on;
+                moonWaxingBtn.disabled = on;
+                if (!on) { // 手動に戻したら、スライダーの表示を手動の値に戻す
+                    lastAutoMoonPct = -1;
+                    lastAutoMoonDir = null;
+                    moonPhaseSlider.value = config.moonPhase;
+                    document.getElementById('val-moon-phase').textContent = config.moonPhase;
+                    moonWaxingBtn.textContent = config.moonWaxing ? '満ちていく' : '欠けていく';
+                }
             });
 
             centerSelect.addEventListener('change', (e) => {
                 config.centerStar = e.target.value;
-            });
-
-            sunBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.showSun = !config.showSun;
-                sunBtn.textContent = config.showSun ? '表示中' : '非表示';
-            });
-
-            moonBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.showMoon = !config.showMoon;
-                moonBtn.textContent = config.showMoon ? '表示中' : '非表示';
-            });
-
-            moonWaxingBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.moonWaxing = !config.moonWaxing;
-                moonWaxingBtn.textContent = config.moonWaxing ? '満ちていく' : '欠けていく';
-            });
-
-            moonAutoBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.moonAutoPhase = !config.moonAutoPhase;
-                moonAutoBtn.textContent = config.moonAutoPhase ? '自転と連動' : '手動';
-                moonPhaseSlider.disabled = config.moonAutoPhase;
-                moonWaxingBtn.disabled = config.moonAutoPhase;
             });
 
             conListToggle.addEventListener('click', (e) => {
@@ -1405,36 +1427,25 @@
                 setAllConstellations(false);
             });
 
+            syncAllUI = () => {
+                lastAutoMoonPct = -1; // 月の満ち欠けの自動表示を、次のフレームで必ず更新させる
+                lastAutoMoonDir = null;
+                syncControls();
+                toggleBindings.forEach(b => b.sync());
+                centerSelect.value = config.centerStar;
+                syncObserveUI();
+                syncDsoUI();
+            };
+
             resetBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 Object.assign(config, defaultConfig);
-                linesBtn.textContent = config.showLines ? '表示中' : '非表示';
-                centerSelect.value = config.centerStar;
-                sunBtn.textContent = config.showSun ? '表示中' : '非表示';
-                moonBtn.textContent = config.showMoon ? '表示中' : '非表示';
-                moonWaxingBtn.textContent = config.moonWaxing ? '満ちていく' : '欠けていく';
-                moonAutoBtn.textContent = config.moonAutoPhase ? '自転と連動' : '手動';
-                moonPhaseSlider.disabled = config.moonAutoPhase;
-                moonWaxingBtn.disabled = config.moonAutoPhase;
+                CENTER_PRESETS.custom.ra = CENTER_PRESETS.polaris.ra;
+                CENTER_PRESETS.custom.dec = CENTER_PRESETS.polaris.dec;
                 setAllConstellations(true);
                 conList.style.display = 'none';
                 conListToggle.textContent = '開く';
-                resetObserveUI();
-                resetDsoUI();
-
-                controls.forEach(item => {
-                    const input = document.getElementById(item.id);
-                    const valDisplay = item.valId ? document.getElementById(item.valId) : null;
-                    const defaultVal = defaultConfig[item.key];
-
-                    input.value = defaultVal;
-
-                    if (valDisplay) {
-                        valDisplay.textContent = typeof defaultVal === 'number' && !Number.isInteger(defaultVal) ? defaultVal.toFixed(1) : defaultVal;
-                    }
-
-                    if (item.onChange) item.onChange();
-                });
+                syncAllUI();
             });
 
             const isMobile = () => mobileMQ.matches;
@@ -1712,11 +1723,59 @@
         // --- 基礎設定 ---
         const canvas = document.getElementById('skyCanvas');
         const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+        // width・height は画面の大きさ（CSSピクセル）。描画はすべてこの単位で行う。
+        // キャンバスの実際の画素数は、画面の解像度倍率（dpr）を掛けた大きさにして、
+        // 高解像度の画面（スマホ・Retina）でも星や文字がぼやけないようにする
+        let width = 0, height = 0, dpr = 1;
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // キャンバスの大きさを変えると座標変換が戻るので、毎回かけ直す
+            starSpriteCache.clear(); // 星の画像は画素数に合わせて作り直す
+        }
+
+        // --- 星の画像のキャッシュ ---
+        // shadowBlur（輝き）を星ごとに毎フレームかけると重いので、
+        // 「大きさ・輝き」の組み合わせごとに一度だけ別のキャンバスに描いておき、drawImageで貼る
+        const starSpriteCache = new Map();
+        function getStarSprite(size, blur) {
+            // 似た大きさはまとめて、キャッシュが増えすぎないようにする
+            const s = size < 2 ? Math.max(0.1, Math.round(size * 10) / 10) : Math.round(size * 4) / 4;
+            const b = Math.max(0, Math.round(blur * 2) / 2);
+            const key = s + '|' + b;
+            let sp = starSpriteCache.get(key);
+            if (sp) return sp;
+            if (starSpriteCache.size > 400) starSpriteCache.clear();
+            const pad = s + b * 1.6 + 2;          // 星の中心から画像の端まで（CSSピクセル）
+            const px = Math.ceil(pad * 2 * dpr);  // 画像の画素数
+            const cv = document.createElement('canvas');
+            cv.width = cv.height = px;
+            const c = cv.getContext('2d');
+            const mid = px / 2;
+            if (b > 0) {
+                c.shadowBlur = b * dpr;  // shadowBlurは座標変換の影響を受けないので、画素数に合わせて掛ける
+                c.shadowColor = 'white';
+            }
+            c.fillStyle = 'white';
+            c.beginPath();
+            c.arc(mid, mid, s * dpr, 0, Math.PI * 2);
+            c.fill();
+            sp = { cv, half: px / dpr / 2 };
+            starSpriteCache.set(key, sp);
+            return sp;
+        }
+        function drawStarSprite(x, y, size, blur) {
+            const sp = getStarSprite(size, blur);
+            ctx.drawImage(sp.cv, x - sp.half, y - sp.half, sp.half * 2, sp.half * 2);
+        }
 
         const stars = [];
-        let activeMeteor = null;
+        const meteors = [];
+        const MAX_METEORS = 30;
+        resizeCanvas();
 
         // 観測モード用の共有状態
         let skyDim = 1;          // 昼間に星を薄くする係数（1=夜、0=昼）
@@ -1724,96 +1783,202 @@
         // 空の円（地平線）の中心と半径、および図法とカメラ（透視図法）の情報
         const skyGeom = { cx: 0, cy: 0, maxR: 0, mode: 'equidistant', F: [0, 1, 0], R: [1, 0, 0], U: [0, 0, 1], f: 1, wide: false, near: 0.05 };
 
-        // --- 星(Star)クラス ---
+        // --- 星(Star)クラス：背景の淡い星屑 ---
+        // 星屑も天球上の決まった方向に置き、実在の星と一緒に動かす（ドラッグ・自転・観測モードの時間の進みに追従）。
+        // 画面に入る星屑の数が「星の数」に近くなるよう、多めの候補の中から、順位(rank)の低いものだけを描く
         class Star {
             constructor() {
+                // 天球上に一様に散らばるよう、単位ベクトル（赤道座標：x=春分点, z=天の北極）を選ぶ
+                const z = Math.random() * 2 - 1;
+                const ph = Math.random() * Math.PI * 2;
+                const rr = Math.sqrt(1 - z * z);
+                this.ex = rr * Math.cos(ph);
+                this.ey = rr * Math.sin(ph);
+                this.ez = z;
+                this.rank = Math.random(); // 小さいほど優先して表示する
+                this.x = 0;
+                this.y = 0;
+                this.onScreen = false;
+                // 通常モードで、中心から180°より外側（画面の四隅や縦長画面の上下）にも星屑を散らすための2つめの位置
+                this.x2 = 0;
+                this.y2 = 0;
+                this.onScreen2 = false;
                 this.reset();
             }
 
+            // 大きさと瞬きだけを選び直す（位置はそのまま）
             reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                
                 const minSize = Math.min(config.starMinSize, config.starMaxSize);
                 const maxSize = Math.max(config.starMinSize, config.starMaxSize);
                 this.size = Math.random() * (maxSize - minSize) + minSize;
-                
                 this.flickerSpeed = Math.random() * 0.05 + 0.01;
                 this.baseAlpha = Math.random() * 0.7 + 0.3;
                 this.flickerOffset = Math.random() * Math.PI * 2;
             }
 
-            update() {
+            update(nowMs) {
                 // パラメータ twinkleSpeed を考慮した明るさ更新
-                this.alpha = this.baseAlpha + Math.sin(Date.now() * (this.flickerSpeed * config.twinkleSpeed) + this.flickerOffset) * 0.3;
+                this.alpha = this.baseAlpha + Math.sin(nowMs * (this.flickerSpeed * config.twinkleSpeed) + this.flickerOffset) * 0.3;
                 if (this.alpha < 0) this.alpha = 0;
                 if (this.alpha > 1) this.alpha = 1;
             }
 
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha * skyDim;
-                
-                // 輝き（グロー）効果の設定
-                if (config.glowScale > 0) {
-                    ctx.shadowBlur = 6 * config.glowScale;
-                    ctx.shadowColor = "white";
-                }
-                
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+            draw(fade) {
+                ctx.globalAlpha = this.alpha * skyDim * fade;
+                const blur = 6 * config.glowScale;
+                if (this.onScreen) drawStarSprite(this.x, this.y, this.size, blur);
+                if (this.onScreen2) drawStarSprite(this.x2, this.y2, this.size, blur);
             }
         }
 
+        // 星の数（画面に見える数）に対して、天球全体に用意する星屑の候補の数
+        function dustPoolSize() {
+            return config.starCount <= 0 ? 0 : Math.min(5000, Math.max(800, config.starCount * 5));
+        }
+
+        // 星屑を画面に置く。view は毎フレーム1回だけ計算した回転の情報。
+        // 星屑は順位(rank)の小さい順に並んでいるので、順位が limit を超えたところで打ち切る（描かない星の計算を省く）
+        let dustLimit = 1;
+        function projectDust(view, limit) {
+            let n = 0;
+            const margin = 8;
+            const inScreen = (q) => q.x > -margin && q.x < width + margin && q.y > -margin && q.y < height + margin;
+            for (const st of stars) {
+                if (st.rank > limit) break;
+                let p = null;
+                st.onScreen2 = false;
+                if (view.obs) {
+                    // 赤道座標 → 地平座標（x=東, y=北, z=天頂）。大気差・歳差は星屑には不要なので省く
+                    const ch = st.ex * view.cL + st.ey * view.sL;
+                    const e = -st.ex * view.sL + st.ey * view.cL;
+                    const nn = st.ez * view.cP - view.sP * ch;
+                    const u = view.sP * st.ez + view.cP * ch;
+                    if (u >= 0) p = obsProj(e, nn, u);
+                } else {
+                    // 中心からの角距離と方位（北から東回り）を、ベクトルの内積で求める（正距方位図法）
+                    const dc = st.ex * view.C[0] + st.ey * view.C[1] + st.ez * view.C[2];
+                    const dn = st.ex * view.N[0] + st.ey * view.N[1] + st.ez * view.N[2];
+                    const de = st.ex * view.E[0] + st.ey * view.E[1];
+                    const c = Math.acos(Math.max(-1, Math.min(1, dc)));
+                    const h = Math.hypot(de, dn);
+                    const r = view.k * c;
+                    if (h > 1e-9) {
+                        const sB = de / h, cB = dn / h;
+                        const sT = sB * view.cR + cB * view.sR;
+                        const cT = cB * view.cR - sB * view.sR;
+                        p = { x: view.cx + r * sT, y: view.cy - r * cT };
+                        // 正距方位図法を180°の先まで延ばした位置（反対側の方位に、360°−角距離）。
+                        // 実在の星はここには描かないが、星屑で画面全体を埋めて、上下や四隅が空っぽに見えないようにする
+                        const r2 = view.k * (2 * Math.PI - c);
+                        if (r2 < view.reach) {
+                            const q = { x: view.cx - r2 * sT, y: view.cy + r2 * cT };
+                            if (inScreen(q)) {
+                                st.x2 = q.x;
+                                st.y2 = q.y;
+                                st.onScreen2 = true;
+                                n++;
+                            }
+                        }
+                    } else {
+                        p = { x: view.cx, y: view.cy };
+                    }
+                }
+                st.onScreen = !!p && inScreen(p);
+                if (st.onScreen) {
+                    st.x = p.x;
+                    st.y = p.y;
+                    n++;
+                }
+            }
+            return n;
+        }
+
+        // 画面のうち、空として星屑を散らす部分の割合（地面に隠れる部分を除く）
+        function dustSkyFraction() {
+            if (!obsState) return 1;
+            if (skyGeom.mode !== 'perspective') return Math.min(1, Math.PI * skyGeom.maxR * skyGeom.maxR / (width * height));
+            if (skyGeom.wide) return 1;
+            return Math.min(1, Math.max(0, horizonY() / height));
+        }
+
+        function drawDust(cx, cy, maxR) {
+            if (!stars.length) return;
+            // 1フレームに1回だけ、回転に必要な値を求める
+            const view = { obs: !!obsState, cx, cy };
+            if (obsState) {
+                const L = obsState.lst * DEG;
+                const P = config.obsLat * DEG;
+                view.cL = Math.cos(L); view.sL = Math.sin(L);
+                view.cP = Math.cos(P); view.sP = Math.sin(P);
+            } else {
+                const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
+                const a0 = center.ra * 15 * DEG;
+                const d0 = center.dec * DEG;
+                view.C = [Math.cos(d0) * Math.cos(a0), Math.cos(d0) * Math.sin(a0), Math.sin(d0)];
+                view.N = [-Math.sin(d0) * Math.cos(a0), -Math.sin(d0) * Math.sin(a0), Math.cos(d0)];
+                view.E = [-Math.sin(a0), Math.cos(a0)];
+                view.k = maxR / (viewAngDeg() * DEG); // 1ラジアンあたりのpx
+                view.cR = Math.cos(rotationDeg * DEG);
+                view.sR = Math.sin(rotationDeg * DEG);
+                view.reach = Math.hypot(width, height) / 2 + 10; // 画面の中心から四隅までの距離
+            }
+            const limit = dustLimit;
+            const nOn = projectDust(view, limit);
+            if (!nOn) { dustLimit = 1; return; }
+            // 画面に入った候補のうち、順位が threshold 未満のものを描く（境目は少しずつ薄くして、ちらつきを防ぐ）。
+            // 順位は一様なので、limit までの候補で数えた nOn を limit で割ると、全候補で数えた場合の見込みになる
+            const target = config.starCount * dustSkyFraction();
+            const threshold = Math.min(limit, 1.1 * target * limit / nOn);
+            dustLimit = Math.min(1, threshold * 1.3 + 0.02); // 次のフレームは少し余裕をもって計算する
+            const soft = Math.max(0.0001, threshold * 0.15);
+            const nowMs = Date.now();
+            ctx.save();
+            for (const st of stars) {
+                if (st.rank >= threshold) break;
+                if (!st.onScreen && !st.onScreen2) continue;
+                const fade = Math.min(1, (threshold - st.rank) / soft);
+                st.update(nowMs);
+                st.draw(fade);
+            }
+            ctx.restore();
+        }
+
         // --- 流れ星(Meteor)クラス ---
+        // 動きは経過時間（秒）で計算する。60fps のとき、これまでと同じ速さ・長さ・消え方になる
         class Meteor {
             constructor() {
-                this.reset();
-                this.active = false;
-            }
-
-            reset() {
                 this.x = Math.random() * width;
                 this.y = -Math.random() * 100;
 
-                const baseLength = Math.random() * 80 + 50;
-                this.length = baseLength * config.meteorLength;
-                
-                const baseSpeed = Math.random() * 12 + 10;
+                const baseSpeed = Math.random() * 12 + 10;   // 60fpsでの1フレームあたりのpx
                 this.speed = baseSpeed * config.meteorSpeed;
                 this.angle = Math.random() * (Math.PI / 4) + (Math.PI / 8);
-                
+
                 this.dx = Math.cos(this.angle) * this.speed;
                 this.dy = Math.sin(this.angle) * this.speed;
+                this.length = Math.hypot(this.dx, this.dy) * 1.5 * config.meteorLength;
 
                 this.alpha = 1.0;
                 this.active = true;
             }
 
-            update() {
-                if (!this.active) return;
+            update(dt) {
+                const f = dt * 60; // 60fpsの1フレームを1とした経過量
+                this.x += this.dx * f;
+                this.y += this.dy * f;
+                this.alpha -= 0.012 * config.meteorSpeed * f;
 
-                this.x += this.dx;
-                this.y += this.dy;
-
-                this.alpha -= 0.012 * config.meteorSpeed; 
-
-                if (this.x > width + this.length || 
-                    this.y > height + this.length || 
+                if (this.x > width + this.length ||
+                    this.y > height + this.length ||
                     this.alpha <= 0) {
                     this.active = false;
                 }
             }
 
             draw() {
-                if (!this.active) return;
-
                 ctx.save();
-                ctx.globalAlpha = Math.max(0, this.alpha);
-                
+                ctx.globalAlpha = Math.max(0, this.alpha) * skyDim;
+
                 const trailX = this.x - this.dx * (1.5 * config.meteorLength);
                 const trailY = this.y - this.dy * (1.5 * config.meteorLength);
 
@@ -1831,17 +1996,28 @@
                 ctx.lineTo(trailX, trailY);
                 ctx.stroke();
 
-                if (config.glowScale > 0) {
-                    ctx.shadowBlur = 10 * config.glowScale;
-                    ctx.shadowColor = "white";
-                }
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
-                ctx.fill();
+                drawStarSprite(this.x, this.y, 1, 10 * config.glowScale);
 
                 ctx.restore();
             }
+        }
+
+        // 流れ星を出す・動かす・描く。観測モードでは、昼間は見えず、地面の上には流れない
+        function updateMeteors(dt) {
+            // 60fpsで1フレームあたり 0.004×頻度 の確率だった出現を、1秒あたりの頻度に直す（平均 0.24×頻度 個/秒）
+            const rate = 0.24 * config.meteorFreq;
+            if (meteors.length < MAX_METEORS && Math.random() < 1 - Math.exp(-rate * dt)) {
+                meteors.push(new Meteor());
+            }
+            for (let i = meteors.length - 1; i >= 0; i--) {
+                meteors[i].update(dt);
+                if (!meteors[i].active) meteors.splice(i, 1);
+            }
+            if (!meteors.length || skyDim <= 0.001) return;
+            ctx.save();
+            clipToSky();
+            meteors.forEach(m => m.draw());
+            ctx.restore();
         }
 
         // --- 実在の星(RealStar)クラス：任意の恒星を中心とした星図から座標を算出 ---
@@ -1921,17 +2097,8 @@
 
             draw() {
                 const size = (0.5 + this.brightness * 2.6) * config.realStarScale;
-                ctx.save();
                 ctx.globalAlpha = this.alpha * skyDim;
-                if (config.glowScale > 0) {
-                    ctx.shadowBlur = (3 + this.brightness * 11) * config.glowScale;
-                    ctx.shadowColor = "white";
-                }
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                drawStarSprite(this.x, this.y, size, (3 + this.brightness * 11) * config.glowScale);
             }
         }
 
@@ -2727,6 +2894,23 @@
             ctx.clip();
         }
 
+        // 観測モード：空の部分（地平線より上）だけに描画を制限する。広角レンズでも地平線の曲線で切る
+        function clipToSky() {
+            if (!obsState) return;
+            ctx.beginPath();
+            if (skyGeom.mode === 'perspective') {
+                if (skyGeom.wide) {
+                    addWideRegion(wideHorizon(), false);
+                    ctx.clip('evenodd');
+                    return;
+                }
+                ctx.rect(0, 0, width, Math.max(0, Math.min(height, horizonY())));
+            } else {
+                ctx.arc(skyGeom.cx, skyGeom.cy, skyGeom.maxR, 0, Math.PI * 2);
+            }
+            ctx.clip();
+        }
+
         function drawSun() {
             if (!config.showSun) return;
             let cx = width * (config.sunX / 100);
@@ -2745,7 +2929,7 @@
             ctx.save();
             if (obsState) clipAboveHorizon();
             if (config.sunGlow > 0) {
-                ctx.shadowBlur = 35 * config.sunGlow * Math.min(1, Math.max(0.25, r / config.sunSize));
+                ctx.shadowBlur = 35 * config.sunGlow * Math.min(1, Math.max(0.25, r / config.sunSize)) * dpr; // shadowBlurは画素単位なのでdprを掛ける
                 ctx.shadowColor = config.sunColor;
             }
             const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
@@ -2810,21 +2994,7 @@
                 const deg = ((rotationDeg % 360) + 360) % 360;
                 k = (1 - Math.cos(deg * Math.PI / 180)) / 2;
                 dir = deg < 180 ? 1 : -1;
-
-                // パネルの表示を現在の自動値にリアルタイム同期（値が変わった時だけDOM更新）
-                const pct = Math.round(k * 100);
-                if (pct !== lastAutoMoonPct) {
-                    lastAutoMoonPct = pct;
-                    const valEl = document.getElementById('val-moon-phase');
-                    const sliderEl = document.getElementById('param-moon-phase');
-                    if (valEl) valEl.textContent = pct;
-                    if (sliderEl) sliderEl.value = pct;
-                }
-                if (dir !== lastAutoMoonDir) {
-                    lastAutoMoonDir = dir;
-                    const waxBtn = document.getElementById('btn-toggle-moon-waxing');
-                    if (waxBtn) waxBtn.textContent = dir === 1 ? '満ちていく' : '欠けていく';
-                }
+                syncMoonPanel(k, dir === 1); // パネルの表示を現在の自動値にリアルタイム同期
             } else {
                 k = Math.min(1, Math.max(0, config.moonPhase / 100));
                 dir = config.moonWaxing ? 1 : -1; // 明るい側: +1=右, -1=左
@@ -2836,7 +3006,7 @@
             // 輝き（グロー）：本体より先に、地平線以外ではクリップしない状態で描く
             if (config.moonGlow > 0) {
                 ctx.save();
-                ctx.shadowBlur = 22 * config.moonGlow * Math.min(1, Math.max(0.25, r / config.moonSize));
+                ctx.shadowBlur = 22 * config.moonGlow * Math.min(1, Math.max(0.25, r / config.moonSize)) * dpr; // shadowBlurは画素単位なのでdprを掛ける
                 ctx.shadowColor = config.moonColor;
                 ctx.globalAlpha = 0.5 * Math.max(0.15, k);
                 ctx.fillStyle = config.moonColor;
@@ -2926,13 +3096,17 @@
             if (el) el.textContent = `表示中の星座: ${visibleCount} / ${SKY_DATA.length}`;
         }
 
+        // 星の数に合わせて、星屑の候補を増やす／減らす（残る星は位置を変えない）
         function adjustStarCount() {
-            while (stars.length < config.starCount) {
+            const n = dustPoolSize();
+            while (stars.length < n) {
                 stars.push(new Star());
             }
-            if (stars.length > config.starCount) {
-                stars.length = config.starCount;
+            if (stars.length > n) {
+                stars.length = n;
             }
+            stars.sort((a, b) => a.rank - b.rank); // 順位の小さい順に並べる（projectDustの打ち切りに使う）
+            dustLimit = 1;
         }
 
         function reinitStars() {
@@ -2942,8 +3116,6 @@
         // --- 初期化関数 ---
         function init() {
             adjustStarCount();
-            activeMeteor = new Meteor(); 
-            activeMeteor.active = false;
         }
 
         // --- アニメーション関数 ---
@@ -2952,6 +3124,10 @@
             const dt = Math.min(0.1, (now - lastFrameTime) / 1000); // タブ非アクティブ復帰時の飛び防止
             lastFrameTime = now;
             rotationDeg += config.rotationSpeed * dt;
+
+            // ウィンドウを解像度の違う画面へ移したときは、キャンバスの画素数を合わせ直す
+            const curDpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+            if (curDpr !== dpr) resizeCanvas();
 
             ctx.clearRect(0, 0, width, height);
 
@@ -2972,11 +3148,8 @@
                 skyDim = 1;
             }
 
-            // 1. 背景の淡い星（実在データを持たない演出用の星屑）
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            });
+            // 1. 背景の淡い星（実在データを持たない演出用の星屑。天球に固定して、空と一緒に動かす）
+            drawDust(cx, cy, maxR);
 
             if (obsState) drawObserveGround(cx, cy, maxR);
 
@@ -2997,11 +3170,13 @@
             // 3. 星座線 → 4. 実在の星（表示ONの星座のみ描画）
             drawConstellationLines();
             drawDeepSky(); // 星雲・星団・銀河（星より下の層）
+            ctx.save();
             realStars.forEach(rs => {
                 if (!constellationVisible[rs.conIndex] || !rs.visible) return;
                 rs.update();
                 rs.draw();
             });
+            ctx.restore();
 
             // 選択中の星座を強調
             drawSelectedConstellation();
@@ -3010,16 +3185,8 @@
             drawSun();
             drawMoon();
 
-            // 5. 流れ星
-            if (activeMeteor.active) {
-                activeMeteor.update();
-                activeMeteor.draw();
-            } else {
-                // 基本の確率 (0.004) に meteorFreq 倍率を適用
-                if (Math.random() < 0.004 * config.meteorFreq) { 
-                    activeMeteor.reset();
-                }
-            }
+            // 5. 流れ星（複数同時に流れる。観測モードでは空の部分だけ・昼間は見えない）
+            updateMeteors(dt);
 
             requestAnimationFrame(animate);
         }
@@ -3588,8 +3755,9 @@
                 }
                 lastTap = { t: now, x: e.clientX, y: e.clientY };
                 const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+                // 描画はCSSピクセル単位なので、画面上の位置をそのまま使う
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
                 // 星雲・星団・銀河を優先し、なければ星座を調べる
                 const di = findDeepSkyAt(x, y);
                 if (di >= 0) {
@@ -3607,7 +3775,10 @@
             });
             document.getElementById('con-info-close').addEventListener('click', closeConstellationInfo);
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') closeConstellationInfo();
+                if (e.key !== 'Escape') return;
+                // スマホの設定モーダルが開いているときは、Escでモーダルだけを閉じる（initUI側で処理）
+                if (document.getElementById('draggable-panel').classList.contains('is-modal-open')) return;
+                closeConstellationInfo();
             });
         }
 
@@ -3642,7 +3813,7 @@
         let obsSimMs = Date.now(); // シミュレーション上の現在時刻（UNIXミリ秒）
         let obsLive = true;        // trueかつ等倍のあいだは端末の現在時刻に追従
         let obsDragMoved = false;  // 透視図法でドラッグした直後（クリックの誤作動防止）
-        let resetObserveUI = () => {};
+        let syncObserveUI = () => {};
 
         function julianDate(ms) { return ms / 86400000 + 2440587.5; }
 
@@ -4291,8 +4462,6 @@
             const dtIn = $('param-obs-datetime');
             const nowBtn = $('btn-obs-now');
             const speedSel = $('param-obs-speed');
-            const guidesBtn = $('btn-toggle-obs-guides');
-            const dayBtn = $('btn-toggle-obs-daylight');
             const timeOut = $('obs-time-readout');
             const skyOut = $('obs-sky-readout');
             let placeTz = OBS_PLACES.tokyo.tz; // 手入力・現在地のときはundefined（端末の時刻のみ表示）
@@ -4302,9 +4471,6 @@
             const pitchIn = $('param-obs-pitch');
             const fovIn = $('param-obs-fov');
             const aimMsg = $('obs-aim-msg');
-            const refrBtn = $('btn-toggle-obs-refraction');
-            const skyBtn = $('btn-toggle-obs-skycolor');
-            const sizeBtn = $('btn-toggle-obs-realsize');
 
             const pad = (n) => String(n).padStart(2, '0');
             const toLocalInput = (ms) => {
@@ -4323,6 +4489,7 @@
 
             function setPlace(key) {
                 const pl = OBS_PLACES[key];
+                config.obsPlace = key;
                 config.obsLat = pl.lat;
                 config.obsLon = pl.lon;
                 latIn.value = pl.lat;
@@ -4372,6 +4539,7 @@
                 if (Number.isFinite(lat)) config.obsLat = Math.max(-90, Math.min(90, lat));
                 if (Number.isFinite(lon)) config.obsLon = Math.max(-180, Math.min(180, lon));
                 placeSel.value = 'custom';
+                config.obsPlace = 'custom';
                 placeTz = undefined;
             }
             latIn.addEventListener('input', onCoordInput);
@@ -4390,6 +4558,7 @@
                     latIn.value = config.obsLat.toFixed(2);
                     lonIn.value = config.obsLon.toFixed(2);
                     placeSel.value = 'custom';
+                    config.obsPlace = 'custom';
                     placeTz = undefined;
                     geoMsg.textContent = '現在地を取得しました。';
                 }, () => {
@@ -4419,17 +4588,8 @@
                 if (config.obsSpeed !== 1) obsLive = false;
             });
 
-            guidesBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.obsGuides = !config.obsGuides;
-                guidesBtn.textContent = config.obsGuides ? '表示中' : '非表示';
-            });
-
-            dayBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.obsDaylight = !config.obsDaylight;
-                dayBtn.textContent = config.obsDaylight ? 'する' : 'しない';
-            });
+            bindToggle('btn-toggle-obs-guides', 'obsGuides', '表示中', '非表示');
+            bindToggle('btn-toggle-obs-daylight', 'obsDaylight', 'する', 'しない');
 
             // ---- 図法と、透視図法の視点（向き・見上げ角・画角） ----
             const dirNames = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
@@ -4499,22 +4659,10 @@
                 setView(config.obsYaw, 90, config.obsFov);
             });
 
-            refrBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.obsRefraction = !config.obsRefraction;
-                refrBtn.textContent = config.obsRefraction ? 'する' : 'しない';
-            });
-
-            skyBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.obsSkyColor = !config.obsSkyColor;
-                skyBtn.textContent = config.obsSkyColor ? 'する' : 'しない';
-            });
-            sizeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.obsRealSize = !config.obsRealSize;
-                sizeBtn.textContent = config.obsRealSize ? 'する' : 'しない';
-                document.body.classList.toggle('obs-realsize', config.obsRealSize);
+            bindToggle('btn-toggle-obs-refraction', 'obsRefraction', 'する', 'しない');
+            bindToggle('btn-toggle-obs-skycolor', 'obsSkyColor', 'する', 'しない');
+            bindToggle('btn-toggle-obs-realsize', 'obsRealSize', 'する', 'しない', (on) => {
+                document.body.classList.toggle('obs-realsize', on);
             });
 
             // 透視図法：ドラッグで向きを変え、ホイールで画角（ズーム）を変える
@@ -4648,22 +4796,24 @@
             // iOS Safariのページ全体のピンチ拡大を止める
             canvasEl.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
 
-            // パネルのリセットボタンから呼ばれる（configは既に初期値に戻っている）
-            resetObserveUI = () => {
-                placeSel.value = 'tokyo';
-                setPlace('tokyo');
+            // パネルの表示を config に合わせる（リセット時と、保存した設定を読み込んだとき）。
+            // 観測の日時は保存せず、いつも現在時刻から始める
+            syncObserveUI = () => {
+                if (OBS_PLACES[config.obsPlace]) {
+                    placeSel.value = config.obsPlace;
+                    setPlace(config.obsPlace);
+                } else {
+                    placeSel.value = 'custom';
+                    latIn.value = config.obsLat;
+                    lonIn.value = config.obsLon;
+                    placeTz = undefined;
+                }
                 projSel.value = config.obsProjection;
                 applyLens();
                 applyProjection();
                 speedSel.value = String(config.obsSpeed);
-                guidesBtn.textContent = config.obsGuides ? '表示中' : '非表示';
-                dayBtn.textContent = config.obsDaylight ? 'する' : 'しない';
-                refrBtn.textContent = config.obsRefraction ? 'する' : 'しない';
-                skyBtn.textContent = config.obsSkyColor ? 'する' : 'しない';
-                sizeBtn.textContent = config.obsRealSize ? 'する' : 'しない';
-                document.body.classList.toggle('obs-realsize', config.obsRealSize);
                 obsSimMs = Date.now();
-                obsLive = true;
+                obsLive = config.obsSpeed === 1;
                 dtIn.value = toLocalInput(obsSimMs);
                 geoMsg.textContent = '';
                 applyMode();
@@ -5364,7 +5514,7 @@
             dark:      { rgb: '170, 170, 185', name: '暗黒星雲' }
         };
         const DSO_AXIS_DEG = 0.5; // 向きと縮尺を求めるための補助点を、位置角の方向へずらす距離（度）
-        let resetDsoUI = () => {};
+        let syncDsoUI = () => {};
 
         // 各天体は、中心の位置と、位置角の方向へ少しずらした補助点を持つ。
         // 2点を同じ投影で画面に置き、その距離から縮尺（px/度）を、向きから楕円の傾きを求める
@@ -5411,6 +5561,7 @@
                 return;
             }
             const scale = config.dsoScale;
+            const labels = [];
             deepSkyObjects.forEach((o, i) => {
                 const d = o.data;
                 o.shown = false;
@@ -5426,7 +5577,8 @@
                 o.rMax = rr;
 
                 const rgb = DSO_STYLE[d.type].rgb;
-                const al = Math.min(0.95, Math.max(0.5, 1.05 - Math.min(d.mag, 9) * 0.07)) * skyDim;
+                const alBase = Math.min(0.95, Math.max(0.5, 1.05 - Math.min(d.mag, 9) * 0.07));
+                const al = alBase * skyDim;
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(o.geomOk ? o.angle : 0);
@@ -5502,17 +5654,54 @@
                 }
                 ctx.restore();
 
-                if (config.dsoLabels) {
-                    ctx.save();
-                    ctx.font = '11px sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = `rgba(${rgb}, ${Math.min(1, al + 0.1)})`;
-                    ctx.fillText(d.short, x + rr + 5, y);
-                    ctx.restore();
+                if (config.dsoLabels && skyDim > 0.001) {
+                    labels.push({
+                        text: d.short, x, y, rr,
+                        color: `rgba(${rgb}, ${Math.min(1, alBase + 0.1) * skyDim})`, // 昼間（skyDim=0）は名前も消す
+                        prio: i === selectedDso ? -100 : (d.mag < 90 ? d.mag : 20)
+                    });
                 }
             });
+            if (labels.length) drawDsoLabels(labels);
             if (selectedDso >= 0 && !deepSkyObjects[selectedDso].shown) closeConstellationInfo();
+        }
+
+        // 星雲・星団・銀河の名前を、重ならないように置く。
+        // 選択中の天体→明るい天体の順に、右・左・上・下の空いている場所を探し、どこも重なるなら省く
+        const dsoLabelWidth = new Map();
+        function drawDsoLabels(labels) {
+            const FONT = '11px sans-serif';
+            const H = 13; // 文字の高さの目安（px）
+            ctx.save();
+            ctx.font = FONT;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            labels.sort((a, b) => a.prio - b.prio);
+            const placed = [];
+            const hits = (bx) => placed.some(p => bx.x < p.x + p.w && p.x < bx.x + bx.w && bx.y < p.y + p.h && p.y < bx.y + bx.h);
+            for (const lb of labels) {
+                let w = dsoLabelWidth.get(lb.text);
+                if (w === undefined) {
+                    w = ctx.measureText(lb.text).width;
+                    dsoLabelWidth.set(lb.text, w);
+                }
+                const gap = lb.rr + 5;
+                const cands = [
+                    { x: lb.x + gap, y: lb.y - H / 2 },             // 右
+                    { x: lb.x - gap - w, y: lb.y - H / 2 },         // 左
+                    { x: lb.x - w / 2, y: lb.y - lb.rr - 3 - H },   // 上
+                    { x: lb.x - w / 2, y: lb.y + lb.rr + 3 }        // 下
+                ];
+                for (const c of cands) {
+                    const bx = { x: c.x - 1, y: c.y - 1, w: w + 2, h: H + 2 };
+                    if (hits(bx)) continue;
+                    placed.push(bx);
+                    ctx.fillStyle = lb.color;
+                    ctx.fillText(lb.text, c.x, c.y + H / 2);
+                    break;
+                }
+            }
+            ctx.restore();
         }
 
         // クリック位置に最も近い（表示中の）星雲・星団・銀河を返す。なければ-1
@@ -5547,42 +5736,81 @@
 
         function initDeepSky() {
             const $ = (id) => document.getElementById(id);
-            const showBtn = $('btn-toggle-dso');
-            const labelBtn = $('btn-toggle-dso-labels');
             const limitSel = $('param-dso-limit');
             const scaleIn = $('param-dso-scale');
             const scaleVal = $('val-dso-scale');
-            showBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.showDso = !config.showDso;
-                showBtn.textContent = config.showDso ? '表示中' : '非表示';
-            });
-            labelBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                config.dsoLabels = !config.dsoLabels;
-                labelBtn.textContent = config.dsoLabels ? '表示中' : '非表示';
-            });
+            bindToggle('btn-toggle-dso', 'showDso', '表示中', '非表示');
+            bindToggle('btn-toggle-dso-labels', 'dsoLabels', '表示中', '非表示');
             limitSel.addEventListener('change', () => { config.dsoLimit = parseFloat(limitSel.value); });
             scaleIn.addEventListener('input', () => {
                 config.dsoScale = parseFloat(scaleIn.value);
                 scaleVal.textContent = config.dsoScale.toFixed(1);
             });
-            // パネルのリセットボタンから呼ばれる（configは既に初期値に戻っている）
-            resetDsoUI = () => {
-                showBtn.textContent = config.showDso ? '表示中' : '非表示';
-                labelBtn.textContent = config.dsoLabels ? '表示中' : '非表示';
+            // パネルの表示を config に合わせる（リセット時と、保存した設定を読み込んだとき）
+            syncDsoUI = () => {
                 limitSel.value = String(config.dsoLimit);
                 scaleIn.value = config.dsoScale;
                 scaleVal.textContent = config.dsoScale.toFixed(1);
             };
         }
 
+        // --- 設定の保存と読み込み（このブラウザの localStorage に保存。次に開いたときも同じ設定で始まる） ---
+        const STORAGE_KEY = 'starryNightAndMeteor.settings.v1';
+        let lastSaved = '';
+
+        function settingsSnapshot() {
+            return JSON.stringify({
+                config,
+                constellations: constellationVisible,
+                custom: { ra: CENTER_PRESETS.custom.ra, dec: CENTER_PRESETS.custom.dec }
+            });
+        }
+
+        function loadSettings() {
+            let saved = null;
+            try {
+                saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+            } catch (e) {
+                saved = null; // 保存できない環境（プライベートブラウズなど）や壊れたデータは無視する
+            }
+            if (!saved || typeof saved !== 'object') return;
+            // 今の版にある項目で、型が同じものだけを取り込む（古い版のデータが混ざっても壊れないように）
+            if (saved.config && typeof saved.config === 'object') {
+                Object.keys(defaultConfig).forEach(k => {
+                    const v = saved.config[k];
+                    if (typeof v === typeof defaultConfig[k] && (typeof v !== 'number' || Number.isFinite(v))) config[k] = v;
+                });
+            }
+            if (!CENTER_PRESETS[config.centerStar]) config.centerStar = defaultConfig.centerStar;
+            if (Array.isArray(saved.constellations) && saved.constellations.length === constellationVisible.length) {
+                saved.constellations.forEach((v, i) => { constellationVisible[i] = v !== false; });
+                document.querySelectorAll('#constellation-checkboxes input[type="checkbox"]').forEach((cb, i) => {
+                    cb.checked = constellationVisible[i];
+                });
+                updateConstellationSummary();
+            }
+            if (saved.custom && Number.isFinite(saved.custom.ra) && Number.isFinite(saved.custom.dec)) {
+                CENTER_PRESETS.custom.ra = saved.custom.ra;
+                CENTER_PRESETS.custom.dec = saved.custom.dec;
+            }
+            syncAllUI();
+        }
+
+        // 変更があったときだけ保存する（1秒ごとに確認。ページを閉じる直前にも保存）
+        function saveSettingsIfChanged() {
+            const snap = settingsSnapshot();
+            if (snap === lastSaved) return;
+            try {
+                localStorage.setItem(STORAGE_KEY, snap);
+                lastSaved = snap;
+            } catch (e) { /* 保存できない環境では何もしない */ }
+        }
+
         // --- リサイズイベント ---
         window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            reinitStars(); // 画面サイズが変わっても背景の星が旧サイズの範囲に偏らないようにする
-            init();
+            // 星屑は天球に固定しているので、画面の大きさが変わっても配置し直す必要はない
+            // （流れている途中の流れ星もそのまま）
+            resizeCanvas();
         });
 
         // 実行開始
@@ -5595,6 +5823,10 @@
             updateBgColor();
             buildSky();
             buildConstellationCheckboxes();
+            loadSettings();
+            lastSaved = settingsSnapshot();
+            setInterval(saveSettingsIfChanged, 1000);
+            window.addEventListener('pagehide', saveSettingsIfChanged);
             init();
             animate();
         });
