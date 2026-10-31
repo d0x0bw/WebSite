@@ -4,37 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROFILE 1 -+SHERRY's GARDEN+-</title>
+  <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../icon/favicon.png" type="image/png">
-
+  <script src="js/site.js" defer></script>
 </head>
 <body>
 
+  <!-- ===== 共通ヘッダー（4ページ共通・変更時は全ページ揃えること） ===== -->
   <header class="header">
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
-  </header>
 
-  <input type="checkbox" id="menu-btn-check">
-  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+    <input type="checkbox" id="menu-btn-check" aria-label="メニューを開閉" aria-controls="global-nav">
+    <label for="menu-btn-check" class="menu-btn" aria-hidden="true"><span></span></label>
 
-  <nav class="menu-content">
+    <nav class="menu-content" id="global-nav" aria-label="サイトメニュー">
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li style="font-weight: bold;">PROFILE 1</li>
-        <li><a href="#rum">・Rum(Red Tabby Mix)</a></li>
-        <li><a href="#ragdoll">・Ragdoll</a></li>
-        <li><a href="#scottish-fold">・Scottish Fold</a></li>
-        <li><a href="#norwegian-forest-cat">・Norwegian Forest Cat</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li class="has-sub-menu">
+          <a href="index.html#gallery">Gallery</a>
+          <ul class="sub-menu">
+            <li><a href="gallery1.html">Gallery1</a></li>
+            <li><a href="gallery2.html">Gallery2</a></li>
+          </ul>
+        </li>
+        <li class="has-sub-menu">
+          <a href="index.html#profile">Profile</a>
+          <ul class="sub-menu">
+            <li><a href="profile1.html" aria-current="page">Profile1</a></li>
+          </ul>
+        </li>
+        <li><a href="index.html#link">Link</a></li>
       </ul>
-  </nav>
-  <label for="menu-btn-check" class="menu-background"></label>
+    </nav>
+    <label for="menu-btn-check" class="menu-background" aria-hidden="true"></label>
+  </header>
+  <!-- ===== /共通ヘッダー ===== -->
 
   <main class="content">
-
 
     <div class="title-area">
       <p class="text">PROFILE</p>
     </div>
+
+    <!-- ページ内目次（以前はメニュー内にあったもの） -->
+    <nav class="page-toc" aria-label="このページの目次">
+      <a href="#rum">Rum (Red Tabby Mix)</a>
+      <a href="#ragdoll">Ragdoll</a>
+      <a href="#scottish-fold">Scottish Fold</a>
+      <a href="#norwegian-forest-cat">Norwegian Forest Cat</a>
+    </nav>
 
     <section id="profile">
       <h2 class="section-title">CAT Profile</h2>
@@ -139,50 +159,6 @@
   </footer>
 
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
-
-  <script>
-    const menuCheck = document.getElementById('menu-btn-check');
-    const menuLinks = document.querySelectorAll('.menu-content a');
-    const menuBg = document.querySelector('.menu-background');
-
-    // --- メニュー開閉時にスクロールを制御 ---
-    menuCheck.addEventListener('change', () => {
-      if (menuCheck.checked) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
-    });
-
-    menuLinks.forEach(link => {
-      link.addEventListener('click', () => { 
-        menuCheck.checked = false; 
-        document.body.style.overflow = ''; 
-      });
-    });
-
-    menuBg.addEventListener('click', () => { 
-      menuCheck.checked = false; 
-      document.body.style.overflow = ''; 
-    });
-
-// --- トップへ戻るボタンの制御 ---
-const goTopBtn = document.querySelector('.gotop');
-
-if (goTopBtn) {
-  goTopBtn.classList.add('js-hidden');
-}
-
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 200) {
-    goTopBtn.classList.remove('js-hidden');
-    goTopBtn.classList.add('is-show');
-  } else {
-    goTopBtn.classList.add('js-hidden');
-    goTopBtn.classList.remove('is-show');
-  }
-});
-  </script>
 
 </body>
 </html>

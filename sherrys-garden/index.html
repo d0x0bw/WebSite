@@ -4,39 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SHERRY's GARDEN</title>
+  <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../icon/favicon.png" type="image/png">
+  <script src="js/site.js" defer></script>
+  <script src="js/lightbox.js" defer></script>
+  <script src="js/home.js" defer></script>
 </head>
 <body>
 
+  <!-- ===== 共通ヘッダー（4ページ共通・変更時は全ページ揃えること） ===== -->
   <header class="header">
     <div class="logo"><a href="index.html">SHERRY's GARDEN</a></div>
+
+    <input type="checkbox" id="menu-btn-check" aria-label="メニューを開閉" aria-controls="global-nav">
+    <label for="menu-btn-check" class="menu-btn" aria-hidden="true"><span></span></label>
+
+    <nav class="menu-content" id="global-nav" aria-label="サイトメニュー">
+      <ul>
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li class="has-sub-menu">
+          <a href="index.html#gallery">Gallery</a>
+          <ul class="sub-menu">
+            <li><a href="gallery1.html">Gallery1</a></li>
+            <li><a href="gallery2.html">Gallery2</a></li>
+          </ul>
+        </li>
+        <li class="has-sub-menu">
+          <a href="index.html#profile">Profile</a>
+          <ul class="sub-menu">
+            <li><a href="profile1.html">Profile1</a></li>
+          </ul>
+        </li>
+        <li><a href="index.html#link">Link</a></li>
+      </ul>
+    </nav>
+    <label for="menu-btn-check" class="menu-background" aria-hidden="true"></label>
   </header>
-
-  <input type="checkbox" id="menu-btn-check">
-  <label for="menu-btn-check" class="menu-btn"><span></span></label>
-
-  <nav class="menu-content">
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="#about">About</a></li>
-      <li class="has-sub-menu">
-        <a href="#gallery" class="sub-menu-toggle">Gallery</a>
-        <ul class="sub-menu">
-          <li><a href="gallery1.html">Gallery1</a></li>
-          <li><a href="gallery2.html">Gallery2</a></li>
-        </ul>
-      </li>
-      <li class="has-sub-menu">
-        <a href="#profile" class="sub-menu-toggle">Profile</a>
-        <ul class="sub-menu">
-          <li><a href="profile1.html">Profile1</a></li>
-        </ul>
-      </li>
-      <li><a href="#link">Link</a></li>
-    </ul>
-  </nav>
-  <label for="menu-btn-check" class="menu-background"></label>
+  <!-- ===== /共通ヘッダー ===== -->
 
   <main class="content">
     <div class="main-image">
@@ -47,7 +53,7 @@
         <img src="./photos/top-02.jpg" alt="メインイメージ" title="シェリーとラム">
       </div>
     </div>
-    
+
     <div class="title-area">
       <p class="text fade-in">SHERRY's GARDEN<span>since 2023</span></p>
     </div>
@@ -75,48 +81,16 @@
     <section id="gallery">
       <h2 class="section-title fade-in">Gallery</h2>
 
-      <!-- JSオフ時用フォールバック表示 -->
-      <div id="random-gallery" class="gallery-grid">
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop1" class="pop-check" style="display: none;">
-          <label for="idx-pop1" class="thumb-label fade-in"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop1" class="pop-img-wrap"><img src="./photos/photo-01.jpg" alt="Gallery 1 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop2" class="pop-check" style="display: none;">
-          <label for="idx-pop2" class="thumb-label fade-in"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop2" class="pop-img-wrap"><img src="./photos/photo-02.jpg" alt="Gallery 2 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop3" class="pop-check" style="display: none;">
-          <label for="idx-pop3" class="thumb-label fade-in"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop3" class="pop-img-wrap"><img src="./photos/photo-03.jpg" alt="Gallery 3 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop4" class="pop-check" style="display: none;">
-          <label for="idx-pop4" class="thumb-label fade-in"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop4" class="pop-img-wrap"><img src="./photos/photo-04.jpg" alt="Gallery 4 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop5" class="pop-check" style="display: none;">
-          <label for="idx-pop5" class="thumb-label fade-in"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop5" class="pop-img-wrap"><img src="./photos/photo-05.jpg" alt="Gallery 5 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop6" class="pop-check" style="display: none;">
-          <label for="idx-pop6" class="thumb-label fade-in"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop6" class="pop-img-wrap"><img src="./photos/photo-06.jpg" alt="Gallery 6 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop7" class="pop-check" style="display: none;">
-          <label for="idx-pop7" class="thumb-label fade-in"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop7" class="pop-img-wrap"><img src="./photos/photo-07.jpg" alt="Gallery 7 拡大" class="full-img"></label></div>
-        </div>
-        <div class="gallery-item">
-          <input type="checkbox" id="idx-pop8" class="pop-check" style="display: none;">
-          <label for="idx-pop8" class="thumb-label fade-in"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></label>
-          <div class="pop-overlay"><label for="idx-pop8" class="pop-img-wrap"><img src="./photos/photo-08.jpg" alt="Gallery 8 拡大" class="full-img"></label></div>
-        </div>
+      <!-- 初期表示（home.js が gallery1.html からランダムな8枚に差し替える。取得できない時はこのまま） -->
+      <div id="random-gallery" class="gallery-grid" data-lightbox>
+        <a class="gallery-item fade-in" href="./photos/photo-01.jpg"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-02.jpg"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-03.jpg"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-04.jpg"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-05.jpg"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-06.jpg"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-07.jpg"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></a>
+        <a class="gallery-item fade-in" href="./photos/photo-08.jpg"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></a>
       </div>
 
       <div class="gallery-grid v-grid" style="margin-top: 30px;">
@@ -171,142 +145,6 @@
   </footer>
 
   <a href="#" class="gotop" aria-label="トップへ戻る"><span class="arrow"></span></a>
-
-<script>
-  document.body.classList.add('js-active');
-
-  // 1. スクロール監視（全ブラウザ共通でIntersectionObserverを使用）
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-      }
-    });
-  }, { rootMargin: '0px 0px -10% 0px' });
-
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-  // 2. スクロールロック制御（ハンバーガーメニュー・写真モーダル共通）
-  const menuCheck = document.getElementById('menu-btn-check');
-  const menuLinks = document.querySelectorAll('.menu-content a');
-  const menuBg = document.querySelector('.menu-background');
-
-  // メニューか写真モーダルのどちらかが開いていれば背景スクロールを禁止する
-  function updateScrollLock() {
-    const anyPopOpen = document.querySelectorAll('.pop-check:checked').length > 0;
-    if ((menuCheck && menuCheck.checked) || anyPopOpen) {
-      document.body.classList.add('is-locked');
-    } else {
-      document.body.classList.remove('is-locked');
-    }
-  }
-
-  if (menuCheck) {
-    menuCheck.addEventListener('change', updateScrollLock);
-  }
-
-  menuLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth <= 768 && link.classList.contains('sub-menu-toggle')) return;
-      if (menuCheck) menuCheck.checked = false; 
-      updateScrollLock();
-    });
-  });
-
-  if (menuBg) {
-    menuBg.addEventListener('click', () => { 
-      if (menuCheck) menuCheck.checked = false; 
-      updateScrollLock();
-    });
-  }
-
-  // 3. トップへ戻るボタン制御
-  const goTopBtn = document.querySelector('.gotop');
-  if (goTopBtn) goTopBtn.classList.add('js-hidden');
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) {
-      if (goTopBtn) {
-        goTopBtn.classList.remove('js-hidden');
-        goTopBtn.classList.add('is-show');
-      }
-    } else {
-      if (goTopBtn) {
-        goTopBtn.classList.add('js-hidden');
-        goTopBtn.classList.remove('is-show');
-      }
-    }
-  });
-
-  // 4. ランダムギャラリー生成制御
-  // gallery1.html を実際に取得して掲載中の写真ファイル名を自動抽出する。
-  // → gallery1.html に写真を追加/削除するだけで、ここにも自動的に反映される。
-  // （gallery1.html が取得できない環境向けの最低限のフォールバック）
-  const FALLBACK_PHOTO_FILES = [
-    "photo-01.jpg", "photo-02.jpg", "photo-03.jpg", "photo-04.jpg",
-    "photo-05.jpg", "photo-06.jpg", "photo-07.jpg", "photo-08.jpg"
-  ];
-
-  async function getPhotoFiles() {
-    try {
-      const res = await fetch('./gallery1.html');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const html = await res.text();
-      const matches = [...html.matchAll(/\.\/photos-thumb\/(photo-\d+\.jpg)/g)];
-      const files = [...new Set(matches.map(m => m[1]))];
-      return files.length > 0 ? files : FALLBACK_PHOTO_FILES;
-    } catch (err) {
-      console.error('gallery1.htmlからの写真リスト取得に失敗したため、フォールバックのリストを使用します。', err);
-      return FALLBACK_PHOTO_FILES;
-    }
-  }
-
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  async function renderRandomGallery() {
-    const galleryContainer = document.getElementById('random-gallery');
-    if (!galleryContainer) return;
-
-    const photoFiles = await getPhotoFiles();
-
-    galleryContainer.innerHTML = '';
-    const shuffledPhotos = shuffleArray([...photoFiles]);
-    const selectedPhotos = shuffledPhotos.slice(0, 8);
-
-    selectedPhotos.forEach((fileName, index) => {
-      const popId = `pop-rand-${index}`;
-      const itemHtml = `
-        <div class="gallery-item">
-          <input type="checkbox" id="${popId}" class="pop-check" style="display: none;">
-          <label for="${popId}" class="thumb-label fade-in">
-            <img src="./photos-thumb/${fileName}" alt="Gallery ${index + 1}" loading="lazy">
-          </label>
-          <div class="pop-overlay">
-            <label for="${popId}" class="pop-img-wrap">
-              <img src="./photos/${fileName}" alt="Gallery ${index + 1} 拡大" class="full-img">
-            </label>
-          </div>
-        </div>
-      `;
-      galleryContainer.insertAdjacentHTML('beforeend', itemHtml);
-    });
-
-    galleryContainer.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-    // 写真モーダルの開閉でもスクロールロックが効くようにする
-    galleryContainer.querySelectorAll('.pop-check').forEach(check => {
-      check.addEventListener('change', updateScrollLock);
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', renderRandomGallery);
-</script>
 
 </body>
 </html>

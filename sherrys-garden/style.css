@@ -1,6 +1,6 @@
 /* --- Style Header ---------------------------------------------
    style.css
-   Version: 1.0
+   Version: 1.1
     --------------------------------------------------------------------
     01. CSS Variables
     02. Reset
@@ -10,11 +10,12 @@
     06. Common Components
     07. Home
     08. Gallery
-    09. Modal
+    09. Lightbox（写真ビューア / lightbox.js）
     10. Profile
     11. Footer
     12. Responsive
-    13. 追記(ScrollFadeIN)
+    13. Scroll Fade In
+    14. Reduced Motion
 -------------------------------------------------------------- */
 
 
@@ -107,8 +108,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* モーダル表示中はスクロール禁止 */
-body.is-locked {
+/* メニュー・写真ビューア表示中はスクロール禁止（site.js が付け外し）
+   ※ html に overflow-x: clip があるため、body に付けても画面のスクロールは止まらない */
+html.is-locked {
   overflow: hidden;
 }
 
@@ -180,12 +182,29 @@ section {
 }
 
 /* Mobile Navigation Trigger ------------------------------------ */
+/* チェックボックスは見た目だけ隠し、キーボード（Tab → Space）でも開閉できるようにする */
 #menu-btn-check {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+#menu-btn-check:focus-visible + .menu-btn {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
 }
 
 .menu-btn {
   display: none;
+}
+
+/* 現在のページ */
+.menu-content a[aria-current="page"] {
+  color: var(--accent-color);
+  font-weight: bold;
 }
 
 
@@ -199,6 +218,8 @@ section {
     position: static;
     background: var(--bg-color);
     box-shadow: none;
+    /* backdrop-filter が残っていると、中の固定表示メニューが header 基準で配置されてしまう */
+    backdrop-filter: none;
   }
 
   .menu-btn {
@@ -281,6 +302,7 @@ section {
     overflow-x: hidden;
     width: 300px;
     height: 100vh;
+    height: 100dvh; /* iOS のアドレスバー分のはみ出しを防ぐ（未対応ブラウザは上の 100vh） */
     padding: 100px 20px 40px;
     background: var(--card-bg);
     box-shadow: -10px 0 30px rgba(0, 0, 0, .1);
@@ -320,6 +342,7 @@ section {
 
 /* Desktop Menu ------------------------------------ */
 @media (min-width: 769px) {
+  #menu-btn-check,
   .menu-btn {
     display: none;
   }
@@ -434,7 +457,8 @@ section {
     transform: translateX(-50%) rotate(45deg);
   }
 
-  .has-sub-menu:hover .sub-menu {
+  .has-sub-menu:hover .sub-menu,
+  .has-sub-menu:focus-within .sub-menu {
     visibility: visible;
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -611,29 +635,13 @@ section {
 .main-image-wrapper img:nth-child(3) { animation-delay: 12s; }
 .main-image-wrapper img:nth-child(4) { animation-delay: 18s; }
 
-.main-image-wrapper img:hover {
-  transform: scale(1.05);
-}
-
 /* Slider Animation ------------------------------------ */
 @keyframes fade-slider {
-  0% {
-    opacity: 0;
-    transform: scale(1);
-  }
-  5% {
-    opacity: 1;
-  }
-  30% {
-    opacity: 1;
-  }
-  38% {
-    opacity: 0;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-  }
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  30%  { opacity: 1; }
+  38%  { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 /* Intro ------------------------------------ */
@@ -688,24 +696,31 @@ section {
 }
 
 /* Gallery Item ------------------------------------ */
+/* <a class="gallery-item" href="拡大画像"><img src="サムネイル"></a> */
 .gallery-item {
   position: relative;
+  display: block;
   overflow: clip;
   aspect-ratio: 1 / 1;
   border-radius: var(--radius-md);
   box-shadow: 0 4px 15px rgba(0, 0, 0, .04);
+  cursor: zoom-in;
 }
 
 .gallery-item img {
   width: 100%;
   height: 100%;
-  cursor: pointer;
   object-fit: cover;
   transition: var(--transition-normal);
 }
 
-.gallery-item img:hover {
-  transform: scale(1.08);
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+.gallery-item:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
 }
 
 /* More Button ------------------------------------ */
@@ -776,17 +791,13 @@ section {
 }
 
 
-/* --- 09. MODAL ------------------------------------------------
-   ギャラリーモーダル（背景・画像表示・開閉・ナビゲーション）
+/* --- 09. LIGHTBOX ---------------------------------------------
+   写真ビューア（lightbox.js がページに1つだけ生成する）
+   背景・写真表示・上部UI・スライドショー・前後ボタン
 -------------------------------------------------------------- */
 
-/* Modal State ------------------------------------ */
-.pop-check {
-  display: none;
-}
-
-/* Modal Overlay ------------------------------------ */
-.pop-overlay {
+/* Overlay ------------------------------------ */
+.lightbox {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -800,41 +811,25 @@ section {
   transition: opacity .4s ease, visibility .4s ease;
 }
 
-.pop-check:checked ~ .pop-overlay {
+.lightbox.is-open {
   visibility: visible;
   opacity: 1;
+  /* 開く時は visibility を即座に切り替える（閉じるボタンへのフォーカス移動のため） */
+  transition: opacity .4s ease, visibility 0s;
 }
 
-/* Modal Image ------------------------------------ */
-.thumb-label {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.thumb-label img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: var(--transition-normal);
-}
-
-.thumb-label:hover img {
-  transform: scale(1.05);
-}
-
-.pop-img-wrap {
+/* Image ------------------------------------ */
+.lightbox-stage {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: auto;
   max-width: 75%;
   max-height: 85vh;
-  cursor: pointer;
+  margin: auto;
+  cursor: zoom-out;
 }
 
-.pop-img-wrap img {
+.lightbox-img {
   max-width: 100%;
   max-height: 85vh;
   object-fit: contain;
@@ -845,55 +840,76 @@ section {
   transition: opacity .6s ease, transform .6s cubic-bezier(.22, 1, .36, 1);
 }
 
-.pop-check:checked ~ .pop-overlay .pop-img-wrap img {
+/* 画像の読み込みが終わったら表示（lightbox.js が付与） */
+.lightbox.is-open .lightbox-img.is-loaded {
   opacity: 1;
-  transform: scale(1) translateY(0);
+  transform: none;
 }
 
-/* Modal Header UI ------------------------------------ */
-.modal-header-ui {
+/* Common Button ------------------------------------ */
+.lb-btn,
+.sec-btn,
+.lightbox-nav {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lb-btn:focus-visible,
+.sec-btn:focus-visible,
+.lightbox-nav:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 3px;
+}
+
+/* Header UI ------------------------------------ */
+.lightbox-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   z-index: var(--z-modal-ui);
   width: 100%;
   padding: 20px 30px;
   color: #fff;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .4s ease, visibility .4s ease;
+  transition: opacity .4s ease; /* visibility は隠す時だけ遅らせる（Auto-Hide 参照） */
 }
 
-body.modal-open .modal-header-ui {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.modal-counter {
+.lightbox-counter {
   font-family: sans-serif;
   font-size: 1.1rem;
   letter-spacing: 2px;
 }
 
-.modal-controls {
+.lightbox-controls {
   display: flex;
   align-items: center;
   gap: 25px;
 }
 
-.modal-controls svg {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  transition: var(--transition-normal);
+.lb-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  /* all にすると visibility まで遅れて切り替わり、開いた直後にフォーカスできなくなる */
+  transition: color .4s ease, transform .4s ease;
 }
 
-.modal-controls svg:hover {
+.lb-btn[hidden] {
+  display: none;
+}
+
+.lb-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.lb-btn:hover {
   color: var(--accent-color);
   transform: scale(1.1);
 }
@@ -904,13 +920,27 @@ body.modal-open .modal-header-ui {
   align-items: center;
   gap: 15px;
   padding: 5px 15px;
-  border-radius: 25px;
+  border-radius: var(--radius-round);
   background: rgba(255, 255, 255, .1);
+}
+
+.lb-play svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 再生／一時停止アイコンの切り替え（aria-pressed で判定） */
+.lb-play .icon-pause,
+.lb-play[aria-pressed="true"] .icon-play {
+  display: none;
+}
+
+.lb-play[aria-pressed="true"] .icon-pause {
+  display: block;
 }
 
 .sec-btn {
   width: 24px;
-  cursor: pointer;
   user-select: none;
   text-align: center;
   font-size: 1.4rem;
@@ -930,31 +960,20 @@ body.modal-open .modal-header-ui {
   font-size: 1rem;
 }
 
-.play-pause-btn {
-  width: 20px;
-  height: 20px;
-}
-
 /* Progress Bar ------------------------------------ */
-.slideshow-progress {
-  position: fixed;
+.lightbox-progress {
+  position: absolute;
   top: 0;
   left: 0;
   z-index: var(--z-progress);
   width: 0;
   height: 2px;
-  opacity: 0;
   pointer-events: none;
   background: rgba(255, 255, 255, .9);
-  transition: opacity .3s;
 }
 
-body.modal-open .slideshow-progress {
-  opacity: 1;
-}
-
-/* Modal Navigation ------------------------------------ */
-.pop-nav {
+/* Prev / Next ------------------------------------ */
+.lightbox-nav {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -963,64 +982,84 @@ body.modal-open .slideshow-progress {
   z-index: var(--z-modal-nav);
   width: 60px;
   height: 90px;
-  cursor: pointer;
   user-select: none;
   color: rgba(255, 255, 255, .7);
   background: rgba(0, 0, 0, .3);
   transform: translateY(-50%);
-  transition: var(--transition-normal);
+  transition: color .4s ease, background-color .4s ease, opacity .4s ease;
 }
 
-.pop-nav svg {
+.lightbox-nav svg {
   width: 40%;
   height: 40%;
 }
 
-.pop-nav.prev {
+.lightbox-nav.prev {
   left: 0;
   padding-right: 8px;
   border-radius: 0 45px 45px 0;
 }
 
-.pop-nav.next {
+.lightbox-nav.next {
   right: 0;
   padding-left: 8px;
   border-radius: 45px 0 0 45px;
 }
 
-.pop-nav:hover {
+.lightbox-nav:hover {
   color: #fff;
   background: rgba(164, 138, 92, .8);
 }
 
 /* Controls Auto-Hide（スライドショー再生中、一定時間無操作でUIを隠す） ------------------------------------ */
-body.controls-idle .modal-header-ui,
-body.controls-idle .pop-nav {
+.lightbox.is-idle {
+  cursor: none;
+}
+
+/* 隠す時だけ visibility を遅らせてフェードアウトさせる。
+   表示側（通常時）に visibility のトランジションがあると、開いた直後のボタンが
+   一瞬「非表示」扱いになりフォーカスできないため、ここにだけ書く */
+.lightbox.is-idle .lightbox-header,
+.lightbox.is-idle .lightbox-nav {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition: opacity .4s ease, visibility .4s ease;
 }
 
-/* Responsive: Modal ------------------------------------ */
+/* Responsive: Lightbox ------------------------------------ */
 @media (max-width: 768px) {
-  .pop-img-wrap {
+  .lightbox-stage {
     max-width: 80%;
   }
 
-  .pop-nav {
+  .lightbox-header {
+    padding: 15px;
+  }
+
+  .lightbox-controls {
+    gap: 15px;
+  }
+
+  .slideshow-settings {
+    gap: 10px;
+    padding: 5px 10px;
+  }
+
+  .lightbox-nav {
     width: 15%;
     height: 70px;
   }
 
-  .pop-nav.prev {
+  .lightbox-nav.prev {
     border-radius: 0 35px 35px 0;
   }
 
-  .pop-nav.next {
+  .lightbox-nav.next {
     border-radius: 35px 0 0 35px;
   }
 
-  .pop-nav:hover {
+  .lightbox-nav:hover {
     background: rgba(0, 0, 0, .3);
   }
 }
@@ -1029,6 +1068,25 @@ body.controls-idle .pop-nav {
 /* --- 10. PROFILE ----------------------------------------------
    プロフィールページ（プロフィールカード・基本情報・画像）
 -------------------------------------------------------------- */
+
+/* Page TOC（profile1 のページ内目次） ------------------------------------ */
+.page-toc {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm) var(--space-md);
+  font-size: .9rem;
+}
+
+.page-toc a {
+  color: var(--text-muted);
+  border-bottom: 1px solid transparent;
+}
+
+.page-toc a:hover {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
 
 /* Profile Card ------------------------------------ */
 .cat-profile {
@@ -1137,18 +1195,13 @@ body.controls-idle .pop-nav {
   transform: translateY(-5px);
 }
 
-.gotop.js-hidden {
+/* JS有効時は、一定量スクロールするまで隠す（site.js が .is-show を付け外し）
+   JS無効時は常に表示 */
+.js .gotop:not(.is-show) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateY(15px);
-}
-
-.gotop.is-show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
 }
 
 .arrow {
@@ -1210,16 +1263,49 @@ body.controls-idle .pop-nav {
 
 
 /* --- 13. SCROLL FADE IN -------------------------------------------
-   index.htmlのスクロール連動フェードイン (JS / IntersectionObserver に一本化)
+   スクロール連動フェードイン（site.js / IntersectionObserver）
+   .js は <head> 内のインラインスクリプトで <html> に付与。JS無効時は最初から表示
 -------------------------------------------------------------- */
 
-body.js-active .fade-in {
+.js .fade-in {
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
 }
 
-body.js-active .fade-in.is-visible {
+.js .fade-in.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+
+/* --- 14. REDUCED MOTION -------------------------------------------
+   OSの「視差効果を減らす／アニメーションを減らす」設定を尊重する
+-------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  /* スライダーは1枚目を静止表示 */
+  .main-image-wrapper img {
+    animation: none !important;
+  }
+
+  .main-image-wrapper img:first-child {
+    opacity: 1;
+  }
+
+  .js .fade-in {
+    opacity: 1;
+    transform: none;
+  }
 }
