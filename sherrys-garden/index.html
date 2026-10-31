@@ -4,14 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SHERRY's GARDEN</title>
+  <meta name="description" content="猫たちと過ごす穏やかな時間。何気なく撮りためた写真をひとつの形にした、シェリーとラムのプライベートガーデンです。">
+  <!-- SNSで共有された時の表示（OGP） -->
+  <meta property="og:title" content="SHERRY's GARDEN">
+  <meta property="og:description" content="猫たちと過ごす穏やかな時間。何気なく撮りためた写真をひとつの形にした、シェリーとラムのプライベートガーデンです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SHERRY's GARDEN">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 公開URLが決まったら有効にする（どちらも https:// から始まる完全なURLが必要）
+  <meta property="og:url" content="https://（公開URL）/index.html">
+  <meta property="og:image" content="https://（公開URL）/photos/top-01.jpg">
+  -->
   <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../icon/favicon.png" type="image/png">
   <script src="js/site.js" defer></script>
+  <script src="js/photos.js" defer></script>
+  <script src="js/gallery.js" defer></script>
   <script src="js/lightbox.js" defer></script>
-  <script src="js/home.js" defer></script>
 </head>
 <body>
+
+  <a class="skip-link" href="#main">本文へスキップ</a>
 
   <!-- ===== 共通ヘッダー（4ページ共通・変更時は全ページ揃えること） ===== -->
   <header class="header">
@@ -44,22 +58,22 @@
   </header>
   <!-- ===== /共通ヘッダー ===== -->
 
-  <main class="content">
+  <main class="content" id="main">
     <div class="main-image">
       <div class="main-image-wrapper">
-        <img src="./photos/top-01.jpg" alt="メインイメージ" title="シェリーとラム">
-        <img src="./photos/top-03.jpg" alt="メインイメージ" title="シェリーとラム">
-        <img src="./photos/top-04.jpg" alt="メインイメージ" title="シェリーとラム">
-        <img src="./photos/top-02.jpg" alt="メインイメージ" title="シェリーとラム">
+        <img src="./photos/top-01.jpg" alt="シェリーとラム" title="シェリーとラム">
+        <img src="./photos/top-03.jpg" alt="シェリーとラム" title="シェリーとラム">
+        <img src="./photos/top-04.jpg" alt="シェリーとラム" title="シェリーとラム">
+        <img src="./photos/top-02.jpg" alt="シェリーとラム" title="シェリーとラム">
       </div>
     </div>
 
     <div class="title-area">
-      <p class="text fade-in">SHERRY's GARDEN<span>since 2023</span></p>
+      <h1 class="page-title fade-in">SHERRY's GARDEN<span class="page-title-sub">since 2023</span></h1>
     </div>
 
     <div class="intro-text">
-      <h1 class="fade-in">猫たちと過ごす穏やかな時間</h1>
+      <p class="intro-title fade-in">猫たちと過ごす穏やかな時間</p>
       <p class="fade-in">May all living things be treated with love.🌞🌜️✨️</p>
     </div>
 
@@ -68,7 +82,7 @@
       <h2 class="section-title fade-in">About</h2>
       <div class="feature-item">
         <div class="feature-img">
-          <img src="../icon/icon.png" alt="画像" title="ラム" loading="lazy" class="fade-in">
+          <img src="../icon/icon.png" alt="ラム" title="ラム" loading="lazy" class="fade-in">
         </div>
         <div class="feature-text">
           <h3 class="fade-in">Concept</h3>
@@ -81,20 +95,12 @@
     <section id="gallery">
       <h2 class="section-title fade-in">Gallery</h2>
 
-      <!-- 初期表示（home.js が gallery1.html からランダムな8枚に差し替える。取得できない時はこのまま） -->
-      <div id="random-gallery" class="gallery-grid" data-lightbox>
-        <a class="gallery-item fade-in" href="./photos/photo-01.jpg"><img src="./photos-thumb/photo-01.jpg" alt="Gallery 1" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-02.jpg"><img src="./photos-thumb/photo-02.jpg" alt="Gallery 2" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-03.jpg"><img src="./photos-thumb/photo-03.jpg" alt="Gallery 3" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-04.jpg"><img src="./photos-thumb/photo-04.jpg" alt="Gallery 4" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-05.jpg"><img src="./photos-thumb/photo-05.jpg" alt="Gallery 5" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-06.jpg"><img src="./photos-thumb/photo-06.jpg" alt="Gallery 6" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-07.jpg"><img src="./photos-thumb/photo-07.jpg" alt="Gallery 7" loading="lazy"></a>
-        <a class="gallery-item fade-in" href="./photos/photo-08.jpg"><img src="./photos-thumb/photo-08.jpg" alt="Gallery 8" loading="lazy"></a>
-      </div>
+      <!-- photos.js の landscape からランダムに8枚（gallery.js が表示） -->
+      <div class="gallery-grid" data-lightbox data-gallery="landscape" data-random="8" data-item-class="fade-in"></div>
+      <noscript><p class="noscript-note">写真を表示するには JavaScript を有効にしてください。</p></noscript>
 
-      <div class="gallery-grid v-grid" style="margin-top: 30px;">
-        <a href="gallery1.html" class="gallery-more-btn fade-in">
+      <div class="more-row">
+        <a href="gallery1.html" class="gallery-more-btn fade-in" aria-label="ギャラリーをもっと見る">
           <span>More</span>
         </a>
       </div>
@@ -108,7 +114,7 @@
         <div class="profile-header">
           <div class="profile-img"><img src="./photos/rum-02.jpg" alt="茶トラ白（まるどら）" loading="lazy" class="fade-in"></div>
           <div class="profile-summary">
-            <h3 class="cat-name fade-in"><big>ラム</big>(茶トラ白)<span><big>Rum</big>(Red Tabby Mix)</span></h3>
+            <h3 class="cat-name fade-in"><em>ラム</em>(茶トラ白)<span class="cat-name-en"><em>Rum</em>(Red Tabby Mix)</span></h3>
             <p class="fade-in">好奇心旺盛、元気で活発な女の子。<br>温かみのあるオレンジ色の縞模様がチャームポイント。<br>親しみやすさと愛嬌で、みんなを笑顔にしてくれるアイドルです。</p>
           </div>
         </div>
@@ -123,8 +129,8 @@
         </table>
       </article>
 
-      <div class="gallery-grid v-grid" style="margin-top: 30px;">
-        <a href="profile1.html" class="gallery-more-btn fade-in">
+      <div class="more-row">
+        <a href="profile1.html" class="gallery-more-btn fade-in" aria-label="プロフィールをもっと見る">
           <span>More</span>
         </a>
       </div>

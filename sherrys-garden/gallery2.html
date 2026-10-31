@@ -4,13 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GALLERY 2 -+SHERRY's GARDEN+-</title>
+  <meta name="description" content="SHERRY's GARDEN の写真ギャラリー（縦位置）。猫たちとの日々を撮りためた写真を掲載しています。">
+  <!-- SNSで共有された時の表示（OGP） -->
+  <meta property="og:title" content="GALLERY 2 -+SHERRY's GARDEN+-">
+  <meta property="og:description" content="SHERRY's GARDEN の写真ギャラリー（縦位置）。猫たちとの日々を撮りためた写真を掲載しています。">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SHERRY's GARDEN">
+  <meta property="og:locale" content="ja_JP">
+  <!-- 公開URLが決まったら有効にする（どちらも https:// から始まる完全なURLが必要）
+  <meta property="og:url" content="https://（公開URL）/gallery2.html">
+  <meta property="og:image" content="https://（公開URL）/photos/top-01.jpg">
+  -->
   <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="../icon/favicon.png" type="image/png">
   <script src="js/site.js" defer></script>
+  <script src="js/photos.js" defer></script>
+  <script src="js/gallery.js" defer></script>
   <script src="js/lightbox.js" defer></script>
 </head>
 <body>
+
+  <a class="skip-link" href="#main">本文へスキップ</a>
 
   <!-- ===== 共通ヘッダー（4ページ共通・変更時は全ページ揃えること） ===== -->
   <header class="header">
@@ -43,51 +58,18 @@
   </header>
   <!-- ===== /共通ヘッダー ===== -->
 
-  <main class="content">
+  <main class="content" id="main">
 
     <div class="title-area">
-      <p class="text">GALLERY2</p>
+      <h1 class="page-title">GALLERY2</h1>
     </div>
 
     <section id="gallery">
       <h2 class="section-title">Portrait Gallery</h2>
 
-      <!-- 写真の追加：1行コピーして番号を変えるだけ（href＝拡大画像、src＝サムネイル） -->
-      <div class="gallery-grid v-grid" data-lightbox>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-01.jpg"><img src="./photos-portrait-thumb/portrait-01.jpg" alt="Gallery 2-1"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-02.jpg"><img src="./photos-portrait-thumb/portrait-02.jpg" alt="Gallery 2-2"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-03.jpg"><img src="./photos-portrait-thumb/portrait-03.jpg" alt="Gallery 2-3"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-04.jpg"><img src="./photos-portrait-thumb/portrait-04.jpg" alt="Gallery 2-4"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-05.jpg"><img src="./photos-portrait-thumb/portrait-05.jpg" alt="Gallery 2-5"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-06.jpg"><img src="./photos-portrait-thumb/portrait-06.jpg" alt="Gallery 2-6"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-07.jpg"><img src="./photos-portrait-thumb/portrait-07.jpg" alt="Gallery 2-7" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-08.jpg"><img src="./photos-portrait-thumb/portrait-08.jpg" alt="Gallery 2-8" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-09.jpg"><img src="./photos-portrait-thumb/portrait-09.jpg" alt="Gallery 2-9" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-10.jpg"><img src="./photos-portrait-thumb/portrait-10.jpg" alt="Gallery 2-10" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-11.jpg"><img src="./photos-portrait-thumb/portrait-11.jpg" alt="Gallery 2-11" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-12.jpg"><img src="./photos-portrait-thumb/portrait-12.jpg" alt="Gallery 2-12" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-13.jpg"><img src="./photos-portrait-thumb/portrait-13.jpg" alt="Gallery 2-13" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-14.jpg"><img src="./photos-portrait-thumb/portrait-14.jpg" alt="Gallery 2-14" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-15.jpg"><img src="./photos-portrait-thumb/portrait-15.jpg" alt="Gallery 2-15" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-16.jpg"><img src="./photos-portrait-thumb/portrait-16.jpg" alt="Gallery 2-16" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-17.jpg"><img src="./photos-portrait-thumb/portrait-17.jpg" alt="Gallery 2-17" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-18.jpg"><img src="./photos-portrait-thumb/portrait-18.jpg" alt="Gallery 2-18" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-19.jpg"><img src="./photos-portrait-thumb/portrait-19.jpg" alt="Gallery 2-19" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-20.jpg"><img src="./photos-portrait-thumb/portrait-20.jpg" alt="Gallery 2-20" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-21.jpg"><img src="./photos-portrait-thumb/portrait-21.jpg" alt="Gallery 2-21" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-22.jpg"><img src="./photos-portrait-thumb/portrait-22.jpg" alt="Gallery 2-22" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-23.jpg"><img src="./photos-portrait-thumb/portrait-23.jpg" alt="Gallery 2-23" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-24.jpg"><img src="./photos-portrait-thumb/portrait-24.jpg" alt="Gallery 2-24" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-25.jpg"><img src="./photos-portrait-thumb/portrait-25.jpg" alt="Gallery 2-25" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-26.jpg"><img src="./photos-portrait-thumb/portrait-26.jpg" alt="Gallery 2-26" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-27.jpg"><img src="./photos-portrait-thumb/portrait-27.jpg" alt="Gallery 2-27" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-28.jpg"><img src="./photos-portrait-thumb/portrait-28.jpg" alt="Gallery 2-28" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-29.jpg"><img src="./photos-portrait-thumb/portrait-29.jpg" alt="Gallery 2-29" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-30.jpg"><img src="./photos-portrait-thumb/portrait-30.jpg" alt="Gallery 2-30" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-31.jpg"><img src="./photos-portrait-thumb/portrait-31.jpg" alt="Gallery 2-31" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-32.jpg"><img src="./photos-portrait-thumb/portrait-32.jpg" alt="Gallery 2-32" loading="lazy"></a>
-        <a class="gallery-item v-item" href="./photos-portrait/portrait-33.jpg"><img src="./photos-portrait-thumb/portrait-33.jpg" alt="Gallery 2-33" loading="lazy"></a>
-      </div>
+      <!-- 写真の追加・削除は js/photos.js の portrait で行う -->
+      <div class="gallery-grid v-grid" data-lightbox data-gallery="portrait" data-eager="6" data-item-class="v-item"></div>
+      <noscript><p class="noscript-note">写真を表示するには JavaScript を有効にしてください。</p></noscript>
     </section>
 
     <section class="btn-area">

@@ -1,21 +1,24 @@
 /* --- Style Header ---------------------------------------------
-   style.css
-   Version: 1.1
+   style.css — SHERRY's GARDEN
+   Version: 2.0
     --------------------------------------------------------------------
     01. CSS Variables
     02. Reset
-    03. Base
+    03. Base Layout
     04. Header
-    05. Navigation
-    06. Common Components
+    05. Navigation（スマホ／PC それぞれの見た目はこの中で完結）
+    06. Common Components（タイトル・ボタン）
     07. Home
     08. Gallery
     09. Lightbox（写真ビューア / lightbox.js）
     10. Profile
-    11. Footer
-    12. Responsive
+    11. Footer / Go To Top
+    12. Responsive（ナビ以外のスマホ・PC別の指定はすべてここ）
     13. Scroll Fade In
     14. Reduced Motion
+
+   ブレークポイント：スマホ ≤ 768px ／ PC ≥ 769px
+   （CSS変数はメディアクエリの条件に使えないため、数値を直接書いている）
 -------------------------------------------------------------- */
 
 
@@ -26,22 +29,32 @@
 
   /* Color ------------------------------------ */
   --bg-color: #f9f8f2;
+  --bg-rgb: 249, 248, 242;          /* 半透明で使う時用（--bg-color と同じ色） */
   --card-bg: #ffffff;
+  --surface-muted: #fafafa;         /* 表の見出しセルなど */
   --text-color: #333333;
+  --text-rgb: 51, 51, 51;           /* 半透明で使う時用（--text-color と同じ色） */
   --text-muted: #777777;
+  --text-inverse: #ffffff;          /* 濃い背景の上の文字 */
   --accent-color: #a48a5c;
+  --accent-rgb: 164, 138, 92;       /* 半透明で使う時用（--accent-color と同じ色） */
   --border-color: #eeeeee;
+  --overlay-color: rgba(0, 0, 0, .5);
+  --lightbox-bg: rgba(15, 15, 15, .95);
 
   /* Font ------------------------------------ */
   --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+  --font-ui: sans-serif;            /* 写真ビューアの数字表示など */
 
   /* Layout ------------------------------------ */
   --container-width: 1100px;
+  --content-narrow: 850px;          /* About・プロフィールカードの幅 */
+  --gutter: 24px;                   /* コンテンツ左右の余白 */
   --header-height: 75px;
-  --scroll-offset: 95px;
+  --scroll-offset: 95px;            /* ページ内リンクで止まる位置（ヘッダーの高さ＋余白） */
+  --grid-gap: 15px;
 
   /* Spacing ------------------------------------ */
-  --space-xs: 5px;
   --space-sm: 10px;
   --space-md: 20px;
   --space-lg: 40px;
@@ -60,12 +73,16 @@
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, .08);
   --shadow-modal: 0 10px 40px rgba(0, 0, 0, .50);
 
+  /* Focus ------------------------------------ */
+  --focus-ring: 2px solid var(--accent-color);
+
   /* Animation ------------------------------------ */
   --transition-fast: .3s ease;
   --transition-normal: all .4s cubic-bezier(.25, 1, .5, 1);
-  --transition-slow: all .6s cubic-bezier(.22, 1, .36, 1);
+  --ease-out: cubic-bezier(.25, 1, .5, 1);
 
   /* z-index ------------------------------------ */
+  --z-gotop: 900;
   --z-header: 1000;
   --z-menu-bg: 1010;
   --z-menu: 1050;
@@ -74,7 +91,6 @@
   --z-modal-nav: 2100;
   --z-modal-ui: 2200;
   --z-progress: 2300;
-
 }
 
 
@@ -98,8 +114,6 @@ html {
 
 body {
   width: 100%;
-  margin: 0;
-  padding: 0;
   overscroll-behavior-x: none;
   background: var(--bg-color);
   color: var(--text-color);
@@ -140,19 +154,38 @@ img {
   width: 100%;
   max-width: var(--container-width);
   margin: 0 auto;
-  padding: var(--space-lg) 24px;
+  padding: var(--space-lg) var(--gutter);
   text-align: center;
 }
 
-/* Section（アンカーリンクのずれ防止） */
+/* ページ内リンクの止まる位置は html の scroll-padding-top で一括管理
+   （以前は section の scroll-margin-top と二重にずれていた） */
 section {
   padding: var(--space-xl) 0;
-  scroll-margin-top: var(--scroll-offset);
+}
+
+/* 本文へスキップ（キーボード操作時だけ表示） */
+.skip-link {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: var(--z-menu-btn);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--text-color);
+  color: var(--text-inverse);
+  font-size: .9rem;
+  transform: translateY(-200%);
+  transition: none; /* フォーカスした瞬間に表示する */
+}
+
+.skip-link:focus {
+  transform: none;
 }
 
 
 /* --- 04. HEADER -----------------------------------------------
-   サイト共通ヘッダー（ロゴ・PCナビ・スマホメニュー）
+   サイト共通ヘッダー（ロゴ＋ナビ。ナビは header の中にある）
 -------------------------------------------------------------- */
 
 /* Header Container ------------------------------------ */
@@ -165,7 +198,7 @@ section {
   z-index: var(--z-header);
   height: var(--header-height);
   padding: 0 5%;
-  background: rgba(249, 248, 242, .92);
+  background: rgba(var(--bg-rgb), .92);
   backdrop-filter: blur(5px);
   box-shadow: var(--shadow-lg);
 }
@@ -181,7 +214,13 @@ section {
   color: var(--accent-color);
 }
 
-/* Mobile Navigation Trigger ------------------------------------ */
+
+/* --- 05. NAVIGATION -------------------------------------------
+   サイト共通ナビゲーション（スマホ：右から出るメニュー ／ PC：横並び＋サブメニュー）
+   開閉は #menu-btn-check（チェックボックス）で行う
+-------------------------------------------------------------- */
+
+/* 共通 ------------------------------------ */
 /* チェックボックスは見た目だけ隠し、キーボード（Tab → Space）でも開閉できるようにする */
 #menu-btn-check {
   position: absolute;
@@ -193,12 +232,16 @@ section {
 }
 
 #menu-btn-check:focus-visible + .menu-btn {
-  outline: 2px solid var(--accent-color);
+  outline: var(--focus-ring);
   outline-offset: 3px;
 }
 
 .menu-btn {
   display: none;
+}
+
+.has-sub-menu {
+  position: relative;
 }
 
 /* 現在のページ */
@@ -207,12 +250,7 @@ section {
   font-weight: bold;
 }
 
-
-/* --- 05. NAVIGATION -------------------------------------------
-   サイト共通ナビゲーション（PCメニュー・スマホメニュー・サブメニュー）
--------------------------------------------------------------- */
-
-/* Mobile Menu ------------------------------------ */
+/* Mobile ------------------------------------ */
 @media (max-width: 768px) {
   .header {
     position: static;
@@ -222,6 +260,7 @@ section {
     backdrop-filter: none;
   }
 
+  /* ハンバーガーボタン */
   .menu-btn {
     display: flex;
     justify-content: center;
@@ -233,13 +272,12 @@ section {
     width: 50px;
     height: 50px;
     cursor: pointer;
-    border-radius: 50%;
-    background: rgba(249, 248, 242, .4);
+    border-radius: var(--radius-circle);
+    background: rgba(var(--bg-rgb), .4);
     backdrop-filter: blur(4px);
     box-shadow: var(--shadow-sm);
   }
 
-  /* ハンバーガー線 */
   .menu-btn span,
   .menu-btn span::before,
   .menu-btn span::after {
@@ -282,7 +320,7 @@ section {
     z-index: var(--z-menu-bg);
     visibility: hidden;
     opacity: 0;
-    background: rgba(0, 0, 0, .5);
+    background: var(--overlay-color);
     transition: opacity .4s ease, visibility .4s ease;
   }
 
@@ -303,7 +341,7 @@ section {
     width: 300px;
     height: 100vh;
     height: 100dvh; /* iOS のアドレスバー分のはみ出しを防ぐ（未対応ブラウザは上の 100vh） */
-    padding: 100px 20px 40px;
+    padding: 100px var(--space-md) var(--space-lg);
     background: var(--card-bg);
     box-shadow: -10px 0 30px rgba(0, 0, 0, .1);
     transition: right .5s cubic-bezier(.65, 0, .35, 1), visibility .5s;
@@ -338,28 +376,32 @@ section {
     font-size: 1.2rem;
     border-bottom: 1px solid var(--border-color);
   }
+
+  /* サブメニュー（常に展開して表示） */
+  .sub-menu {
+    display: block;
+    width: 100%;
+    background: rgba(0, 0, 0, .03);
+  }
+
+  .sub-menu li {
+    opacity: 1;
+    transform: none;
+  }
+
+  .sub-menu a {
+    width: 100%;
+    padding: 15px 25px 15px 50px;
+    color: var(--text-muted);
+    text-align: left;
+  }
 }
 
-/* Desktop Menu ------------------------------------ */
+/* Desktop ------------------------------------ */
 @media (min-width: 769px) {
   #menu-btn-check,
-  .menu-btn {
-    display: none;
-  }
-
   .menu-background {
     display: none;
-  }
-
-  .menu-content {
-    position: static;
-    visibility: visible;
-    overflow: visible;
-    width: auto;
-    height: auto;
-    padding: 0;
-    background: transparent;
-    box-shadow: none;
   }
 
   .menu-content > ul {
@@ -374,7 +416,7 @@ section {
   .menu-content a {
     position: relative;
     display: block;
-    padding: 10px 0;
+    padding: var(--space-sm) 0;
     font-size: 1rem;
     letter-spacing: 1px;
   }
@@ -389,47 +431,14 @@ section {
     height: 1px;
     background: var(--accent-color);
     transform: scaleX(0);
-    transition: transform .3s ease;
+    transition: transform var(--transition-fast);
   }
 
   .menu-content a:hover::after {
     transform: scaleX(1);
   }
-}
 
-/* Sub Menu ------------------------------------ */
-.has-sub-menu {
-  position: relative;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .sub-menu {
-    display: block;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: rgba(0, 0, 0, .03);
-  }
-
-  .sub-menu li {
-    margin: 0;
-    opacity: 1;
-    transform: none;
-  }
-
-  .sub-menu a {
-    display: block;
-    width: 100%;
-    padding: 15px 25px 15px 50px;
-    color: var(--text-muted);
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-  }
-}
-
-/* Desktop */
-@media (min-width: 769px) {
+  /* サブメニュー（ホバー・キーボードフォーカスで表示） */
   .sub-menu {
     position: absolute;
     top: 100%;
@@ -441,9 +450,9 @@ section {
     padding: 8px 0;
     border-radius: var(--radius-md);
     background: var(--card-bg);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+    box-shadow: var(--shadow-lg);
     transform: translateX(-50%) translateY(10px);
-    transition: opacity .3s ease, transform .3s ease;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
   }
 
   .sub-menu::before {
@@ -465,8 +474,7 @@ section {
   }
 
   .sub-menu a {
-    display: block;
-    padding: 10px 15px;
+    padding: var(--space-sm) 15px;
     color: var(--text-color);
     font-size: .9rem;
     text-align: center;
@@ -485,15 +493,14 @@ section {
 
 
 /* --- 06. COMMON COMPONENTS ------------------------------------
-   ボタン・タイトル・共通UI
+   ページタイトル・セクション見出し・ボタン
 -------------------------------------------------------------- */
 
-/* Page Title ------------------------------------ */
-.text {
+/* Page Title（写真で塗った大見出し。各ページの h1） ------------------------------------ */
+.page-title {
   overflow: hidden;
   max-width: 100%;
   margin-bottom: 30px;
-  font-family: var(--font-serif);
   font-size: clamp(2.2rem, 6vw, 4.5rem);
   font-weight: bold;
   letter-spacing: 6px;
@@ -505,14 +512,14 @@ section {
   background-clip: text;
 }
 
-.text span {
+.page-title-sub {
   display: block;
   width: fit-content;
-  margin: 10px auto 0;
+  margin: var(--space-sm) auto 0;
   padding: 4px 15px;
   border-radius: 2px;
   background: var(--text-color);
-  color: #fff;
+  color: var(--text-inverse);
   font-size: clamp(.8rem, 2vw, 1rem);
   letter-spacing: 2px;
 }
@@ -521,7 +528,7 @@ section {
 .section-title {
   position: relative;
   display: inline-block;
-  margin-bottom: 40px;
+  margin-bottom: var(--space-lg);
   font-size: 1.8rem;
   letter-spacing: .15em;
 }
@@ -539,7 +546,7 @@ section {
 
 /* Buttons ------------------------------------ */
 .btn-area {
-  margin-top: 40px;
+  margin-top: var(--space-lg);
 }
 
 .btn-wrapper {
@@ -549,7 +556,7 @@ section {
 .btn,
 .btn-home {
   display: inline-block;
-  padding: 12px 40px;
+  padding: 12px var(--space-lg);
   border-radius: var(--radius-round);
   font-size: .9rem;
   font-weight: bold;
@@ -560,7 +567,7 @@ section {
 .btn {
   border: 1px solid var(--accent-color);
   background: var(--accent-color);
-  color: #fff;
+  color: var(--text-inverse);
 }
 
 .btn:hover {
@@ -572,7 +579,7 @@ section {
 /* Secondary */
 .btn-home {
   background: var(--text-color);
-  color: #fff;
+  color: var(--text-inverse);
 }
 
 .btn-home:hover {
@@ -580,11 +587,11 @@ section {
   transform: translateY(-3px);
 }
 
-/* Link Buttons ------------------------------------ */
+/* Link Buttons（index の Link セクション） ------------------------------------ */
 .link-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: var(--space-md);
 }
 
 .link-buttons .btn {
@@ -595,7 +602,16 @@ section {
 
 .link-buttons .btn:hover {
   background: var(--text-color);
-  color: #fff;
+  color: var(--text-inverse);
+}
+
+/* キーボード操作時のフォーカス表示 */
+.btn:focus-visible,
+.btn-home:focus-visible,
+.gallery-more-btn:focus-visible,
+.gotop:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
 }
 
 
@@ -629,13 +645,12 @@ section {
   animation: fade-slider 24s infinite;
 }
 
-/* アニメーション開始タイミング */
+/* アニメーション開始タイミング（24秒 ÷ 4枚 = 6秒ずつ） */
 .main-image-wrapper img:nth-child(1) { animation-delay: 0s; }
 .main-image-wrapper img:nth-child(2) { animation-delay: 6s; }
 .main-image-wrapper img:nth-child(3) { animation-delay: 12s; }
 .main-image-wrapper img:nth-child(4) { animation-delay: 18s; }
 
-/* Slider Animation ------------------------------------ */
 @keyframes fade-slider {
   0%   { opacity: 0; }
   5%   { opacity: 1; }
@@ -645,20 +660,19 @@ section {
 }
 
 /* Intro ------------------------------------ */
-.intro-text h1 {
+.intro-title {
   margin-bottom: 15px;
   font-size: clamp(1.3rem, 4vw, 1.8rem);
-  font-weight: 400;
 }
 
-/* Feature ------------------------------------ */
+/* Feature（About） ------------------------------------ */
 .feature-item {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
-  max-width: 850px;
-  margin: 40px auto 0;
+  gap: var(--space-lg);
+  max-width: var(--content-narrow);
+  margin: var(--space-lg) auto 0;
 }
 
 .feature-img {
@@ -669,7 +683,7 @@ section {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   box-shadow: 0 8px 25px rgba(0, 0, 0, .06);
   transition: var(--transition-normal);
 }
@@ -683,16 +697,45 @@ section {
   text-align: left;
 }
 
+/* More ボタンの行（最終列に配置） ------------------------------------ */
+.more-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--grid-gap);
+  margin-top: 30px;
+}
+
+.gallery-more-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-column: -2 / -1;
+  margin-top: var(--space-lg);
+  border: 1px dashed var(--accent-color);
+  border-radius: var(--radius-md);
+  background: rgba(var(--accent-rgb), .03);
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: var(--transition-normal);
+}
+
+.gallery-more-btn:hover {
+  border-style: solid;
+  background: var(--accent-color);
+  color: var(--text-inverse);
+}
+
 
 /* --- 08. GALLERY ----------------------------------------------
-   ギャラリー一覧表示（画像一覧・サムネイル・Moreボタン）
+   写真の一覧（gallery.js が js/photos.js から生成）
 -------------------------------------------------------------- */
 
 /* Gallery Grid ------------------------------------ */
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  gap: var(--grid-gap);
 }
 
 /* Gallery Item ------------------------------------ */
@@ -719,75 +762,20 @@ section {
 }
 
 .gallery-item:focus-visible {
-  outline: 2px solid var(--accent-color);
+  outline: var(--focus-ring);
   outline-offset: 3px;
 }
 
-/* More Button ------------------------------------ */
-.v-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-
+/* 縦長写真用（gallery2）：.v-grid は列数、.v-item は縦横比 */
 .v-item {
   aspect-ratio: 1 / 2;
 }
 
-.gallery-more-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 40px;
-  grid-column: 4;
-  border: 1px dashed var(--accent-color);
-  border-radius: var(--radius-md);
-  background: rgba(164, 138, 92, .03);
-  color: var(--accent-color);
-  font-size: 1.1rem;
-  font-weight: bold;
-  transition: var(--transition-normal);
-}
-
-.gallery-more-btn:hover {
-  border-style: solid;
-  background: var(--accent-color);
-  color: #fff;
-}
-
-/* Responsive: Home & Gallery ------------------------------------ */
-@media (max-width: 768px) {
-  /* Feature */
-  .feature-item {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .feature-img {
-    flex: none;
-    width: 60%;
-    max-width: 160px;
-  }
-
-  .feature-text {
-    text-align: center;
-  }
-
-  /* Gallery */
-  .gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .v-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .gallery-more-btn {
-    grid-column: 1 / -1;
-    aspect-ratio: auto;
-    padding: 15px 0;
-    margin-top: 10px;
-  }
+/* JS無効時の案内（ギャラリーは js/photos.js から表示するため） */
+.noscript-note {
+  padding: var(--space-md);
+  color: var(--text-muted);
+  font-size: .9rem;
 }
 
 
@@ -806,7 +794,7 @@ section {
   z-index: var(--z-modal);
   visibility: hidden;
   opacity: 0;
-  background: rgba(15, 15, 15, .95);
+  background: var(--lightbox-bg);
   backdrop-filter: blur(8px);
   transition: opacity .4s ease, visibility .4s ease;
 }
@@ -861,7 +849,7 @@ section {
 .lb-btn:focus-visible,
 .sec-btn:focus-visible,
 .lightbox-nav:focus-visible {
-  outline: 2px solid var(--accent-color);
+  outline: var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -875,13 +863,13 @@ section {
   left: 0;
   z-index: var(--z-modal-ui);
   width: 100%;
-  padding: 20px 30px;
-  color: #fff;
+  padding: var(--space-md) 30px;
+  color: var(--text-inverse);
   transition: opacity .4s ease; /* visibility は隠す時だけ遅らせる（Auto-Hide 参照） */
 }
 
 .lightbox-counter {
-  font-family: sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.1rem;
   letter-spacing: 2px;
 }
@@ -945,7 +933,7 @@ section {
   text-align: center;
   font-size: 1.4rem;
   line-height: 1;
-  transition: color .3s;
+  transition: color var(--transition-fast);
 }
 
 .sec-btn:hover {
@@ -956,7 +944,7 @@ section {
   min-width: 45px;
   text-align: center;
   user-select: none;
-  font-family: sans-serif;
+  font-family: var(--font-ui);
   font-size: 1rem;
 }
 
@@ -1007,8 +995,8 @@ section {
 }
 
 .lightbox-nav:hover {
-  color: #fff;
-  background: rgba(164, 138, 92, .8);
+  color: var(--text-inverse);
+  background: rgba(var(--accent-rgb), .8);
 }
 
 /* Controls Auto-Hide（スライドショー再生中、一定時間無操作でUIを隠す） ------------------------------------ */
@@ -1027,46 +1015,9 @@ section {
   transition: opacity .4s ease, visibility .4s ease;
 }
 
-/* Responsive: Lightbox ------------------------------------ */
-@media (max-width: 768px) {
-  .lightbox-stage {
-    max-width: 80%;
-  }
-
-  .lightbox-header {
-    padding: 15px;
-  }
-
-  .lightbox-controls {
-    gap: 15px;
-  }
-
-  .slideshow-settings {
-    gap: 10px;
-    padding: 5px 10px;
-  }
-
-  .lightbox-nav {
-    width: 15%;
-    height: 70px;
-  }
-
-  .lightbox-nav.prev {
-    border-radius: 0 35px 35px 0;
-  }
-
-  .lightbox-nav.next {
-    border-radius: 35px 0 0 35px;
-  }
-
-  .lightbox-nav:hover {
-    background: rgba(0, 0, 0, .3);
-  }
-}
-
 
 /* --- 10. PROFILE ----------------------------------------------
-   プロフィールページ（プロフィールカード・基本情報・画像）
+   プロフィール（index の Profile セクション／profile1.html）
 -------------------------------------------------------------- */
 
 /* Page TOC（profile1 のページ内目次） ------------------------------------ */
@@ -1090,9 +1041,9 @@ section {
 
 /* Profile Card ------------------------------------ */
 .cat-profile {
-  max-width: 850px;
-  margin: 0 auto 10px;
-  padding: 40px;
+  max-width: var(--content-narrow);
+  margin: 0 auto var(--space-sm);
+  padding: var(--space-lg);
   border-radius: var(--radius-lg);
   background: var(--card-bg);
   box-shadow: var(--shadow-md);
@@ -1111,7 +1062,6 @@ section {
 }
 
 .profile-img img {
-  display: block;
   width: 100%;
   border-radius: 10px;
 }
@@ -1121,15 +1071,22 @@ section {
   text-align: left;
 }
 
-/* Cat Name ------------------------------------ */
+/* Cat Name ------------------------------------
+   <h3 class="cat-name"><em>ラム</em>(茶トラ白)<span class="cat-name-en"><em>Rum</em>(Red Tabby Mix)</span></h3>
+   em … 名前を一回り大きく（以前の <big> の代わり） */
 .cat-name {
   display: inline-block;
   border-bottom: 2px solid var(--accent-color);
   font-size: 1.6rem;
 }
 
-.cat-name span {
-  margin-left: 10px;
+.cat-name em {
+  font-size: larger;
+  font-style: normal;
+}
+
+.cat-name-en {
+  margin-left: var(--space-sm);
   color: var(--text-muted);
   font-size: .9rem;
 }
@@ -1144,7 +1101,7 @@ section {
 .spec-table th {
   width: 25%;
   padding: 12px;
-  background: #fafafa;
+  background: var(--surface-muted);
   font-size: .8rem;
 }
 
@@ -1155,11 +1112,11 @@ section {
 }
 
 
-/* --- 11. FOOTER -----------------------------------------------
-   フッター
+/* --- 11. FOOTER / GO TO TOP -----------------------------------
+   フッター・画面右下のトップへ戻るボタン
 -------------------------------------------------------------- */
 .footer {
-  margin-top: 60px;
+  margin-top: var(--space-xl);
   padding: 30px;
   background: var(--text-color);
   color: rgba(255, 255, 255, .6);
@@ -1167,27 +1124,19 @@ section {
   text-align: center;
 }
 
-
-/* --- GO TO TOP ------------------------------------------------
-   画面右下のトップへ戻るボタン
--------------------------------------------------------------- */
 .gotop {
   display: flex;
   justify-content: center;
   align-items: center;
   position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 900;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: var(--z-gotop);
   width: 45px;
   height: 45px;
-  border-radius: 50%;
-  background: rgba(51, 51, 51, .8);
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
-  transition: opacity .4s ease, visibility .4s ease, transform .4s cubic-bezier(.25, 1, .5, 1);
+  border-radius: var(--radius-circle);
+  background: rgba(var(--text-rgb), .8);
+  transition: opacity .4s ease, visibility .4s ease, transform .4s var(--ease-out);
 }
 
 .gotop:hover {
@@ -1208,18 +1157,91 @@ section {
   width: 8px;
   height: 8px;
   margin-top: 4px;
-  border-top: 2px solid #fff;
-  border-right: 2px solid #fff;
+  border-top: 2px solid var(--text-inverse);
+  border-right: 2px solid var(--text-inverse);
   transform: rotate(-45deg);
 }
 
 
 /* --- 12. RESPONSIVE -------------------------------------------
-   Profile / Footer / GoTop
+   ナビゲーション以外のスマホ・PC別の指定
 -------------------------------------------------------------- */
 
-/* Mobile */
+/* Mobile ------------------------------------ */
 @media (max-width: 768px) {
+  :root {
+    /* スマホではヘッダーが追従しないので、ページ内リンクの余白を小さくする */
+    --scroll-offset: 20px;
+  }
+
+  /* Feature */
+  .feature-item {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .feature-img {
+    flex: none;
+    width: 60%;
+    max-width: 160px;
+  }
+
+  .feature-text {
+    text-align: center;
+  }
+
+  /* Gallery */
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .v-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+  }
+
+  /* More ボタン（横幅いっぱい） */
+  .gallery-more-btn {
+    grid-column: 1 / -1;
+    padding: 15px 0;
+    margin-top: var(--space-sm);
+  }
+
+  /* Lightbox */
+  .lightbox-stage {
+    max-width: 80%;
+  }
+
+  .lightbox-header {
+    padding: 15px;
+  }
+
+  .lightbox-controls {
+    gap: 15px;
+  }
+
+  .slideshow-settings {
+    gap: var(--space-sm);
+    padding: 5px var(--space-sm);
+  }
+
+  .lightbox-nav {
+    width: 15%;
+    height: 70px;
+  }
+
+  .lightbox-nav.prev {
+    border-radius: 0 35px 35px 0;
+  }
+
+  .lightbox-nav.next {
+    border-radius: 35px 0 0 35px;
+  }
+
+  .lightbox-nav:hover {
+    background: rgba(0, 0, 0, .3);
+  }
+
   /* Profile */
   .profile-header {
     flex-direction: column;
@@ -1250,8 +1272,9 @@ section {
   }
 }
 
-/* Desktop */
+/* Desktop ------------------------------------ */
 @media (min-width: 769px) {
+  /* プロフィールカードを1枚おきに左右反転 */
   .cat-profile:nth-of-type(even) .profile-header {
     flex-direction: row-reverse;
   }
@@ -1266,11 +1289,10 @@ section {
    スクロール連動フェードイン（site.js / IntersectionObserver）
    .js は <head> 内のインラインスクリプトで <html> に付与。JS無効時は最初から表示
 -------------------------------------------------------------- */
-
 .js .fade-in {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(.25, 1, .5, 1), transform 0.8s cubic-bezier(.25, 1, .5, 1);
+  transition: opacity .8s var(--ease-out), transform .8s var(--ease-out);
 }
 
 .js .fade-in.is-visible {
