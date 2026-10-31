@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Matrix Code Rain V2 - Cinematic Intro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Code Rain V3 - Cinematic Intro</title>
   <link rel="icon" href="../icon/favicon.png" type="image/png">
 
   <style>
@@ -22,8 +22,10 @@
       color: #00ff41;
       font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, 'Courier New', monospace;
       height: 100vh;
+      height: 100dvh; /* モバイルのアドレスバーの出入りに追従する高さ（未対応ブラウザは上の 100vh） */
       width: 100vw;
       overflow: hidden;
+      touch-action: manipulation; /* ピンチ拡大は許可しつつ、ダブルタップでの意図しない拡大は防ぐ */
     }
 
     canvas#matrix {
@@ -32,6 +34,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       display: block;
       z-index: 1;
       cursor: pointer;
@@ -52,6 +55,7 @@
       padding: 0; /* ヘッダーを固定表示にするため、パディングはヘッダー／本文側に持たせる */
       width: 320px;
       max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
@@ -90,6 +94,7 @@
       padding: 16px 18px 8px;
       border-bottom: 1px solid rgba(var(--accent-rgb), 0.15);
       cursor: move;
+      touch-action: none; /* ヘッダーはドラッグ専用（タッチでもパネルを動かせるように） */
       background: rgba(0, 12, 4, 0.88);
       backdrop-filter: blur(10px);
       border-radius: 12px 12px 0 0;
@@ -139,9 +144,10 @@
       border: 1px solid rgba(var(--accent-rgb), 0.4);
       color: var(--accent);
       border-radius: 6px;
-      padding: 4px 10px 26px 10px;
+      padding: 0 10px;
       font-size: 0.75rem;
-      height: 30px;
+      line-height: 1;
+      height: 26px; /* 隣のアイコンボタン（26px）と高さを揃える */
       cursor: pointer;
       transition: background-color 0.2s ease, border-color 0.3s ease, color 0.3s ease;
     }
@@ -245,6 +251,22 @@
 
     .panel-content.is-collapsed { display: none; }
 
+    /* キーボード操作時のフォーカス表示（マウスクリックでは出ない） */
+    .icon-btn:focus-visible,
+    .toggle-btn:focus-visible,
+    .section-toggle:focus-visible,
+    .control-group select:focus-visible,
+    .control-group input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    .section-toggle:focus-visible { border-radius: 4px; }
+
+    /* OS の「視差効果を減らす」設定が有効なら、パネルのアニメーションを止める */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+
     @media (max-width: 768px) {
       .control-panel {
         top: auto !important;
@@ -253,10 +275,11 @@
         right: 16px !important;
         width: auto !important;
         max-height: 40vh;
+        max-height: 40dvh;
         border-radius: 16px;
         padding: 0;
       }
-      .panel-header { cursor: default; margin: 0 0 6px; padding: 10px 14px 6px; border-radius: 16px 16px 0 0; }
+      .panel-header { cursor: default; touch-action: auto; margin: 0 0 6px; padding: 10px 14px 6px; border-radius: 16px 16px 0 0; }
       .panel-content { padding: 0 14px 10px; }
       .panel-header h3 { font-size: 0.8rem; }
       .control-section { margin-bottom: 8px; }
@@ -270,221 +293,309 @@
 </head>
 <body>
 
-<canvas id="matrix"></canvas>
+<canvas id="matrix" aria-hidden="true"></canvas>
 
-<div class="control-panel" id="draggable-panel">
+<div class="control-panel" id="draggable-panel" role="region" aria-label="パラメータ設定">
   <div class="panel-header" id="panel-header">
-    <h3>パラメータ設定 ⠿</h3>
+    <h3>パラメータ設定 <span aria-hidden="true">⠿</span></h3>
     <div class="header-controls">
-      <button class="icon-btn" id="btn-pause" title="再生/一時停止" aria-label="再生/一時停止">
-        <svg id="pause-icon" viewBox="0 0 24 24" fill="currentColor">
+      <button class="icon-btn" id="btn-pause" type="button" title="一時停止 (Space)" aria-label="一時停止" aria-pressed="false">
+        <svg id="pause-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="4" width="4" height="16"></rect>
           <rect x="14" y="4" width="4" height="16"></rect>
         </svg>
       </button>
-      <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <button class="icon-btn" id="btn-reset-panel" type="button" title="初期値に戻す" aria-label="初期値に戻す">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
           <path d="M3 3v5h5"></path>
         </svg>
       </button>
-      <button class="toggle-btn" id="btn-toggle-panel">非表示</button>
+      <button class="toggle-btn" id="btn-toggle-panel" type="button" aria-controls="panel-body" aria-expanded="true">非表示</button>
     </div>
   </div>
 
-  <div class="panel-content" id="panel-body">
-    <!-- 1. 速度 & 密度 -->
-    <div class="control-section is-collapsed">
-      <button class="section-toggle" type="button" aria-expanded="false">
-        <span class="section-title">■ 速度 & 密度</span>
-        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div class="section-body">
-        <div class="control-group">
-          <label>落下速度: <span id="speed-val">8</span></label>
-          <input type="range" id="speed" min="1" max="20" value="8" step="1">
-        </div>
-        <div class="control-group">
-          <label>密度: <span id="density-val">8</span></label>
-          <input type="range" id="density" min="1" max="10" value="8" step="1">
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. 文字 & 残像 -->
-    <div class="control-section is-collapsed">
-      <button class="section-toggle" type="button" aria-expanded="false">
-        <span class="section-title">■ 文字 & 残像</span>
-        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div class="section-body">
-        <div class="control-group">
-          <label>文字サイズ: <span id="fontSize-val">14</span>px</label>
-          <input type="range" id="fontSize" min="6" max="40" value="14" step="1">
-        </div>
-        <div class="control-group">
-          <label>残像の長さ: <span id="trailLength-val">16</span></label>
-          <input type="range" id="trailLength" min="1" max="20" value="16" step="1">
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. ビジュアル -->
-    <div class="control-section is-collapsed">
-      <button class="section-toggle" type="button" aria-expanded="false">
-        <span class="section-title">■ ビジュアル</span>
-        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div class="section-body">
-        <div class="control-group">
-          <label>ぼかし: <span id="blurAmount-val">0.6</span>px</label>
-          <input type="range" id="blurAmount" min="0" max="3" value="0.6" step="0.1">
-        </div>
-        <div class="control-group">
-          <label>カラー</label>
-          <select id="colorMode">
-            <option value="green">グリーン</option>
-            <option value="cyan">シアン</option>
-            <option value="red">レッド</option>
-            <option value="amber">アンバー</option>
-            <option value="white">ホワイト</option>
-            <option value="purple">パープル</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. エフェクト -->
-    <div class="control-section is-collapsed">
-      <button class="section-toggle" type="button" aria-expanded="false">
-        <span class="section-title">■ エフェクト</span>
-        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div class="section-body">
-        <div class="control-group">
-          <label>グロー強度: <span id="glowIntensity-val">12</span></label>
-          <input type="range" id="glowIntensity" min="0" max="30" value="12" step="1">
-        </div>
-        <div class="control-group">
-          <label>文字セット</label>
-          <select id="charSet">
-            <option value="katakana">カタカナ＋記号（既定）</option>
-            <option value="alnum">英数字のみ</option>
-            <option value="binary">数字のみ (0/1)</option>
-            <option value="hiragana">ひらがな</option>
-            <option value="symbols">記号のみ</option>
-          </select>
-        </div>
-        <div class="control-group">
-          <label>ちらつき（グリッチ）: <span id="flickerRate-val">0</span>%</label>
-          <input type="range" id="flickerRate" min="0" max="100" value="0" step="5">
-        </div>
-        <div class="control-group">
-          <label>速度のばらつき: <span id="speedVariance-val">0.4</span></label>
-          <input type="range" id="speedVariance" min="0.1" max="1.2" value="0.4" step="0.05">
-        </div>
-        <div class="control-group inline-row">
-          <label>太字にする</label>
-          <input type="checkbox" id="boldText" checked>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- 各セクションと設定項目は、スクリプト内の SECTIONS / SETTINGS から自動生成する -->
+  <div class="panel-content" id="panel-body"></div>
 </div>
 
 <script>
   const canvas = document.getElementById('matrix');
   const ctx = canvas.getContext('2d');
 
+  /* =====================================================
+     定義データ
+     ・文字セット／カラーの「表示名」もここに持たせ、プルダウンはここから生成する
+  ===================================================== */
   const CHARSETS = {
-    katakana: 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ日＠＃＄％＆＊{}[]＿；：・±｜/￥￥？！<>¦*⁼+-',
-    alnum: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-    binary: '01',
-    hiragana: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん',
-    symbols: '@#$%&*{}[]_;:・±|/¥?!<>¦*⁼+-=~^'
+    katakana: { label: 'カタカナ＋記号（既定）', chars: 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン１２３４５６７８９０ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ日＠＃＄％＆＊{}[]＿；：・±｜/￥￥？！<>¦*⁼+-' },
+    alnum:    { label: '英数字のみ',            chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' },
+    binary:   { label: '数字のみ (0/1)',        chars: '01' },
+    hiragana: { label: 'ひらがな',              chars: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん' },
+    symbols:  { label: '記号のみ',              chars: '@#$%&*{}[]_;:・±|/¥?!<>¦*⁼+-=~^' }
   };
-  let activeChars = CHARSETS.katakana;
 
   const COLOR_MAP = {
-    green:  { head: '#ffffff', body: '#00cc33', glow: '#00ff41', bg: 'rgba(0, 0, 0, 0.03)', accentRgb: '0, 255, 65' },
-    cyan:   { head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', bg: 'rgba(0, 0, 5, 0.03)', accentRgb: '0, 229, 255' },
-    red:    { head: '#ffffff', body: '#cc2200', glow: '#ff3c28', bg: 'rgba(5, 0, 0, 0.03)', accentRgb: '255, 60, 40' },
-    amber:  { head: '#ffffff', body: '#cc8800', glow: '#ffaa00', bg: 'rgba(5, 3, 0, 0.03)', accentRgb: '255, 170, 0' },
-    white:  { head: '#ffffff', body: '#999999', glow: '#ffffff', bg: 'rgba(0, 0, 0, 0.03)', accentRgb: '255, 255, 255' },
-    purple: { head: '#ffffff', body: '#9b45e0', glow: '#c77dff', bg: 'rgba(2, 0, 5, 0.03)', accentRgb: '199, 125, 255' },
+    green:  { label: 'グリーン', head: '#ffffff', body: '#00cc33', glow: '#00ff41', accentRgb: '0, 255, 65' },
+    cyan:   { label: 'シアン',   head: '#ffffff', body: '#00b8cc', glow: '#00e5ff', accentRgb: '0, 229, 255' },
+    red:    { label: 'レッド',   head: '#ffffff', body: '#cc2200', glow: '#ff3c28', accentRgb: '255, 60, 40' },
+    amber:  { label: 'アンバー', head: '#ffffff', body: '#cc8800', glow: '#ffaa00', accentRgb: '255, 170, 0' },
+    white:  { label: 'ホワイト', head: '#ffffff', body: '#999999', glow: '#ffffff', accentRgb: '255, 255, 255' },
+    purple: { label: 'パープル', head: '#ffffff', body: '#9b45e0', glow: '#c77dff', accentRgb: '199, 125, 255' },
   };
 
-  // --- デフォルト値（リセット用） ---
-  const defaultConfig = {
-    speed: 8,
-    density: 8,
-    fontSize: 14,
-    trailLength: 16,
-    blurAmount: 0.6,
-    colorMode: 'green',
-    glowIntensity: 12,
-    charSet: 'katakana',
-    flickerRate: 0,
-    speedVariance: 0.4,
-    boldText: true
-  };
+  /* =====================================================
+     オープニング演出の手順
+     ・上から順に 1 本ずつ列を落とし、その列が指定の高さまで来たら次の手順へ進む
+     ・すべての手順が終わると、残りの全列が一斉に動き出す
+     ・各項目の意味
+         column  … 落とす列の位置（画面の左端 0 〜 右端 1 の割合）
+         until   … この列が画面のどの高さまで来たら次へ進むか（上端 0 〜 下端 1 の割合）
+         startRow… 落とし始める行（省略時 -1 ＝ 画面の一番上のすぐ上）
+     ・手順を増やす／減らす／順番を変える、はこの配列を書き換えるだけでよい
+       （空の配列にすると演出なしで、最初から全列が動く）
+  ===================================================== */
+  const INTRO_STEPS = [
+    { column: 0.5,  until: 0.3 }, // ① 画面中央の列
+    { column: 0.75, until: 0.3 }  // ② 画面右寄り（75%）の列
+  ];
 
-  let W, H, cols;
-  let columnsData = [];
-  let paused = false;
-  let currentColor = COLOR_MAP.green;
-  let fs = 14;
+  /* =====================================================
+     設定スキーマ（既定値・範囲・表示名の唯一の定義元）
+     ・ここを書き換えるだけで、パネルの表示・既定値・リセットがすべて連動する
+     ・apply: 値が変わった時に追加で必要な処理
+         'filter'  … キャンバスのぼかしを更新
+         'color'   … 配色を更新
+         'charset' … 文字セットを更新
+         'rebuild' … 列を作り直す（文字サイズ変更など）
+       指定なしの項目は、描画ループが毎フレーム config を直接参照するので処理不要
+  ===================================================== */
+  const SECTIONS = [
+    { id: 'motion', title: '速度 & 密度' },
+    { id: 'glyph',  title: '文字 & 残像' },
+    { id: 'visual', title: 'ビジュアル' },
+    { id: 'effect', title: 'エフェクト' }
+  ];
 
-  let speedVal = 8;
-  let densityVal = 8;
-  let trailVal = 16;
-  let blurVal = 0.6;
-  let glowVal = 12;
-  let flickerRateVal = 0;
-  let varianceVal = 0.4;
-  let boldVal = true;
+  const toOptions = (map) => Object.entries(map).map(([value, def]) => ({ value, label: def.label }));
 
-  // --- 演出用の変数 ---
-  let introPhase = 1;         // 1:真ん中のみ, 2:右追加, 3:通常通り
-  let hasPlayedIntro = false; // 一度演出が終わったらリサイズしてもスキップする用
-  let midIndex = 0;
-  let rightIndex = 0;
+  const SETTINGS = [
+    { key: 'speed',         section: 'motion', type: 'range',    label: '落下速度',           min: 1,   max: 20,  step: 1,    default: 8 },
+    { key: 'density',       section: 'motion', type: 'range',    label: '密度',               min: 1,   max: 10,  step: 1,    default: 8 },
+    { key: 'fontSize',      section: 'glyph',  type: 'range',    label: '文字サイズ',         min: 6,   max: 40,  step: 1,    default: 14,  unit: 'px', apply: 'rebuild' },
+    { key: 'trailLength',   section: 'glyph',  type: 'range',    label: '残像の長さ',         min: 1,   max: 20,  step: 1,    default: 16 },
+    { key: 'blurAmount',    section: 'visual', type: 'range',    label: 'ぼかし',             min: 0,   max: 3,   step: 0.1,  default: 0.6, unit: 'px', apply: 'filter' },
+    { key: 'colorMode',     section: 'visual', type: 'select',   label: 'カラー',             options: toOptions(COLOR_MAP), default: 'green',    apply: 'color' },
+    { key: 'glowIntensity', section: 'effect', type: 'range',    label: 'グロー強度',         min: 0,   max: 30,  step: 1,    default: 12 },
+    { key: 'charSet',       section: 'effect', type: 'select',   label: '文字セット',         options: toOptions(CHARSETS), default: 'katakana', apply: 'charset' },
+    { key: 'flickerRate',   section: 'effect', type: 'range',    label: 'ちらつき（グリッチ）', min: 0, max: 100, step: 5,    default: 0,   unit: '%' },
+    { key: 'speedVariance', section: 'effect', type: 'range',    label: '速度のばらつき',     min: 0.1, max: 1.2, step: 0.05, default: 0.4 },
+    { key: 'boldText',      section: 'effect', type: 'checkbox', label: '太字にする',         default: true }
+  ];
 
-  function drawChar(char, x, y) {
-    if (char >= 'ァ' && char <= 'ン' || char === '２' || char === '５' || char === '９') {
-      // 左右反転（カタカナ + ２・５・９）
-      ctx.save();
-      ctx.translate(x + fs / 2, y);
-      ctx.scale(-1, 1);
-      ctx.fillText(char, -fs / 2, 0);
-      ctx.restore();
-    } else if (char === '３') {
-      // 上下反転
-      ctx.save();
-      ctx.translate(x, y - fs / 2);
-      ctx.scale(1, -1);
-      ctx.fillText(char, 0, fs / 2);
-      ctx.restore();
-    } else {
-      // 半角文字は幅が狭く左詰めになるため、セル中央に来るよう補正する
-      const width = ctx.measureText(char).width;
-      const offsetX = (fs - width) / 2;
-      ctx.fillText(char, x + offsetX, y);
+  const DEFAULTS = Object.fromEntries(SETTINGS.map(s => [s.key, s.default]));
+
+  // 現在の設定値（描画側・UI 側の双方がここだけを参照する）
+  const config = { ...DEFAULTS };
+
+  // 値を各設定の型・範囲に収める（不正な値は既定値に戻す）
+  function normalizeValue(setting, raw) {
+    switch (setting.type) {
+      case 'range': {
+        const n = typeof raw === 'number' ? raw : parseFloat(raw);
+        if (Number.isNaN(n)) return setting.default;
+        return Math.min(setting.max, Math.max(setting.min, n));
+      }
+      case 'select':
+        return setting.options.some(o => o.value === raw) ? raw : setting.default;
+      case 'checkbox':
+        return typeof raw === 'boolean' ? raw : setting.default;
+      default:
+        return setting.default;
     }
   }
 
+  // 小数の表示桁数はスライダーの刻み（step）から自動で決める（0.05 → 2 桁）
+  function decimalsOf(step) {
+    const s = String(step);
+    return s.includes('.') ? s.split('.')[1].length : 0;
+  }
+
+  function formatValue(setting, val) {
+    return setting.type === 'range' ? Number(val).toFixed(decimalsOf(setting.step)) : val;
+  }
+
+  /* =====================================================
+     描画エンジン（B案：残像をデータとして持ち、毎フレーム描き直す）
+     ・各列は「どのマス（行）に、いつ、どの文字を置いたか」を覚えている
+     ・毎フレーム画面を黒で消してから、置いてからの経過時間に応じた
+       透明度で描き直す。半透明の黒を重ねる旧方式と違い、焼き付きは起きない
+     ・速度・残像・ちらつきはすべて経過時間（秒）で計算するため、
+       60Hz / 120Hz / 144Hz どの画面でも同じ速さで動く
+     ・重い処理であるグロー（ぼかし影）は、文字ごとに一度だけ画像にしておき（グローキャッシュ）、
+       毎フレームはそれを低解像度のグロー専用レイヤーへ貼り付けるだけにして負荷を抑える
+     ・文字そのものはブラウザの文字描画（内部で文字の画像をキャッシュしている）で直接描く
+  ===================================================== */
+  const BASE_FPS = 60;               // 旧実装（1 フレーム単位）の値を秒単位に換算する基準
+  const MAX_DT = 0.1;                // タブ復帰時などに一気に進みすぎないよう、1 フレームの経過時間に上限を設ける
+  const MAX_DPR = 2;                 // 高解像度対応の上限（3 倍以上はメモリと負荷の割に差が小さい）
+  const MIN_VISIBLE_ALPHA = 1 / 255; // これより薄くなった残像は消去する
+  const MIN_HALO_ALPHA = 0.15;       // 残像のグローはこれより薄くなったら省略する（ここから先はほぼ見えないため）
+  const GLOW_STRENGTH = 2;           // グロー画像を作る時に重ねる回数。旧実装では先頭のグローが
+                                     // 毎フレーム重ね描きされて周囲の残像まで明るくしていたので、その輝きを再現する
+  const HEAD_GLOW_PASSES = 2;        // 先頭文字のグローはさらに重ねる（同じ位置に何フレームも重ね描きされていた輝きの再現）
+  const GLOW_SCALE = 0.5;            // グローはぼけているので、画面の半分の解像度の専用レイヤーに描く（負荷を約 1/4 に）
+
+  // グロー専用のレイヤー（低解像度）。毎フレームここにグローを描いてから、画面に拡大して重ねる
+  const glowLayer = document.createElement('canvas');
+  const glowCtx = glowLayer.getContext('2d');
+
+  let W = 0, H = 0, dpr = 1, cols = 0, rows = 0;
+  let columnsData = [];
+  let paused = false;
+  let rafId = null;
+  let lastTimestamp = null;
+  let simTime = 0; // 演出上の時刻（秒）。一時停止中は進まないので、止めている間に残像が消えることはない
+  let currentColor = COLOR_MAP[DEFAULTS.colorMode];
+  let activeChars = CHARSETS[DEFAULTS.charSet].chars;
+  let fs = DEFAULTS.fontSize; // 現在の列グリッドの 1 マスの大きさ（rebuild 時に config から取り込む）
+
+
+  const randomChar = () => activeChars[Math.floor(Math.random() * activeChars.length)];
+  const fontString = () => `${config.boldText ? 'bold ' : ''}${fs}px monospace`;
+
+  // 残像の長さ（1〜20）→ 残像が薄れていく速さ（時定数・秒）
+  // 旧実装の「毎フレーム半透明の黒を重ねる」方式を 60Hz で動かした時と同じ減衰カーブになるよう換算
+  function trailTimeConstant(length) {
+    const alphaPerFrame = 0.12 - (length - 1) * (0.115 / 19);
+    return -1 / (BASE_FPS * Math.log(1 - alphaPerFrame));
+  }
+
+  // 1 文字を描く（反転・中央寄せのルールは旧実装と同じ）。(x, y) はマスの左端とベースライン
+  //   width: 文字幅が分かっていれば渡す（毎回の計測を省くため）
+  function drawGlyph(c, char, x, y, size, width) {
+    if (char >= 'ァ' && char <= 'ン' || char === '２' || char === '５' || char === '９') {
+      // 左右反転（カタカナ + ２・５・９）
+      c.save();
+      c.translate(x + size / 2, y);
+      c.scale(-1, 1);
+      c.fillText(char, -size / 2, 0);
+      c.restore();
+    } else if (char === '３') {
+      // 上下反転
+      c.save();
+      c.translate(x, y - size / 2);
+      c.scale(1, -1);
+      c.fillText(char, 0, size / 2);
+      c.restore();
+    } else {
+      // 半角文字は幅が狭く左詰めになるため、セル中央に来るよう補正する
+      const w = width ?? c.measureText(char).width;
+      c.fillText(char, x + (size - w) / 2, y);
+    }
+  }
+
+  // 文字画像の「実際に色が付いている範囲」だけを切り出す情報を作る
+  // （余白まで毎フレーム貼り付けると、その分だけ描画が重くなるため）
+  //   canvas: 画像 / margin: 画像の左上からマス左上までの距離（CSS px） / size: 画像の一辺（CSS px）
+  function trimSprite(canvas, margin, size) {
+    const w = canvas.width, h = canvas.height;
+    const data = canvas.getContext('2d').getImageData(0, 0, w, h).data;
+    let minX = w, minY = h, maxX = -1, maxY = -1;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (data[(y * w + x) * 4 + 3] !== 0) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+    if (maxX < 0) return null; // 何も描かれていない
+
+    const k = size / w; // 画像 1px あたりの CSS px
+    return {
+      canvas,
+      sx: minX, sy: minY, sw: maxX - minX + 1, sh: maxY - minY + 1,
+      dx: minX * k - margin, dy: minY * k - margin,
+      dw: (maxX - minX + 1) * k, dh: (maxY - minY + 1) * k
+    };
+  }
+
+  /* -----------------------------------------------------
+     グローキャッシュ
+     ・文字の形をしたグローだけの画像を、文字ごとに一度だけ作っておく（ぼけているので低解像度）
+     ・あわせて文字幅も覚えておき、中央寄せのための計測を毎フレーム行わないようにする
+     文字サイズ・太字・グロー強度・カラーのどれかが変わったら作り直す
+  ----------------------------------------------------- */
+  const glyphCache = {
+    key: '',
+    glowMargin: 0, // グロー画像の余白（ぼかしがはみ出す分）
+    glows: new Map(),
+    widths: new Map(),
+
+    sync() {
+      const key = [fs, config.boldText, config.glowIntensity, config.colorMode].join('|');
+      if (key === this.key) return;
+      this.key = key;
+      this.glows.clear();
+      this.widths.clear();
+      this.glowMargin = Math.ceil(fs * 0.3) + 1 + Math.ceil(config.glowIntensity * 1.5);
+    },
+
+    width(char) {
+      let w = this.widths.get(char);
+      if (w === undefined) {
+        w = ctx.measureText(char).width; // 呼び出し時点で ctx.font は設定済み
+        this.widths.set(char, w);
+      }
+      return w;
+    },
+
+    glow(char) {
+      if (!this.glows.has(char)) this.glows.set(char, this.renderGlow(char));
+      return this.glows.get(char);
+    },
+
+    renderGlow(char) {
+      const m = this.glowMargin;
+      const size = fs + m * 2; // CSS px
+      const scale = GLOW_SCALE;
+      const c = document.createElement('canvas');
+      c.width = c.height = Math.max(1, Math.ceil(size * scale));
+      const g = c.getContext('2d');
+      g.scale(scale, scale);
+      g.font = fontString();
+      g.fillStyle = '#000';
+      g.shadowColor = currentColor.glow;
+      g.shadowBlur = config.glowIntensity * scale; // shadowBlur は拡大縮小の影響を受けないので手動で合わせる
+      // 文字本体は画像の外に描き、影（＝グロー）だけを画像内に落とす
+      const away = 10000;
+      g.shadowOffsetX = away * scale;
+      for (let i = 0; i < GLOW_STRENGTH; i++) drawGlyph(g, char, m - away, m + fs, fs);
+      return trimSprite(c, m, size);
+    },
+
+    // グロー専用レイヤーへ描く
+    drawGlow(char, x, rowTop, alpha) {
+      const s = this.glow(char);
+      if (!s) return; // 空白など、描くものがない文字
+      glowCtx.globalAlpha = alpha;
+      glowCtx.drawImage(s.canvas, s.sx, s.sy, s.sw, s.sh, x + s.dx, rowTop + s.dy, s.dw, s.dh);
+    }
+  };
+
+  /* -----------------------------------------------------
+     列（1 本の文字の流れ）
+  ----------------------------------------------------- */
   class Column {
     constructor(colIndex) {
       this.colIndex = colIndex;
       this.isActive = false; // ★最初はすべて停止状態で生成
+      this.cellChar = [];    // マスごとの残像の文字（なければ undefined）
+      this.cellBorn = [];    // その文字を置いた時刻（simTime）
+      this.cellAlpha = [];   // 現在の濃さ（描画のたびに計算）
       this.reset(true);
     }
 
@@ -493,46 +604,110 @@
         // 初期状態は画面上空（見えない位置）にランダム配置
         this.y = -(Math.random() * (H / fs) * 1.5) - 2;
       } else {
-        const delayRows = 30 + ((10 - densityVal) * 15) + (Math.random() * 40);
+        const delayRows = 30 + ((10 - config.density) * 15) + (Math.random() * 40);
         this.y = -delayRows;
       }
-      this.speed = Math.random() * varianceVal + 0.15;
-      this.char = activeChars[Math.floor(Math.random() * activeChars.length)];
+      this.speed = Math.random() * config.speedVariance + 0.15;
+      this.char = randomChar();
+      // ※ 画面に残っている残像（cellChar）は消さず、そのまま薄れさせる
     }
 
-    updateAndDraw(speedMultiplier) {
-      let oldRow = Math.floor(this.y);
-      this.y += this.speed * (speedMultiplier * 0.2);
-      let newRow = Math.floor(this.y);
-      const xPos = this.colIndex * fs;
+    // dt: 前フレームからの経過時間（秒）
+    update(dt) {
+      const y0 = this.y;
+      const y1 = y0 + this.speed * config.speed * 0.2 * BASE_FPS * dt;
+      this.y = y1;
 
-      if (newRow > oldRow) {
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = currentColor.body;
-        drawChar(this.char, xPos, (oldRow + 1) * fs);
-        ctx.shadowBlur = glowVal;
-
-        this.char = activeChars[Math.floor(Math.random() * activeChars.length)];
+      // 先頭が通過したマスすべてに残像を置く（1 フレームで何行進んでも隙間ができない）
+      // 置いた時刻は、そのマスを通過した瞬間に補間して、残像の濃さが滑らかにつながるようにする
+      const oldRow = Math.floor(y0);
+      const newRow = Math.floor(y1);
+      for (let r = oldRow; r < newRow; r++) {
+        if (r >= 0 && r < rows) {
+          const passedAt = simTime - dt * (y1 - (r + 1)) / (y1 - y0);
+          this.cellChar[r] = this.char;
+          this.cellBorn[r] = passedAt;
+        }
+        this.char = randomChar();
       }
 
-      // ちらつき（グリッチ）：行が進んでいない間も、一定確率で先頭文字を差し替える
-      if (flickerRateVal > 0 && Math.random() < flickerRateVal / 100) {
-        this.char = activeChars[Math.floor(Math.random() * activeChars.length)];
-      }
-
-      if (newRow >= 0 && newRow * fs <= H + fs) {
-        ctx.fillStyle = currentColor.head;
-        drawChar(this.char, xPos, (newRow + 1) * fs);
+      // ちらつき（グリッチ）：60Hz の 1 フレームあたりの確率を、経過時間に応じた確率に換算
+      if (config.flickerRate > 0) {
+        const pPerFrame = config.flickerRate / 100;
+        const p = pPerFrame >= 1 ? 1 : 1 - Math.pow(1 - pPerFrame, dt * BASE_FPS);
+        if (Math.random() < p) this.char = randomChar();
       }
 
       if (newRow * fs > H) {
         this.reset(false);
       }
     }
+
+    // 各マスの残像の濃さを計算する（見えなくなった残像はここで捨てる）
+    updateAlphas(tau) {
+      const limit = Math.min(rows, this.cellChar.length);
+      for (let r = 0; r < limit; r++) {
+        if (this.cellChar[r] === undefined) continue;
+        const alpha = Math.exp(-(simTime - this.cellBorn[r]) / tau);
+        if (alpha < MIN_VISIBLE_ALPHA) {
+          this.cellChar[r] = undefined;
+        } else {
+          this.cellAlpha[r] = alpha;
+        }
+      }
+    }
+
+    // 残像のグロー：先頭が通った直後のマスには先頭のグローの名残りが残る（旧実装の見え方の再現）
+    drawTrailGlow() {
+      const x = this.colIndex * fs;
+      const limit = Math.min(rows, this.cellChar.length);
+      for (let r = 0; r < limit; r++) {
+        const char = this.cellChar[r];
+        if (char === undefined || this.cellAlpha[r] < MIN_HALO_ALPHA) continue;
+        glyphCache.drawGlow(char, x, r * fs, this.cellAlpha[r]);
+      }
+    }
+
+    // 残像の文字
+    drawTrailGlyphs() {
+      const x = this.colIndex * fs;
+      const limit = Math.min(rows, this.cellChar.length);
+      for (let r = 0; r < limit; r++) {
+        const char = this.cellChar[r];
+        if (char === undefined) continue;
+        ctx.globalAlpha = this.cellAlpha[r];
+        drawGlyph(ctx, char, x, (r + 1) * fs, fs, glyphCache.width(char));
+      }
+    }
+
+    headRow() {
+      const row = Math.floor(this.y);
+      return (row < 0 || row * fs > H + fs) ? null : row;
+    }
+
+    drawHeadGlow() {
+      const row = this.headRow();
+      if (row === null) return;
+      for (let i = 0; i < HEAD_GLOW_PASSES; i++) glyphCache.drawGlow(this.char, this.colIndex * fs, row * fs, 1);
+    }
+
+    drawHead() {
+      const row = this.headRow();
+      if (row === null) return;
+      ctx.globalAlpha = 1;
+      drawGlyph(ctx, this.char, this.colIndex * fs, (row + 1) * fs, fs, glyphCache.width(this.char));
+    }
+  }
+
+  /* -----------------------------------------------------
+     設定値の反映処理（SETTINGS の apply から呼ばれる）
+  ----------------------------------------------------- */
+  function applyFilter() {
+    canvas.style.filter = config.blurAmount > 0 ? `blur(${config.blurAmount}px)` : 'none';
   }
 
   function applyColor() {
-    currentColor = COLOR_MAP[document.getElementById('colorMode').value] || COLOR_MAP.green;
+    currentColor = COLOR_MAP[config.colorMode] || COLOR_MAP[DEFAULTS.colorMode];
 
     // フローティングパネルのアクセントカラーも選択中の色に同期させる
     document.documentElement.style.setProperty('--accent', currentColor.glow);
@@ -540,21 +715,40 @@
   }
 
   function applyCharSet() {
-    const key = document.getElementById('charSet').value;
-    activeChars = CHARSETS[key] || CHARSETS.katakana;
+    activeChars = (CHARSETS[config.charSet] || CHARSETS[DEFAULTS.charSet]).chars;
+  }
+
+  const APPLY_HANDLERS = {
+    filter: applyFilter,
+    color: applyColor,
+    charset: applyCharSet,
+    rebuild: () => init()
+  };
+
+  // 見た目に関わる設定をまとめて反映する（起動時・リセット時用。列の作り直しは別途 init()）
+  function applyAllSettings() {
+    applyFilter();
+    applyColor();
+    applyCharSet();
+  }
+
+  /* -----------------------------------------------------
+     キャンバスの大きさ（高解像度画面に対応）
+  ----------------------------------------------------- */
+  function resizeCanvas() {
+    dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    glowLayer.width = Math.max(1, Math.ceil(W * GLOW_SCALE));
+    glowLayer.height = Math.max(1, Math.ceil(H * GLOW_SCALE));
+    rows = Math.ceil(H / fs) + 1;
   }
 
   function init() {
-    fs = parseInt(document.getElementById('fontSize').value) || 14;
-    speedVal = parseInt(document.getElementById('speed').value) || 8;
-    densityVal = parseInt(document.getElementById('density').value) || 8;
-    trailVal = parseInt(document.getElementById('trailLength').value) || 16;
-    blurVal = parseFloat(document.getElementById('blurAmount').value) || 0.6;
-
-    canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
-
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    fs = config.fontSize;
+    resizeCanvas();
 
     cols = Math.floor(W / fs);
     columnsData = [];
@@ -564,147 +758,488 @@
       columnsData.push(new Column(i));
     }
 
-    // --- 演出の初期化 ---
-    if (!hasPlayedIntro) {
-      // まだ演出を見ていない場合（初回ロード）
-      introPhase = 1;
-      midIndex = Math.floor(cols / 2);         // 画面中央の列番号
-      rightIndex = Math.floor(cols * 0.75);    // 画面右（75%）の列番号
-
-      // 中央の列だけ動かし、開始位置を画面一番上（0付近）にする
-      columnsData[midIndex].isActive = true;
-      columnsData[midIndex].y = -1;
-    } else {
-      // 既に演出が終わっている場合（リサイズ時など）は全列アクティブ
-      introPhase = 3;
-      for (let i = 0; i < cols; i++) {
-        columnsData[i].isActive = true;
-      }
-    }
-
-    // キャンバスを真っ黒にリセット
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, W, H);
+    intro.start(); // 初回は演出から、演出を見終わっていれば全列を動かした状態から始める
+    render();
   }
 
-  function draw() {
-    requestAnimationFrame(draw);
-    if (paused) return;
+  /* -----------------------------------------------------
+     オープニング演出の進行管理（手順は INTRO_STEPS で定義）
+     ・stepIndex が「いま何番目の手順か」。手順が終われば done になる
+     ・一度最後まで再生したら played が立ち、以降の作り直し（文字サイズ変更など）では再生しない
+  ----------------------------------------------------- */
+  const intro = {
+    played: false,
+    done: false,
+    stepIndex: 0,
+    column: null, // いまの手順で落としている列
 
-    const trailAlpha = (0.12 - (trailVal - 1) * (0.115 / 19)).toFixed(4);
-    const bgBase = currentColor.bg.replace(/[\d.]+\)$/, `${trailAlpha})`);
-
-    ctx.fillStyle = bgBase;
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.font = `${boldVal ? 'bold ' : ''}${fs}px monospace`;
-    ctx.shadowBlur = glowVal;
-    ctx.shadowColor = currentColor.glow;
-
-    // =====================================================
-    // ★ 演出の進行管理
-    // =====================================================
-    if (introPhase === 1) {
-      // 真ん中の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ2へ
-      if (columnsData[midIndex].y * fs > H * 0.3) {
-        introPhase = 2;
-        columnsData[rightIndex].isActive = true;
-        columnsData[rightIndex].y = -1; // 右の列も一番上からスタート
+    // 演出を始める（すでに見終わっていれば、すぐに全列を動かす）
+    start() {
+      if (this.played || INTRO_STEPS.length === 0) {
+        this.finish();
+        return;
       }
-    }
-    else if (introPhase === 2) {
-      // 右の列が画面の 30% (H * 0.3) まで落ちてきたらフェーズ3へ
-      if (columnsData[rightIndex].y * fs > H * 0.3) {
-        introPhase = 3;
-        hasPlayedIntro = true; // 演出完了フラグを立てる
+      this.done = false;
+      this.beginStep(0);
+    },
 
-        // 残りの全列をアクティブにする
-        for (let i = 0; i < columnsData.length; i++) {
-          if (!columnsData[i].isActive) {
-            columnsData[i].isActive = true;
-          }
-        }
+    beginStep(index) {
+      const step = INTRO_STEPS[index];
+      const colIndex = Math.min(columnsData.length - 1, Math.floor(columnsData.length * step.column));
+      this.stepIndex = index;
+      this.column = columnsData[colIndex];
+      if (!this.column) { // 列が 1 本もないほど画面が狭い場合
+        this.finish();
+        return;
       }
-    }
+      this.column.isActive = true;
+      this.column.y = step.startRow ?? -1;
+    },
 
-    // =====================================================
-    // 描画処理（アクティブな列だけを更新）
-    // =====================================================
+    // 毎フレーム呼ぶ：落としている列が指定の高さを越えたら次の手順へ
+    update() {
+      if (this.done) return;
+      const step = INTRO_STEPS[this.stepIndex];
+      if (this.column.y * fs <= H * step.until) return;
+
+      if (this.stepIndex + 1 < INTRO_STEPS.length) {
+        this.beginStep(this.stepIndex + 1);
+      } else {
+        this.finish();
+      }
+    },
+
+    // 演出を終えて、残りの全列を動かす
+    finish() {
+      this.done = true;
+      this.played = true;
+      this.column = null;
+      for (const col of columnsData) col.isActive = true;
+    }
+  };
+
+  // 現在の状態を 1 枚描く（一時停止中に設定を変えた時も、これで画面を更新する）
+  //   重ね順：黒背景＋グロー（低解像度レイヤーを拡大） → 残像の文字 → 先頭の白文字
+  function render() {
+    glyphCache.sync();
+    const glowOn = config.glowIntensity > 0;
+    const tau = trailTimeConstant(config.trailLength);
+
     for (let i = 0; i < columnsData.length; i++) {
-      if (columnsData[i].isActive) {
-        columnsData[i].updateAndDraw(speedVal);
-      }
+      columnsData[i].updateAlphas(tau);
     }
 
-    ctx.shadowBlur = 0;
+    if (glowOn) {
+      // 1) グローレイヤーを黒で塗り、そこへグローを集める（低解像度なので軽い）
+      glowCtx.setTransform(1, 0, 0, 1, 0, 0);
+      glowCtx.globalAlpha = 1;
+      glowCtx.fillStyle = '#000000';
+      glowCtx.fillRect(0, 0, glowLayer.width, glowLayer.height);
+      glowCtx.setTransform(GLOW_SCALE, 0, 0, GLOW_SCALE, 0, 0);
+
+      for (let i = 0; i < columnsData.length; i++) {
+        columnsData[i].drawTrailGlow();
+        if (columnsData[i].isActive) columnsData[i].drawHeadGlow();
+      }
+
+      // 2) それを画面全体に拡大して「上書き」する。背景の黒塗りも兼ねるので、全画面の処理は 1 回で済む
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'copy';
+      ctx.drawImage(glowLayer, 0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = 'source-over';
+    } else {
+      // グローなし：黒で消すだけ
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // 3) 残像の文字 → 4) 先頭の白文字
+    ctx.font = fontString();
+    ctx.fillStyle = currentColor.body;
+    for (let i = 0; i < columnsData.length; i++) {
+      columnsData[i].drawTrailGlyphs();
+    }
+    ctx.fillStyle = currentColor.head;
+    for (let i = 0; i < columnsData.length; i++) {
+      if (columnsData[i].isActive) columnsData[i].drawHead();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // 1 フレーム分：時間を進めて、状態を更新して、描く
+  function frame(timestamp) {
+    rafId = requestAnimationFrame(frame);
+    const dt = lastTimestamp === null ? 0 : Math.min(MAX_DT, (timestamp - lastTimestamp) / 1000);
+    lastTimestamp = timestamp;
+    simTime += dt;
+
+    intro.update();
+    for (let i = 0; i < columnsData.length; i++) {
+      if (columnsData[i].isActive) columnsData[i].update(dt);
+    }
+    render();
+  }
+
+  // 一時停止中は描画ループそのものを止める（無駄な処理をしない）
+  function startLoop() {
+    if (rafId !== null) return;
+    lastTimestamp = null;
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function stopLoop() {
+    if (rafId === null) return;
+    cancelAnimationFrame(rafId);
+    rafId = null;
   }
 
   /* =====================================================
      コントロールパネル UI ロジック（FireflyEffect 風）
   ===================================================== */
-  const controls = [
-    { id: 'speed', valId: 'speed-val', type: 'int' },
-    { id: 'density', valId: 'density-val', type: 'int' },
-    { id: 'fontSize', valId: 'fontSize-val', type: 'int', onChange: init },
-    { id: 'trailLength', valId: 'trailLength-val', type: 'int' },
-    { id: 'blurAmount', valId: 'blurAmount-val', type: 'float' },
-    { id: 'colorMode', valId: null, type: 'select', onChange: applyColor },
-    { id: 'glowIntensity', valId: 'glowIntensity-val', type: 'int' },
-    { id: 'charSet', valId: null, type: 'select', onChange: applyCharSet },
-    { id: 'flickerRate', valId: 'flickerRate-val', type: 'int' },
-    { id: 'speedVariance', valId: 'speedVariance-val', type: 'float' },
-    { id: 'boldText', valId: null, type: 'checkbox' }
-  ];
+  const HIDE_DELAY_MS = 3000; // 「非表示」を押してからパネルが完全に消えるまでの時間
 
-  let hideTimerId = null;
-  const HIDE_DELAY_MS = 3000;
+  // SETTINGS から 1 項目分の DOM 情報を引くためのヘルパー
+  const inputIdOf = (setting) => `ctl-${setting.key}`;
+  const valueIdOf = (setting) => `ctl-${setting.key}-val`;
 
-  function syncVarsFromInputs() {
-    speedVal = parseInt(document.getElementById('speed').value) || 8;
-    densityVal = parseInt(document.getElementById('density').value) || 8;
-    trailVal = parseInt(document.getElementById('trailLength').value) || 16;
-    blurVal = parseFloat(document.getElementById('blurAmount').value) || 0.6;
-    canvas.style.filter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+  const escapeHtml = (str) => String(str).replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+  ));
 
-    const glowRaw = parseInt(document.getElementById('glowIntensity').value, 10);
-    glowVal = Number.isNaN(glowRaw) ? 12 : glowRaw;
+  // 1 項目分の HTML を生成
+  function renderControl(setting) {
+    const id = inputIdOf(setting);
+    const label = escapeHtml(setting.label);
 
-    const flickerRaw = parseInt(document.getElementById('flickerRate').value, 10);
-    flickerRateVal = Number.isNaN(flickerRaw) ? 0 : flickerRaw;
-
-    const varianceRaw = parseFloat(document.getElementById('speedVariance').value);
-    varianceVal = Number.isNaN(varianceRaw) ? 0.4 : varianceRaw;
-
-    boldVal = document.getElementById('boldText').checked;
+    switch (setting.type) {
+      case 'range':
+        return `
+        <div class="control-group">
+          <label for="${id}">
+            <span>${label}:</span>
+            <span><span id="${valueIdOf(setting)}"></span>${escapeHtml(setting.unit ?? '')}</span>
+          </label>
+          <input type="range" id="${id}" min="${setting.min}" max="${setting.max}" step="${setting.step}">
+        </div>`;
+      case 'select':
+        return `
+        <div class="control-group">
+          <label for="${id}">${label}</label>
+          <select id="${id}">
+            ${setting.options.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
+          </select>
+        </div>`;
+      case 'checkbox':
+        return `
+        <div class="control-group inline-row">
+          <label for="${id}">${label}</label>
+          <input type="checkbox" id="${id}">
+        </div>`;
+      default:
+        return '';
+    }
   }
 
-  function initUI() {
-    controls.forEach(item => {
-      const input = document.getElementById(item.id);
-      const valDisplay = item.valId ? document.getElementById(item.valId) : null;
-      const eventName = (item.type === 'select' || item.type === 'checkbox') ? 'change' : 'input';
+  // パネル本体（アコーディオンの各セクション＋設定項目）を SECTIONS / SETTINGS から生成
+  function buildPanel() {
+    const chevron = `
+          <svg class="section-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>`;
 
-      input.addEventListener(eventName, (e) => {
-        let val;
-        if (item.type === 'int') val = parseInt(e.target.value);
-        else if (item.type === 'float') val = parseFloat(e.target.value);
-        else if (item.type === 'checkbox') val = e.target.checked;
-        else val = e.target.value;
+    document.getElementById('panel-body').innerHTML = SECTIONS.map(section => `
+      <div class="control-section is-collapsed" data-section="${section.id}">
+        <button class="section-toggle" type="button" aria-expanded="false" aria-controls="section-${section.id}">
+          <span class="section-title"><span aria-hidden="true">■ </span>${escapeHtml(section.title)}</span>${chevron}
+        </button>
+        <div class="section-body" id="section-${section.id}" role="group" aria-label="${escapeHtml(section.title)}">
+          ${SETTINGS.filter(s => s.section === section.id).map(renderControl).join('')}
+        </div>
+      </div>`).join('');
+  }
 
-        if (valDisplay) {
-          valDisplay.textContent = item.type === 'float' ? val.toFixed(1) : val;
-        }
+  // config の値を 1 項目分、入力欄と数値表示へ書き戻す
+  function renderValue(setting) {
+    const input = document.getElementById(inputIdOf(setting));
+    const val = config[setting.key];
 
-        syncVarsFromInputs();
-        if (item.onChange) item.onChange();
+    if (setting.type === 'checkbox') input.checked = val;
+    else input.value = val;
+
+    const valDisplay = document.getElementById(valueIdOf(setting));
+    if (valDisplay) valDisplay.textContent = formatValue(setting, val);
+  }
+
+  function renderAllValues() {
+    SETTINGS.forEach(renderValue);
+  }
+
+  // 入力欄の操作 → config 更新 → 表示更新 → 必要な反映処理
+  function bindControls() {
+    SETTINGS.forEach(setting => {
+      const input = document.getElementById(inputIdOf(setting));
+      const eventName = setting.type === 'range' ? 'input' : 'change';
+
+      input.addEventListener(eventName, () => {
+        const raw = setting.type === 'checkbox' ? input.checked : input.value;
+        config[setting.key] = normalizeValue(setting, raw);
+        renderValue(setting);
+        if (setting.apply) APPLY_HANDLERS[setting.apply]();
+        if (paused) render(); // 一時停止中も変更を画面に反映する
       });
     });
+  }
 
-    const pauseBtn = document.getElementById('btn-pause');
-    const toggleBtn = document.getElementById('btn-toggle-panel');
-    const resetBtn = document.getElementById('btn-reset-panel');
-    const panelBody = document.getElementById('panel-body');
-    const panel = document.getElementById('draggable-panel');
+  // すべての設定を既定値に戻す
+  function resetSettings() {
+    Object.assign(config, DEFAULTS);
+    renderAllValues();
+    applyAllSettings();
+    init();
+  }
+
+  // 画面幅がスマホ向けレイアウト（パネルを下に固定）かどうか。CSS の @media と同じ条件
+  const compactLayout = window.matchMedia('(max-width: 768px)');
+  // 「視差効果を減らす」設定（OS のアクセシビリティ設定）
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* -----------------------------------------------------
+     パネルの開閉と自動非表示
+     ・「非表示」で本文を畳み、3 秒後にパネルごと消える
+     ・画面のクリック／タップ、または H キーで再表示
+  ----------------------------------------------------- */
+  const panelUI = {
+    panel: null,
+    body: null,
+    toggleBtn: null,
+    hideTimerId: null,
+
+    init() {
+      this.panel = document.getElementById('draggable-panel');
+      this.body = document.getElementById('panel-body');
+      this.toggleBtn = document.getElementById('btn-toggle-panel');
+
+      this.toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.isCollapsed()) this.show();
+        else this.collapse();
+      });
+
+      // 画面（Canvas）をクリック／タップした時の再表示
+      canvas.addEventListener('click', () => {
+        if (this.isCollapsed() || this.isFullyHidden()) this.show();
+      });
+
+      this.updateToggleButton();
+    },
+
+    isCollapsed() { return this.body.classList.contains('is-collapsed'); },
+    isFullyHidden() { return this.panel.classList.contains('is-fully-hidden'); },
+
+    // 本文を畳み、しばらくしたらパネルごと消す
+    collapse() {
+      this.body.classList.add('is-collapsed');
+      this.updateToggleButton();
+      clearTimeout(this.hideTimerId);
+      this.hideTimerId = setTimeout(() => this.panel.classList.add('is-fully-hidden'), HIDE_DELAY_MS);
+    },
+
+    // パネルを表示し、本文も開く
+    show() {
+      clearTimeout(this.hideTimerId);
+      this.panel.classList.remove('is-fully-hidden');
+      this.body.classList.remove('is-collapsed');
+      this.updateToggleButton();
+    },
+
+    // H キー：開いていれば畳む、畳んでいる／消えていれば表示してボタンにフォーカス
+    toggleFromKeyboard() {
+      if (this.isCollapsed() || this.isFullyHidden()) {
+        this.show();
+        this.toggleBtn.focus({ preventScroll: true });
+      } else {
+        this.collapse();
+      }
+    },
+
+    updateToggleButton() {
+      const collapsed = this.isCollapsed();
+      this.toggleBtn.textContent = collapsed ? '表示' : '非表示';
+      this.toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+      this.toggleBtn.title = collapsed ? 'パネルを表示 (H)' : 'パネルを隠す (H)';
+    }
+  };
+
+  /* -----------------------------------------------------
+     パネルのドラッグ移動（PC など、パネルが浮いているレイアウトのみ）
+     ・Pointer Events でマウス／タッチ／ペンをまとめて扱う
+     ・ウィンドウサイズが変わっても、パネルが画面外に取り残されないよう補正する
+  ----------------------------------------------------- */
+  const panelDrag = {
+    panel: null,
+    header: null,
+    drag: null, // ドラッグ中の情報 { pointerId, startX, startY, left, top }
+
+    init() {
+      this.panel = document.getElementById('draggable-panel');
+      this.header = document.getElementById('panel-header');
+
+      this.header.addEventListener('pointerdown', (e) => this.onDown(e));
+      this.header.addEventListener('pointermove', (e) => this.onMove(e));
+      this.header.addEventListener('pointerup', (e) => this.onUp(e));
+      this.header.addEventListener('pointercancel', (e) => this.onUp(e));
+
+      // スマホ向けレイアウトになったら、ドラッグで付けた位置を解除して下部固定に戻す
+      compactLayout.addEventListener('change', () => {
+        if (compactLayout.matches) this.resetPosition();
+        else this.clampIntoView();
+      });
+    },
+
+    onDown(e) {
+      if (compactLayout.matches) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('button')) return;
+
+      const rect = this.panel.getBoundingClientRect();
+      this.drag = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, left: rect.left, top: rect.top };
+      this.header.setPointerCapture(e.pointerId);
+      this.placeAt(rect.left, rect.top);
+      e.preventDefault(); // ドラッグ中の文字選択を防ぐ
+    },
+
+    onMove(e) {
+      if (!this.drag || e.pointerId !== this.drag.pointerId) return;
+      this.placeAt(this.drag.left + (e.clientX - this.drag.startX), this.drag.top + (e.clientY - this.drag.startY));
+    },
+
+    onUp(e) {
+      if (!this.drag || e.pointerId !== this.drag.pointerId) return;
+      this.drag = null;
+    },
+
+    // 画面内に収まるよう補正して配置する
+    placeAt(left, top) {
+      const maxLeft = Math.max(0, window.innerWidth - this.panel.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - this.panel.offsetHeight);
+      this.panel.style.right = 'auto';
+      this.panel.style.bottom = 'auto';
+      this.panel.style.left = `${Math.min(Math.max(0, left), maxLeft)}px`;
+      this.panel.style.top = `${Math.min(Math.max(0, top), maxTop)}px`;
+    },
+
+    // ドラッグで動かした後なら、今の画面サイズに収まるよう位置を補正する
+    clampIntoView() {
+      if (compactLayout.matches || !this.panel.style.left) return;
+      const rect = this.panel.getBoundingClientRect();
+      this.placeAt(rect.left, rect.top);
+    },
+
+    resetPosition() {
+      this.drag = null;
+      ['left', 'top', 'right', 'bottom'].forEach(p => this.panel.style.removeProperty(p));
+    }
+  };
+
+  /* -----------------------------------------------------
+     スライダーの誤操作防止（タッチ操作のみ）
+     ・つまみ以外（トラック部分）に触れただけで値が飛ぶのを防ぐ
+       → 触れた瞬間の値を覚えておき、そのタッチの間に値が変わっても元に戻す
+     ・ブラウザ標準のスクロールは止めないので、トラックから縦にスワイプしても
+       パネルは普通にスクロールする（旧実装ではここが止まっていた）
+     ・マウスやキーボードの操作には一切影響しない
+  ----------------------------------------------------- */
+  const sliderGuard = {
+    THUMB_HIT_RADIUS: 26, // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
+    THUMB_SIZE: 20,       // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
+    guarded: null,        // 値を固定中のスライダー { slider, value }
+
+    init(container) {
+      // capture（親要素で先に受け取る）にして、スライダー本来の動作や設定の反映より先に判定する
+      container.addEventListener('pointerdown', (e) => this.onPointerDown(e), true);
+      const release = () => setTimeout(() => { this.guarded = null; }, 0);
+      container.addEventListener('pointerup', release, true);
+      container.addEventListener('pointercancel', release, true);
+      document.addEventListener('keydown', () => { this.guarded = null; }, true);
+
+      const revert = (e) => {
+        if (!this.guarded || e.target !== this.guarded.slider) return;
+        e.target.value = this.guarded.value;
+        e.stopPropagation(); // 値の変更を設定へ反映させない
+      };
+      container.addEventListener('input', revert, true);
+      container.addEventListener('change', revert, true);
+    },
+
+    onPointerDown(e) {
+      this.guarded = null;
+      const slider = e.target.closest('input[type="range"]');
+      if (!slider || e.pointerType !== 'touch') return;
+      if (!this.isOnThumb(slider, e.clientX, e.clientY)) {
+        this.guarded = { slider, value: slider.value };
+      }
+    },
+
+    isOnThumb(slider, x, y) {
+      const rect = slider.getBoundingClientRect();
+      const min = parseFloat(slider.min) || 0;
+      const max = parseFloat(slider.max) || 100;
+      const percent = max > min ? (parseFloat(slider.value) - min) / (max - min) : 0;
+      const thumbX = rect.left + this.THUMB_SIZE / 2 + percent * Math.max(0, rect.width - this.THUMB_SIZE);
+      const thumbY = rect.top + rect.height / 2;
+      return Math.hypot(x - thumbX, y - thumbY) <= this.THUMB_HIT_RADIUS;
+    }
+  };
+
+  /* -----------------------------------------------------
+     再生 / 一時停止
+  ----------------------------------------------------- */
+  function togglePause() {
+    paused = !paused;
+    if (paused) stopLoop();
+    else startLoop();
+
+    const btn = document.getElementById('btn-pause');
+    const pauseIcon = document.getElementById('pause-icon');
+    if (paused) {
+      // 再生アイコン（三角形）に切り替え
+      pauseIcon.innerHTML = '<path d="M7 4l14 8-14 8V4z"></path>';
+    } else {
+      // 一時停止アイコン（2本バー）に切り替え
+      pauseIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+    }
+    btn.setAttribute('aria-pressed', String(paused));
+    btn.setAttribute('aria-label', paused ? '再生' : '一時停止');
+    btn.title = paused ? '再生 (Space)' : '一時停止 (Space)';
+  }
+
+  /* -----------------------------------------------------
+     キーボードショートカット
+     ・Space … 再生 / 一時停止（ボタンやチェックボックス等にフォーカスがある時は、その部品の操作を優先）
+     ・H     … パネルの表示 / 非表示
+  ----------------------------------------------------- */
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+
+    if (e.code === 'Space') {
+      if (e.target.closest('input, select, textarea, button, [contenteditable]')) return;
+      e.preventDefault();
+      togglePause();
+    } else if (e.code === 'KeyH') {
+      if (e.target.closest('textarea, [contenteditable], input[type="text"]')) return;
+      e.preventDefault();
+      panelUI.toggleFromKeyboard();
+    }
+  });
+
+  function initUI() {
+    buildPanel();
+    renderAllValues();
+    bindControls();
 
     // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
     document.querySelectorAll('.control-section').forEach(section => {
@@ -717,224 +1252,73 @@
       });
     });
 
-    // 再生 / 一時停止
-    pauseBtn.addEventListener('click', (e) => {
+    document.getElementById('btn-pause').addEventListener('click', (e) => {
       e.stopPropagation();
       togglePause();
     });
 
-    // リセットボタン押下時
-    resetBtn.addEventListener('click', (e) => {
+    document.getElementById('btn-reset-panel').addEventListener('click', (e) => {
       e.stopPropagation();
+      resetSettings();
+    });
 
-      controls.forEach(item => {
-        const input = document.getElementById(item.id);
-        const valDisplay = item.valId ? document.getElementById(item.valId) : null;
-        const defaultVal = defaultConfig[item.id];
+    panelUI.init();
+    panelDrag.init();
+    sliderGuard.init(document.getElementById('panel-body'));
 
-        if (item.type === 'checkbox') input.checked = defaultVal;
-        else input.value = defaultVal;
+    // 「視差効果を減らす」が有効なら、オープニング演出を省いて最初から全列を表示する
+    if (reducedMotion.matches) intro.played = true;
 
-        if (valDisplay) {
-          valDisplay.textContent = item.type === 'float' ? defaultVal.toFixed(1) : defaultVal;
-        }
-      });
+    applyAllSettings(); // 起動時にぼかし・配色（パネルのアクセント含む）・文字セットを反映
+  }
 
-      syncVarsFromInputs();
-      applyColor();
-      applyCharSet();
+  // リサイズ処理：
+  //  ・連続して発生するイベントは間引き、最後の 1 回だけ処理する
+  //  ・各列の落下状態と残像を保ったままキャンバスサイズだけ変更する
+  //    （モバイルのアドレスバー出入りでも画面がリセットされない）
+  //  ・オープニング演出の途中で横幅が変わった場合のみ、従来どおり作り直す
+  let resizeTimerId = null;
+  const RESIZE_DEBOUNCE_MS = 150;
+
+  function handleResize() {
+    const newDpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    if (window.innerWidth === W && window.innerHeight === H && newDpr === dpr) return;
+
+    const newCols = Math.floor(window.innerWidth / fs);
+    if (!intro.done && newCols !== cols) {
       init();
-    });
-
-    // 指定秒数後にパネルを完全非表示にするタイマーをスタート
-    function startHideTimer() {
-      clearTimeout(hideTimerId);
-      hideTimerId = setTimeout(() => {
-        panel.classList.add('is-fully-hidden');
-      }, HIDE_DELAY_MS);
+      return;
     }
 
-    // パネルを再表示する
-    function showPanel() {
-      clearTimeout(hideTimerId);
-      panel.classList.remove('is-fully-hidden');
-      panelBody.classList.remove('is-collapsed');
-      toggleBtn.textContent = '非表示';
-    }
+    resizeCanvas();
 
-    // 非表示/表示ボタン押下時
-    toggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isCollapsed = panelBody.classList.toggle('is-collapsed');
-      if (isCollapsed) {
-        toggleBtn.textContent = '表示';
-        startHideTimer();
-      } else {
-        toggleBtn.textContent = '非表示';
-        clearTimeout(hideTimerId);
-        panel.classList.remove('is-fully-hidden');
+    // 列数の増減だけ反映（既存の列はそのまま落下を続ける）
+    if (newCols > cols) {
+      for (let i = cols; i < newCols; i++) {
+        const col = new Column(i);
+        col.isActive = intro.done;
+        columnsData.push(col);
       }
-    });
+    } else if (newCols < cols) {
+      columnsData.length = newCols;
+    }
+    cols = newCols;
 
-    // 画面（Canvas）をクリック／タップした時の再表示
-    canvas.addEventListener('click', () => {
-      if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
-        showPanel();
-      }
-    });
-
-    applyColor(); // 初期表示時もパネルのアクセントカラーを選択中の色に同期
-    applyCharSet(); // 初期表示時も文字セットのプルダウン選択状態を反映
-    initDraggable();
-    initSliderTouchPrevention();
+    render(); // 一時停止中でも新しいサイズで描き直す
   }
 
-  // PC用ドラッグ移動機能
-  function initDraggable() {
-    const panel = document.getElementById('draggable-panel');
-    const header = document.getElementById('panel-header');
-
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let initialLeft = 0, initialTop = 0;
-
-    header.addEventListener('mousedown', (e) => {
-      if (window.innerWidth <= 768) return;
-      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-
-      const rect = panel.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
-
-      panel.style.right = 'auto';
-      panel.style.bottom = 'auto';
-      panel.style.left = `${initialLeft}px`;
-      panel.style.top = `${initialTop}px`;
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {
-      if (!isDragging) return;
-
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      const maxLeft = window.innerWidth - panel.offsetWidth;
-      const maxTop = window.innerHeight - panel.offsetHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      panel.style.left = `${newLeft}px`;
-      panel.style.top = `${newTop}px`;
-    }
-
-    function onMouseUp() {
-      isDragging = false;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    }
-  }
-
-  // スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
-  // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
-  //   PCのマウス／カーソル操作はこの判定を通らないため、これまでと同じ挙動のまま）
-  // ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
-  //   衝突しないようにする（モバイル）
-  function initSliderTouchPrevention() {
-    const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
-    const THUMB_SIZE = 20; // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
-
-    function getThumbCenterX(slider, rect) {
-      const min = parseFloat(slider.min) || 0;
-      const max = parseFloat(slider.max) || 100;
-      const val = parseFloat(slider.value);
-      const percent = max > min ? (val - min) / (max - min) : 0;
-      const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
-      return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
-    }
-
-    const sliders = document.querySelectorAll('input[type="range"]');
-
-    sliders.forEach(slider => {
-      let startX = 0;
-      let startY = 0;
-      let isVertical = false;
-      let touchOnThumb = true;
-
-      slider.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isVertical = false;
-
-        const rect = slider.getBoundingClientRect();
-        const thumbX = getThumbCenterX(slider, rect);
-        const thumbY = rect.top + rect.height / 2;
-        const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
-        touchOnThumb = dist <= THUMB_HIT_RADIUS;
-
-        if (!touchOnThumb) {
-          // つまみ以外の場所へのタップ／ドラッグは、既定の
-          // 「触れた位置へ値をジャンプさせる」動作ごと無効化する
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      slider.addEventListener('touchmove', (e) => {
-        if (!touchOnThumb) {
-          e.preventDefault();
-          return;
-        }
-
-        if (isVertical) return;
-
-        const touch = e.touches[0];
-        const diffX = Math.abs(touch.clientX - startX);
-        const diffY = Math.abs(touch.clientY - startY);
-
-        if (diffY > diffX && diffY > 4) {
-          isVertical = true;
-          slider.style.pointerEvents = 'none';
-          setTimeout(() => {
-            slider.style.pointerEvents = 'auto';
-          }, 300);
-        }
-      }, { passive: false });
-    });
-  }
-
-  function togglePause() {
-    paused = !paused;
-    const pauseIcon = document.getElementById('pause-icon');
-    if (paused) {
-      // 再生アイコン（三角形）に切り替え
-      pauseIcon.innerHTML = '<path d="M7 4l14 8-14 8V4z"></path>';
-    } else {
-      // 一時停止アイコン（2本バー）に切り替え
-      pauseIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
-    }
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimerId);
+    resizeTimerId = setTimeout(() => {
+      handleResize();
+      panelDrag.clampIntoView(); // ドラッグで動かしたパネルが画面外に出ないように
+    }, RESIZE_DEBOUNCE_MS);
   });
-
-  window.addEventListener('resize', init);
 
   window.addEventListener('DOMContentLoaded', () => {
     initUI();
     init();
-    draw();
+    startLoop();
   });
 </script>
 </body>
