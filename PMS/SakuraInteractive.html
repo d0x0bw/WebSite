@@ -7,6 +7,7 @@
   <link rel="icon" href="../icon/favicon.png" type="image/png">
 
   <style>
+    /* 配色は桜色テーマを維持（STYLE.md の例外。DECISIONS.md 参照） */
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -15,14 +16,14 @@
     }
 
     body {
-      /* 初期背景色（JSで上書きされます） */
+      /* 初期背景色（JSで上書きされます）。
+         グラデーションは CSS の transition では補間されないため transition は付けない */
       background: linear-gradient(135deg, #dc143c 0%, #2b1020 100%);
       min-height: 100vh;
       overflow: hidden;
       width: 100vw;
       height: 100vh;
       font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-      transition: background 0.3s ease;
     }
 
     /* 全画面Canvas */
@@ -45,13 +46,12 @@
       z-index: 10;
       background: rgba(15, 23, 42, 0.88);
       color: #ffffff;
-      border: 1px solid rgba(251, 165, 209, 0.3); /* 桜のテーマ色に合わせたボーダー */
+      border: 1px solid rgba(251, 165, 209, 0.3);
       border-radius: 12px;
       padding: 0; /* ヘッダーを固定表示にするため、パディングはヘッダー／本文側に持たせる */
       width: 320px;
       max-height: calc(100vh - 32px);
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
       user-select: none;
@@ -71,9 +71,7 @@
     .control-panel::-webkit-scrollbar-thumb { background: rgba(251, 165, 209, 0.4); border-radius: 3px; }
 
     .panel-header {
-      /* スクロールしても常に見える位置に固定（sticky）。
-         親要素(.control-panel)のパディングを 0 にした分、
-         ここで上下左右のパディングを肩代わりしている */
+      /* スクロールしても常に見える位置に固定（sticky） */
       position: sticky;
       top: 0;
       z-index: 2;
@@ -120,6 +118,8 @@
     .icon-btn svg { width: 14px; height: 14px; }
 
     .toggle-btn { padding: 3px 10px; font-size: 0.75rem; height: 26px; }
+    .toggle-btn:hover { background: rgba(251, 165, 209, 0.15); }
+    .toggle-btn:active { transform: scale(0.96); }
 
     .control-section { margin-bottom: 14px; }
     .section-title {
@@ -155,10 +155,19 @@
 
     .panel-content.is-collapsed { display: none; }
 
+    /* キーボード操作時のフォーカス枠（STYLE.md の指定を桜色で適用） */
+    .icon-btn:focus-visible,
+    .toggle-btn:focus-visible,
+    .section-toggle:focus-visible,
+    .control-group input:focus-visible {
+      outline: 2px solid #FBA5D1;
+      outline-offset: 2px;
+    }
+
     @media (max-width: 768px) {
       .control-panel {
         top: auto !important; bottom: 16px !important; left: 16px !important; right: 16px !important;
-        width: auto !important; max-height: 35vh; border-radius: 16px; padding: 0;
+        width: auto !important; max-height: 30vh; border-radius: 16px; padding: 0;
       }
       .panel-header { cursor: default; margin: 0 0 6px; padding: 10px 14px 6px; border-radius: 16px 16px 0 0; }
       .panel-content { padding: 0 14px 10px; }
@@ -181,13 +190,13 @@
   <div class="panel-header" id="panel-header">
     <h3>🌸 桜 設定 ⠿</h3>
     <div class="header-controls">
-      <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
+      <button class="icon-btn" id="btn-reset-panel" type="button" title="初期値に戻す" aria-label="リセット">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
           <path d="M3 3v5h5"></path>
         </svg>
       </button>
-      <button class="toggle-btn" id="btn-toggle-panel">非表示</button>
+      <button class="toggle-btn" id="btn-toggle-panel" type="button" aria-controls="panel-body" aria-expanded="true" title="パネルの表示／非表示（Esc）">非表示</button>
     </div>
   </div>
 
@@ -202,11 +211,11 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>花びらの数: <span id="val-count">40</span>枚</label>
+          <label for="param-count">花びらの数: <span><span id="val-count">40</span>枚</span></label>
           <input type="range" id="param-count" min="1" max="250" value="40">
         </div>
         <div class="control-group">
-          <label>サイズ倍率: <span id="val-size">1.0</span>倍</label>
+          <label for="param-size">サイズ倍率: <span><span id="val-size">1.0</span>倍</span></label>
           <input type="range" id="param-size" min="0.2" max="3.0" step="0.1" value="1.0">
         </div>
       </div>
@@ -222,15 +231,15 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>外側の色</label>
-          <input type="color" id="param-outercolor" value="#FBA5D1">
+          <label for="param-outercolor">外側の色</label>
+          <input type="color" id="param-outercolor" value="#fba5d1">
         </div>
         <div class="control-group">
-          <label>内側の色</label>
-          <input type="color" id="param-innercolor" value="#FFD1EA">
+          <label for="param-innercolor">内側の色</label>
+          <input type="color" id="param-innercolor" value="#ffd1ea">
         </div>
         <div class="control-group">
-          <label>透明度（最大）: <span id="val-opacity">100</span>%</label>
+          <label for="param-opacity">透明度（最大）: <span><span id="val-opacity">100</span>%</span></label>
           <input type="range" id="param-opacity" min="10" max="100" value="100">
         </div>
       </div>
@@ -246,11 +255,11 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>落下・回転速度: <span id="val-speed">1.0</span>倍</label>
+          <label for="param-speed">落下・回転速度: <span><span id="val-speed">1.0</span>倍</span></label>
           <input type="range" id="param-speed" min="0.1" max="5.0" step="0.1" value="1.0">
         </div>
         <div class="control-group">
-          <label>風の強さ: <span id="val-wind">0.0</span></label>
+          <label for="param-wind">風の強さ: <span id="val-wind">0.0</span></label>
           <input type="range" id="param-wind" min="-5.0" max="5.0" step="0.1" value="0.0">
         </div>
       </div>
@@ -266,15 +275,15 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
+          <label for="param-hidedelay">完全非表示タイマー: <span><span id="val-hidedelay">3</span>秒</span></label>
           <input type="range" id="param-hidedelay" min="1" max="10" value="3">
         </div>
         <div class="control-group">
-          <label>背景色（上部）</label>
+          <label for="param-bgcolor1">背景色（上部）</label>
           <input type="color" id="param-bgcolor1" value="#dc143c">
         </div>
         <div class="control-group">
-          <label>背景色（下部）</label>
+          <label for="param-bgcolor2">背景色（下部）</label>
           <input type="color" id="param-bgcolor2" value="#2b1020">
         </div>
       </div>
@@ -283,289 +292,119 @@
 </div>
 
 <script>
+(() => {
+  'use strict';
+
   // ==========================================
-  // パラメータ初期値設定 (CONFIG)
+  // CONFIG（初期値・定数）
   // ==========================================
-  const defaultConfig = {
+  const DEFAULT_CONFIG = Object.freeze({
     petalCount: 40,
     sizeScale: 1.0,
-    outerColor: '#FBA5D1',
-    innerColor: '#FFD1EA',
+    outerColor: '#fba5d1',
+    innerColor: '#ffd1ea',
     maxOpacity: 1.0,
     speedScale: 1.0,
     windForce: 0.0,
-    hideDelay: 3, 
-    bgColor1: '#dc143c', // crimsonのHex
+    hideDelay: 3,         // 秒
+    bgColor1: '#dc143c',  // crimson
     bgColor2: '#2b1020'
-  };
+  });
 
-  const config = { ...defaultConfig };
+  const MOBILE_BREAKPOINT = 768;  // px。CSS の @media と同じ値にする
+  const FRAME_MS = 1000 / 60;     // 動きの基準（60fpsでの1コマの時間）
+  const MAX_FRAME_MS = 100;       // タブ復帰時などに花びらが飛ばないよう、1コマの経過時間に上限を設ける
 
-  // ==========================================
-  // UI コントロールロジック
-  // ==========================================
-  const controls = [
-    { id: 'param-count', key: 'petalCount', valId: 'val-count', type: 'int', onChange: adjustPetalCount },
-    { id: 'param-size', key: 'sizeScale', valId: 'val-size', type: 'float' },
-    { id: 'param-outercolor', key: 'outerColor', type: 'color' },
-    { id: 'param-innercolor', key: 'innerColor', type: 'color' },
-    { id: 'param-opacity', key: 'maxOpacity', valId: 'val-opacity', type: 'percent' },
-    { id: 'param-speed', key: 'speedScale', valId: 'val-speed', type: 'float' },
-    { id: 'param-wind', key: 'windForce', valId: 'val-wind', type: 'float' },
-    { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
-    { id: 'param-bgcolor1', key: 'bgColor1', type: 'color', onChange: updateBgColor },
-    { id: 'param-bgcolor2', key: 'bgColor2', type: 'color', onChange: updateBgColor }
+  // スライダー・色入力の定義
+  // type: int / float / percent（0〜100 を 0〜1 に変換） / color
+  // onChange の関数は下の LOGIC・UI 区画で定義（関数宣言なので先に参照できる）
+  const CONTROL_DEFS = [
+    { id: 'param-count',      key: 'petalCount', valId: 'val-count',     type: 'int',     onChange: adjustPetalCount },
+    { id: 'param-size',       key: 'sizeScale',  valId: 'val-size',      type: 'float' },
+    { id: 'param-outercolor', key: 'outerColor',                         type: 'color' },
+    { id: 'param-innercolor', key: 'innerColor',                         type: 'color' },
+    { id: 'param-opacity',    key: 'maxOpacity', valId: 'val-opacity',   type: 'percent' },
+    { id: 'param-speed',      key: 'speedScale', valId: 'val-speed',     type: 'float' },
+    { id: 'param-wind',       key: 'windForce',  valId: 'val-wind',      type: 'float' },
+    { id: 'param-hidedelay',  key: 'hideDelay',  valId: 'val-hidedelay', type: 'int' },
+    { id: 'param-bgcolor1',   key: 'bgColor1',                           type: 'color',   onChange: updateBgColor },
+    { id: 'param-bgcolor2',   key: 'bgColor2',                           type: 'color',   onChange: updateBgColor }
   ];
 
-  let hideTimerId = null;
+  // ==========================================
+  // STATE（実行中に変わる値）
+  // ==========================================
+  const config = { ...DEFAULT_CONFIG };
 
-  function initUI() {
-    controls.forEach(item => {
-      const input = document.getElementById(item.id);
-      const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+  const state = {
+    petals: [],
+    viewW: 0,        // 画面の幅（CSSピクセル）
+    viewH: 0,        // 画面の高さ（CSSピクセル）
+    lastTime: null,  // 前のコマの時刻（requestAnimationFrame の値）
+    hideTimerId: null
+  };
 
-      input.addEventListener('input', (e) => {
-        let val;
-        if (item.type === 'int') val = parseInt(e.target.value);
-        else if (item.type === 'float') val = parseFloat(e.target.value);
-        else if (item.type === 'percent') val = parseInt(e.target.value) / 100;
-        else val = e.target.value;
-
-        config[item.key] = val;
-
-        if (valDisplay) {
-          if (item.type === 'percent') valDisplay.textContent = Math.round(val * 100);
-          else if (item.type === 'float') valDisplay.textContent = val.toFixed(1);
-          else valDisplay.textContent = val;
-        }
-
-        if (item.onChange) item.onChange();
-      });
-    });
-
-    const toggleBtn = document.getElementById('btn-toggle-panel');
-    const resetBtn = document.getElementById('btn-reset-panel');
-    const panelBody = document.getElementById('panel-body');
-    const panel = document.getElementById('draggable-panel');
-    const canvas = document.getElementById('sakuraCanvas');
-
-    // 各セクションのアコーディオン開閉(他のセクションの開閉状態には影響しない)
-    document.querySelectorAll('.control-section').forEach(section => {
-      const toggle = section.querySelector('.section-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = section.classList.toggle('is-collapsed');
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
-      });
-    });
-
-    resetBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      Object.assign(config, defaultConfig);
-
-      controls.forEach(item => {
-        const input = document.getElementById(item.id);
-        const valDisplay = item.valId ? document.getElementById(item.valId) : null;
-        const defaultVal = defaultConfig[item.key];
-
-        if (item.type === 'percent') input.value = Math.round(defaultVal * 100);
-        else input.value = defaultVal;
-
-        if (valDisplay) {
-          if (item.type === 'percent') valDisplay.textContent = Math.round(defaultVal * 100);
-          else if (item.type === 'float') valDisplay.textContent = defaultVal.toFixed(1);
-          else valDisplay.textContent = defaultVal;
-        }
-
-        if (item.onChange) item.onChange();
-      });
-    });
-
-    function startHideTimer() {
-      clearTimeout(hideTimerId);
-      hideTimerId = setTimeout(() => {
-        panel.classList.add('is-fully-hidden');
-      }, config.hideDelay * 1000);
-    }
-
-    function showPanel() {
-      clearTimeout(hideTimerId);
-      panel.classList.remove('is-fully-hidden');
-      panelBody.classList.remove('is-collapsed');
-      toggleBtn.textContent = '非表示';
-    }
-
-    toggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isCollapsed = panelBody.classList.toggle('is-collapsed');
-      if (isCollapsed) {
-        toggleBtn.textContent = '表示';
-        startHideTimer(); 
-      } else {
-        toggleBtn.textContent = '非表示';
-        clearTimeout(hideTimerId);
-        panel.classList.remove('is-fully-hidden');
-      }
-    });
-
-    canvas.addEventListener('click', () => {
-      if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
-        showPanel();
-      }
-    });
-
-    initDraggable();
-    initSliderTouchPrevention();
-  }
-
-  function initDraggable() {
-    const panel = document.getElementById('draggable-panel');
-    const header = document.getElementById('panel-header');
-
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let initialLeft = 0, initialTop = 0;
-
-    header.addEventListener('mousedown', (e) => {
-      if (window.innerWidth <= 768) return;
-      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      const rect = panel.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
-
-      panel.style.right = 'auto';
-      panel.style.bottom = 'auto';
-      panel.style.left = `${initialLeft}px`;
-      panel.style.top = `${initialTop}px`;
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      let newLeft = Math.max(0, Math.min(initialLeft + dx, window.innerWidth - panel.offsetWidth));
-      let newTop = Math.max(0, Math.min(initialTop + dy, window.innerHeight - panel.offsetHeight));
-
-      panel.style.left = `${newLeft}px`;
-      panel.style.top = `${newTop}px`;
-    }
-
-    function onMouseUp() {
-      isDragging = false;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    }
-  }
-
-  // スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
-  // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
-  //   PCのマウス／カーソル操作はこの判定を通らないため、これまでと同じ挙動のまま）
-  // ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
-  //   衝突しないようにする（モバイル）
-  function initSliderTouchPrevention() {
-    const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
-    const THUMB_SIZE = 20; // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
-
-    function getThumbCenterX(slider, rect) {
-      const min = parseFloat(slider.min) || 0;
-      const max = parseFloat(slider.max) || 100;
-      const val = parseFloat(slider.value);
-      const percent = max > min ? (val - min) / (max - min) : 0;
-      const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
-      return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
-    }
-
-    const sliders = document.querySelectorAll('input[type="range"]');
-    sliders.forEach((slider) => {
-      let startX = 0, startY = 0, isVertical = false, touchOnThumb = true;
-
-      slider.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isVertical = false;
-
-        const rect = slider.getBoundingClientRect();
-        const thumbX = getThumbCenterX(slider, rect);
-        const thumbY = rect.top + rect.height / 2;
-        const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
-        touchOnThumb = dist <= THUMB_HIT_RADIUS;
-
-        if (!touchOnThumb) {
-          // つまみ以外の場所へのタップ／ドラッグは、既定の
-          // 「触れた位置へ値をジャンプさせる」動作ごと無効化する
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      slider.addEventListener('touchmove', (e) => {
-        if (!touchOnThumb) {
-          e.preventDefault();
-          return;
-        }
-        if (isVertical) return;
-        const touch = e.touches[0];
-        const diffX = Math.abs(touch.clientX - startX);
-        const diffY = Math.abs(touch.clientY - startY);
-        if (diffY > diffX && diffY > 4) {
-          isVertical = true;
-          slider.style.pointerEvents = 'none';
-          setTimeout(() => { slider.style.pointerEvents = 'auto'; }, 300);
-        }
-      }, { passive: false });
-    });
-  }
-
-  function updateBgColor() {
-    document.body.style.background = `linear-gradient(135deg, ${config.bgColor1} 0%, ${config.bgColor2} 100%)`;
-  }
+  // 画面部品への参照（INIT で設定）
+  const dom = {};
 
   // ==========================================
-  // Canvas & 桜描画ロジック
+  // STORAGE
   // ==========================================
-  const canvas = document.getElementById('sakuraCanvas');
-  const ctx = canvas.getContext('2d');
-  const petals = [];
+  // このアプリは設定を保存しない（2026-11-03 決定。DECISIONS.md 参照）
 
+  // ==========================================
+  // LOGIC（描画・計算）
+  // ==========================================
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+  }
+
+  // 高DPI対応：Canvas の実解像度を「画面サイズ × 拡大率」にし、
+  // 描画側は CSSピクセルのまま扱えるよう座標を拡大しておく
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    state.viewW = window.innerWidth;
+    state.viewH = window.innerHeight;
+    dom.canvas.width = Math.round(state.viewW * dpr);
+    dom.canvas.height = Math.round(state.viewH * dpr);
+    dom.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+
+  // ウィンドウを拡大率の違うモニターへ移したときにも解像度を合わせ直す
+  function watchDevicePixelRatio() {
+    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mq.addEventListener('change', () => {
+      resizeCanvas();
+      watchDevicePixelRatio();
+    }, { once: true });
+  }
 
   class Petal {
     constructor() {
+      this.size = 0;
+      this.opacity = 1;
       this.reset(true);
     }
 
     reset(isInit = false) {
-      // リアルタイム計算用のランダム係数を保持
+      // 設定値をリアルタイムに反映するため、ランダム係数だけを保持する
       this.randomSize = Math.random();
       this.randomSpeedY = Math.random();
       this.randomSpeedX = Math.random();
       this.randomAngular = Math.random();
       this.randomFlip = Math.random();
       this.randomOpacity = Math.random();
-      
-      this.x = Math.random() * canvas.width;
+
+      this.x = Math.random() * state.viewW;
       // 初期化時は画面全体、リセット時は画面外（上部）に配置
-      this.y = isInit ? Math.random() * canvas.height : -50; 
-      
+      this.y = isInit ? Math.random() * state.viewH : -50;
+
       this.angle = Math.random() * Math.PI * 2;
       this.flipAngle = Math.random() * Math.PI;
     }
 
-    update() {
-      // コントロールパネルの値を毎フレーム適用して計算
+    // f: 60fps を 1 としたときの経過時間の倍率（144Hz なら約 0.42）
+    update(f) {
       const minS = 10 * config.sizeScale;
       const maxS = 18 * config.sizeScale;
       this.size = this.randomSize * (maxS - minS) + minS;
@@ -583,28 +422,28 @@
       const minOp = Math.max(0, config.maxOpacity - 0.4);
       this.opacity = this.randomOpacity * (config.maxOpacity - minOp) + minOp;
 
-      // 座標更新
-      this.y += speedY;
-      this.x += Math.sin(this.y * 0.01) + speedX;
-      this.angle += angularSpeed;
-      this.flipAngle += flipSpeed;
+      // 座標更新（経過時間で補正）
+      this.y += speedY * f;
+      this.x += (Math.sin(this.y * 0.01) + speedX) * f;
+      this.angle += angularSpeed * f;
+      this.flipAngle += flipSpeed * f;
 
       // 画面外判定
-      if (this.y > canvas.height + this.size * 2 || this.x < -this.size * 3 || this.x > canvas.width + this.size * 3) {
+      if (this.y > state.viewH + this.size * 2 || this.x < -this.size * 3 || this.x > state.viewW + this.size * 3) {
         this.reset();
-        
+
         // 風が強い場合は横から出現させる
         if (config.windForce > 1.0 && Math.random() < 0.5) {
           this.x = -this.size * 2;
-          this.y = Math.random() * canvas.height;
+          this.y = Math.random() * state.viewH;
         } else if (config.windForce < -1.0 && Math.random() < 0.5) {
-          this.x = canvas.width + this.size * 2;
-          this.y = Math.random() * canvas.height;
+          this.x = state.viewW + this.size * 2;
+          this.y = Math.random() * state.viewH;
         }
       }
     }
 
-    draw() {
+    draw(ctx) {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle);
@@ -642,32 +481,292 @@
   }
 
   function adjustPetalCount() {
-    while (petals.length < config.petalCount) {
-      petals.push(new Petal());
+    while (state.petals.length < config.petalCount) {
+      state.petals.push(new Petal());
     }
-    if (petals.length > config.petalCount) {
-      petals.length = config.petalCount;
+    if (state.petals.length > config.petalCount) {
+      state.petals.length = config.petalCount;
     }
   }
 
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    petals.forEach((petal) => {
-      petal.update();
-      petal.draw();
-    });
+  function animate(now) {
+    const elapsed = state.lastTime === null
+      ? FRAME_MS
+      : clamp(now - state.lastTime, 0, MAX_FRAME_MS);
+    state.lastTime = now;
+    const f = elapsed / FRAME_MS;
+
+    const ctx = dom.ctx;
+    ctx.clearRect(0, 0, state.viewW, state.viewH);
+    for (const petal of state.petals) {
+      petal.update(f);
+      petal.draw(ctx);
+    }
     requestAnimationFrame(animate);
   }
 
   // ==========================================
-  // 初期化実行
+  // UI（パネル操作）
   // ==========================================
-  window.addEventListener('DOMContentLoaded', () => {
-    initUI();
+  function updateBgColor() {
+    document.body.style.background = `linear-gradient(135deg, ${config.bgColor1} 0%, ${config.bgColor2} 100%)`;
+  }
+
+  function parseControlValue(def, raw) {
+    switch (def.type) {
+      case 'int': return parseInt(raw, 10);
+      case 'float': return parseFloat(raw);
+      case 'percent': return parseInt(raw, 10) / 100;
+      default: return raw;
+    }
+  }
+
+  function formatControlValue(def, value) {
+    if (def.type === 'percent') return String(Math.round(value * 100));
+    if (def.type === 'float') return value.toFixed(1);
+    return String(value);
+  }
+
+  function updateValueDisplay(def) {
+    if (!def.valId) return;
+    document.getElementById(def.valId).textContent = formatControlValue(def, config[def.key]);
+  }
+
+  function initControls() {
+    CONTROL_DEFS.forEach((def) => {
+      const input = document.getElementById(def.id);
+      input.addEventListener('input', () => {
+        config[def.key] = parseControlValue(def, input.value);
+        updateValueDisplay(def);
+        if (def.onChange) def.onChange();
+      });
+    });
+  }
+
+  function resetConfig() {
+    Object.assign(config, DEFAULT_CONFIG);
+    const handlers = new Set();
+    CONTROL_DEFS.forEach((def) => {
+      const value = config[def.key];
+      document.getElementById(def.id).value = def.type === 'percent' ? String(Math.round(value * 100)) : String(value);
+      updateValueDisplay(def);
+      if (def.onChange) handlers.add(def.onChange);
+    });
+    handlers.forEach((fn) => fn());
+  }
+
+  // --- パネルの表示／非表示 ---
+  function isPanelOpen() {
+    return !dom.panel.classList.contains('is-fully-hidden') && !dom.panelBody.classList.contains('is-collapsed');
+  }
+
+  function startHideTimer() {
+    clearTimeout(state.hideTimerId);
+    state.hideTimerId = setTimeout(() => {
+      dom.panel.classList.add('is-fully-hidden');
+      state.hideTimerId = null;
+    }, config.hideDelay * 1000);
+  }
+
+  // 本文をたたみ、一定時間後にパネルごと消す
+  function collapsePanel() {
+    dom.panelBody.classList.add('is-collapsed');
+    dom.toggleBtn.textContent = '表示';
+    dom.toggleBtn.setAttribute('aria-expanded', 'false');
+    startHideTimer();
+  }
+
+  function showPanel() {
+    clearTimeout(state.hideTimerId);
+    state.hideTimerId = null;
+    dom.panel.classList.remove('is-fully-hidden');
+    dom.panelBody.classList.remove('is-collapsed');
+    dom.toggleBtn.textContent = '非表示';
+    dom.toggleBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function initPanelToggle() {
+    dom.toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dom.panelBody.classList.contains('is-collapsed')) showPanel();
+      else collapsePanel();
+    });
+
+    dom.resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetConfig();
+    });
+
+    dom.canvas.addEventListener('click', () => {
+      if (!isPanelOpen()) showPanel();
+    });
+
+    // Esc キーでも開閉する（STYLE.md 共通ルール）
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || e.isComposing) return;
+      if (isPanelOpen()) {
+        collapsePanel();
+      } else {
+        showPanel();
+        dom.toggleBtn.focus({ preventScroll: true }); // キーボードのままパネルを操作できるように
+      }
+    });
+  }
+
+  // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
+  function initAccordion() {
+    document.querySelectorAll('.control-section').forEach((section) => {
+      const toggle = section.querySelector('.section-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = section.classList.toggle('is-collapsed');
+        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+      });
+    });
+  }
+
+  // --- パネルのドラッグ移動（PCのみ） ---
+  function initDraggable() {
+    const panel = dom.panel;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    dom.header.addEventListener('mousedown', (e) => {
+      if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+      if (e.target.closest('button')) return;
+
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = panel.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.left = `${initialLeft}px`;
+      panel.style.top = `${initialTop}px`;
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      const newLeft = clamp(initialLeft + e.clientX - startX, 0, Math.max(0, window.innerWidth - panel.offsetWidth));
+      const newTop = clamp(initialTop + e.clientY - startY, 0, Math.max(0, window.innerHeight - panel.offsetHeight));
+      panel.style.left = `${newLeft}px`;
+      panel.style.top = `${newTop}px`;
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+  }
+
+  // ドラッグで動かしたパネルが、ウィンドウ縮小後に画面外へ取り残されないようにする
+  function clampPanelIntoView() {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) return; // スマホ幅では CSS が位置を固定する
+    const panel = dom.panel;
+    if (!panel.style.left) return; // 一度もドラッグしていない（右上固定のまま）なら不要
+
+    const left = clamp(parseFloat(panel.style.left) || 0, 0, Math.max(0, window.innerWidth - panel.offsetWidth));
+    const top = clamp(parseFloat(panel.style.top) || 0, 0, Math.max(0, window.innerHeight - panel.offsetHeight));
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+  }
+
+  // スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
+  // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
+  //   PCのマウス操作はこの判定を通らないため、挙動は変わらない）
+  // ＋ つまみを掴んでいても、縦スワイプはページスクロールと衝突しないようにする（モバイル）
+  function initSliderTouchPrevention() {
+    const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
+    const THUMB_SIZE = 20;       // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
+
+    function getThumbCenterX(slider, rect) {
+      const min = parseFloat(slider.min) || 0;
+      const max = parseFloat(slider.max) || 100;
+      const val = parseFloat(slider.value);
+      const percent = max > min ? (val - min) / (max - min) : 0;
+      const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
+      return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
+    }
+
+    document.querySelectorAll('input[type="range"]').forEach((slider) => {
+      let startX = 0, startY = 0, isVertical = false, touchOnThumb = true;
+
+      slider.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isVertical = false;
+
+        const rect = slider.getBoundingClientRect();
+        const thumbX = getThumbCenterX(slider, rect);
+        const thumbY = rect.top + rect.height / 2;
+        touchOnThumb = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY) <= THUMB_HIT_RADIUS;
+
+        if (!touchOnThumb) {
+          // つまみ以外へのタップ／ドラッグは「触れた位置へ値をジャンプさせる」既定動作ごと無効化
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      slider.addEventListener('touchmove', (e) => {
+        if (!touchOnThumb) {
+          e.preventDefault();
+          return;
+        }
+        if (isVertical) return;
+        const touch = e.touches[0];
+        const diffX = Math.abs(touch.clientX - startX);
+        const diffY = Math.abs(touch.clientY - startY);
+        if (diffY > diffX && diffY > 4) {
+          isVertical = true;
+          slider.style.pointerEvents = 'none';
+          setTimeout(() => { slider.style.pointerEvents = 'auto'; }, 300);
+        }
+      }, { passive: false });
+    });
+  }
+
+  // ==========================================
+  // INIT
+  // ==========================================
+  function init() {
+    dom.canvas = document.getElementById('sakuraCanvas');
+    dom.ctx = dom.canvas.getContext('2d');
+    dom.panel = document.getElementById('draggable-panel');
+    dom.header = document.getElementById('panel-header');
+    dom.panelBody = document.getElementById('panel-body');
+    dom.toggleBtn = document.getElementById('btn-toggle-panel');
+    dom.resetBtn = document.getElementById('btn-reset-panel');
+
+    resizeCanvas();
+    watchDevicePixelRatio();
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      clampPanelIntoView();
+    });
+
+    initControls();
+    initPanelToggle();
+    initAccordion();
+    initDraggable();
+    initSliderTouchPrevention();
+
     updateBgColor();
     adjustPetalCount();
-    animate();
-  });
+    requestAnimationFrame(animate);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
 </script>
 
 </body>
