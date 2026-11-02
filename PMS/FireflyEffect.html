@@ -23,7 +23,7 @@
       transition: background-color 0.3s ease;
     }
 
-    /* 全画面Canvas */
+    /* 全画面Canvas（実際の描画解像度はJSで devicePixelRatio に合わせる） */
     #effect-canvas {
       position: fixed;
       top: 0;
@@ -54,7 +54,6 @@
       backdrop-filter: blur(10px);
       user-select: none;
       touch-action: pan-y; /* 垂直スワイプ（スクロール）を許可 */
-      /* フェードイン・フェードアウト用アニメーション設定 */
       opacity: 1;
       visibility: visible;
       transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -76,9 +75,7 @@
     }
 
     .panel-header {
-      /* スクロールしても常に見える位置に固定（sticky）。
-         親要素(.control-panel)のパディングを 0 にした分、
-         ここで上下左右のパディングを肩代わりしている */
+      /* スクロールしても常に見える位置に固定（sticky） */
       position: sticky;
       top: 0;
       z-index: 2;
@@ -96,6 +93,10 @@
 
     .panel-content {
       padding: 0 18px 16px;
+    }
+
+    .panel-content.is-collapsed {
+      display: none;
     }
 
     .panel-header h3 {
@@ -126,12 +127,15 @@
       transition: background-color 0.2s ease, transform 0.2s ease;
     }
 
-    .icon-btn:hover {
+    .icon-btn:hover,
+    .toggle-btn:hover,
+    .text-btn:hover {
       background: rgba(192, 234, 46, 0.15);
     }
 
-    .icon-btn:active {
-      transform: scale(0.92);
+    .icon-btn:active,
+    .text-btn:active {
+      transform: scale(0.96);
     }
 
     .icon-btn svg {
@@ -148,6 +152,55 @@
       font-size: 0.75rem;
       height: 26px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    /* 文字入りの汎用ボタン（エクスポート／インポートなど） */
+    .text-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(192, 234, 46, 0.4);
+      color: #c0ea2e;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .io-note {
+      margin: 0 0 8px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    .io-status {
+      margin: 8px 0 0;
+      min-height: 1.2em;
+      font-size: 0.72rem;
+      color: #c0ea2e;
+    }
+
+    .io-status.is-error {
+      color: #f87171;
+    }
+
+    /* キーボード操作時のフォーカス枠（マウス操作時は出ない） */
+    .section-toggle:focus-visible,
+    .icon-btn:focus-visible,
+    .toggle-btn:focus-visible,
+    .text-btn:focus-visible,
+    .control-group input:focus-visible {
+      outline: 2px solid #c0ea2e;
+      outline-offset: 2px;
+      border-radius: 4px;
     }
 
     .control-section {
@@ -226,10 +279,6 @@
       background: none;
     }
 
-    .panel-content.is-collapsed {
-      display: none;
-    }
-
     /* レスポンシブ表示 (幅768px以下) */
     @media (max-width: 768px) {
       .control-panel {
@@ -294,17 +343,22 @@
 
 <canvas id="effect-canvas"></canvas>
 
+<!--
+  スライダーの min / max / step / 初期値 と数値表示は、
+  すべて JS の CONFIG（DEFAULT_CONFIG と CONTROLS）から流し込む。
+  ここには書かないこと（初期値の二重管理を防ぐため）。
+-->
 <div class="control-panel" id="draggable-panel">
   <div class="panel-header" id="panel-header">
     <h3>✨ 蛍 設定 ⠿</h3>
     <div class="header-controls">
-      <button class="icon-btn" id="btn-reset-panel" title="初期値に戻す" aria-label="リセット">
+      <button class="icon-btn" id="btn-reset-panel" type="button" title="初期値に戻す" aria-label="リセット">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
           <path d="M3 3v5h5"></path>
         </svg>
       </button>
-      <button class="toggle-btn" id="btn-toggle-panel">非表示</button>
+      <button class="toggle-btn" id="btn-toggle-panel" type="button" title="Escキーでも切り替えできます">非表示</button>
     </div>
   </div>
 
@@ -319,16 +373,16 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>蛍の数: <span id="val-count">35</span>匹</label>
-          <input type="range" id="param-count" min="1" max="250" value="35">
+          <label for="param-count">蛍の数: <span><span id="val-count"></span>匹</span></label>
+          <input type="range" id="param-count">
         </div>
         <div class="control-group">
-          <label>核サイズ（大きさ）: <span id="val-radius">1.3</span>px</label>
-          <input type="range" id="param-radius" min="0.5" max="4.0" step="0.1" value="1.3">
+          <label for="param-radius">核サイズ（大きさ）: <span><span id="val-radius"></span>px</span></label>
+          <input type="range" id="param-radius">
         </div>
         <div class="control-group">
-          <label>光の広がり範囲: <span id="val-glow">1.0</span>倍</label>
-          <input type="range" id="param-glow" min="0.2" max="3.0" step="0.1" value="1.0">
+          <label for="param-glow">光の広がり範囲: <span><span id="val-glow"></span>倍</span></label>
+          <input type="range" id="param-glow">
         </div>
       </div>
     </div>
@@ -343,16 +397,16 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>基本の色相 (Hue): <span id="val-hue">75</span>°</label>
-          <input type="range" id="param-hue" min="0" max="360" value="75">
+          <label for="param-hue">基本の色相 (Hue): <span><span id="val-hue"></span>°</span></label>
+          <input type="range" id="param-hue">
         </div>
         <div class="control-group">
-          <label>色の個体差（ばらつき）: <span id="val-huerange">30</span>°</label>
-          <input type="range" id="param-huerange" min="0" max="90" value="30">
+          <label for="param-huerange">色の個体差（ばらつき）: <span><span id="val-huerange"></span>°</span></label>
+          <input type="range" id="param-huerange">
         </div>
         <div class="control-group">
-          <label>発光強度: <span id="val-brightness">1.0</span>倍</label>
-          <input type="range" id="param-brightness" min="0.2" max="2.5" step="0.1" value="1.0">
+          <label for="param-brightness">発光強度: <span><span id="val-brightness"></span>倍</span></label>
+          <input type="range" id="param-brightness">
         </div>
       </div>
     </div>
@@ -367,16 +421,16 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>移動速度: <span id="val-speed">1.0</span>倍</label>
-          <input type="range" id="param-speed" min="0.0" max="3.0" step="0.1" value="1.0">
+          <label for="param-speed">移動速度: <span><span id="val-speed"></span>倍</span></label>
+          <input type="range" id="param-speed">
         </div>
         <div class="control-group">
-          <label>浮遊の揺らぎ (Wobble): <span id="val-wobble">1.0</span>倍</label>
-          <input type="range" id="param-wobble" min="0.0" max="3.0" step="0.1" value="1.0">
+          <label for="param-wobble">浮遊の揺らぎ (Wobble): <span><span id="val-wobble"></span>倍</span></label>
+          <input type="range" id="param-wobble">
         </div>
         <div class="control-group">
-          <label>上昇傾向（上昇力）: <span id="val-rise">-0.08</span></label>
-          <input type="range" id="param-rise" min="-0.30" max="0.10" step="0.02" value="-0.08">
+          <label for="param-rise">上昇傾向（上昇力）: <span id="val-rise"></span></label>
+          <input type="range" id="param-rise">
         </div>
       </div>
     </div>
@@ -391,12 +445,12 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>点滅周期速度: <span id="val-duration">1.0</span>倍</label>
-          <input type="range" id="param-duration" min="0.2" max="3.0" step="0.1" value="1.0">
+          <label for="param-duration">点滅周期速度: <span><span id="val-duration"></span>倍</span></label>
+          <input type="range" id="param-duration">
         </div>
         <div class="control-group">
-          <label>長光個体の割合: <span id="val-longratio">30</span>%</label>
-          <input type="range" id="param-longratio" min="0" max="100" value="30">
+          <label for="param-longratio">長光個体の割合: <span><span id="val-longratio"></span>%</span></label>
+          <input type="range" id="param-longratio">
         </div>
       </div>
     </div>
@@ -411,421 +465,772 @@
       </button>
       <div class="section-body">
         <div class="control-group">
-          <label>完全非表示タイマー: <span id="val-hidedelay">3</span>秒</label>
-          <input type="range" id="param-hidedelay" min="1" max="10" value="3">
+          <label for="param-hidedelay">完全非表示タイマー: <span><span id="val-hidedelay"></span>秒</span></label>
+          <input type="range" id="param-hidedelay">
         </div>
         <div class="control-group">
-          <label>背景カラー</label>
-          <input type="color" id="param-bgcolor" value="#070d16">
+          <label for="param-bgcolor">背景カラー</label>
+          <input type="color" id="param-bgcolor">
         </div>
+      </div>
+    </div>
+
+    <!-- 6. 設定の保存（JSONエクスポート／インポート） -->
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 設定の保存</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <p class="io-note">設定はこのブラウザに自動保存されます。バックアップや別PCへの移行にはJSONファイルを使ってください。</p>
+        <div class="button-row">
+          <button class="text-btn" id="btn-export" type="button">エクスポート</button>
+          <button class="text-btn" id="btn-import" type="button">インポート</button>
+        </div>
+        <input type="file" id="file-import" accept=".json,application/json" hidden>
+        <p class="io-status" id="io-status" role="status" aria-live="polite"></p>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // パラメータ初期値設定オブジェクト
-  const defaultConfig = {
-    count: 35,
-    baseRadius: 1.3,
-    glowScale: 1.0,
-    hue: 75,
-    hueRange: 30,
-    brightnessScale: 1.0,
-    speedScale: 1.0,
-    wobbleScale: 1.0,
-    riseBias: -0.08,
-    durationScale: 1.0,
-    longGlowRatio: 0.3,
-    hideDelay: 3, // 自動完全隠蔽までの秒数設定
-    bgColor: '#070d16'
+'use strict';
+
+// ============================================================
+// CONFIG：定数・初期値・コントロール定義
+//   初期値は DEFAULT_CONFIG の1か所だけで管理する
+// ============================================================
+const APP_NAME = 'FireflyEffect';
+const STORAGE_VERSION = 1;                                         // データ構造を変えたら上げる
+const STORAGE_KEY = `${APP_NAME}:v${STORAGE_VERSION}:settings`;    // 例: FireflyEffect:v1:settings
+const SAVE_DELAY_MS = 300;        // スライダー操作中の保存をまとめる待ち時間
+const STATUS_CLEAR_MS = 4000;     // 入出力メッセージの表示時間
+const BASE_FPS = 60;              // 動きの速さの基準（60fps時に従来と同じ見た目）
+const MAX_DELTA_FRAMES = 3;       // タブ復帰時などに一気に進みすぎないための上限（フレーム数換算）
+const MOBILE_BREAKPOINT = 768;    // CSSの @media (max-width: 768px) と揃える
+
+const DEFAULT_CONFIG = Object.freeze({
+  count: 35,
+  baseRadius: 1.3,
+  glowScale: 1.0,
+  hue: 75,
+  hueRange: 30,
+  brightnessScale: 1.0,
+  speedScale: 1.0,
+  wobbleScale: 1.0,
+  riseBias: -0.08,
+  durationScale: 1.0,
+  longGlowRatio: 0.3,   // 0〜1（画面上は%表示）
+  hideDelay: 3,         // 自動完全非表示までの秒数
+  bgColor: '#070d16'
+});
+
+// スライダーの定義。min / max / step は「画面上の値」の単位で書く（percent は 0〜100）
+//   type: int / float / percent / color
+//   digits: 数値表示の小数点以下の桁数（float のみ）
+const CONTROLS = [
+  { id: 'param-count',      key: 'count',           valId: 'val-count',      type: 'int',     min: 1,     max: 250,  step: 1,    onChange: adjustParticleCount },
+  { id: 'param-radius',     key: 'baseRadius',      valId: 'val-radius',     type: 'float',   min: 0.5,   max: 4.0,  step: 0.1,  digits: 1 },
+  { id: 'param-glow',       key: 'glowScale',       valId: 'val-glow',       type: 'float',   min: 0.2,   max: 3.0,  step: 0.1,  digits: 1 },
+  { id: 'param-hue',        key: 'hue',             valId: 'val-hue',        type: 'int',     min: 0,     max: 360,  step: 1 },
+  { id: 'param-huerange',   key: 'hueRange',        valId: 'val-huerange',   type: 'int',     min: 0,     max: 90,   step: 1 },
+  { id: 'param-brightness', key: 'brightnessScale', valId: 'val-brightness', type: 'float',   min: 0.2,   max: 2.5,  step: 0.1,  digits: 1 },
+  { id: 'param-speed',      key: 'speedScale',      valId: 'val-speed',      type: 'float',   min: 0.0,   max: 3.0,  step: 0.1,  digits: 1 },
+  { id: 'param-wobble',     key: 'wobbleScale',     valId: 'val-wobble',     type: 'float',   min: 0.0,   max: 3.0,  step: 0.1,  digits: 1 },
+  { id: 'param-rise',       key: 'riseBias',        valId: 'val-rise',       type: 'float',   min: -0.30, max: 0.10, step: 0.02, digits: 2 },
+  { id: 'param-duration',   key: 'durationScale',   valId: 'val-duration',   type: 'float',   min: 0.2,   max: 3.0,  step: 0.1,  digits: 1 },
+  { id: 'param-longratio',  key: 'longGlowRatio',   valId: 'val-longratio',  type: 'percent', min: 0,     max: 100,  step: 1 },
+  { id: 'param-hidedelay',  key: 'hideDelay',       valId: 'val-hidedelay',  type: 'int',     min: 1,     max: 10,   step: 1 },
+  { id: 'param-bgcolor',    key: 'bgColor',                                  type: 'color',   onChange: updateBgColor }
+];
+
+
+// ============================================================
+// STATE：実行中に変化する値
+// ============================================================
+const config = { ...DEFAULT_CONFIG };   // 現在の設定
+
+const state = {
+  particles: [],
+  width: 0,             // 画面サイズ（CSSピクセル）
+  height: 0,
+  dpr: 1,               // devicePixelRatio（Windowsの表示スケール 125% なら 1.25）
+  lastTime: null,       // 前フレームの時刻（ms）
+  hideTimerId: null,
+  saveTimerId: null,
+  statusTimerId: null
+};
+
+const dom = {};         // よく使うDOM要素（INITで取得）
+
+
+// ============================================================
+// STORAGE：localStorage への保存と JSON エクスポート／インポート
+//   保存形式: { version: 1, settings: { ...config } }
+// ============================================================
+
+// 画面上の値を min〜max に収め、step の刻みに揃える
+function clampAndSnap(ctrl, inputValue) {
+  let v = Number(inputValue);
+  if (!Number.isFinite(v)) return null;
+  v = Math.min(ctrl.max, Math.max(ctrl.min, v));
+  v = Math.round((v - ctrl.min) / ctrl.step) * ctrl.step + ctrl.min;
+  return Number(v.toFixed(6)); // 0.1 + 0.2 のような小数誤差を除く
+}
+
+// 読み込んだ設定を検証し、不足・不正な項目は初期値で補う
+function sanitizeSettings(raw) {
+  const result = { ...DEFAULT_CONFIG };
+  if (!raw || typeof raw !== 'object') return result;
+
+  for (const ctrl of CONTROLS) {
+    const value = raw[ctrl.key];
+    if (value === undefined) continue;
+
+    if (ctrl.type === 'color') {
+      if (typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)) {
+        result[ctrl.key] = value.toLowerCase();
+      }
+      continue;
+    }
+
+    const snapped = clampAndSnap(ctrl, toInputValue(ctrl, value));
+    if (snapped !== null) result[ctrl.key] = fromInputValue(ctrl, snapped);
+  }
+  return result;
+}
+
+// 保存データを現在の形式に変換する
+//   将来 STORAGE_VERSION を 2 に上げるときは、ここに v1 → v2 の変換を追加する
+function migrateSettings(data) {
+  if (!data || typeof data !== 'object') return null;
+  const version = Number(data.version) || 1;
+  if (version > STORAGE_VERSION) return null; // 新しすぎる形式は読まない
+  return data.settings ?? null;
+}
+
+function loadSettings() {
+  try {
+    const text = localStorage.getItem(STORAGE_KEY);
+    if (!text) return { ...DEFAULT_CONFIG };
+    return sanitizeSettings(migrateSettings(JSON.parse(text)));
+  } catch (err) {
+    console.warn('設定の読み込みに失敗したため初期値を使います', err);
+    return { ...DEFAULT_CONFIG };
+  }
+}
+
+function saveSettingsNow() {
+  clearTimeout(state.saveTimerId);
+  state.saveTimerId = null;
+  try {
+    const payload = { version: STORAGE_VERSION, settings: { ...config } };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn('設定の保存に失敗しました', err);
+  }
+}
+
+// スライダー操作中は保存をまとめ、操作が止まってから1回だけ保存する
+function scheduleSave() {
+  clearTimeout(state.saveTimerId);
+  state.saveTimerId = setTimeout(saveSettingsNow, SAVE_DELAY_MS);
+}
+
+// 保存待ちが残っていれば即保存（ページを閉じる直前用）
+function flushPendingSave() {
+  if (state.saveTimerId !== null) saveSettingsNow();
+}
+
+function formatDateStamp(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+}
+
+function exportSettings() {
+  const payload = {
+    app: APP_NAME,
+    version: STORAGE_VERSION,
+    exportedAt: new Date().toISOString(),
+    settings: { ...config }
   };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${APP_NAME}-settings-${formatDateStamp(new Date())}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
-  // 現在の設定（初期値でコピー複製）
-  const config = { ...defaultConfig };
+// JSONファイルを読み、検証済みの設定を返す（問題があれば Error を投げる）
+async function readSettingsFile(file) {
+  const text = await file.text();
 
-  const controls = [
-    { id: 'param-count', key: 'count', valId: 'val-count', type: 'int', onChange: adjustParticleCount },
-    { id: 'param-radius', key: 'baseRadius', valId: 'val-radius', type: 'float' },
-    { id: 'param-glow', key: 'glowScale', valId: 'val-glow', type: 'float' },
-    { id: 'param-hue', key: 'hue', valId: 'val-hue', type: 'int', onChange: updateAllHues },
-    { id: 'param-huerange', key: 'hueRange', valId: 'val-huerange', type: 'int', onChange: updateAllHues },
-    { id: 'param-brightness', key: 'brightnessScale', valId: 'val-brightness', type: 'float' },
-    { id: 'param-speed', key: 'speedScale', valId: 'val-speed', type: 'float' },
-    { id: 'param-wobble', key: 'wobbleScale', valId: 'val-wobble', type: 'float' },
-    { id: 'param-rise', key: 'riseBias', valId: 'val-rise', type: 'float' },
-    { id: 'param-duration', key: 'durationScale', valId: 'val-duration', type: 'float' },
-    { id: 'param-longratio', key: 'longGlowRatio', valId: 'val-longratio', type: 'percent' },
-    { id: 'param-hidedelay', key: 'hideDelay', valId: 'val-hidedelay', type: 'int' },
-    { id: 'param-bgcolor', key: 'bgColor', type: 'color', onChange: updateBgColor }
-  ];
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error('JSONファイルとして読み込めませんでした');
+  }
 
-  let hideTimerId = null;
+  if (!data || typeof data !== 'object') {
+    throw new Error('ファイルの形式が正しくありません');
+  }
+  if (data.app !== undefined && data.app !== APP_NAME) {
+    throw new Error('このアプリの設定ファイルではありません');
+  }
+  if (Number(data.version) > STORAGE_VERSION) {
+    throw new Error('新しい形式のファイルのため読み込めません');
+  }
 
-  function initUI() {
-    controls.forEach(item => {
-      const input = document.getElementById(item.id);
-      const valDisplay = item.valId ? document.getElementById(item.valId) : null;
+  const settings = migrateSettings(data);
+  if (!settings || typeof settings !== 'object') {
+    throw new Error('設定データが見つかりません');
+  }
+  return sanitizeSettings(settings);
+}
 
-      input.addEventListener('input', (e) => {
-        let val;
-        if (item.type === 'int') val = parseInt(e.target.value);
-        else if (item.type === 'float') val = parseFloat(e.target.value);
-        else if (item.type === 'percent') val = parseInt(e.target.value) / 100;
-        else val = e.target.value;
 
-        config[item.key] = val;
+// ============================================================
+// LOGIC：蛍の生成・更新・描画
+//   時間の単位は「60fps換算のフレーム数」。dt=1 が 1/60秒
+// ============================================================
 
-        if (valDisplay) {
-          if (item.type === 'percent') valDisplay.textContent = Math.round(val * 100);
-          else if (item.type === 'float') valDisplay.textContent = val.toFixed(1);
-          else valDisplay.textContent = val;
-        }
+function randomIdleDuration() {
+  return 60 + Math.random() * 150;
+}
 
-        if (item.onChange) item.onChange();
-      });
-    });
+function createParticle() {
+  const p = {
+    x: Math.random() * state.width,
+    y: Math.random() * state.height,
+    radiusOffset: Math.random() * 0.4 - 0.2,
+    speedX: (Math.random() - 0.5) * 0.5,
+    speedY: (Math.random() - 0.5) * 0.5,
+    hueOffset: Math.random() - 0.5,   // 色のずらし幅の割合（-0.5〜0.5）。実際の色は描画時に計算
+    longRoll: Math.random(),          // 長光判定用の固定乱数。これが割合未満なら長光個体
+    isLongGlow: false,
+    wobble: Math.random() * Math.PI * 2,
+    flicker: 0.92 + Math.random() * 0.08,
+    flickerTimer: 0,
 
-    const toggleBtn = document.getElementById('btn-toggle-panel');
-    const resetBtn = document.getElementById('btn-reset-panel');
-    const panelBody = document.getElementById('panel-body');
-    const panel = document.getElementById('draggable-panel');
-    const canvas = document.getElementById('effect-canvas');
+    phase: 'idle',
+    phaseTimer: Math.random() * 90,
+    idleDuration: randomIdleDuration(),
+    riseDuration: 8 + Math.random() * 10,
+    peakShort: 4 + Math.random() * 8,    // 通常個体の最大光の長さ
+    peakLong: 20 + Math.random() * 14,   // 長光個体の最大光の長さ
+    fallBase: 25 + Math.random() * 30,   // 消えていく長さ（長光個体は +10）
+    brightness: 0
+  };
+  p.isLongGlow = p.longRoll < config.longGlowRatio;
+  return p;
+}
 
-    // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
-    document.querySelectorAll('.control-section').forEach(section => {
-      const toggle = section.querySelector('.section-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = section.classList.toggle('is-collapsed');
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
-      });
-    });
+function adjustParticleCount() {
+  while (state.particles.length < config.count) {
+    state.particles.push(createParticle());
+  }
+  if (state.particles.length > config.count) {
+    state.particles.length = config.count;
+  }
+}
 
-    // リセットボタン押下時
-    resetBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      Object.assign(config, defaultConfig);
+// 点滅の状態（idle → rising → peak → falling → idle）と位置を進める
+function updateParticle(p, dt) {
+  const scale = config.durationScale;
+  const idleDur = p.idleDuration * scale;
+  const riseDur = p.riseDuration * scale;
+  const peakDur = (p.isLongGlow ? p.peakLong : p.peakShort) * scale;
+  const fallDur = ((p.isLongGlow ? 10 : 0) + p.fallBase) * scale;
 
-      controls.forEach(item => {
-        const input = document.getElementById(item.id);
-        const valDisplay = item.valId ? document.getElementById(item.valId) : null;
-        const defaultVal = defaultConfig[item.key];
+  p.phaseTimer += dt;
 
-        if (item.type === 'percent') input.value = Math.round(defaultVal * 100);
-        else input.value = defaultVal;
-
-        if (valDisplay) {
-          if (item.type === 'percent') valDisplay.textContent = Math.round(defaultVal * 100);
-          else if (item.type === 'float') valDisplay.textContent = defaultVal.toFixed(1);
-          else valDisplay.textContent = defaultVal;
-        }
-
-        if (item.onChange) item.onChange();
-      });
-    });
-
-    // 指定秒数後にパネルを完全非表示にするタイマーをスタート
-    function startHideTimer() {
-      clearTimeout(hideTimerId);
-      hideTimerId = setTimeout(() => {
-        panel.classList.add('is-fully-hidden');
-      }, config.hideDelay * 1000);
-    }
-
-    // パネルを再表示する
-    function showPanel() {
-      clearTimeout(hideTimerId);
-      panel.classList.remove('is-fully-hidden');
-      panelBody.classList.remove('is-collapsed');
-      toggleBtn.textContent = '非表示';
-    }
-
-    // 非表示/表示ボタン押下時
-    toggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isCollapsed = panelBody.classList.toggle('is-collapsed');
-      if (isCollapsed) {
-        toggleBtn.textContent = '表示';
-        startHideTimer(); // 折りたたまれたらカウントダウン開始
-      } else {
-        toggleBtn.textContent = '非表示';
-        clearTimeout(hideTimerId);
-        panel.classList.remove('is-fully-hidden');
+  switch (p.phase) {
+    case 'idle':
+      p.brightness = 0;
+      if (p.phaseTimer >= idleDur) {
+        p.phase = 'rising';
+        p.phaseTimer = 0;
+        // 光り始めるたびに長光かどうかを判定し直す（割合スライダーを次の点滅から反映）
+        p.isLongGlow = p.longRoll < config.longGlowRatio;
       }
-    });
-
-    // 画面（Canvas）をクリック／タップした時の再表示
-    canvas.addEventListener('click', () => {
-      if (panel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed')) {
-        showPanel();
+      break;
+    case 'rising':
+      p.brightness = Math.min(1, p.phaseTimer / Math.max(1, riseDur));
+      if (p.phaseTimer >= riseDur) { p.phase = 'peak'; p.phaseTimer = 0; }
+      break;
+    case 'peak':
+      p.brightness = 1;
+      if (p.phaseTimer >= peakDur) { p.phase = 'falling'; p.phaseTimer = 0; }
+      break;
+    case 'falling':
+      p.brightness = Math.max(0, 1 - p.phaseTimer / Math.max(1, fallDur));
+      if (p.phaseTimer >= fallDur) {
+        p.phase = 'idle';
+        p.phaseTimer = 0;
+        p.idleDuration = randomIdleDuration();
       }
-    });
-
-    initDraggable();
-    initSliderTouchPrevention();
+      break;
   }
 
-  // PC用ドラッグ移動機能
-  function initDraggable() {
-    const panel = document.getElementById('draggable-panel');
-    const header = document.getElementById('panel-header');
+  // ちらつき：60fps換算で1フレームごとに値を更新（リフレッシュレートに依存させない）
+  p.flickerTimer += dt;
+  if (p.flickerTimer >= 1) {
+    p.flickerTimer %= 1;
+    p.flicker = 0.92 + Math.random() * 0.08;
+  }
 
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let initialLeft = 0, initialTop = 0;
+  // 移動
+  p.wobble += 0.02 * config.wobbleScale * dt;
+  p.x += (p.speedX + Math.sin(p.wobble) * 0.15 * config.wobbleScale) * config.speedScale * dt;
+  p.y += (p.speedY + config.riseBias + Math.cos(p.wobble * 0.8) * 0.15 * config.wobbleScale) * config.speedScale * dt;
 
-    header.addEventListener('mousedown', (e) => {
-      if (window.innerWidth <= 768) return;
-      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+  // 画面端で反対側へ回り込む
+  if (p.x < 0) p.x = state.width;
+  if (p.x > state.width) p.x = 0;
+  if (p.y < 0) p.y = state.height;
+  if (p.y > state.height) p.y = 0;
+}
 
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
+function drawParticle(ctx, p) {
+  const brightness = p.brightness * p.flicker * config.brightnessScale;
+  const glowOpacity = Math.max(0.02, brightness);
+  const coreLightness = 55 + Math.min(1, brightness) * 40;
+  const radius = Math.max(0.3, config.baseRadius + p.radiusOffset);
+  const hue = config.hue + p.hueOffset * config.hueRange;
 
-      const rect = panel.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
+  // 外側の光（グロー）
+  const glowRadius = radius * (5 + brightness * 8) * config.glowScale;
+  if (glowRadius > 0) {
+    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
+    gradient.addColorStop(0,   `hsla(${hue}, 100%, ${coreLightness}%, ${Math.min(1, glowOpacity * 0.9)})`);
+    gradient.addColorStop(0.4, `hsla(${hue}, 100%, 60%, ${Math.min(1, glowOpacity * 0.35)})`);
+    gradient.addColorStop(1,   `hsla(${hue}, 100%, 50%, 0)`);
+    ctx.beginPath();
+    ctx.fillStyle = gradient;
+    ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-      panel.style.right = 'auto';
-      panel.style.bottom = 'auto';
-      panel.style.left = `${initialLeft}px`;
-      panel.style.top = `${initialTop}px`;
+  // 中心の核
+  ctx.beginPath();
+  ctx.fillStyle = `hsla(${hue}, 90%, ${Math.min(96, coreLightness + 15)}%, ${Math.min(1, glowOpacity + 0.15)})`;
+  ctx.arc(p.x, p.y, radius * (0.6 + brightness * 0.6), 0, Math.PI * 2);
+  ctx.fill();
+}
 
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
+// 前フレームからの経過時間を「60fps換算のフレーム数」で返す
+function computeDeltaFrames(now) {
+  if (state.lastTime === null) {
+    state.lastTime = now;
+    return 1;
+  }
+  const dt = (now - state.lastTime) / (1000 / BASE_FPS);
+  state.lastTime = now;
+  return Math.min(Math.max(dt, 0), MAX_DELTA_FRAMES);
+}
 
-    function onMouseMove(e) {
-      if (!isDragging) return;
+function renderFrame(now) {
+  const dt = computeDeltaFrames(now);
+  const ctx = dom.ctx;
 
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
+  ctx.clearRect(0, 0, state.width, state.height);
+  ctx.globalCompositeOperation = 'lighter'; // 光を加算合成
+  for (const p of state.particles) {
+    updateParticle(p, dt);
+    drawParticle(ctx, p);
+  }
+  ctx.globalCompositeOperation = 'source-over';
 
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
+  requestAnimationFrame(renderFrame);
+}
 
-      const maxLeft = window.innerWidth - panel.offsetWidth;
-      const maxTop = window.innerHeight - panel.offsetHeight;
+// Canvasの実解像度を画面の表示倍率に合わせる（高DPI環境でぼやけないように）
+function resizeCanvas() {
+  state.dpr = window.devicePixelRatio || 1;
+  state.width = window.innerWidth;
+  state.height = window.innerHeight;
+  dom.canvas.width = Math.round(state.width * state.dpr);
+  dom.canvas.height = Math.round(state.height * state.dpr);
+  // 以降の描画座標はCSSピクセルのまま扱えるよう、倍率を座標変換に設定
+  dom.ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+}
 
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
 
-      panel.style.left = `${newLeft}px`;
-      panel.style.top = `${newTop}px`;
+// ============================================================
+// UI：パネル操作・スライダー・ボタン
+// ============================================================
+
+// config の値 → スライダーの値（percent は 0.3 → 30）
+function toInputValue(ctrl, value) {
+  if (ctrl.type === 'percent') return Math.round(Number(value) * 100);
+  return value;
+}
+
+// スライダーの値 → config の値
+function fromInputValue(ctrl, raw) {
+  switch (ctrl.type) {
+    case 'int':     return Math.round(Number(raw));
+    case 'float':   return Number(raw);
+    case 'percent': return Number(raw) / 100;
+    default:        return String(raw);
+  }
+}
+
+// 画面に表示する数値の文字列
+function formatDisplayValue(ctrl, value) {
+  if (ctrl.type === 'percent') return String(Math.round(value * 100));
+  if (ctrl.type === 'float') return value.toFixed(ctrl.digits ?? 1);
+  return String(value);
+}
+
+function renderControl(ctrl) {
+  const input = document.getElementById(ctrl.id);
+  input.value = toInputValue(ctrl, config[ctrl.key]);
+  if (ctrl.valId) {
+    document.getElementById(ctrl.valId).textContent = formatDisplayValue(ctrl, config[ctrl.key]);
+  }
+}
+
+function renderAllControls() {
+  CONTROLS.forEach(renderControl);
+}
+
+// 設定をまとめて反映する（読み込み・リセット・インポート用）
+function applyConfig(newConfig) {
+  Object.assign(config, newConfig);
+  renderAllControls();
+  const handlers = new Set(CONTROLS.map(c => c.onChange).filter(Boolean));
+  handlers.forEach(fn => fn());
+}
+
+function setupControls() {
+  CONTROLS.forEach(ctrl => {
+    const input = document.getElementById(ctrl.id);
+    if (ctrl.type !== 'color') {
+      input.min = ctrl.min;
+      input.max = ctrl.max;
+      input.step = ctrl.step;
     }
 
-    function onMouseUp() {
-      isDragging = false;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    }
-  }
-
-  // スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
-  // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
-  //   PCのマウス／カーソル操作はこの判定を通らないため、これまでと同じ挙動のまま）
-  // ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
-  //   衝突しないようにする（モバイル）
-  function initSliderTouchPrevention() {
-    const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
-    const THUMB_SIZE = 20; // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
-
-    function getThumbCenterX(slider, rect) {
-      const min = parseFloat(slider.min) || 0;
-      const max = parseFloat(slider.max) || 100;
-      const val = parseFloat(slider.value);
-      const percent = max > min ? (val - min) / (max - min) : 0;
-      const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
-      return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
-    }
-
-    const sliders = document.querySelectorAll('input[type="range"]');
-
-    sliders.forEach(slider => {
-      let startX = 0;
-      let startY = 0;
-      let isVertical = false;
-      let touchOnThumb = true;
-
-      slider.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        startX = touch.clientX;
-        startY = touch.clientY;
-        isVertical = false;
-
-        const rect = slider.getBoundingClientRect();
-        const thumbX = getThumbCenterX(slider, rect);
-        const thumbY = rect.top + rect.height / 2;
-        const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
-        touchOnThumb = dist <= THUMB_HIT_RADIUS;
-
-        if (!touchOnThumb) {
-          // つまみ以外の場所へのタップ／ドラッグは、既定の
-          // 「触れた位置へ値をジャンプさせる」動作ごと無効化する
-          e.preventDefault();
-        }
-      }, { passive: false });
-
-      slider.addEventListener('touchmove', (e) => {
-        if (!touchOnThumb) {
-          e.preventDefault();
-          return;
-        }
-
-        if (isVertical) return;
-
-        const touch = e.touches[0];
-        const diffX = Math.abs(touch.clientX - startX);
-        const diffY = Math.abs(touch.clientY - startY);
-
-        if (diffY > diffX && diffY > 4) {
-          isVertical = true;
-          slider.style.pointerEvents = 'none';
-          setTimeout(() => {
-            slider.style.pointerEvents = 'auto';
-          }, 300);
-        }
-      }, { passive: false });
-    });
-  }
-
-  function updateBgColor() {
-    document.body.style.backgroundColor = config.bgColor;
-  }
-
-  function updateAllHues() {
-    for (let p of particles) {
-      p.hue = config.hue + (Math.random() - 0.5) * config.hueRange;
-    }
-  }
-
-  // Canvas描画ロジック
-  let effectAnimationId = null;
-  const canvas = document.getElementById('effect-canvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  function createFireflyParticle() {
-    const isLongGlow = Math.random() < config.longGlowRatio;
-    return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      radiusOffset: Math.random() * 0.4 - 0.2,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      hue: config.hue + (Math.random() - 0.5) * config.hueRange,
-      wobble: Math.random() * Math.PI * 2,
-
-      phase: 'idle',
-      phaseTimer: Math.random() * 90,
-      idleDuration: 60 + Math.random() * 150,
-      riseDuration: 8 + Math.random() * 10,
-      peakDuration: isLongGlow ? (20 + Math.random() * 14) : (4 + Math.random() * 8),
-      fallDuration: (isLongGlow ? 10 : 0) + 25 + Math.random() * 30,
-      brightness: 0
-    };
-  }
-
-  function adjustParticleCount() {
-    while (particles.length < config.count) {
-      particles.push(createFireflyParticle());
-    }
-    if (particles.length > config.count) {
-      particles.length = config.count;
-    }
-  }
-
-  function drawEffect() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let p of particles) {
-      p.phaseTimer++;
-
-      const idleDur = p.idleDuration * config.durationScale;
-      const riseDur = p.riseDuration * config.durationScale;
-      const peakDur = p.peakDuration * config.durationScale;
-      const fallDur = p.fallDuration * config.durationScale;
-
-      switch (p.phase) {
-        case 'idle':
-          p.brightness = 0;
-          if (p.phaseTimer >= idleDur) { p.phase = 'rising'; p.phaseTimer = 0; }
-          break;
-        case 'rising':
-          p.brightness = Math.min(1, p.phaseTimer / Math.max(1, riseDur));
-          if (p.phaseTimer >= riseDur) { p.phase = 'peak'; p.phaseTimer = 0; }
-          break;
-        case 'peak':
-          p.brightness = 1;
-          if (p.phaseTimer >= peakDur) { p.phase = 'falling'; p.phaseTimer = 0; }
-          break;
-        case 'falling':
-          p.brightness = Math.max(0, 1 - p.phaseTimer / Math.max(1, fallDur));
-          if (p.phaseTimer >= fallDur) {
-            p.phase = 'idle';
-            p.phaseTimer = 0;
-            p.idleDuration = 60 + Math.random() * 150;
-          }
-          break;
+    input.addEventListener('input', () => {
+      config[ctrl.key] = fromInputValue(ctrl, input.value);
+      if (ctrl.valId) {
+        document.getElementById(ctrl.valId).textContent = formatDisplayValue(ctrl, config[ctrl.key]);
       }
-
-      const flicker = 0.92 + Math.random() * 0.08;
-      const brightness = p.brightness * flicker * config.brightnessScale;
-      const glowOpacity = Math.max(0.02, brightness);
-      const coreLightness = 55 + Math.min(1, brightness) * 40;
-
-      const currentRadius = Math.max(0.3, config.baseRadius + p.radiusOffset);
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-
-      const glowRadius = currentRadius * (5 + brightness * 8) * config.glowScale;
-      if (glowRadius > 0) {
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
-        gradient.addColorStop(0,   `hsla(${p.hue}, 100%, ${coreLightness}%, ${Math.min(1, glowOpacity * 0.9)})`);
-        gradient.addColorStop(0.4, `hsla(${p.hue}, 100%, 60%, ${Math.min(1, glowOpacity * 0.35)})`);
-        gradient.addColorStop(1,   `hsla(${p.hue}, 100%, 50%, 0)`);
-        ctx.beginPath();
-        ctx.fillStyle = gradient;
-        ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.beginPath();
-      ctx.fillStyle = `hsla(${p.hue}, 90%, ${Math.min(96, coreLightness + 15)}%, ${Math.min(1, glowOpacity + 0.15)})`;
-      ctx.arc(p.x, p.y, currentRadius * (0.6 + brightness * 0.6), 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-
-      p.wobble += 0.02 * config.wobbleScale;
-      p.x += (p.speedX + Math.sin(p.wobble) * 0.15 * config.wobbleScale) * config.speedScale;
-      p.y += (p.speedY + config.riseBias + Math.cos(p.wobble * 0.8) * 0.15 * config.wobbleScale) * config.speedScale;
-
-      if (p.x < 0) p.x = canvas.width;
-      if (p.x > canvas.width) p.x = 0;
-      if (p.y < 0) p.y = canvas.height;
-      if (p.y > canvas.height) p.y = 0;
-    }
-
-    effectAnimationId = requestAnimationFrame(drawEffect);
-  }
-
-  window.addEventListener('DOMContentLoaded', () => {
-    initUI();
-    updateBgColor();
-    adjustParticleCount();
-    drawEffect();
+      if (ctrl.onChange) ctrl.onChange();
+      scheduleSave();
+    });
   });
+}
+
+function updateBgColor() {
+  document.body.style.backgroundColor = config.bgColor;
+}
+
+function showStatus(message, isError = false) {
+  clearTimeout(state.statusTimerId);
+  dom.ioStatus.textContent = message;
+  dom.ioStatus.classList.toggle('is-error', isError);
+  state.statusTimerId = setTimeout(() => {
+    dom.ioStatus.textContent = '';
+    dom.ioStatus.classList.remove('is-error');
+  }, STATUS_CLEAR_MS);
+}
+
+// --- パネルの表示／非表示 ---
+
+function isPanelHidden() {
+  return dom.panel.classList.contains('is-fully-hidden') ||
+         dom.panelBody.classList.contains('is-collapsed');
+}
+
+// 指定秒数後にパネルを完全非表示にする
+function startHideTimer() {
+  clearTimeout(state.hideTimerId);
+  state.hideTimerId = setTimeout(() => {
+    dom.panel.classList.add('is-fully-hidden');
+  }, config.hideDelay * 1000);
+}
+
+function showPanel() {
+  clearTimeout(state.hideTimerId);
+  dom.panel.classList.remove('is-fully-hidden');
+  dom.panelBody.classList.remove('is-collapsed');
+  dom.toggleBtn.textContent = '非表示';
+  clampPanelIntoView();
+}
+
+function collapsePanel() {
+  // 折りたたむ中身にフォーカスがあれば、ボタンへ移しておく
+  if (dom.panelBody.contains(document.activeElement)) dom.toggleBtn.focus();
+  dom.panelBody.classList.add('is-collapsed');
+  dom.toggleBtn.textContent = '表示';
+  startHideTimer();
+}
+
+function togglePanel() {
+  if (dom.panelBody.classList.contains('is-collapsed')) showPanel();
+  else collapsePanel();
+}
+
+// ドラッグで移動したパネルが画面外へはみ出さないように戻す
+function clampPanelIntoView() {
+  if (window.innerWidth <= MOBILE_BREAKPOINT) return; // スマホ表示はCSSで位置固定
+  if (!dom.panel.style.left) return;                  // まだドラッグしていない
+
+  const rect = dom.panel.getBoundingClientRect();
+  const maxLeft = Math.max(0, window.innerWidth - rect.width);
+  const maxTop = Math.max(0, window.innerHeight - rect.height);
+  dom.panel.style.left = `${Math.max(0, Math.min(rect.left, maxLeft))}px`;
+  dom.panel.style.top = `${Math.max(0, Math.min(rect.top, maxTop))}px`;
+}
+
+function initPanelButtons() {
+  dom.toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePanel();
+  });
+
+  dom.resetBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    applyConfig({ ...DEFAULT_CONFIG });
+    saveSettingsNow();
+  });
+
+  // 画面（Canvas）をクリック／タップした時の再表示
+  dom.canvas.addEventListener('click', () => {
+    if (isPanelHidden()) showPanel();
+  });
+}
+
+// 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
+function initAccordion() {
+  document.querySelectorAll('.control-section').forEach(section => {
+    const toggle = section.querySelector('.section-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isCollapsed = section.classList.toggle('is-collapsed');
+      toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    });
+  });
+}
+
+function initDataButtons() {
+  dom.exportBtn.addEventListener('click', () => {
+    try {
+      exportSettings();
+      showStatus('JSONファイルを保存しました');
+    } catch (err) {
+      console.error(err);
+      showStatus('エクスポートに失敗しました', true);
+    }
+  });
+
+  dom.importBtn.addEventListener('click', () => dom.fileInput.click());
+
+  dom.fileInput.addEventListener('change', async () => {
+    const file = dom.fileInput.files[0];
+    dom.fileInput.value = ''; // 同じファイルを続けて選んでも反応するように
+    if (!file) return;
+    try {
+      const settings = await readSettingsFile(file);
+      applyConfig(settings);
+      saveSettingsNow();
+      showStatus('設定を読み込みました');
+    } catch (err) {
+      console.error(err);
+      showStatus(err.message || 'インポートに失敗しました', true);
+    }
+  });
+}
+
+// Escキーでパネルの表示／非表示を切り替え
+function initKeyboard() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.isComposing) return;
+    if (isPanelHidden()) {
+      showPanel();
+      dom.toggleBtn.focus();
+    } else {
+      collapsePanel();
+    }
+  });
+}
+
+// PC用ドラッグ移動機能
+function initDraggable() {
+  const panel = dom.panel;
+  const header = document.getElementById('panel-header');
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  header.addEventListener('mousedown', (e) => {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+    if (e.target.closest('button')) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = panel.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+    panel.style.left = `${initialLeft}px`;
+    panel.style.top = `${initialTop}px`;
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  function onMouseMove(e) {
+    if (!isDragging) return;
+
+    const maxLeft = window.innerWidth - panel.offsetWidth;
+    const maxTop = window.innerHeight - panel.offsetHeight;
+    const newLeft = Math.max(0, Math.min(initialLeft + (e.clientX - startX), maxLeft));
+    const newTop = Math.max(0, Math.min(initialTop + (e.clientY - startY), maxTop));
+
+    panel.style.left = `${newLeft}px`;
+    panel.style.top = `${newTop}px`;
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+// スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変更できるようにする
+// （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
+//   PCのマウス操作はこの判定を通らないため、これまでと同じ挙動のまま）
+// ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
+//   衝突しないようにする（モバイル）
+function initSliderTouchPrevention() {
+  const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
+  const THUMB_SIZE = 20;       // ネイティブのつまみのおおよその幅（ブラウザ既定の見た目に合わせた目安）
+
+  function getThumbCenterX(slider, rect) {
+    const min = parseFloat(slider.min) || 0;
+    const max = parseFloat(slider.max) || 100;
+    const val = parseFloat(slider.value);
+    const percent = max > min ? (val - min) / (max - min) : 0;
+    const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
+    return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
+  }
+
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    let startX = 0;
+    let startY = 0;
+    let isVertical = false;
+    let touchOnThumb = true;
+
+    slider.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      isVertical = false;
+
+      const rect = slider.getBoundingClientRect();
+      const thumbX = getThumbCenterX(slider, rect);
+      const thumbY = rect.top + rect.height / 2;
+      const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
+      touchOnThumb = dist <= THUMB_HIT_RADIUS;
+
+      if (!touchOnThumb) {
+        // つまみ以外の場所へのタップ／ドラッグは、既定の
+        // 「触れた位置へ値をジャンプさせる」動作ごと無効化する
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    slider.addEventListener('touchmove', (e) => {
+      if (!touchOnThumb) {
+        e.preventDefault();
+        return;
+      }
+
+      if (isVertical) return;
+
+      const touch = e.touches[0];
+      const diffX = Math.abs(touch.clientX - startX);
+      const diffY = Math.abs(touch.clientY - startY);
+
+      if (diffY > diffX && diffY > 4) {
+        isVertical = true;
+        slider.style.pointerEvents = 'none';
+        setTimeout(() => {
+          slider.style.pointerEvents = 'auto';
+        }, 300);
+      }
+    }, { passive: false });
+  });
+}
+
+// 表示倍率の変化（別モニターへのウィンドウ移動など）を検知して解像度を合わせ直す
+function watchDevicePixelRatio() {
+  const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+  mq.addEventListener('change', () => {
+    resizeCanvas();
+    watchDevicePixelRatio();
+  }, { once: true });
+}
+
+
+// ============================================================
+// INIT：起動処理
+// ============================================================
+function init() {
+  dom.canvas = document.getElementById('effect-canvas');
+  dom.ctx = dom.canvas.getContext('2d');
+  dom.panel = document.getElementById('draggable-panel');
+  dom.panelBody = document.getElementById('panel-body');
+  dom.toggleBtn = document.getElementById('btn-toggle-panel');
+  dom.resetBtn = document.getElementById('btn-reset-panel');
+  dom.exportBtn = document.getElementById('btn-export');
+  dom.importBtn = document.getElementById('btn-import');
+  dom.fileInput = document.getElementById('file-import');
+  dom.ioStatus = document.getElementById('io-status');
+
+  resizeCanvas();            // 蛍の初期位置に画面サイズを使うため、先に実行
+  setupControls();
+  applyConfig(loadSettings());
+
+  initPanelButtons();
+  initAccordion();
+  initDataButtons();
+  initKeyboard();
+  initDraggable();
+  initSliderTouchPrevention();
+  watchDevicePixelRatio();
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    clampPanelIntoView();
+  });
+  // タブを切り替えて戻った時に、経過時間を測り直す
+  document.addEventListener('visibilitychange', () => { state.lastTime = null; });
+  // 保存待ちのまま閉じられても設定が失われないように
+  window.addEventListener('pagehide', flushPendingSave);
+
+  requestAnimationFrame(renderFrame);
+}
+
+window.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
