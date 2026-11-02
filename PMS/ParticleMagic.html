@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Particle Magic Studio</title>
 
-  <link rel="icon" href="../icon/favicon.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <!-- ファビコンはファイル内に埋め込み（フォルダ外の画像を参照しない） -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E">
 
   <style>
-
+    /* =====================================================================
+       基本設定（色・角丸・フォント）
+       色はこのアプリ独自の「粒子パレット」を使う（STYLE.md からの例外。DECISIONS.md 参照）
+       ===================================================================== */
     :root {
       --void: #07070b;
       --panel: #121218;
@@ -28,17 +29,22 @@
       --p-green: #50fa7b;
       --p-amber: #ffb86c;
       --p-red: #ff5555;
+      --error: #f87171;
 
-      /* パネルの透明度／ぼかし。システム設定パネルのスライダーからこの値が更新される */
-      --panel-bg-alpha: 0;
-      --panel-blur: 10px;
+      /* ボタンの枠線・ホバー背景（アクセント＝p-blue） */
+      --btn-border: rgba(166, 200, 255, 0.4);
+      --btn-hover-bg: rgba(166, 200, 255, 0.15);
 
-      --radius-lg: 20px;
-      --radius-md: 12px;
+      /* パネルの不透明度／ぼかし。システム設定のスライダーからJSで更新される */
+      --panel-bg-alpha: 0.85;
+      --panel-blur: 8.5px;
+
+      --radius-panel: 12px;
+      --radius-btn: 6px;
       --radius-sm: 9px;
 
-      --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      /* STYLE.md 共通フォント（Webフォントは使わない） */
+      --font-base: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
     }
 
     * {
@@ -56,33 +62,21 @@
     }
 
     body {
-      font-family: var(--font-display);
+      font-family: var(--font-base);
       background-color: var(--void);
       color: var(--ink);
       position: relative;
     }
 
-    /* ===== フルスクリーン・キャンバス（画面全体が計器のスクリーンそのもの） ===== */
+    /* ===== フルスクリーン・キャンバス ===== */
     #canvas-container {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
+      /* 背景は黒一色 */
       background-color: var(--void);
-      background-image:
-        radial-gradient(circle, var(--line-soft) 1px, transparent 1px),
-        radial-gradient(ellipse 70% 55% at 50% -8%, rgba(166, 200, 255, 0.08), transparent 70%);
-      background-size: 26px 26px, auto;
-      background-repeat: repeat, no-repeat;
       overflow: hidden;
-    }
-
-    #canvas-container::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.4) 100%);
     }
 
     canvas#particleCanvas {
@@ -96,9 +90,8 @@
     }
 
     .header-eyebrow {
-      font-family: var(--font-mono);
       font-size: 0.65rem;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 2.5px;
       color: var(--dim);
       text-transform: uppercase;
@@ -114,13 +107,14 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background-color: rgba(18, 18, 24, var(--panel-bg-alpha, 0.88));
+      background-color: rgba(18, 18, 24, var(--panel-bg-alpha));
       border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-panel);
       padding: 16px 20px;
-      backdrop-filter: blur(var(--panel-blur, 10px));
-      -webkit-backdrop-filter: blur(var(--panel-blur, 10px));
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(var(--panel-blur));
+      -webkit-backdrop-filter: blur(var(--panel-blur));
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      transition: background-color 0.3s ease;
     }
 
     .status-bar-top {
@@ -132,7 +126,7 @@
     .brand-title {
       font-size: 1.3rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
     }
 
     .status-bar-row {
@@ -151,19 +145,17 @@
     }
 
     .status-label {
-      font-family: var(--font-mono);
       font-size: 0.68rem;
       color: var(--dim);
       letter-spacing: 1.8px;
       margin-bottom: 7px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .status-value {
-      font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
       font-size: 1.05rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--p-blue);
       text-shadow: 0 0 12px rgba(166, 200, 255, 0.5);
       height: 28px;
@@ -171,7 +163,6 @@
       align-items: center;
       justify-content: center;
       letter-spacing: 1px;
-      transition: color 0.25s, text-shadow 0.25s;
     }
 
     .status-divider {
@@ -186,30 +177,41 @@
       position: fixed;
       top: 16px;
       right: 16px;
-      z-index: 20;
+      z-index: 10;
       width: 320px;
       max-width: calc(100vw - 32px);
       max-height: calc(100vh - 32px);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
-      background-color: rgba(18, 18, 24, var(--panel-bg-alpha, 0));
+      background-color: rgba(18, 18, 24, var(--panel-bg-alpha));
       color: var(--ink);
       border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      padding: 0; /* ヘッダーを固定表示にするため、パディングはヘッダー／本文側に持たせる */
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(var(--panel-blur, 10px));
-      -webkit-backdrop-filter: blur(var(--panel-blur, 10px));
+      border-radius: var(--radius-panel);
+      padding: 0; /* ヘッダーを固定表示にするため、余白はヘッダー／本文側に持たせる */
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(var(--panel-blur));
+      -webkit-backdrop-filter: blur(var(--panel-blur));
       opacity: 1;
       visibility: visible;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      transition: opacity 0.5s ease, visibility 0.5s ease, background-color 0.3s ease;
     }
 
+    /* 指定秒数後にパネル全体を消す */
     .control-panel.is-fully-hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+    }
+
+    /* 「非表示」を押した直後：本文を畳んでヘッダーだけ残す */
+    .control-panel.is-collapsed .panel-content {
+      display: none;
+    }
+
+    .control-panel.is-collapsed .panel-header {
+      margin-bottom: 0;
+      border-bottom-color: transparent;
     }
 
     .control-panel::-webkit-scrollbar { width: 5px; }
@@ -226,85 +228,102 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 10px;
       cursor: move;
-      padding: 18px 20px 14px;
+      padding: 16px 18px 12px;
       margin: 0 0 14px;
       border-bottom: 1px solid var(--line);
-      background-color: rgba(18, 18, 24, var(--panel-bg-alpha, 0));
-      backdrop-filter: blur(var(--panel-blur, 10px));
-      -webkit-backdrop-filter: blur(var(--panel-blur, 10px));
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      background-color: rgba(18, 18, 24, var(--panel-bg-alpha));
+      backdrop-filter: blur(var(--panel-blur));
+      -webkit-backdrop-filter: blur(var(--panel-blur));
     }
 
     .panel-content {
-      padding: 0 20px 20px;
+      padding: 0 18px 18px;
     }
 
     .panel-header-title {
       display: flex;
       flex-direction: column;
       gap: 4px;
+      min-width: 0;
     }
 
     .panel-header-title h3 {
-      font-size: 1.02rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      letter-spacing: -0.3px;
       color: var(--ink);
+    }
+
+    /* 状態メッセージ（4秒で自動的に消える） */
+    .status-msg {
+      font-size: 0.7rem;
+      line-height: 1.5;
+      color: var(--p-blue);
+    }
+
+    .status-msg:empty {
+      display: none;
+    }
+
+    .status-msg.is-error {
+      color: var(--error);
     }
 
     .header-controls {
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    .icon-btn {
-      background-color: var(--surface);
-      border: 1px solid var(--line);
-      color: var(--ink);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
       flex-shrink: 0;
     }
 
-    .icon-btn:hover {
-      border-color: var(--p-red);
-      color: var(--p-red);
-      box-shadow: 0 0 16px rgba(255, 85, 85, 0.25);
+    /* ボタン共通：透明背景＋アクセント枠線、角丸6px、高さ26px */
+    .icon-btn,
+    .toggle-btn {
+      background-color: transparent;
+      border: 1px solid var(--btn-border);
+      border-radius: var(--radius-btn);
+      height: 26px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
     }
 
-    .icon-btn:active {
+    .icon-btn:active,
+    .toggle-btn:active {
       transform: scale(0.94);
     }
 
-    .toggle-btn {
-      background-color: var(--surface);
-      border: 1px solid var(--line);
+    .icon-btn {
       color: var(--ink);
-      border-radius: 14px;
-      padding: 0 12px;
-      height: 32px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
+      width: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* リセットは「元に戻す」操作なので赤で警告色を出す */
+    .icon-btn:hover {
+      border-color: var(--p-red);
+      color: var(--p-red);
+      background-color: rgba(255, 85, 85, 0.15);
+    }
+
+    .toggle-btn {
+      color: var(--p-blue);
+      padding: 0 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
     }
 
     .toggle-btn:hover {
       border-color: var(--p-blue);
-      color: var(--p-blue);
+      background-color: var(--btn-hover-bg);
     }
 
     .control-section {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .control-section:last-child {
@@ -312,18 +331,14 @@
     }
 
     .section-title {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
       color: var(--dim);
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--line-soft);
     }
 
-    /* セクション見出しのアコーディオン化 */
+    /* セクション見出しのアコーディオン */
     .section-toggle {
       all: unset;
       display: flex;
@@ -336,12 +351,6 @@
       margin-bottom: 12px;
       padding-bottom: 6px;
       border-bottom: 1px solid var(--line-soft);
-    }
-
-    .section-toggle .section-title {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
     }
 
     .section-chevron {
@@ -378,15 +387,15 @@
       opacity: 0.5;
     }
 
-    /* 各モジュールが担当する粒子色を示す小さなドット */
+    /* 項目名。左の小さなドットは、その項目が担当する粒子色 */
     .control-label {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: #d6d5d2;
       white-space: nowrap;
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
     }
 
     .control-label::before {
@@ -397,7 +406,7 @@
       background: var(--accent, var(--dim-2));
       box-shadow: 0 0 6px var(--accent-glow, transparent);
       flex-shrink: 0;
-      transition: background 0.25s, box-shadow 0.25s;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
     }
 
     /* Particle Style だけは選んだテーマの色に連動する */
@@ -420,6 +429,7 @@
     .control-opacity   { --accent: var(--p-amber); --accent-glow: rgba(255, 184, 108, 0.55); }
     .control-hidedelay { --accent: var(--p-blue);  --accent-glow: rgba(166, 200, 255, 0.55); }
 
+    /* ラベル行：左に項目名、右に「数値＋単位」 */
     .range-label {
       display: flex;
       justify-content: space-between;
@@ -430,11 +440,10 @@
     .value-badge {
       background-color: var(--surface-2);
       padding: 3px 10px;
-      border-radius: 8px;
-      font-family: var(--font-mono);
+      border-radius: var(--radius-btn);
       font-variant-numeric: tabular-nums;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
       color: var(--accent, var(--ink));
       text-shadow: 0 0 8px var(--accent-glow, transparent);
     }
@@ -453,10 +462,10 @@
       background-position: right 14px center;
       color: var(--ink);
       border: 1px solid var(--accent, var(--line));
-      padding: 11px 40px 11px 14px;
+      padding: 9px 40px 9px 12px;
       border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
+      font-family: inherit;
+      font-size: 0.78rem;
       letter-spacing: 0.5px;
       text-transform: uppercase;
       outline: none;
@@ -464,7 +473,7 @@
       appearance: none;
       -webkit-appearance: none;
       box-shadow: 0 0 14px var(--accent-glow, transparent);
-      transition: border-color 0.25s, box-shadow 0.25s;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .control-style.is-rainbow select {
@@ -507,7 +516,7 @@
       border: 2px solid var(--panel);
       box-shadow: 0 0 10px 1px var(--accent-glow, rgba(166, 200, 255, 0.55));
       cursor: pointer;
-      transition: transform 0.15s ease;
+      transition: transform 0.2s ease;
     }
 
     input[type="range"]::-webkit-slider-thumb:hover {
@@ -532,7 +541,7 @@
 
     input[type="range"]:focus-visible {
       outline: 2px solid var(--accent, var(--p-blue));
-      outline-offset: 5px;
+      outline-offset: 2px;
       border-radius: 10px;
     }
 
@@ -558,7 +567,7 @@
       border: 1px solid var(--line);
       border-radius: 34px;
       cursor: pointer;
-      transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .slider-toggle:before {
@@ -570,7 +579,7 @@
       bottom: 3px;
       background-color: var(--dim-2);
       border-radius: 50%;
-      transition: transform 0.25s, background-color 0.25s, box-shadow 0.25s;
+      transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     input:checked + .slider-toggle {
@@ -587,12 +596,11 @@
 
     input:focus-visible + .slider-toggle {
       outline: 2px solid var(--p-blue);
-      outline-offset: 3px;
+      outline-offset: 2px;
     }
 
     .hint-text {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       color: var(--dim);
       line-height: 1.6;
       padding-top: 4px;
@@ -607,12 +615,12 @@
       * { transition-duration: 0.001ms !important; }
     }
 
-    /* ===== モバイル・600px以下に特化したレスポンシブ設定 ===== */
-    @media (max-width: 600px) {
+    /* ===== 768px以下：パネルを画面下部に固定 ===== */
+    @media (max-width: 768px) {
       .status-bar {
-        top: 10px;
-        left: 10px;
-        right: 10px;
+        top: 16px;
+        left: 16px;
+        right: 16px;
         max-width: none;
         padding: 12px 16px;
         gap: 8px;
@@ -641,40 +649,29 @@
         height: 24px;
       }
 
+      /* ドラッグで付いた位置指定より優先させるため !important */
       .control-panel {
         top: auto !important;
-        left: 10px !important;
-        right: 10px !important;
-        bottom: 10px !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 16px !important;
         width: auto !important;
         max-width: none;
-        max-height: 46vh;
-        border-radius: 16px;
-        padding: 0;
+        max-height: 30vh;
       }
 
       .panel-header {
         cursor: default;
-        padding: 14px 16px 10px;
+        padding: 12px 16px 10px;
         margin: 0 0 10px;
-        border-radius: 16px 16px 0 0;
       }
 
       .panel-content {
         padding: 0 16px 14px;
       }
 
-      .panel-header-title h3 {
-        font-size: 0.88rem;
-      }
-
       .control-section {
         margin-bottom: 14px;
-      }
-
-      .section-title {
-        font-size: 0.62rem;
-        margin-bottom: 8px;
       }
 
       .section-toggle {
@@ -683,15 +680,6 @@
 
       .control-panel .control-group {
         margin-bottom: 10px;
-      }
-
-      .control-label {
-        font-size: 0.76rem;
-      }
-
-      .value-badge {
-        font-size: 0.72rem;
-        padding: 3px 8px;
       }
     }
   </style>
@@ -728,14 +716,15 @@
       <div class="panel-header-title">
         <span class="header-eyebrow">Instrument Panel</span>
         <h3>◆ パーティクル設定</h3>
+        <p class="status-msg" id="statusMsg" role="status" aria-live="polite"></p>
       </div>
       <div class="header-controls">
-        <button class="icon-btn" id="resetBtn" title="初期値に戻す" aria-label="リセット">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <button class="icon-btn" id="resetBtn" type="button" title="初期値に戻す" aria-label="リセット">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
           </svg>
         </button>
-        <button class="toggle-btn" id="togglePanelBtn">非表示</button>
+        <button class="toggle-btn" id="togglePanelBtn" type="button" aria-controls="panelBody" aria-expanded="true" title="Escキーでも切り替えできます">非表示</button>
       </div>
     </div>
 
@@ -752,7 +741,7 @@
         <div class="section-body">
           <div class="control-group control-style is-rainbow" id="styleControlGroup">
             <div class="range-label">
-              <span class="control-label" for="styleSelect">Particle Style</span>
+              <label class="control-label" for="styleSelect">Particle Style</label>
             </div>
             <div class="select-wrapper">
               <select id="styleSelect">
@@ -765,7 +754,7 @@
 
           <div class="control-group control-speed">
             <div class="range-label">
-              <span class="control-label">Speed</span>
+              <label class="control-label" for="speedRange">Speed</label>
               <span class="value-badge" id="speedVal">5</span>
             </div>
             <input type="range" id="speedRange" min="1" max="10" step="1" value="5">
@@ -773,7 +762,7 @@
 
           <div class="control-group control-size">
             <div class="range-label">
-              <span class="control-label">Size</span>
+              <label class="control-label" for="sizeRange">Size</label>
               <span class="value-badge" id="sizeVal">1.0</span>
             </div>
             <input type="range" id="sizeRange" min="0.3" max="3" step="0.1" value="1">
@@ -781,7 +770,7 @@
 
           <div class="control-group control-gravity">
             <div class="range-label">
-              <span class="control-label">Gravity</span>
+              <label class="control-label" for="gravityRange">Gravity</label>
               <span class="value-badge" id="gravityVal">-0.35</span>
             </div>
             <input type="range" id="gravityRange" min="-1" max="1" step="0.05" value="-0.35">
@@ -799,33 +788,33 @@
 
         <div class="section-body">
           <div class="control-group control-shape-circle inline-row">
-            <span class="control-label">Circle</span>
+            <label class="control-label" for="shapeCircle">Circle</label>
             <label class="switch">
-              <input type="checkbox" class="shape-toggle" data-shape="circle" checked>
+              <input type="checkbox" class="shape-toggle" id="shapeCircle" data-shape="circle" checked>
               <span class="slider-toggle"></span>
             </label>
           </div>
 
           <div class="control-group control-shape-star inline-row">
-            <span class="control-label">Star</span>
+            <label class="control-label" for="shapeStar">Star</label>
             <label class="switch">
-              <input type="checkbox" class="shape-toggle" data-shape="star" checked>
+              <input type="checkbox" class="shape-toggle" id="shapeStar" data-shape="star" checked>
               <span class="slider-toggle"></span>
             </label>
           </div>
 
           <div class="control-group control-shape-sparkle inline-row">
-            <span class="control-label">Sparkle</span>
+            <label class="control-label" for="shapeSparkle">Sparkle</label>
             <label class="switch">
-              <input type="checkbox" class="shape-toggle" data-shape="sparkle" checked>
+              <input type="checkbox" class="shape-toggle" id="shapeSparkle" data-shape="sparkle" checked>
               <span class="slider-toggle"></span>
             </label>
           </div>
 
           <div class="control-group control-shape-ray inline-row">
-            <span class="control-label">Ray</span>
+            <label class="control-label" for="shapeRay">Ray</label>
             <label class="switch">
-              <input type="checkbox" class="shape-toggle" data-shape="ray" checked>
+              <input type="checkbox" class="shape-toggle" id="shapeRay" data-shape="ray" checked>
               <span class="slider-toggle"></span>
             </label>
           </div>
@@ -845,19 +834,21 @@
         <div class="section-body">
           <div class="control-group control-opacity">
             <div class="range-label">
-              <span class="control-label">パネルの透明度</span>
-              <span class="value-badge" id="panelOpacityValue">0%</span>
+              <label class="control-label" for="panelOpacitySlider">パネルの不透明度</label>
+              <span class="value-badge" id="panelOpacityValue">85%</span>
             </div>
-            <input type="range" id="panelOpacitySlider" min="0" max="100" step="5" value="0">
+            <input type="range" id="panelOpacitySlider" min="0" max="100" step="5" value="85">
           </div>
 
           <div class="control-group control-hidedelay">
             <div class="range-label">
-              <span class="control-label">パネルが消える時間</span>
+              <label class="control-label" for="hideDelaySlider">パネルが消える時間</label>
               <span class="value-badge" id="hideDelayValue">4s</span>
             </div>
             <input type="range" id="hideDelaySlider" min="1" max="15" step="1" value="4">
           </div>
+
+          <p class="hint-text">「非表示」またはEscキーで本文を畳み、この時間が過ぎるとパネル全体が消えます。再表示はEscキーか、背景を素早く3回クリック。</p>
         </div>
       </div>
 
@@ -865,125 +856,119 @@
   </div>
 
   <script>
-    const canvasContainer = document.getElementById('canvas-container');
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d');
-    const countDisplay = document.getElementById('particleCount');
+    'use strict';
 
-    // パラメータ・コントロール要素
-    const styleSelect = document.getElementById('styleSelect');
-    const speedRange = document.getElementById('speedRange');
-    const speedVal = document.getElementById('speedVal');
-    const sizeRange = document.getElementById('sizeRange');
-    const sizeVal = document.getElementById('sizeVal');
-    const gravityRange = document.getElementById('gravityRange');
-    const gravityVal = document.getElementById('gravityVal');
-    const resetBtn = document.getElementById('resetBtn');
+    // =====================================================================
+    // CONFIG — 初期値と定数（ここを変えると挙動を調整できる）
+    // =====================================================================
 
-    // 図形の管理（パネル内のスイッチ群）
-    const shapeToggles = document.querySelectorAll('.shape-toggle');
-
-    // 見た目の連動用要素（発光色・ステータス表示）
-    const styleControlGroup = document.getElementById('styleControlGroup');
-    const styleDisplay = document.getElementById('styleDisplay');
-
-    // パネル本体（格納・移動・自動退避）
-    const controlPanel = document.getElementById('controlPanel');
-    const panelHeader = document.getElementById('panelHeader');
-    const panelBody = document.getElementById('panelBody');
-    const togglePanelBtn = document.getElementById('togglePanelBtn');
-
-    // システム（パネルの透明度・自動退避までの時間）
-    const panelOpacitySlider = document.getElementById('panelOpacitySlider');
-    const panelOpacityValue = document.getElementById('panelOpacityValue');
-    const hideDelaySlider = document.getElementById('hideDelaySlider');
-    const hideDelayValue = document.getElementById('hideDelayValue');
-
-    // 初期設定
-    const defaults = {
+    // 設定の初期値（リセットでこの値に戻る）
+    const DEFAULTS = Object.freeze({
       style: 'rainbowSparkles',
       speed: 5,
       size: 1,
       gravity: -0.35,
-      panelOpacity: 0,
-      hideDelay: 4
-    };
+      panelOpacity: 0.85, // 0〜1（1で完全に不透明）
+      hideDelay: 4,       // 秒
+      shapes: Object.freeze({ circle: true, star: true, sparkle: true, ray: true })
+    });
 
-    // 各図形の有効/無効（パネルのスイッチで切り替え）
-    let enabledShapes = { circle: true, star: true, sparkle: true, ray: true };
     const ALL_SHAPES = ['circle', 'star', 'sparkle', 'ray'];
 
-    // クリック/タップした瞬間に放つバーストの強さ
-    const BURST_COUNT = 28;
-    const BURST_BOOST = 2.2;
-    // 背景に薄く軌跡を残すフェード量（0に近いほど尾が長く残る）
-    const TRAIL_ALPHA = 0.14;
-
-    let config = { ...defaults };
-    let particles = [];
-
-    // 複数の指・マウスを同時に追跡するためのポインター管理
-    // (pointerId -> { x, y, active, type })
-    const pointers = new Map();
-
-    function setPointer(id, x, y, active, type) {
-      const p = pointers.get(id) || {};
-      p.x = x;
-      p.y = y;
-      p.active = active;
-      p.type = type;
-      pointers.set(id, p);
-    }
-
-    // Particle Style が選ばれたテーマの色で自ら発光するようにする
-    // （粒子シミュレーション自体には一切影響しない、見た目だけの同期処理）
-    function syncStyleAccent(value) {
-      styleControlGroup.classList.toggle('is-rainbow', value === 'rainbowSparkles');
-      if (value === 'magicDust') {
-        styleControlGroup.style.setProperty('--accent', 'var(--p-amber)');
-        styleControlGroup.style.setProperty('--accent-glow', 'rgba(255, 184, 108, 0.55)');
-      } else if (value === 'cosmicRays') {
-        styleControlGroup.style.setProperty('--accent', 'var(--p-blue)');
-        styleControlGroup.style.setProperty('--accent-glow', 'rgba(166, 200, 255, 0.55)');
-      } else {
-        styleControlGroup.style.removeProperty('--accent');
-        styleControlGroup.style.removeProperty('--accent-glow');
-      }
-      styleDisplay.textContent = styleSelect.selectedOptions[0].text.toUpperCase();
-    }
-
-    // パネルの透明度スライダーと連動し、背景の不透明度とぼかし量を更新する
-    // （透明度が0に近いほど、すりガラス効果(ぼかし)も弱めて背景が完全に透けるようにする）
-    function applyPanelOpacity() {
-      document.documentElement.style.setProperty('--panel-bg-alpha', config.panelOpacity);
-      document.documentElement.style.setProperty('--panel-blur', (config.panelOpacity * 10).toFixed(1) + 'px');
-    }
-
-    // Canvas サイズ調整（画面全体に追従）
-    function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
     // テーマごとの図形の出現比率（[形, 重み]）
-    // (rainbowSparklesは全種類、magicDustはきらめき中心、cosmicRaysは光の筋を混ぜる)
     const SHAPE_POOLS = {
       magicDust: [['circle', 0.72], ['sparkle', 0.28]],
       cosmicRays: [['circle', 0.55], ['ray', 0.45]],
       rainbowSparkles: [['circle', 0.4], ['star', 0.3], ['sparkle', 0.3]]
     };
 
+    // テーマごとの色（色相の開始値・幅、彩度、明度）
+    const STYLE_COLORS = {
+      rainbowSparkles: { hueStart: 0,   hueRange: 360, sat: 85, light: 65 },
+      magicDust:       { hueStart: 40,  hueRange: 20,  sat: 90, light: 70 },
+      cosmicRays:      { hueStart: 180, hueRange: 100, sat: 80, light: 60 }
+    };
+
+    // フレームレートに依存しない動きにするための基準（60fpsの1フレーム）
+    const FRAME_MS = 1000 / 60;
+    // タブ切り替え後などに一気に進みすぎないよう、1回の更新は最大3フレーム分まで
+    const MAX_DT = 3;
+
+    // 粒子の上限（超えたら古い粒子から消す）
+    const MAX_PARTICLES = 1500;
+
+    // 1秒あたりの発生数（旧版の「1フレーム4個／2個 × 60fps」と同じ量）
+    const POINTER_EMIT_PER_SEC = 240;
+    const IDLE_EMIT_PER_SEC = 120;
+
+    // 何も触っていない時の発生位置（画面幅・高さに対する割合）とばらつき(px)
+    const IDLE_EMITTER = { x: 0.65, y: 0.25, spread: 80 };
+
+    // クリック/タップした瞬間に放つバースト
+    const BURST_COUNT = 28;
+    const BURST_BOOST = 2.2;
+    const BURST_JITTER = 14;
+
+    // 残像の消え方（60fps時に1フレームで消える割合。0に近いほど尾が長い）
+    const TRAIL_ALPHA = 0.14;
+
+    // 状態メッセージを表示しておく時間
+    const STATUS_MS = 4000;
+
+    // 背景を何回・何ミリ秒以内にクリックしたらパネルを再表示するか
+    const SHOW_PANEL_CLICK_COUNT = 3;
+    const SHOW_PANEL_CLICK_WINDOW = 600;
+
+    // この幅以下ではパネルを画面下部に固定（CSSの @media と合わせる）
+    const MOBILE_BREAKPOINT = 768;
+
+    // タッチ時、スライダーのつまみとみなす範囲(px)とつまみの大きさ(px)
+    const THUMB_HIT_RADIUS = 22;
+    const THUMB_SIZE = 14;
+
+    // =====================================================================
+    // STATE — 実行中に変わる値
+    // =====================================================================
+    const state = {
+      config: structuredClone(DEFAULTS),
+      particles: [],
+      // 複数の指・マウスを同時に追跡（pointerId -> { x, y, active, type, emitAcc }）
+      pointers: new Map(),
+      // キャンバスの表示サイズと位置（リサイズ時だけ測り直す）
+      view: { w: 0, h: 0, left: 0, top: 0 },
+      idleEmitAcc: 0,     // 待機中の発生数の端数をためておく
+      lastTime: 0,        // 前回フレームの時刻
+      lastShownCount: -1, // 前回表示した粒子数（変わった時だけ画面を更新）
+      hideTimerId: null,
+      statusTimerId: null,
+      showClickTimes: []
+    };
+
+    // =====================================================================
+    // STORAGE — 現在は設定を保存しない（再読み込みで初期値に戻る）
+    // 保存を追加する場合のキー名: "ParticleMagic:v1:settings"
+    // =====================================================================
+
+    // =====================================================================
+    // LOGIC — 粒子の生成・移動・描画（画面部品には触れない）
+    // =====================================================================
+
+    function setPointer(id, x, y, active, type) {
+      const p = state.pointers.get(id) || { emitAcc: 0 };
+      p.x = x;
+      p.y = y;
+      p.active = active;
+      p.type = type;
+      state.pointers.set(id, p);
+    }
+
     // パネルで無効化された形は候補から除外して選ぶ
-    function pickShape(style) {
-      const pool = SHAPE_POOLS[style].filter(([shape]) => enabledShapes[shape]);
+    function pickShape(style, shapes) {
+      const pool = SHAPE_POOLS[style].filter(([shape]) => shapes[shape]);
 
       if (pool.length === 0) {
-        // このテーマの候補が全て無効化されている場合は、有効な形から選ぶ
-        const fallback = ALL_SHAPES.filter((s) => enabledShapes[s]);
+        // このテーマの候補が全て無効な場合は、有効な形から均等に選ぶ
+        const fallback = ALL_SHAPES.filter((s) => shapes[s]);
         return fallback.length > 0
           ? fallback[Math.floor(Math.random() * fallback.length)]
           : 'circle';
@@ -999,13 +984,12 @@
     }
 
     // 五芒星のパスを作る
-    function tracStarPath(context, cx, cy, radius, rotation) {
+    function traceStarPath(context, cx, cy, radius, rotation) {
       const spikes = 5;
-      const outerR = radius;
       const innerR = radius * 0.45;
       context.beginPath();
       for (let i = 0; i < spikes * 2; i++) {
-        const r = i % 2 === 0 ? outerR : innerR;
+        const r = i % 2 === 0 ? radius : innerR;
         const angle = rotation + (Math.PI / spikes) * i;
         const px = cx + Math.cos(angle) * r;
         const py = cy + Math.sin(angle) * r;
@@ -1014,14 +998,14 @@
       context.closePath();
     }
 
-    // 4方向にきらめく、スパークル(✨)のパスを作る
+    // 4方向にきらめくスパークル(✨)のパスを作る
     function traceSparklePath(context, cx, cy, radius, rotation) {
+      const midR = radius * 0.22;
       context.beginPath();
       for (let i = 0; i < 4; i++) {
         const angle = rotation + (Math.PI / 2) * i;
         const tipX = cx + Math.cos(angle) * radius;
         const tipY = cy + Math.sin(angle) * radius;
-        const midR = radius * 0.22;
         const m1x = cx + Math.cos(angle - 0.35) * midR;
         const m1y = cy + Math.sin(angle - 0.35) * midR;
         const m2x = cx + Math.cos(angle + 0.35) * midR;
@@ -1033,287 +1017,425 @@
       context.closePath();
     }
 
-    // パーティクルクラス
     class Particle {
+      // x, y を省略すると待機中の発生位置から出る
       constructor(x, y, boost = 1) {
-        const rect = canvas.getBoundingClientRect();
-        this.x = x ?? (rect.width * 0.65 + (Math.random() * 80 - 40));
-        this.y = y ?? (rect.height * 0.25 + (Math.random() * 80 - 40));
+        const { config, view } = state;
+        const s = IDLE_EMITTER.spread;
+        this.x = x ?? (view.w * IDLE_EMITTER.x + (Math.random() * s - s / 2));
+        this.y = y ?? (view.h * IDLE_EMITTER.y + (Math.random() * s - s / 2));
 
         const angle = Math.random() * Math.PI * 2;
         const spd = (Math.random() * 2 + 0.5) * (config.speed / 5) * boost;
-
         this.vx = Math.cos(angle) * spd;
         this.vy = Math.sin(angle) * spd;
+
         this.size = (Math.random() * 5 + 2) * config.size;
         this.alpha = 1;
         this.decay = Math.random() * 0.006 + 0.003;
 
-        this.shape = pickShape(config.style);
+        this.shape = pickShape(config.style, config.shapes);
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.15;
 
-        if (config.style === 'rainbowSparkles') {
-          const hue = Math.floor(Math.random() * 360);
-          this.color = `hsla(${hue}, 85%, 65%, `;
-        } else if (config.style === 'magicDust') {
-          const hue = 40 + Math.random() * 20;
-          this.color = `hsla(${hue}, 90%, 70%, `;
-        } else if (config.style === 'cosmicRays') {
-          const hue = 180 + Math.random() * 100;
-          this.color = `hsla(${hue}, 80%, 60%, `;
-        }
+        const c = STYLE_COLORS[config.style];
+        const hue = c.hueStart + Math.random() * c.hueRange;
+        this.color = `hsl(${hue}, ${c.sat}%, ${c.light}%)`;
       }
 
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += config.gravity * 0.1;
-        this.alpha -= this.decay;
-        this.rotation += this.rotationSpeed;
+      // dt = 60fps換算で何フレーム分進めるか
+      update(dt) {
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        this.vy += state.config.gravity * 0.1 * dt;
+        this.alpha -= this.decay * dt;
+        this.rotation += this.rotationSpeed * dt;
       }
 
-      draw() {
-        const fill = this.color + Math.max(0, this.alpha) + ')';
+      draw(context) {
+        context.globalAlpha = this.alpha;
 
         if (this.shape === 'ray') {
           const len = this.size * 1.8;
           const mag = Math.hypot(this.vx, this.vy) || 1;
-          const ux = this.vx / mag, uy = this.vy / mag;
-          ctx.strokeStyle = fill;
-          ctx.lineWidth = Math.max(1, this.size * 0.45);
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.moveTo(this.x - ux * len, this.y - uy * len);
-          ctx.lineTo(this.x + ux * len, this.y + uy * len);
-          ctx.stroke();
+          const ux = this.vx / mag;
+          const uy = this.vy / mag;
+          context.strokeStyle = this.color;
+          context.lineWidth = Math.max(1, this.size * 0.45);
+          context.lineCap = 'round';
+          context.beginPath();
+          context.moveTo(this.x - ux * len, this.y - uy * len);
+          context.lineTo(this.x + ux * len, this.y + uy * len);
+          context.stroke();
           return;
         }
 
-        ctx.fillStyle = fill;
+        context.fillStyle = this.color;
 
         if (this.shape === 'star') {
-          tracStarPath(ctx, this.x, this.y, this.size, this.rotation);
-          ctx.fill();
-          return;
+          traceStarPath(context, this.x, this.y, this.size, this.rotation);
+        } else if (this.shape === 'sparkle') {
+          traceSparklePath(context, this.x, this.y, this.size * 1.5, this.rotation);
+        } else {
+          context.beginPath();
+          context.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         }
-
-        if (this.shape === 'sparkle') {
-          traceSparklePath(ctx, this.x, this.y, this.size * 1.5, this.rotation);
-          ctx.fill();
-          return;
-        }
-
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        context.fill();
       }
     }
 
     // クリック/タップした瞬間に、その場で粒子を一気に放つ
     function spawnBurst(x, y) {
       for (let i = 0; i < BURST_COUNT; i++) {
-        const jitter = 14;
-        particles.push(new Particle(
-          x + (Math.random() * jitter * 2 - jitter),
-          y + (Math.random() * jitter * 2 - jitter),
+        state.particles.push(new Particle(
+          x + (Math.random() * BURST_JITTER * 2 - BURST_JITTER),
+          y + (Math.random() * BURST_JITTER * 2 - BURST_JITTER),
           BURST_BOOST
         ));
       }
+      trimParticles();
     }
 
-    // イベントリスナー設定
-    styleSelect.addEventListener('change', (e) => {
-      config.style = e.target.value;
-      syncStyleAccent(e.target.value);
-    });
+    // 上限を超えた分を古い順に消す（配列の先頭ほど古い）
+    function trimParticles() {
+      const excess = state.particles.length - MAX_PARTICLES;
+      if (excess > 0) state.particles.splice(0, excess);
+    }
 
-    speedRange.addEventListener('input', (e) => {
-      config.speed = parseFloat(e.target.value);
-      speedVal.textContent = config.speed;
-    });
+    // 経過時間に応じて粒子を発生させる（端数は次のフレームへ持ち越す）
+    function emitParticles(dt) {
+      const sec = dt / 60;
+      let anyActive = false;
 
-    sizeRange.addEventListener('input', (e) => {
-      config.size = parseFloat(e.target.value);
-      sizeVal.textContent = config.size.toFixed(1);
-    });
-
-    gravityRange.addEventListener('input', (e) => {
-      config.gravity = parseFloat(e.target.value);
-      gravityVal.textContent = config.gravity.toFixed(2);
-    });
-
-    // --- 図形の管理（パネル内のスイッチ） ---
-    shapeToggles.forEach((toggle) => {
-      toggle.addEventListener('change', (e) => {
-        const shape = e.target.dataset.shape;
-
-        if (!e.target.checked) {
-          const stillEnabled = ALL_SHAPES.some((s) => s !== shape && enabledShapes[s]);
-          if (!stillEnabled) {
-            // 最低ひとつは有効なままにする
-            e.target.checked = true;
-            alert('最低ひとつの形は有効にしてね');
-            return;
-          }
+      state.pointers.forEach((p) => {
+        if (!p.active) {
+          p.emitAcc = 0;
+          return;
         }
-
-        enabledShapes[shape] = e.target.checked;
-        e.target.closest('.control-group').classList.toggle('is-off', !e.target.checked);
+        anyActive = true;
+        p.emitAcc += POINTER_EMIT_PER_SEC * sec;
+        const n = Math.floor(p.emitAcc);
+        p.emitAcc -= n;
+        for (let i = 0; i < n; i++) state.particles.push(new Particle(p.x, p.y));
       });
-    });
 
-    // --- システム：パネルの透明度／自動退避までの時間 ---
-    panelOpacitySlider.addEventListener('input', (e) => {
-      config.panelOpacity = parseInt(e.target.value, 10) / 100;
-      panelOpacityValue.textContent = Math.round(config.panelOpacity * 100) + '%';
-      applyPanelOpacity();
-    });
-
-    hideDelaySlider.addEventListener('input', (e) => {
-      config.hideDelay = parseInt(e.target.value, 10);
-      hideDelayValue.textContent = config.hideDelay + 's';
-    });
-
-    // --- ポインターイベント (マウス・タッチ・スタイラス、複数同時対応) ---
-    canvas.addEventListener('pointerdown', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setPointer(e.pointerId, x, y, true, e.pointerType);
-      spawnBurst(x, y);
-    });
-
-    canvas.addEventListener('pointermove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const existing = pointers.get(e.pointerId);
-
-      // マウスの場合は乗せているだけでアクティブ、タッチの場合は画面を押している間だけアクティブ
-      const active = e.pointerType === 'mouse' ? true : Boolean(existing && existing.active);
-      setPointer(e.pointerId, x, y, active, e.pointerType);
-    });
-
-    canvas.addEventListener('pointerup', (e) => {
-      if (e.pointerType === 'mouse') {
-        const p = pointers.get(e.pointerId);
-        if (p) p.active = false;
+      if (anyActive) {
+        state.idleEmitAcc = 0;
       } else {
-        pointers.delete(e.pointerId);
+        state.idleEmitAcc += IDLE_EMIT_PER_SEC * sec;
+        const n = Math.floor(state.idleEmitAcc);
+        state.idleEmitAcc -= n;
+        for (let i = 0; i < n; i++) state.particles.push(new Particle());
       }
-    });
 
-    canvas.addEventListener('pointercancel', (e) => {
-      if (e.pointerType === 'mouse') {
-        const p = pointers.get(e.pointerId);
-        if (p) p.active = false;
+      trimParticles();
+    }
+
+    // 移動・描画し、消えた粒子を取り除く（順番を保ったまま詰め直す）
+    function updateAndDrawParticles(context, dt) {
+      const list = state.particles;
+      let keep = 0;
+      for (let i = 0; i < list.length; i++) {
+        const p = list[i];
+        p.update(dt);
+        if (p.alpha <= 0) continue;
+        p.draw(context);
+        list[keep++] = p;
+      }
+      list.length = keep;
+      context.globalAlpha = 1;
+    }
+
+    // =====================================================================
+    // UI — 画面部品の参照・表示更新・イベント
+    // =====================================================================
+    const dom = {
+      canvasContainer: document.getElementById('canvas-container'),
+      canvas: document.getElementById('particleCanvas'),
+      countDisplay: document.getElementById('particleCount'),
+      styleDisplay: document.getElementById('styleDisplay'),
+
+      styleSelect: document.getElementById('styleSelect'),
+      styleControlGroup: document.getElementById('styleControlGroup'),
+      speedRange: document.getElementById('speedRange'),
+      speedVal: document.getElementById('speedVal'),
+      sizeRange: document.getElementById('sizeRange'),
+      sizeVal: document.getElementById('sizeVal'),
+      gravityRange: document.getElementById('gravityRange'),
+      gravityVal: document.getElementById('gravityVal'),
+      shapeToggles: document.querySelectorAll('.shape-toggle'),
+      panelOpacitySlider: document.getElementById('panelOpacitySlider'),
+      panelOpacityValue: document.getElementById('panelOpacityValue'),
+      hideDelaySlider: document.getElementById('hideDelaySlider'),
+      hideDelayValue: document.getElementById('hideDelayValue'),
+
+      controlPanel: document.getElementById('controlPanel'),
+      panelHeader: document.getElementById('panelHeader'),
+      togglePanelBtn: document.getElementById('togglePanelBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      statusMsg: document.getElementById('statusMsg')
+    };
+
+    const ctx = dom.canvas.getContext('2d');
+
+    // スライダーと設定値の対応表（表示形式・変換方法をここに集約）
+    const SLIDER_BINDINGS = [
+      {
+        key: 'speed', input: dom.speedRange, badge: dom.speedVal,
+        toInput: (v) => v, fromInput: (s) => parseFloat(s), format: (v) => String(v)
+      },
+      {
+        key: 'size', input: dom.sizeRange, badge: dom.sizeVal,
+        toInput: (v) => v, fromInput: (s) => parseFloat(s), format: (v) => v.toFixed(1)
+      },
+      {
+        key: 'gravity', input: dom.gravityRange, badge: dom.gravityVal,
+        toInput: (v) => v, fromInput: (s) => parseFloat(s), format: (v) => v.toFixed(2)
+      },
+      {
+        key: 'panelOpacity', input: dom.panelOpacitySlider, badge: dom.panelOpacityValue,
+        toInput: (v) => Math.round(v * 100), fromInput: (s) => parseInt(s, 10) / 100,
+        format: (v) => Math.round(v * 100) + '%', onChange: () => applyPanelOpacity()
+      },
+      {
+        key: 'hideDelay', input: dom.hideDelaySlider, badge: dom.hideDelayValue,
+        toInput: (v) => v, fromInput: (s) => parseInt(s, 10), format: (v) => v + 's'
+      }
+    ];
+
+    // --- 表示の更新 ---
+
+    // Particle Style の発光色とステータス札の表示を、選んだテーマに合わせる
+    function syncStyleAccent(style) {
+      const group = dom.styleControlGroup;
+      group.classList.toggle('is-rainbow', style === 'rainbowSparkles');
+      if (style === 'magicDust') {
+        group.style.setProperty('--accent', 'var(--p-amber)');
+        group.style.setProperty('--accent-glow', 'rgba(255, 184, 108, 0.55)');
+      } else if (style === 'cosmicRays') {
+        group.style.setProperty('--accent', 'var(--p-blue)');
+        group.style.setProperty('--accent-glow', 'rgba(166, 200, 255, 0.55)');
       } else {
-        pointers.delete(e.pointerId);
+        group.style.removeProperty('--accent');
+        group.style.removeProperty('--accent-glow');
       }
-    });
+      dom.styleDisplay.textContent = dom.styleSelect.selectedOptions[0].text.toUpperCase();
+    }
 
-    canvas.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse') {
-        const p = pointers.get(e.pointerId);
-        if (p) p.active = false;
-      }
-    });
+    // パネルの不透明度に合わせて、背景の濃さとぼかし量を更新する
+    // （0%に近いほどぼかしも弱め、背景が完全に透けるようにする）
+    function applyPanelOpacity() {
+      const a = state.config.panelOpacity;
+      document.documentElement.style.setProperty('--panel-bg-alpha', a);
+      document.documentElement.style.setProperty('--panel-blur', (a * 10).toFixed(1) + 'px');
+    }
 
-    // リセットボタン（すべてのパラメータを初期値へ）
-    resetBtn.addEventListener('click', () => {
-      particles = [];
-      config = { ...defaults };
-      styleSelect.value = defaults.style;
-      speedRange.value = defaults.speed;
-      speedVal.textContent = defaults.speed;
-      sizeRange.value = defaults.size;
-      sizeVal.textContent = defaults.size.toFixed(1);
-      gravityRange.value = defaults.gravity;
-      gravityVal.textContent = defaults.gravity;
-      syncStyleAccent(defaults.style);
+    // 設定値（state.config）を、すべての画面部品に反映する
+    function applyConfigToUI() {
+      const c = state.config;
 
-      enabledShapes = { circle: true, star: true, sparkle: true, ray: true };
-      shapeToggles.forEach((toggle) => {
-        toggle.checked = true;
-        toggle.closest('.control-group').classList.remove('is-off');
+      dom.styleSelect.value = c.style;
+      syncStyleAccent(c.style);
+
+      SLIDER_BINDINGS.forEach((b) => {
+        b.input.value = b.toInput(c[b.key]);
+        b.badge.textContent = b.format(c[b.key]);
       });
 
-      panelOpacitySlider.value = Math.round(defaults.panelOpacity * 100);
-      panelOpacityValue.textContent = Math.round(defaults.panelOpacity * 100) + '%';
+      dom.shapeToggles.forEach((toggle) => {
+        const on = c.shapes[toggle.dataset.shape];
+        toggle.checked = on;
+        toggle.closest('.control-group').classList.toggle('is-off', !on);
+      });
+
       applyPanelOpacity();
+    }
 
-      hideDelaySlider.value = defaults.hideDelay;
-      hideDelayValue.textContent = defaults.hideDelay + 's';
-    });
+    // 状態メッセージを表示（STATUS_MS 後に自動で消える）
+    function showStatus(text, type = 'info') {
+      dom.statusMsg.textContent = text;
+      dom.statusMsg.classList.toggle('is-error', type === 'error');
+      clearTimeout(state.statusTimerId);
+      state.statusTimerId = setTimeout(() => {
+        dom.statusMsg.textContent = '';
+      }, STATUS_MS);
+    }
 
-    // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
-    document.querySelectorAll('.control-section').forEach(section => {
-      const toggle = section.querySelector('.section-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = section.classList.toggle('is-collapsed');
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
-      });
-    });
+    // キャンバスを画面サイズ・画素密度に合わせる
+    function resizeCanvas() {
+      const rect = dom.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      state.view = { w: rect.width, h: rect.height, left: rect.left, top: rect.top };
+      dom.canvas.width = Math.round(rect.width * dpr);
+      dom.canvas.height = Math.round(rect.height * dpr);
+      // 拡大率を毎回「設定し直す」ので、リサイズを繰り返しても倍率が積み重ならない
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
-    // ===== 格納式パネルの挙動（表示/非表示・自動退避・ドラッグ移動） =====
-    let hideTimerId = null;
+    // --- パネルの表示／非表示 ---
+
+    function isPanelHidden() {
+      const cl = dom.controlPanel.classList;
+      return cl.contains('is-fully-hidden') || cl.contains('is-collapsed');
+    }
 
     function startHideTimer() {
-      clearTimeout(hideTimerId);
-      hideTimerId = setTimeout(() => {
-        controlPanel.classList.add('is-fully-hidden');
-      }, config.hideDelay * 1000);
+      clearTimeout(state.hideTimerId);
+      state.hideTimerId = setTimeout(() => {
+        dom.controlPanel.classList.add('is-fully-hidden');
+      }, state.config.hideDelay * 1000);
+    }
+
+    // 本文を畳んでヘッダーだけにし、指定秒数後にパネル全体を消す
+    function collapsePanel() {
+      dom.controlPanel.classList.add('is-collapsed');
+      dom.togglePanelBtn.textContent = '表示';
+      dom.togglePanelBtn.setAttribute('aria-expanded', 'false');
+      startHideTimer();
     }
 
     function showPanel() {
-      clearTimeout(hideTimerId);
-      controlPanel.classList.remove('is-fully-hidden');
-      panelBody.classList.remove('is-collapsed');
-      togglePanelBtn.textContent = '非表示';
+      clearTimeout(state.hideTimerId);
+      dom.controlPanel.classList.remove('is-fully-hidden', 'is-collapsed');
+      dom.togglePanelBtn.textContent = '非表示';
+      dom.togglePanelBtn.setAttribute('aria-expanded', 'true');
+      clampPanelIntoView();
     }
 
-    togglePanelBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isCollapsed = panelBody.classList.toggle('is-collapsed');
-      if (isCollapsed) {
-        togglePanelBtn.textContent = '表示';
-        startHideTimer();
-      } else {
-        togglePanelBtn.textContent = '非表示';
-        clearTimeout(hideTimerId);
-        controlPanel.classList.remove('is-fully-hidden');
-      }
-    });
+    function togglePanel() {
+      if (isPanelHidden()) showPanel(); else collapsePanel();
+    }
 
-    // パネル上での操作が背後のキャンバスに伝わらないようにブロック
-    controlPanel.addEventListener('mousedown', (e) => e.stopPropagation());
-    controlPanel.addEventListener('touchstart', (e) => e.stopPropagation());
+    // ドラッグで動かしたパネルが画面外にはみ出さないよう押し戻す（PC表示のみ）
+    function clampPanelIntoView() {
+      const panel = dom.controlPanel;
+      if (window.innerWidth <= MOBILE_BREAKPOINT || !panel.style.left) return;
+      const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+      const left = Math.min(Math.max(0, parseFloat(panel.style.left)), maxLeft);
+      const top = Math.min(Math.max(0, parseFloat(panel.style.top)), maxTop);
+      panel.style.left = `${left}px`;
+      panel.style.top = `${top}px`;
+    }
 
-    // 背景（キャンバス）を3回連続クリック／タップした時にパネルを再表示
-    const SHOW_PANEL_CLICK_WINDOW = 600;
-    let showPanelClickTimestamps = [];
-    canvasContainer.addEventListener('click', () => {
-      if (!(controlPanel.classList.contains('is-fully-hidden') || panelBody.classList.contains('is-collapsed'))) {
-        return;
-      }
-      const now = Date.now();
-      showPanelClickTimestamps.push(now);
-      showPanelClickTimestamps = showPanelClickTimestamps.filter(t => now - t <= SHOW_PANEL_CLICK_WINDOW);
-      if (showPanelClickTimestamps.length >= 3) {
-        showPanel();
-        showPanelClickTimestamps = [];
-      }
-    });
+    // --- イベント登録 ---
 
-    // スライダー：タッチ操作の場合はつまみ（●）を掴んだ時だけ値を変更できるようにする
-    // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため）
+    function bindControls() {
+      dom.styleSelect.addEventListener('change', (e) => {
+        state.config.style = e.target.value;
+        syncStyleAccent(e.target.value);
+      });
+
+      SLIDER_BINDINGS.forEach((b) => {
+        b.input.addEventListener('input', () => {
+          state.config[b.key] = b.fromInput(b.input.value);
+          b.badge.textContent = b.format(state.config[b.key]);
+          if (b.onChange) b.onChange();
+        });
+      });
+
+      dom.shapeToggles.forEach((toggle) => {
+        toggle.addEventListener('change', () => {
+          const shape = toggle.dataset.shape;
+          const shapes = state.config.shapes;
+
+          if (!toggle.checked && !ALL_SHAPES.some((s) => s !== shape && shapes[s])) {
+            // 最低ひとつは有効なままにする
+            toggle.checked = true;
+            showStatus('最低ひとつの形は有効にしてください', 'error');
+            return;
+          }
+
+          shapes[shape] = toggle.checked;
+          toggle.closest('.control-group').classList.toggle('is-off', !toggle.checked);
+        });
+      });
+
+      // リセット（すべての設定を初期値へ）
+      dom.resetBtn.addEventListener('click', () => {
+        state.particles.length = 0;
+        state.config = structuredClone(DEFAULTS);
+        applyConfigToUI();
+      });
+
+      // 各セクションのアコーディオン開閉（他のセクションには影響しない）
+      document.querySelectorAll('.control-section').forEach((section) => {
+        const toggle = section.querySelector('.section-toggle');
+        if (!toggle) return;
+        toggle.addEventListener('click', () => {
+          const isCollapsed = section.classList.toggle('is-collapsed');
+          toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+        });
+      });
+    }
+
+    // マウス・タッチ・ペン（複数同時対応）
+    function bindPointerEvents() {
+      const toLocal = (e) => ({ x: e.clientX - state.view.left, y: e.clientY - state.view.top });
+
+      dom.canvas.addEventListener('pointerdown', (e) => {
+        const { x, y } = toLocal(e);
+        setPointer(e.pointerId, x, y, true, e.pointerType);
+        spawnBurst(x, y);
+      });
+
+      dom.canvas.addEventListener('pointermove', (e) => {
+        const { x, y } = toLocal(e);
+        const existing = state.pointers.get(e.pointerId);
+        // マウスは乗せているだけでアクティブ、タッチ・ペンは押している間だけアクティブ
+        const active = e.pointerType === 'mouse' ? true : Boolean(existing && existing.active);
+        setPointer(e.pointerId, x, y, active, e.pointerType);
+      });
+
+      const release = (e) => {
+        if (e.pointerType === 'mouse') {
+          const p = state.pointers.get(e.pointerId);
+          if (p) p.active = false;
+        } else {
+          state.pointers.delete(e.pointerId);
+        }
+      };
+      dom.canvas.addEventListener('pointerup', release);
+      dom.canvas.addEventListener('pointercancel', release);
+
+      dom.canvas.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const p = state.pointers.get(e.pointerId);
+        if (p) p.active = false;
+      });
+    }
+
+    function bindPanelEvents() {
+      dom.togglePanelBtn.addEventListener('click', togglePanel);
+
+      // Escキーでパネルの表示／非表示を切り替える
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || e.repeat) return;
+        togglePanel();
+      });
+
+      // パネルが隠れている時、背景を素早く3回クリック／タップすると再表示
+      dom.canvasContainer.addEventListener('click', () => {
+        if (!isPanelHidden()) return;
+        const now = Date.now();
+        state.showClickTimes = state.showClickTimes
+          .concat(now)
+          .filter((t) => now - t <= SHOW_PANEL_CLICK_WINDOW);
+        if (state.showClickTimes.length >= SHOW_PANEL_CLICK_COUNT) {
+          showPanel();
+          state.showClickTimes = [];
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        clampPanelIntoView();
+      });
+    }
+
+    // スライダー：タッチ操作では、つまみ（●）を掴んだ時だけ値を変更できるようにする
+    // （トラック部分に触れただけで意図せず値が変わるのを防ぐため）
     function initSliderTouchPrevention() {
-      const THUMB_HIT_RADIUS = 22;
-      const THUMB_SIZE = 14;
-
       function getThumbCenterX(slider, rect) {
         const min = parseFloat(slider.min) || 0;
         const max = parseFloat(slider.max) || 100;
@@ -1323,9 +1445,11 @@
         return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
       }
 
-      const sliders = document.querySelectorAll('input[type="range"]');
-      sliders.forEach((slider) => {
-        let startX = 0, startY = 0, isVertical = false, touchOnThumb = true;
+      document.querySelectorAll('input[type="range"]').forEach((slider) => {
+        let startX = 0;
+        let startY = 0;
+        let isVertical = false;
+        let touchOnThumb = true;
 
         slider.addEventListener('touchstart', (e) => {
           const touch = e.touches[0];
@@ -1336,12 +1460,9 @@
           const rect = slider.getBoundingClientRect();
           const thumbX = getThumbCenterX(slider, rect);
           const thumbY = rect.top + rect.height / 2;
-          const dist = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY);
-          touchOnThumb = dist <= THUMB_HIT_RADIUS;
+          touchOnThumb = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY) <= THUMB_HIT_RADIUS;
 
-          if (!touchOnThumb) {
-            e.preventDefault();
-          }
+          if (!touchOnThumb) e.preventDefault();
         }, { passive: false });
 
         slider.addEventListener('touchmove', (e) => {
@@ -1362,100 +1483,86 @@
       });
     }
 
-    // デスクトップ用パネル・ドラッグ移動
+    // PC表示でのパネルのドラッグ移動
     function initDraggable() {
-      let isDragging = false;
-      let startX = 0, startY = 0;
-      let initialLeft = 0, initialTop = 0;
+      const panel = dom.controlPanel;
+      let startX = 0;
+      let startY = 0;
+      let initialLeft = 0;
+      let initialTop = 0;
 
-      panelHeader.addEventListener('mousedown', (e) => {
-        if (window.innerWidth <= 600) return;
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+      function onMouseMove(e) {
+        const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+        const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+        const newLeft = Math.max(0, Math.min(initialLeft + e.clientX - startX, maxLeft));
+        const newTop = Math.max(0, Math.min(initialTop + e.clientY - startY, maxTop));
+        panel.style.left = `${newLeft}px`;
+        panel.style.top = `${newTop}px`;
+      }
 
-        isDragging = true;
+      function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+
+      dom.panelHeader.addEventListener('mousedown', (e) => {
+        if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+        if (e.target.closest('button')) return;
+
         startX = e.clientX;
         startY = e.clientY;
-
-        const rect = controlPanel.getBoundingClientRect();
+        const rect = panel.getBoundingClientRect();
         initialLeft = rect.left;
         initialTop = rect.top;
 
-        controlPanel.style.right = 'auto';
-        controlPanel.style.left = `${initialLeft}px`;
-        controlPanel.style.top = `${initialTop}px`;
+        panel.style.right = 'auto';
+        panel.style.left = `${initialLeft}px`;
+        panel.style.top = `${initialTop}px`;
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
       });
-
-      function onMouseMove(e) {
-        if (!isDragging) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-
-        let newLeft = initialLeft + dx;
-        let newTop = initialTop + dy;
-
-        const maxLeft = window.innerWidth - controlPanel.offsetWidth;
-        const maxTop = window.innerHeight - controlPanel.offsetHeight;
-
-        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-        newTop = Math.max(0, Math.min(newTop, maxTop));
-
-        controlPanel.style.left = `${newLeft}px`;
-        controlPanel.style.top = `${newTop}px`;
-      }
-
-      function onMouseUp() {
-        isDragging = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      }
     }
 
-    // メインアニメーションループ
-    function animate() {
-      const rect = canvas.getBoundingClientRect();
+    // --- メインループ ---
+    function animate(now) {
+      const dt = Math.min(Math.max((now - state.lastTime) / FRAME_MS, 0), MAX_DT);
+      state.lastTime = now;
 
-      // 完全に消さず、薄い帯で塗り重ねることで軌跡(トレイル)を残す
-      ctx.fillStyle = `rgba(7, 7, 11, ${TRAIL_ALPHA})`;
-      ctx.fillRect(0, 0, rect.width, rect.height);
+      // 残像：これまでの描画を少しずつ透明にしていく（下の黒い背景が透けて見える）
+      const fade = 1 - Math.pow(1 - TRAIL_ALPHA, dt);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = `rgba(0, 0, 0, ${fade})`;
+      ctx.fillRect(0, 0, state.view.w, state.view.h);
+      ctx.globalCompositeOperation = 'source-over';
 
-      let anyActive = false;
-      pointers.forEach((p) => {
-        if (p.active) {
-          anyActive = true;
-          for (let i = 0; i < 4; i++) {
-            particles.push(new Particle(p.x, p.y));
-          }
-        }
-      });
+      emitParticles(dt);
+      updateAndDrawParticles(ctx, dt);
 
-      if (!anyActive) {
-        for (let i = 0; i < 2; i++) {
-          particles.push(new Particle());
-        }
+      // 粒子数は変わった時だけ表示を更新
+      const count = state.particles.length;
+      if (count !== state.lastShownCount) {
+        dom.countDisplay.textContent = count;
+        state.lastShownCount = count;
       }
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.update();
-        p.draw();
-
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-        }
-      }
-
-      countDisplay.textContent = particles.length;
 
       requestAnimationFrame(animate);
     }
 
-    syncStyleAccent(defaults.style);
+    // =====================================================================
+    // INIT — 起動処理
+    // =====================================================================
+    resizeCanvas();
+    applyConfigToUI();
+    bindControls();
+    bindPointerEvents();
+    bindPanelEvents();
     initDraggable();
     initSliderTouchPrevention();
-    animate();
+
+    state.lastTime = performance.now();
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
