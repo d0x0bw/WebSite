@@ -6,9 +6,6 @@
   <title>Particle Morphing Text</title>
 
   <link rel="icon" href="../icon/favicon.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
 
@@ -39,8 +36,10 @@
       --radius-md: 12px;
       --radius-sm: 9px;
 
-      --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      /* Webフォントは使わず、PCに入っているフォントだけで表示する
+         （等幅は英数字を Consolas、日本語を Meiryo で表示） */
+      --font-display: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      --font-mono: Consolas, "SFMono-Regular", Menlo, Meiryo, monospace;
     }
 
     * {
@@ -325,6 +324,17 @@
       padding: 0 20px 20px;
     }
 
+    /* 「非表示」ボタンで本文を畳んだ状態（ヘッダーだけ残す） */
+    .panel-content.is-collapsed {
+      display: none;
+    }
+
+    .control-panel:has(#panelBody.is-collapsed) .panel-header {
+      margin-bottom: 0;
+      border-bottom-color: transparent;
+      border-radius: var(--radius-lg);
+    }
+
     .panel-header-title {
       display: flex;
       flex-direction: column;
@@ -386,6 +396,53 @@
     .toggle-btn:hover {
       border-color: var(--p-blue);
       color: var(--p-blue);
+    }
+
+    .toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* ■ 設定の保存 */
+    .save-note {
+      font-size: 0.7rem;
+      line-height: 1.6;
+      color: var(--dim);
+      margin-bottom: 10px;
+    }
+
+    .save-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .save-btn {
+      flex: 1;
+    }
+
+    /* 状態メッセージ（空の時は表示しない） */
+    .status-msg {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: #d6d5d2;
+      background-color: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-bottom: 14px;
+    }
+
+    .status-msg:empty {
+      display: none;
+    }
+
+    .status-msg.is-error {
+      color: #f87171;
+      border-color: rgba(248, 113, 113, 0.4);
+    }
+
+    .modal-box .status-msg {
+      margin-bottom: 0;
     }
 
     .control-section {
@@ -479,35 +536,20 @@
     }
 
     /* アクセント割り当て：粒子パレットの5色をそのままコントロールへ配る */
-    .control-scatter, .control-autocycle {
+    .control-pattern, .control-shattercycle, .control-autocycle, .control-scatter {
       --accent: var(--p-violet); --accent-glow: rgba(189, 147, 249, 0.55);
     }
-    .control-speed, .control-weight {
+    .control-weight, .control-textstyle, .control-speed {
       --accent: var(--p-green); --accent-glow: rgba(80, 250, 123, 0.55);
     }
-    .control-interval, .control-fontscale {
+    .control-interval, .control-fontscale, .control-opacity {
       --accent: var(--p-amber); --accent-glow: rgba(255, 184, 108, 0.55);
     }
     .control-glow, .control-glowstrength {
       --accent: var(--p-blue); --accent-glow: rgba(166, 200, 255, 0.55);
     }
-    .control-size {
+    .control-size, .control-uniformsize, .control-mono {
       --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-uniformsize {
-      --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-pattern, .control-shattercycle {
-      --accent: var(--p-violet); --accent-glow: rgba(189, 147, 249, 0.55);
-    }
-    .control-textstyle {
-      --accent: var(--p-green); --accent-glow: rgba(80, 250, 123, 0.55);
-    }
-    .control-mono {
-      --accent: var(--p-red); --accent-glow: rgba(255, 85, 85, 0.55);
-    }
-    .control-opacity {
-      --accent: var(--p-amber); --accent-glow: rgba(255, 184, 108, 0.55);
     }
 
     /* モーフィングパターンの2択スイッチ */
@@ -1156,6 +1198,9 @@
 
   <div class="panel-content" id="panelBody">
 
+    <!-- 状態メッセージ（保存・読み込みの結果など。4秒で消える） -->
+    <p class="status-msg" id="statusMessage" role="status" aria-live="polite"></p>
+
     <div class="control-section is-collapsed">
       <button class="section-toggle" type="button" aria-expanded="false">
         <span class="section-title">■ テキスト</span>
@@ -1369,6 +1414,22 @@
       </div>
     </div>
 
+    <div class="control-section is-collapsed">
+      <button class="section-toggle" type="button" aria-expanded="false">
+        <span class="section-title">■ 設定の保存</span>
+        <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="section-body">
+        <p class="save-note">設定とテキストは、このブラウザに自動で保存されます。別のPCへ移す時や控えを残す時は、エクスポートしたファイルを使ってください。</p>
+        <div class="save-actions">
+          <button type="button" class="toggle-btn save-btn" id="exportSettingsBtn">エクスポート</button>
+          <button type="button" class="toggle-btn save-btn" id="importSettingsBtn">インポート</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1382,6 +1443,8 @@
       </div>
       <button class="modal-close-btn" id="modalCloseBtn" title="閉じる">×</button>
     </div>
+
+    <p class="status-msg" id="modalStatusMessage" role="status" aria-live="polite"></p>
 
     <div class="modal-input-row">
       <input type="text" id="modalNewWordInput" placeholder="テキストを入力" maxlength="12" spellcheck="false" autocomplete="off">
@@ -1397,87 +1460,36 @@
   </div>
 </div>
 <input type="file" id="modalFileInput" accept="application/json,.json" style="display:none;">
+<input type="file" id="settingsFileInput" accept="application/json,.json" style="display:none;">
 
 <script>
-  const DEFAULT_WORDS = ["MAGIC", "DREAM", "FUTURE", "SPARK", "GLOW", "VISION"];
-  let words = [...DEFAULT_WORDS];
-  let wordIndex = 0;
+  // ============================================================
+  // CONFIG — 定数と初期値（実行中に書き換えない値）
+  // ============================================================
+  const APP_NAME = "ParticleMorphingText";
+  const DEFAULT_WORDS = Object.freeze(["MAGIC", "DREAM", "FUTURE", "SPARK", "GLOW", "VISION"]);
+  const FALLBACK_WORD = "MAGIC";        // WORD欄を空にして確定した時に入れる単語
+  const MAX_WORD_LENGTH = 12;           // 入力欄の maxlength と合わせる
+  const MOBILE_BREAKPOINT = 600;        // CSSの @media (max-width: 600px) と合わせる
+  const UNIFORM_BASE_RADIUS = 1.75;     // 粒子サイズ均一時の半径（ランダム時の平均値付近）
+  const SHOW_PANEL_CLICK_WINDOW = 600;  // 背景3回クリックでパネル再表示する判定時間(ms)
+  const THUMB_HIT_RADIUS = 22;          // タッチでスライダーのつまみを「掴んだ」とみなす距離(px)
+  const THUMB_SIZE = 14;                // CSS側のつまみの幅・高さ(14px)と合わせる
+  const BASE_FRAME_MS = 1000 / 60;      // Morph Speed は「60fpsで1コマあたりに近づく割合」として扱う
+  const MAX_FRAME_MS = 100;             // タブ復帰直後などの大きなコマ間隔は、ここで頭打ちにする
+  const GLOW_SPRITE_CACHE_LIMIT = 400;  // グロー付き粒子の画像を覚えておく最大数
 
-  const canvasContainer = document.getElementById("canvas-container");
-  const canvas = document.getElementById("particleCanvas");
-  const ctx = canvas.getContext("2d");
+  // 保存（キー名は「アプリ名:v1:用途」。データ構造を変える時は v2 にして移行処理を足す）
+  const STORAGE_KEYS = Object.freeze({
+    settings: `${APP_NAME}:v1:settings`,
+    words: `${APP_NAME}:v1:words`
+  });
+  const EXPORT_FORMAT_VERSION = 1;      // エクスポートファイルの形式の版
+  const SAVE_DELAY_MS = 300;            // スライダー操作中に何度も保存しないよう、操作が止まってから保存する
+  const STATUS_DURATION_MS = 4000;      // 状態メッセージを消すまでの時間
 
-  // ステータス札
-  const wordInput = document.getElementById("wordInput");
-  const addWordBtn = document.getElementById("addWordBtn");
-  const particleCountDisplay = document.getElementById("particleCountDisplay");
-  const nextWordBtn = document.getElementById("nextWordBtn");
-
-  // パラメータパネル本体
-  const controlPanel = document.getElementById("controlPanel");
-  const panelHeader = document.getElementById("panelHeader");
-  const panelBody = document.getElementById("panelBody");
-  const togglePanelBtn = document.getElementById("togglePanelBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  // テキスト
-  const patternCrossBtn = document.getElementById("patternCrossBtn");
-  const patternShatterBtn = document.getElementById("patternShatterBtn");
-  const shatterCycleGroup = document.getElementById("shatterCycleGroup");
-  const shatterCycleSlider = document.getElementById("shatterCycleSlider");
-  const shatterCycleValue = document.getElementById("shatterCycleValue");
-  const autoCycleToggle = document.getElementById("autoCycleToggle");
-  const intervalSlider = document.getElementById("intervalSlider");
-  const intervalValue = document.getElementById("intervalValue");
-  const weightSlider = document.getElementById("weightSlider");
-  const weightValue = document.getElementById("weightValue");
-  const fontScaleSlider = document.getElementById("fontScaleSlider");
-  const fontScaleValue = document.getElementById("fontScaleValue");
-  const styleFillBtn = document.getElementById("styleFillBtn");
-  const styleOutlineBtn = document.getElementById("styleOutlineBtn");
-
-  // パーティクル
-  const scatterSlider = document.getElementById("scatterSlider");
-  const scatterValue = document.getElementById("scatterValue");
-  const sizeSlider = document.getElementById("sizeSlider");
-  const sizeValue = document.getElementById("sizeValue");
-  const uniformSizeToggle = document.getElementById("uniformSizeToggle");
-  const speedSlider = document.getElementById("speedSlider");
-  const speedValue = document.getElementById("speedValue");
-  const glowToggle = document.getElementById("glowToggle");
-  const glowStrengthSlider = document.getElementById("glowStrengthSlider");
-  const glowStrengthValue = document.getElementById("glowStrengthValue");
-
-  // カラー
-  const monoToggle = document.getElementById("monoToggle");
-  const paletteColorGrid = document.getElementById("paletteColorGrid");
-  const monoColorRow = document.getElementById("monoColorRow");
-  const monoColorPicker = document.getElementById("monoColorPicker");
-  const colorBlue = document.getElementById("colorBlue");
-  const colorViolet = document.getElementById("colorViolet");
-  const colorGreen = document.getElementById("colorGreen");
-  const colorAmber = document.getElementById("colorAmber");
-  const colorRed = document.getElementById("colorRed");
-  const bgColorPicker = document.getElementById("bgColorPicker");
-
-  // システム
-  const panelOpacitySlider = document.getElementById("panelOpacitySlider");
-  const panelOpacityValue = document.getElementById("panelOpacityValue");
-  const hideDelaySlider = document.getElementById("hideDelaySlider");
-  const hideDelayValue = document.getElementById("hideDelayValue");
-
-  // モーダル要素
-  const wordModalOverlay = document.getElementById("wordModalOverlay");
-  const modalCloseBtn = document.getElementById("modalCloseBtn");
-  const modalNewWordInput = document.getElementById("modalNewWordInput");
-  const modalAddBtn = document.getElementById("modalAddBtn");
-  const modalWordList = document.getElementById("modalWordList");
-  const modalSaveBtn = document.getElementById("modalSaveBtn");
-  const modalRestoreBtn = document.getElementById("modalRestoreBtn");
-  const modalFileInput = document.getElementById("modalFileInput");
-
-  // ===== パラメータ初期値（3DParticleTunnelWarpBoostOmega と同じ考え方の config オブジェクト） =====
-  const defaultConfig = {
+  // パラメータ初期値（リセットボタンはこの値へ戻す）
+  const defaultConfig = Object.freeze({
     scatterAmount: 0,
     particleSize: 1.0,
     uniformSize: true,
@@ -1501,57 +1513,168 @@
     bgColor: "#000000",
     hideDelay: 4,
     panelOpacity: 0
-  };
+  });
 
-  const config = { ...defaultConfig };
+  // 粒子パレット5色：設定キー ⇔ カラーピッカーのID ⇔ CSS変数
+  // （CSS変数を書き換えると、パネル内のアクセントドットも同じ色になる）
+  const PALETTE = Object.freeze([
+    { key: "colorBlue",   inputId: "colorBlue",   cssVar: "--p-blue" },
+    { key: "colorViolet", inputId: "colorViolet", cssVar: "--p-violet" },
+    { key: "colorGreen",  inputId: "colorGreen",  cssVar: "--p-green" },
+    { key: "colorAmber",  inputId: "colorAmber",  cssVar: "--p-amber" },
+    { key: "colorRed",    inputId: "colorRed",    cssVar: "--p-red" }
+  ]);
 
-  let intervalTimer = null;
-  let currentDpr = 1;
+  // ============================================================
+  // STATE — 実行中に変わる値
+  // ============================================================
+  const config = { ...defaultConfig };   // 現在のパラメータ
+  let words = [...DEFAULT_WORDS];        // 表示する単語の一覧
+  let wordIndex = 0;                     // 今表示している単語の番号
+  let particles = [];                    // 画面上の粒子
+  let currentDpr = 1;                    // 画面の拡大率（devicePixelRatio）
+  let lastFrameTime = null;              // 前のコマを描いた時刻（アニメーション速度の計算用）
+  let wordRefreshRequested = false;      // 文字の形の再計算を次のコマで1回だけ行うための印
 
-  // シャッター(分散→収束)パターン用の状態
-  let shatterCycleTimer = null;
-  let shatterPhase = "hold"; // "hold"(文字の形) | "scatter"(バラバラ)
+  // 自動切り替え
+  let intervalTimer = null;              // ダイレクトパターン用（setInterval）
+  let shatterCycleTimer = null;          // シャッターパターン用（setTimeout）
+  let shatterPhase = "hold";             // "hold"(文字の形) | "scatter"(バラバラ)
+  // 一時停止の理由（"input"=WORD欄で入力中、"modal"=テキスト管理を表示中）。
+  // 理由が1つでも残っている間は、どちらのパターンのタイマーも動かさない
+  const autoCyclePauseReasons = new Set();
 
-  // Particle Class
-  // 粒子サイズが均一な場合に使う固定半径（ランダム時の平均値付近に設定）
-  const UNIFORM_BASE_RADIUS = 1.75;
+  // パネル
+  let hideTimerId = null;
+  let showPanelClickTimestamps = [];
 
-  function getBaseRadius() {
-    return config.uniformSize ? UNIFORM_BASE_RADIUS : (Math.random() * 1.5 + 1);
+  // 保存・状態メッセージ
+  let saveTimerId = null;
+  let statusTimerId = null;
+  let storageErrorShown = false;        // 保存失敗のメッセージを何度も出さないため
+
+  // ============================================================
+  // STORAGE — ブラウザ(localStorage)への保存とファイルの書き出し・読み込み
+  // ============================================================
+
+  // 古い形式の保存データを新しい形式へ移す。
+  // v1 が最初の版なので、今は何もしない（v2 を作る時にここへ変換処理を書く）
+  function migrateStorage() {}
+
+  function readStorageJson(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      return { value: raw === null ? null : JSON.parse(raw), ok: true };
+    } catch (err) {
+      return { value: null, ok: false };
+    }
   }
 
-  class Particle {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      this.targetX = x;
-      this.targetY = y;
-      this.shapeX = x;
-      this.shapeY = y;
-      this.baseRadius = getBaseRadius();
-      this.color = getRandomParticleColor();
-      this.active = true;
+  // 保存データを読み出す（中身の検査は呼び出し側で行う）
+  function loadStoredData() {
+    migrateStorage();
+    const settings = readStorageJson(STORAGE_KEYS.settings);
+    const wordList = readStorageJson(STORAGE_KEYS.words);
+    return {
+      settings: settings.value,
+      words: wordList.value,
+      hadError: !settings.ok || !wordList.ok
+    };
+  }
+
+  // 保存する（容量不足などで失敗した時は例外を投げる）
+  function writeStoredData(settings, wordList) {
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+    localStorage.setItem(STORAGE_KEYS.words, JSON.stringify(wordList));
+  }
+
+  // エクスポートファイルの中身
+  function buildExportData(settings, wordList) {
+    return {
+      app: APP_NAME,
+      version: EXPORT_FORMAT_VERSION,
+      exportedAt: new Date().toISOString(),
+      config: settings,
+      words: wordList
+    };
+  }
+
+  // インポートファイルを解釈する。読めない時は null。
+  // ・このアプリのエクスポート形式 → 設定とテキスト
+  // ・文字列の配列（テキスト管理の「テキストを保存」で作ったファイル）→ テキストだけ
+  function parseImportData(data) {
+    if (Array.isArray(data)) {
+      const list = normalizeWordList(data);
+      return list ? { config: null, words: list } : null;
     }
+    if (!data || typeof data !== "object") return null;
+    if (data.app !== APP_NAME || typeof data.version !== "number") return null;
+    if (data.version > EXPORT_FORMAT_VERSION) return null; // 新しい版で作られたファイル
 
-    update(speed) {
-      this.x += (this.targetX - this.x) * speed;
-      this.y += (this.targetY - this.y) * speed;
+    const settings = data.config && typeof data.config === "object" ? data.config : null;
+    let list = null;
+    if (data.words !== undefined) {
+      list = normalizeWordList(data.words);
+      if (!list) return null;
     }
+    if (!settings && !list) return null;
+    return { config: settings, words: list };
+  }
 
-    draw(context, glow, dpr) {
-      context.beginPath();
-      context.arc(this.x, this.y, this.baseRadius * config.particleSize * dpr, 0, Math.PI * 2);
-      context.fillStyle = this.color;
+  function getDateStamp() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  }
 
-      if (glow) {
-        context.shadowBlur = config.glowStrength * dpr;
-        context.shadowColor = this.color;
-      } else {
-        context.shadowBlur = 0;
+  function downloadJson(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // 選ばれたJSONファイルを読み、結果をコールバックで返す
+  function readJsonFile(file, onSuccess, onError) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      let parsed;
+      try {
+        parsed = JSON.parse(ev.target.result);
+      } catch (err) {
+        onError(err);
+        return;
       }
+      onSuccess(parsed);
+    };
+    reader.onerror = () => onError(reader.error);
+    reader.readAsText(file);
+  }
 
-      context.fill();
-    }
+  // 単語リストとして読み込めるデータか確かめ、整えた配列を返す（不正なら null）
+  function normalizeWordList(data) {
+    if (!Array.isArray(data) || !data.every((w) => typeof w === "string")) return null;
+    const list = data
+      .map((w) => w.toUpperCase().slice(0, MAX_WORD_LENGTH))
+      .filter((w) => w.trim().length > 0);
+    return list.length > 0 ? list : [...DEFAULT_WORDS];
+  }
+
+  // ============================================================
+  // LOGIC — 粒子・文字の形・自動切り替え（画面部品には触れない）
+  // ============================================================
+  const canvasContainer = document.getElementById("canvas-container");
+  const canvas = document.getElementById("particleCanvas");
+  const ctx = canvas.getContext("2d");
+
+  // ---------- 粒子 ----------
+  function getBaseRadius() {
+    return config.uniformSize ? UNIFORM_BASE_RADIUS : (Math.random() * 1.5 + 1);
   }
 
   function getRandomParticleColor() {
@@ -1562,6 +1685,72 @@
     if (rand > 0.55) return config.colorGreen;
     if (rand > 0.40) return config.colorViolet;
     return config.colorBlue;
+  }
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.targetX = x;   // 今向かっている位置
+      this.targetY = y;
+      this.shapeX = x;    // 文字の形を作る時の位置
+      this.shapeY = y;
+      this.baseRadius = getBaseRadius();
+      this.color = getRandomParticleColor();
+      this.active = true; // true=文字を形作る粒子 / false=周りに散らばる粒子
+    }
+
+    // ratio: このコマで目標位置へ近づく割合（0〜1）
+    update(ratio) {
+      this.x += (this.targetX - this.x) * ratio;
+      this.y += (this.targetY - this.y) * ratio;
+    }
+
+    draw(context, glow, dpr) {
+      const radius = this.baseRadius * config.particleSize * dpr;
+
+      if (glow) {
+        // 粒子ごとに shadowBlur で光をぼかすのは重いため、
+        // 同じ色・大きさの「光る粒子の画像」を一度だけ作って貼り付ける
+        const sprite = getGlowSprite(this.color, radius, config.glowStrength * dpr);
+        context.drawImage(sprite.canvas, this.x - sprite.half, this.y - sprite.half);
+        return;
+      }
+
+      context.beginPath();
+      context.arc(this.x, this.y, radius, 0, Math.PI * 2);
+      context.fillStyle = this.color;
+      context.fill();
+    }
+  }
+
+  // ---------- グロー付き粒子の画像（スプライト） ----------
+  const glowSpriteCache = new Map();
+
+  function getGlowSprite(color, radius, blur) {
+    const r = Math.round(radius * 4) / 4; // 0.25px 単位にそろえて、作る画像の数を抑える
+    const key = `${color}|${r}|${blur}`;
+    let sprite = glowSpriteCache.get(key);
+    if (sprite) return sprite;
+
+    if (glowSpriteCache.size >= GLOW_SPRITE_CACHE_LIMIT) glowSpriteCache.clear();
+
+    // 光のにじみは blur の約1.5倍まで広がるので、その分の余白を取る
+    const half = Math.ceil(r + blur * 1.5 + 2);
+    const c = document.createElement("canvas");
+    c.width = half * 2;
+    c.height = half * 2;
+    const g = c.getContext("2d");
+    g.fillStyle = color;
+    g.shadowColor = color;
+    g.shadowBlur = blur;
+    g.beginPath();
+    g.arc(half, half, r, 0, Math.PI * 2);
+    g.fill();
+
+    sprite = { canvas: c, half };
+    glowSpriteCache.set(key, sprite);
+    return sprite;
   }
 
   // パレット変更時に、既に画面上にある粒子の色も配り直す
@@ -1577,170 +1766,169 @@
     }
   }
 
-  function applyAccentVar(varName, value) {
-    document.documentElement.style.setProperty(varName, value);
+  // ---------- 文字の形 ----------
+  // 文字を描いてピクセルを読み取る作業用キャンバス（毎回作らずに使い回す）
+  const workCanvas = document.createElement("canvas");
+  const workCtx = workCanvas.getContext("2d", { willReadFrequently: true });
+
+  // 文字の描画設定（フォント・中央ぞろえ）。キャンバスの大きさを変えると
+  // 設定が消えるため、測る前・描く前に毎回入れ直す
+  function setWorkTextStyle(font) {
+    workCtx.font = font;
+    workCtx.textAlign = "center";
+    workCtx.textBaseline = "middle";
   }
 
-  function applyBgColor() {
-    document.documentElement.style.setProperty("--void", config.bgColor);
+  // 文字（＋周りの余白）が収まる範囲を、画面キャンバスの座標で求める。
+  // ピクセルの読み取りはこの範囲だけにする（画面全体を読むより大幅に軽い）
+  function getTextRegion(text, font, padding) {
+    setWorkTextStyle(font);
+    const m = workCtx.measureText(text);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const left = Math.max(0, Math.floor(cx - m.actualBoundingBoxLeft - padding));
+    const top = Math.max(0, Math.floor(cy - m.actualBoundingBoxAscent - padding));
+    const right = Math.min(canvas.width, Math.ceil(cx + m.actualBoundingBoxRight + padding));
+    const bottom = Math.min(canvas.height, Math.ceil(cy + m.actualBoundingBoxDescent + padding));
+    return { x: left, y: top, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
   }
 
-  function applyPanelOpacity() {
-    document.documentElement.style.setProperty("--panel-bg-alpha", config.panelOpacity);
-    // 透明度が0に近いほど、すりガラス効果(ぼかし)も弱めて背景が完全に透けるようにする
-    document.documentElement.style.setProperty("--panel-blur", (config.panelOpacity * 10).toFixed(1) + "px");
-  }
-
-  let particles = [];
-
-  function resizeCanvas() {
-    const rect = canvasContainer.getBoundingClientRect();
-    currentDpr = window.devicePixelRatio || 1;
-
-    canvas.width = rect.width * currentDpr;
-    canvas.height = rect.height * currentDpr;
-
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-
-    updateWord(words[wordIndex]);
+  // 作業用キャンバスを region の大きさにし、文字の描画設定を整える
+  function prepareWorkCanvas(region, font) {
+    workCanvas.width = region.width;
+    workCanvas.height = region.height;
+    setWorkTextStyle(font);
   }
 
   function getTextCoordinates(text) {
-    const offscreen = document.createElement("canvas");
-    const offCtx = offscreen.getContext("2d", { willReadFrequently: true });
-    offscreen.width = canvas.width;
-    offscreen.height = canvas.height;
-
     // 画面幅が狭くても文字が左右にはみ出さないよう比率を調整
     const fontSize = Math.min((canvas.width / Math.max(text.length, 1)) * config.fontScale, 150 * currentDpr);
-    offCtx.font = `${config.fontWeight} ${fontSize}px -apple-system, sans-serif`;
-    offCtx.textAlign = "center";
-    offCtx.textBaseline = "middle";
+    const font = `${config.fontWeight} ${fontSize}px -apple-system, sans-serif`;
 
     // 文字の太さが細い(fontWeightが小さい)ほど線が細くなり、
     // 固定の間隔でサンプリングすると細い線を拾い損ねて「文字の一部が
     // 欠ける」原因になるため、太さに応じてサンプリング間隔を細かくする
     const weightFactor = config.fontWeight / 900; // 100/900 ≈ 0.11 〜 900/900 = 1
     const step = Math.max(Math.floor((3 + weightFactor * 3) * currentDpr), 2);
+    const outlineWidth = Math.max(step * 1.4, 2 * currentDpr);
+    const maskLineWidth = 35 * currentDpr;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
 
-    if (config.textStyle === "outline") {
-      // 塗りつぶさず輪郭だけを細くなぞることで、面を粒子で埋めるのではなく
-      // 粒子一粒分の線が文字の形をなぞるような見た目にする
-      offCtx.lineWidth = Math.max(step * 1.4, 2 * currentDpr);
-      offCtx.lineJoin = "round";
-      offCtx.lineCap = "round";
-      offCtx.strokeStyle = "#ffffff";
-      offCtx.strokeText(text, offscreen.width / 2, offscreen.height / 2);
-    } else {
-      offCtx.fillStyle = "#ffffff";
-      offCtx.fillText(text, offscreen.width / 2, offscreen.height / 2);
-    }
-
-    const imageData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
-    const data = imageData.data;
+    // ---- 文字を形作る点 ----
+    const shapeRegion = getTextRegion(text, font, outlineWidth + 4);
     const points = [];
 
-    for (let y = 0; y < offscreen.height; y += step) {
-      for (let x = 0; x < offscreen.width; x += step) {
-        const index = (y * offscreen.width + x) * 4;
-        // アンチエイリアスがかかった細い線の輪郭も拾えるよう閾値を少し下げる
-        if (data[index + 3] > 100) {
-          points.push({ x, y });
+    if (shapeRegion.width > 0 && shapeRegion.height > 0) {
+      prepareWorkCanvas(shapeRegion, font);
+      const ox = cx - shapeRegion.x; // 作業用キャンバス上での文字の中心
+      const oy = cy - shapeRegion.y;
+
+      if (config.textStyle === "outline") {
+        // 塗りつぶさず輪郭だけを細くなぞることで、面を粒子で埋めるのではなく
+        // 粒子一粒分の線が文字の形をなぞるような見た目にする
+        workCtx.lineWidth = outlineWidth;
+        workCtx.lineJoin = "round";
+        workCtx.lineCap = "round";
+        workCtx.strokeStyle = "#ffffff";
+        workCtx.strokeText(text, ox, oy);
+      } else {
+        workCtx.fillStyle = "#ffffff";
+        workCtx.fillText(text, ox, oy);
+      }
+
+      const data = workCtx.getImageData(0, 0, shapeRegion.width, shapeRegion.height).data;
+
+      // 画面全体を step 間隔で調べていた時と同じ格子点だけを調べる
+      // （範囲の左上から、最初の step の倍数の位置に合わせる）
+      const startX = Math.ceil(shapeRegion.x / step) * step;
+      const startY = Math.ceil(shapeRegion.y / step) * step;
+      const endX = shapeRegion.x + shapeRegion.width;
+      const endY = shapeRegion.y + shapeRegion.height;
+
+      for (let y = startY; y < endY; y += step) {
+        for (let x = startX; x < endX; x += step) {
+          const index = ((y - shapeRegion.y) * shapeRegion.width + (x - shapeRegion.x)) * 4;
+          // アンチエイリアスがかかった細い線の輪郭も拾えるよう閾値を少し下げる
+          if (data[index + 3] > 100) {
+            points.push({ x, y });
+          }
         }
       }
     }
 
-    offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
-    offCtx.lineWidth = 35 * currentDpr;
-    offCtx.lineJoin = "round";
-    offCtx.strokeStyle = "#fff";
-    offCtx.strokeText(text, offscreen.width / 2, offscreen.height / 2);
+    // ---- 文字の周り（太めになぞった範囲）＝ 散らばる粒子が入らない領域 ----
+    const maskRegion = getTextRegion(text, font, maskLineWidth / 2 + 4);
+    let maskData = null;
 
-    const maskData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+    if (maskRegion.width > 0 && maskRegion.height > 0) {
+      prepareWorkCanvas(maskRegion, font);
+      workCtx.lineWidth = maskLineWidth;
+      workCtx.lineJoin = "round";
+      workCtx.strokeStyle = "#fff";
+      workCtx.strokeText(text, cx - maskRegion.x, cy - maskRegion.y);
+      maskData = workCtx.getImageData(0, 0, maskRegion.width, maskRegion.height).data;
+    }
 
-    return { points, maskData, width: offscreen.width, height: offscreen.height };
+    return { points, mask: { data: maskData, ...maskRegion } };
   }
 
-  function updateWord(word) {
-    const uppercaseWord = word.toUpperCase();
-    wordInput.value = uppercaseWord;
+  // 散らばる粒子の行き先を、文字の周りを避けてランダムに決める
+  // （mask の範囲外は、文字から十分離れているので常に置いてよい）
+  function pickScatterPosition(mask) {
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const rx = Math.random() * canvas.width;
+      const ry = Math.random() * canvas.height;
+      const mx = Math.floor(rx) - mask.x;
+      const my = Math.floor(ry) - mask.y;
 
-    const { points: targetPoints, maskData, width: maskW, height: maskH } = getTextCoordinates(uppercaseWord);
+      if (!mask.data || mx < 0 || mx >= mask.width || my < 0 || my >= mask.height) {
+        return { x: rx, y: ry };
+      }
+      if (mask.data[(my * mask.width + mx) * 4 + 3] === 0) return { x: rx, y: ry };
+    }
+    // 30回試しても見つからなければ画面の左右端へ
+    return { x: Math.random() > 0.5 ? 0 : canvas.width, y: Math.random() * canvas.height };
+  }
+
+  // 指定した単語の形へ粒子を並べ直す。文字を形作る粒子数を返す
+  function morphParticlesTo(word) {
+    const { points: targetPoints, mask } = getTextCoordinates(word);
     const totalTarget = targetPoints.length + config.scatterAmount;
 
     while (particles.length < totalTarget) {
-      const rx = Math.random() * canvas.width;
-      const ry = Math.random() * canvas.height;
-      particles.push(new Particle(rx, ry));
+      particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
     }
-
     if (particles.length > totalTarget) {
       particles.length = totalTarget;
     }
 
     for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       if (i < targetPoints.length) {
-        particles[i].shapeX = targetPoints[i].x;
-        particles[i].shapeY = targetPoints[i].y;
-        particles[i].active = true;
+        p.shapeX = targetPoints[i].x;
+        p.shapeY = targetPoints[i].y;
+        p.active = true;
 
         // 「シャッター」パターンで今まさに分散フェーズ中の場合は、
         // 今の分散先へ向かったままにしておき、収束フェーズで新しい
         // 文字の形へ吸い込まれるようにする
         if (config.morphPattern !== "shatter" || shatterPhase === "hold") {
-          particles[i].targetX = particles[i].shapeX;
-          particles[i].targetY = particles[i].shapeY;
+          p.targetX = p.shapeX;
+          p.targetY = p.shapeY;
         }
       } else {
-        let validPos = false;
-
-        for (let attempt = 0; attempt < 30; attempt++) {
-          const rx = Math.random() * canvas.width;
-          const ry = Math.random() * canvas.height;
-          const mx = Math.floor(rx);
-          const my = Math.floor(ry);
-
-          if (mx >= 0 && mx < maskW && my >= 0 && my < maskH) {
-            const idx = (my * maskW + mx) * 4;
-            if (maskData[idx + 3] === 0) {
-              particles[i].targetX = rx;
-              particles[i].targetY = ry;
-              validPos = true;
-              break;
-            }
-          }
-        }
-
-        if (!validPos) {
-          particles[i].targetX = Math.random() > 0.5 ? 0 : canvas.width;
-          particles[i].targetY = Math.random() * canvas.height;
-        }
-        particles[i].active = false;
+        const pos = pickScatterPosition(mask);
+        p.targetX = pos.x;
+        p.targetY = pos.y;
+        p.active = false;
       }
     }
 
-    particleCountDisplay.innerText = targetPoints.length;
+    return targetPoints.length;
   }
 
-  function nextWord() {
-    wordIndex = (wordIndex + 1) % words.length;
-    updateWord(words[wordIndex]);
-  }
-
-  function resetTimer() {
-    if (intervalTimer) clearInterval(intervalTimer);
-    // シャッターパターンでは「完全に分散してから次のWORDへ」を
-    // 分散サイクル側のタイマーが担当するため、通常の自動切り替え
-    // タイマーは動かさない（二重に切り替わってしまうのを防ぐ）
-    if (config.morphPattern === "shatter") return;
-    if (!config.autoCycle) return;
-    intervalTimer = setInterval(() => {
-      nextWord();
-    }, config.autoInterval * 1000);
-  }
-
-  // ===== シャッター(分散→収束)パターン =====
+  // ---------- シャッター(分散→収束)パターン ----------
   // 文字を形作っている粒子だけを対象に、一定間隔で
   // 「バラバラに飛び散る」→「文字の形へ再び集まる」を繰り返す
   function applyShapeTargets() {
@@ -1766,7 +1954,7 @@
     const delay = shatterPhase === "hold" ? holdMs : scatterMs;
 
     shatterCycleTimer = setTimeout(() => {
-      if (config.morphPattern !== "shatter") return;
+      if (config.morphPattern !== "shatter" || isAutoCyclePaused()) return;
       if (shatterPhase === "hold") {
         shatterPhase = "scatter";
         applyScatterBurstTargets();
@@ -1782,268 +1970,492 @@
     }, delay);
   }
 
-  function startShatterCycle() {
-    stopShatterCycle();
+  // ---------- 自動切り替えタイマーの一元管理 ----------
+  function isAutoCyclePaused() {
+    return autoCyclePauseReasons.size > 0;
+  }
+
+  function stopAllCycleTimers() {
+    if (intervalTimer) clearInterval(intervalTimer);
+    if (shatterCycleTimer) clearTimeout(shatterCycleTimer);
+    intervalTimer = null;
+    shatterCycleTimer = null;
+  }
+
+  // ダイレクトパターン用の自動切り替えタイマーだけを掛け直す
+  // （切り替え間隔スライダー・自動切り替えスイッチから呼ぶ）
+  function resetTimer() {
+    if (intervalTimer) clearInterval(intervalTimer);
+    intervalTimer = null;
+    // シャッターパターンでは「完全に分散してから次のWORDへ」を
+    // 分散サイクル側のタイマーが担当するため、通常の自動切り替え
+    // タイマーは動かさない（二重に切り替わってしまうのを防ぐ）
+    if (config.morphPattern === "shatter") return;
+    if (!config.autoCycle || isAutoCyclePaused()) return;
+    intervalTimer = setInterval(() => {
+      nextWord();
+    }, config.autoInterval * 1000);
+  }
+
+  // 自動切り替えを「今の単語を文字の形で表示した状態」から最初からやり直す。
+  // Next・単語の選択・パターン変更・リセット・読み込みの後に呼ぶ
+  function restartAutoCycle() {
+    stopAllCycleTimers();
     shatterPhase = "hold";
     applyShapeTargets();
-    scheduleShatterPhase();
-  }
-
-  function stopShatterCycle() {
-    if (shatterCycleTimer) clearTimeout(shatterCycleTimer);
-    shatterCycleTimer = null;
-    shatterPhase = "hold";
-  }
-
-  // Event Listeners — テキスト管理
-  wordInput.addEventListener("input", (e) => {
-    const val = e.target.value.toUpperCase();
-    words[wordIndex] = val || " ";
-    updateWord(val);
-  });
-
-  wordInput.addEventListener("focus", () => {
-    if (intervalTimer) clearInterval(intervalTimer);
-  });
-
-  wordInput.addEventListener("blur", () => {
-    if (!wordInput.value.trim()) {
-      words[wordIndex] = "MAGIC";
-      updateWord("MAGIC");
-    }
-    resetTimer();
-  });
-
-  wordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") wordInput.blur();
-  });
-
-  nextWordBtn.addEventListener("click", () => {
-    nextWord();
-    resetTimer();
-  });
-
-  // Event Listeners — パラメータ（テキスト）
-  const patternBtns = [patternCrossBtn, patternShatterBtn];
-  patternBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const pattern = btn.dataset.pattern;
-      if (config.morphPattern === pattern) return;
-
-      config.morphPattern = pattern;
-      patternBtns.forEach((b) => b.classList.toggle("active", b.dataset.pattern === pattern));
-      shatterCycleGroup.style.display = pattern === "shatter" ? "block" : "none";
-
-      if (pattern === "shatter") {
-        startShatterCycle();
-      } else {
-        stopShatterCycle();
-        applyShapeTargets();
-        resetTimer();
-      }
-    });
-  });
-
-  shatterCycleSlider.addEventListener("input", (e) => {
-    config.shatterCycle = parseFloat(e.target.value);
-    shatterCycleValue.textContent = config.shatterCycle + "s";
-  });
-
-  autoCycleToggle.addEventListener("change", (e) => {
-    config.autoCycle = e.target.checked;
-    resetTimer();
-  });
-
-  intervalSlider.addEventListener("input", (e) => {
-    config.autoInterval = parseInt(e.target.value, 10);
-    intervalValue.textContent = config.autoInterval + "s";
-    resetTimer();
-  });
-
-  weightSlider.addEventListener("input", (e) => {
-    config.fontWeight = parseInt(e.target.value, 10);
-    weightValue.textContent = config.fontWeight;
-    updateWord(words[wordIndex]);
-  });
-
-  fontScaleSlider.addEventListener("input", (e) => {
-    config.fontScale = parseFloat(e.target.value);
-    fontScaleValue.textContent = config.fontScale.toFixed(2);
-    updateWord(words[wordIndex]);
-  });
-
-  const styleBtns = [styleFillBtn, styleOutlineBtn];
-  styleBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const style = btn.dataset.style;
-      if (config.textStyle === style) return;
-      config.textStyle = style;
-      styleBtns.forEach((b) => b.classList.toggle("active", b.dataset.style === style));
-      updateWord(words[wordIndex]);
-    });
-  });
-
-  // Event Listeners — パラメータ（パーティクル）
-  scatterSlider.addEventListener("input", (e) => {
-    config.scatterAmount = parseInt(e.target.value, 10);
-    scatterValue.textContent = config.scatterAmount;
-    updateWord(words[wordIndex]);
-  });
-
-  sizeSlider.addEventListener("input", (e) => {
-    config.particleSize = parseFloat(e.target.value);
-    sizeValue.textContent = config.particleSize.toFixed(1) + "x";
-  });
-
-  uniformSizeToggle.addEventListener("change", (e) => {
-    config.uniformSize = e.target.checked;
-    applyParticleSizes();
-  });
-
-  speedSlider.addEventListener("input", (e) => {
-    config.morphSpeed = parseFloat(e.target.value);
-    speedValue.textContent = config.morphSpeed.toFixed(2);
-  });
-
-  glowToggle.addEventListener("change", (e) => {
-    config.enableGlow = e.target.checked;
-  });
-
-  glowStrengthSlider.addEventListener("input", (e) => {
-    config.glowStrength = parseInt(e.target.value, 10);
-    glowStrengthValue.textContent = config.glowStrength;
-  });
-
-  // Event Listeners — カラー
-  monoToggle.addEventListener("change", (e) => {
-    config.monochrome = e.target.checked;
-    paletteColorGrid.style.display = config.monochrome ? "none" : "grid";
-    monoColorRow.style.display = config.monochrome ? "flex" : "none";
-    applyColorPalette();
-  });
-
-  monoColorPicker.addEventListener("input", (e) => {
-    config.monoColor = e.target.value;
-    applyColorPalette();
-  });
-
-  colorBlue.addEventListener("input", (e) => {
-    config.colorBlue = e.target.value;
-    applyAccentVar("--p-blue", config.colorBlue);
-    applyColorPalette();
-  });
-  colorViolet.addEventListener("input", (e) => {
-    config.colorViolet = e.target.value;
-    applyAccentVar("--p-violet", config.colorViolet);
-    applyColorPalette();
-  });
-  colorGreen.addEventListener("input", (e) => {
-    config.colorGreen = e.target.value;
-    applyAccentVar("--p-green", config.colorGreen);
-    applyColorPalette();
-  });
-  colorAmber.addEventListener("input", (e) => {
-    config.colorAmber = e.target.value;
-    applyAccentVar("--p-amber", config.colorAmber);
-    applyColorPalette();
-  });
-  colorRed.addEventListener("input", (e) => {
-    config.colorRed = e.target.value;
-    applyAccentVar("--p-red", config.colorRed);
-    applyColorPalette();
-  });
-  bgColorPicker.addEventListener("input", (e) => {
-    config.bgColor = e.target.value;
-    applyBgColor();
-  });
-
-  // Event Listeners — システム
-  panelOpacitySlider.addEventListener("input", (e) => {
-    config.panelOpacity = parseInt(e.target.value, 10) / 100;
-    panelOpacityValue.textContent = Math.round(config.panelOpacity * 100) + "%";
-    applyPanelOpacity();
-  });
-
-  hideDelaySlider.addEventListener("input", (e) => {
-    config.hideDelay = parseInt(e.target.value, 10);
-    hideDelayValue.textContent = config.hideDelay + "s";
-  });
-
-  // リセットボタン（テキスト・パラメータすべてを初期値へ）
-  resetBtn.addEventListener("click", () => {
-    words = [...DEFAULT_WORDS];
-    wordIndex = 0;
-    Object.assign(config, defaultConfig);
-
-    stopShatterCycle();
-    patternBtns.forEach((b) => b.classList.toggle("active", b.dataset.pattern === config.morphPattern));
-    shatterCycleGroup.style.display = config.morphPattern === "shatter" ? "block" : "none";
-    shatterCycleSlider.value = config.shatterCycle;
-    shatterCycleValue.textContent = config.shatterCycle + "s";
-
-    autoCycleToggle.checked = config.autoCycle;
-    intervalSlider.value = config.autoInterval;
-    intervalValue.textContent = config.autoInterval + "s";
-    weightSlider.value = config.fontWeight;
-    weightValue.textContent = config.fontWeight;
-    fontScaleSlider.value = config.fontScale;
-    fontScaleValue.textContent = config.fontScale.toFixed(2);
-    styleBtns.forEach((b) => b.classList.toggle("active", b.dataset.style === config.textStyle));
-
-    scatterSlider.value = config.scatterAmount;
-    scatterValue.textContent = config.scatterAmount;
-    sizeSlider.value = config.particleSize;
-    sizeValue.textContent = config.particleSize.toFixed(1) + "x";
-    uniformSizeToggle.checked = config.uniformSize;
-    applyParticleSizes();
-    speedSlider.value = config.morphSpeed;
-    speedValue.textContent = config.morphSpeed.toFixed(2);
-    glowToggle.checked = config.enableGlow;
-    glowStrengthSlider.value = config.glowStrength;
-    glowStrengthValue.textContent = config.glowStrength;
-
-    monoToggle.checked = config.monochrome;
-    monoColorPicker.value = config.monoColor;
-    paletteColorGrid.style.display = config.monochrome ? "none" : "grid";
-    monoColorRow.style.display = config.monochrome ? "flex" : "none";
-
-    colorBlue.value = config.colorBlue;
-    colorViolet.value = config.colorViolet;
-    colorGreen.value = config.colorGreen;
-    colorAmber.value = config.colorAmber;
-    colorRed.value = config.colorRed;
-    applyAccentVar("--p-blue", config.colorBlue);
-    applyAccentVar("--p-violet", config.colorViolet);
-    applyAccentVar("--p-green", config.colorGreen);
-    applyAccentVar("--p-amber", config.colorAmber);
-    applyAccentVar("--p-red", config.colorRed);
-    applyColorPalette();
-
-    bgColorPicker.value = config.bgColor;
-    applyBgColor();
-
-    panelOpacitySlider.value = Math.round(config.panelOpacity * 100);
-    panelOpacityValue.textContent = Math.round(config.panelOpacity * 100) + "%";
-    applyPanelOpacity();
-
-    hideDelaySlider.value = config.hideDelay;
-    hideDelayValue.textContent = config.hideDelay + "s";
-
-    updateWord(words[0]);
-    resetTimer();
+    if (isAutoCyclePaused()) return;
     if (config.morphPattern === "shatter") {
-      startShatterCycle();
+      scheduleShatterPhase();
+    } else {
+      resetTimer();
     }
+  }
+
+  function pauseAutoCycle(reason) {
+    autoCyclePauseReasons.add(reason);
+    restartAutoCycle(); // タイマーを止め、分散中なら文字の形へ戻す
+  }
+
+  function resumeAutoCycle(reason) {
+    if (!autoCyclePauseReasons.delete(reason)) return;
+    restartAutoCycle();
+  }
+
+  // ---------- 描画ループ ----------
+  // 画面のリフレッシュレート(60Hz/144Hzなど)が違っても同じ速さで動くよう、
+  // 前のコマからの経過時間に合わせて「近づく割合」を計算する
+  function animate(now) {
+    if (wordRefreshRequested) {
+      wordRefreshRequested = false;
+      refreshCurrentWord();
+    }
+
+    const elapsed = lastFrameTime === null ? BASE_FRAME_MS : Math.min(now - lastFrameTime, MAX_FRAME_MS);
+    lastFrameTime = now;
+    const ratio = 1 - Math.pow(1 - config.morphSpeed, elapsed / BASE_FRAME_MS);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].update(ratio);
+      particles[i].draw(ctx, config.enableGlow, currentDpr);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // ============================================================
+  // UI — 画面部品の参照・表示の同期・イベント
+  // ============================================================
+  const $ = (id) => document.getElementById(id);
+
+  // ステータス札
+  const wordInput = $("wordInput");
+  const addWordBtn = $("addWordBtn");
+  const particleCountDisplay = $("particleCountDisplay");
+  const nextWordBtn = $("nextWordBtn");
+
+  // パラメータパネル
+  const controlPanel = $("controlPanel");
+  const panelHeader = $("panelHeader");
+  const panelBody = $("panelBody");
+  const togglePanelBtn = $("togglePanelBtn");
+  const resetBtn = $("resetBtn");
+  const shatterCycleGroup = $("shatterCycleGroup");
+  const paletteColorGrid = $("paletteColorGrid");
+  const monoColorRow = $("monoColorRow");
+  const statusMessage = $("statusMessage");
+  const modalStatusMessage = $("modalStatusMessage");
+  const exportSettingsBtn = $("exportSettingsBtn");
+  const importSettingsBtn = $("importSettingsBtn");
+  const settingsFileInput = $("settingsFileInput");
+
+  // テキスト管理モーダル
+  const wordModalOverlay = $("wordModalOverlay");
+  const modalCloseBtn = $("modalCloseBtn");
+  const modalNewWordInput = $("modalNewWordInput");
+  const modalAddBtn = $("modalAddBtn");
+  const modalWordList = $("modalWordList");
+  const modalSaveBtn = $("modalSaveBtn");
+  const modalRestoreBtn = $("modalRestoreBtn");
+  const modalFileInput = $("modalFileInput");
+
+  // ---------- 状態メッセージ ----------
+  // テキスト管理を開いている間はその中に、それ以外はパネル上部に表示する
+  function showStatus(text, isError = false) {
+    clearTimeout(statusTimerId);
+    statusMessage.textContent = "";
+    modalStatusMessage.textContent = "";
+
+    const target = wordModalOverlay.classList.contains("open") ? modalStatusMessage : statusMessage;
+    target.textContent = text;
+    target.classList.toggle("is-error", isError);
+    statusTimerId = setTimeout(() => {
+      target.textContent = "";
+    }, STATUS_DURATION_MS);
+  }
+
+  // ---------- ブラウザへの自動保存 ----------
+  // 操作が止まってから SAVE_DELAY_MS 後にまとめて保存する
+  function scheduleSave() {
+    clearTimeout(saveTimerId);
+    saveTimerId = setTimeout(saveNow, SAVE_DELAY_MS);
+  }
+
+  function saveNow() {
+    clearTimeout(saveTimerId);
+    saveTimerId = null;
+    try {
+      writeStoredData({ ...config }, [...words]);
+      storageErrorShown = false;
+    } catch (err) {
+      if (!storageErrorShown) {
+        showStatus("ブラウザへの保存に失敗しました。「■ 設定の保存」からエクスポートしてください", true);
+        storageErrorShown = true;
+      }
+    }
+  }
+
+  // ---------- 単語の表示 ----------
+  function updateWord(word) {
+    const uppercaseWord = word.toUpperCase();
+    // 入力中に値を書き換えると、カーソルが末尾へ飛んだり日本語変換が
+    // 途切れたりするため、WORD欄にフォーカスがある間は書き換えない
+    // （フォーカスが外れた時に blur 側で表記を揃える）
+    if (document.activeElement !== wordInput) {
+      wordInput.value = uppercaseWord;
+    }
+    particleCountDisplay.textContent = morphParticlesTo(uppercaseWord);
+  }
+
+  function refreshCurrentWord() {
+    updateWord(words[wordIndex]);
+  }
+
+  // スライダーを動かしている間やウィンドウの大きさを変えている間は、
+  // 1コマの間に何度も再計算しないよう、次のコマでまとめて1回だけ行う
+  function requestWordRefresh() {
+    wordRefreshRequested = true;
+  }
+
+  function nextWord() {
+    wordIndex = (wordIndex + 1) % words.length;
+    refreshCurrentWord();
+  }
+
+  // キャンバスの大きさを画面に合わせる（文字の形の再計算は呼び出し側で行う）
+  function resizeCanvas() {
+    const rect = canvasContainer.getBoundingClientRect();
+    currentDpr = window.devicePixelRatio || 1;
+
+    canvas.width = rect.width * currentDpr;
+    canvas.height = rect.height * currentDpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+  }
+
+  // ---------- 見た目に関わる設定の反映 ----------
+  function setRootVar(name, value) {
+    document.documentElement.style.setProperty(name, value);
+  }
+
+  function applyAccentVars() {
+    PALETTE.forEach((c) => setRootVar(c.cssVar, config[c.key]));
+  }
+
+  function applyBgColor() {
+    setRootVar("--void", config.bgColor);
+  }
+
+  function applyPanelOpacity() {
+    setRootVar("--panel-bg-alpha", config.panelOpacity);
+    // 透明度が0に近いほど、すりガラス効果(ぼかし)も弱めて背景が完全に透けるようにする
+    setRootVar("--panel-blur", (config.panelOpacity * 10).toFixed(1) + "px");
+  }
+
+  // 他の設定によって表示／非表示が変わる部品
+  function applyDependentVisibility() {
+    shatterCycleGroup.style.display = config.morphPattern === "shatter" ? "block" : "none";
+    paletteColorGrid.style.display = config.monochrome ? "none" : "grid";
+    monoColorRow.style.display = config.monochrome ? "flex" : "none";
+  }
+
+  // ---------- 設定項目の定義表 ----------
+  // type:
+  //   "range"    … スライダー。badge に format(値) を表示する
+  //   "checkbox" … ON/OFFスイッチ
+  //   "color"    … カラーピッカー
+  //   "choice"   … 2択ボタン。各ボタンの data-<attr> の値を設定値にする
+  // toInput / fromInput … 設定値とスライダー値の単位が違う時の変換
+  // effect … 値が変わった時に呼ぶ処理（リセット時は呼ばず、まとめて反映する）
+  const CONTROLS = [
+    // ■ テキスト
+    { key: "morphPattern", type: "choice", buttonIds: ["patternCrossBtn", "patternShatterBtn"], attr: "pattern",
+      effect: () => { applyDependentVisibility(); restartAutoCycle(); } },
+    { key: "shatterCycle", type: "range", id: "shatterCycleSlider", badge: "shatterCycleValue",
+      fromInput: parseFloat, format: (v) => v + "s" },
+    { key: "autoCycle", type: "checkbox", id: "autoCycleToggle", effect: resetTimer },
+    { key: "autoInterval", type: "range", id: "intervalSlider", badge: "intervalValue",
+      fromInput: (v) => parseInt(v, 10), format: (v) => v + "s", effect: resetTimer },
+    { key: "fontWeight", type: "range", id: "weightSlider", badge: "weightValue",
+      fromInput: (v) => parseInt(v, 10), format: String, effect: requestWordRefresh },
+    { key: "fontScale", type: "range", id: "fontScaleSlider", badge: "fontScaleValue",
+      fromInput: parseFloat, format: (v) => v.toFixed(2), effect: requestWordRefresh },
+    { key: "textStyle", type: "choice", buttonIds: ["styleFillBtn", "styleOutlineBtn"], attr: "style",
+      effect: refreshCurrentWord },
+
+    // ■ パーティクル
+    { key: "scatterAmount", type: "range", id: "scatterSlider", badge: "scatterValue",
+      fromInput: (v) => parseInt(v, 10), format: String, effect: requestWordRefresh },
+    { key: "particleSize", type: "range", id: "sizeSlider", badge: "sizeValue",
+      fromInput: parseFloat, format: (v) => v.toFixed(1) + "x" },
+    { key: "uniformSize", type: "checkbox", id: "uniformSizeToggle", effect: applyParticleSizes },
+    { key: "morphSpeed", type: "range", id: "speedSlider", badge: "speedValue",
+      fromInput: parseFloat, format: (v) => v.toFixed(2) },
+    { key: "enableGlow", type: "checkbox", id: "glowToggle" },
+    { key: "glowStrength", type: "range", id: "glowStrengthSlider", badge: "glowStrengthValue",
+      fromInput: (v) => parseInt(v, 10), format: String },
+
+    // ■ カラー
+    { key: "monochrome", type: "checkbox", id: "monoToggle",
+      effect: () => { applyDependentVisibility(); applyColorPalette(); } },
+    { key: "monoColor", type: "color", id: "monoColorPicker", effect: applyColorPalette },
+    ...PALETTE.map((c) => ({
+      key: c.key, type: "color", id: c.inputId,
+      effect: () => { setRootVar(c.cssVar, config[c.key]); applyColorPalette(); }
+    })),
+    { key: "bgColor", type: "color", id: "bgColorPicker", effect: applyBgColor },
+
+    // ■ システム
+    { key: "panelOpacity", type: "range", id: "panelOpacitySlider", badge: "panelOpacityValue",
+      toInput: (v) => Math.round(v * 100), fromInput: (v) => parseInt(v, 10) / 100,
+      format: (v) => Math.round(v * 100) + "%", effect: applyPanelOpacity },
+    { key: "hideDelay", type: "range", id: "hideDelaySlider", badge: "hideDelayValue",
+      fromInput: (v) => parseInt(v, 10), format: (v) => v + "s" }
+  ];
+
+  // 1項目分：設定値 → 画面部品（スライダー位置・バッジ・スイッチ・ボタンの選択状態）
+  function syncControl(def) {
+    const value = config[def.key];
+    if (def.type === "choice") {
+      def.buttonIds.forEach((id) => {
+        const btn = $(id);
+        btn.classList.toggle("active", btn.dataset[def.attr] === value);
+      });
+      return;
+    }
+    const input = $(def.id);
+    if (def.type === "checkbox") {
+      input.checked = value;
+    } else {
+      input.value = def.toInput ? def.toInput(value) : value;
+    }
+    if (def.badge) $(def.badge).textContent = def.format(value);
+  }
+
+  // 保存データやインポートファイルから来た設定値を検査する。
+  // 項目ごとに、型・選択肢・スライダーの範囲を確かめ、
+  // 使えない値や無い項目は初期値にする（知らない項目は無視する）
+  function sanitizeValue(def, value) {
+    switch (def.type) {
+      case "checkbox":
+        return typeof value === "boolean" ? value : undefined;
+      case "color":
+        return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : undefined;
+      case "choice":
+        return def.buttonIds.some((id) => $(id).dataset[def.attr] === value) ? value : undefined;
+      case "range": {
+        if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+        const input = $(def.id);
+        const inputValue = def.toInput ? def.toInput(value) : value;
+        const clamped = Math.min(Math.max(inputValue, parseFloat(input.min)), parseFloat(input.max));
+        return def.fromInput(String(clamped));
+      }
+      default:
+        return undefined;
+    }
+  }
+
+  function sanitizeConfig(raw) {
+    const result = { ...defaultConfig };
+    if (!raw || typeof raw !== "object") return result;
+    CONTROLS.forEach((def) => {
+      if (raw[def.key] === undefined) return;
+      const value = sanitizeValue(def, raw[def.key]);
+      if (value !== undefined) result[def.key] = value;
+    });
+    return result;
+  }
+
+  // すべての項目：設定値 → 画面部品
+  function syncUIFromConfig() {
+    CONTROLS.forEach(syncControl);
+    applyDependentVisibility();
+  }
+
+  // すべての見た目設定を、画面と粒子へまとめて反映する
+  function applyAllVisualSettings() {
+    applyAccentVars();
+    applyBgColor();
+    applyPanelOpacity();
+    applyParticleSizes();
+    applyColorPalette();
+  }
+
+  // 画面部品の操作 → 設定値の更新 → effect の実行
+  function bindControls() {
+    CONTROLS.forEach((def) => {
+      if (def.type === "choice") {
+        def.buttonIds.forEach((id) => {
+          const btn = $(id);
+          btn.addEventListener("click", () => {
+            const value = btn.dataset[def.attr];
+            if (config[def.key] === value) return;
+            config[def.key] = value;
+            syncControl(def);
+            if (def.effect) def.effect();
+            scheduleSave();
+          });
+        });
+        return;
+      }
+
+      const input = $(def.id);
+      const eventName = def.type === "checkbox" ? "change" : "input";
+      input.addEventListener(eventName, () => {
+        if (def.type === "checkbox") {
+          config[def.key] = input.checked;
+        } else if (def.type === "range") {
+          config[def.key] = def.fromInput(input.value);
+        } else {
+          config[def.key] = input.value;
+        }
+        if (def.badge) $(def.badge).textContent = def.format(config[def.key]);
+        if (def.effect) def.effect();
+        scheduleSave();
+      });
+    });
+  }
+
+  // 設定とテキストを差し替えて、画面・粒子・自動切り替えへ反映する
+  // （settings / wordList が null の場合は、その部分を変えない）
+  function applyLoadedData(settings, wordList) {
+    stopAllCycleTimers();
+    if (settings) Object.assign(config, settings);
+    if (wordList) {
+      words = wordList;
+      wordIndex = 0;
+    }
+
+    syncUIFromConfig();
+    applyAllVisualSettings();
+    refreshCurrentWord();
+    restartAutoCycle();
     if (wordModalOverlay.classList.contains("open")) {
       renderModalList();
     }
-  });
+  }
 
-  window.addEventListener("resize", resizeCanvas);
+  // リセットボタン（テキスト・パラメータすべてを初期値へ）
+  function resetAll() {
+    const ok = confirm(
+      "設定とテキストをすべて初期値に戻します。よろしいですか？\n" +
+      "（今の状態を残したい場合は、先に「■ 設定の保存」からエクスポートしてください）"
+    );
+    if (!ok) return;
 
-  // ===== 格納式パネルの挙動（表示/非表示・自動退避・ドラッグ移動） =====
-  let hideTimerId = null;
+    applyLoadedData({ ...defaultConfig }, [...DEFAULT_WORDS]);
+    saveNow();
+    showStatus("初期値に戻しました");
+  }
 
+  // ---------- ■ 設定の保存（エクスポート／インポート） ----------
+  function exportSettings() {
+    downloadJson(buildExportData({ ...config }, [...words]), `particle-morphing-text-${getDateStamp()}.json`);
+    showStatus("エクスポートしました");
+  }
+
+  function importSettingsFromFile(file) {
+    readJsonFile(file, (data) => {
+      const parsed = parseImportData(data);
+      if (!parsed) {
+        showStatus("このファイルは読み込めません（形式が違うか、新しい版のファイルです）", true);
+        return;
+      }
+      applyLoadedData(parsed.config ? sanitizeConfig(parsed.config) : null, parsed.words);
+      saveNow();
+      showStatus(parsed.config ? "設定とテキストを読み込みました" : "テキストを読み込みました");
+    }, () => {
+      showStatus("JSONの読み込みに失敗しました", true);
+    });
+  }
+
+  function initSettingsStorage() {
+    exportSettingsBtn.addEventListener("click", exportSettings);
+
+    importSettingsBtn.addEventListener("click", () => {
+      settingsFileInput.value = "";
+      settingsFileInput.click();
+    });
+
+    settingsFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) importSettingsFromFile(file);
+    });
+
+    // 保存待ちのまま閉じられても失われないよう、ページを離れる時に保存する
+    window.addEventListener("pagehide", () => {
+      if (saveTimerId) saveNow();
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && saveTimerId) saveNow();
+    });
+  }
+
+  // ---------- WORD欄・Nextボタン ----------
+  function initWordInput() {
+    function applyWordInput() {
+      const val = wordInput.value.toUpperCase();
+      words[wordIndex] = val || " ";
+      updateWord(val);
+      scheduleSave();
+    }
+
+    wordInput.addEventListener("input", (e) => {
+      // 日本語変換の途中（未確定）では反映せず、確定時(compositionend)に反映する
+      if (e.isComposing) return;
+      applyWordInput();
+    });
+
+    wordInput.addEventListener("compositionend", applyWordInput);
+
+    wordInput.addEventListener("focus", () => {
+      pauseAutoCycle("input");
+    });
+
+    wordInput.addEventListener("blur", () => {
+      if (!wordInput.value.trim()) {
+        words[wordIndex] = FALLBACK_WORD;
+      }
+      // 入力中は書き換えを控えていた表記（大文字化など）をここで揃える
+      wordInput.value = words[wordIndex];
+      refreshCurrentWord();
+      resumeAutoCycle("input");
+      scheduleSave();
+    });
+
+    wordInput.addEventListener("keydown", (e) => {
+      // 変換確定のEnterでは確定だけを行い、入力欄からは抜けない
+      if (e.key === "Enter" && !e.isComposing) wordInput.blur();
+    });
+
+    nextWordBtn.addEventListener("click", () => {
+      nextWord();
+      restartAutoCycle();
+    });
+  }
+
+  // ---------- 格納式パネル（表示/非表示・自動退避） ----------
   function startHideTimer() {
     clearTimeout(hideTimerId);
     hideTimerId = setTimeout(() => {
@@ -2058,48 +2470,70 @@
     togglePanelBtn.textContent = "非表示";
   }
 
-  togglePanelBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const isCollapsed = panelBody.classList.toggle("is-collapsed");
-    if (isCollapsed) {
-      togglePanelBtn.textContent = "表示";
-      startHideTimer();
+  function collapsePanel() {
+    panelBody.classList.add("is-collapsed");
+    togglePanelBtn.textContent = "表示";
+    startHideTimer();
+  }
+
+  // 開いていれば畳む（その後自動で消える）、畳まれて／消えていれば開く
+  function togglePanel() {
+    const isOpen = !panelBody.classList.contains("is-collapsed") &&
+                   !controlPanel.classList.contains("is-fully-hidden");
+    if (isOpen) {
+      collapsePanel();
     } else {
-      togglePanelBtn.textContent = "非表示";
-      clearTimeout(hideTimerId);
-      controlPanel.classList.remove("is-fully-hidden");
-    }
-  });
-
-  // パネル上での操作が背後のキャンバスに伝わらないようにブロック
-  controlPanel.addEventListener("mousedown", (e) => e.stopPropagation());
-  controlPanel.addEventListener("touchstart", (e) => e.stopPropagation());
-
-  // 背景（キャンバス）を3回連続クリック／タップした時にパネルを再表示
-  const SHOW_PANEL_CLICK_WINDOW = 600;
-  let showPanelClickTimestamps = [];
-  canvasContainer.addEventListener("click", () => {
-    if (!(controlPanel.classList.contains("is-fully-hidden") || panelBody.classList.contains("is-collapsed"))) {
-      return;
-    }
-    const now = Date.now();
-    showPanelClickTimestamps.push(now);
-    showPanelClickTimestamps = showPanelClickTimestamps.filter(t => now - t <= SHOW_PANEL_CLICK_WINDOW);
-    if (showPanelClickTimestamps.length >= 3) {
       showPanel();
-      showPanelClickTimestamps = [];
     }
-  });
+  }
 
-  // スライダー：タッチ操作の場合はつまみ（●）を掴んだ時だけ値を変更できるようにする
+  function initPanelVisibility() {
+    togglePanelBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      togglePanel();
+    });
+
+    // Esc キー：テキスト管理を開いていれば閉じる。それ以外はパネルの表示／非表示を切り替える
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || e.isComposing) return;
+      if (wordModalOverlay.classList.contains("open")) {
+        closeModal();
+        return;
+      }
+      // 入力中の Esc は、まず入力欄から抜けるだけにする
+      if (document.activeElement === wordInput) {
+        wordInput.blur();
+        return;
+      }
+      togglePanel();
+    });
+
+    // パネル上での操作が背後のキャンバスに伝わらないようにブロック
+    controlPanel.addEventListener("mousedown", (e) => e.stopPropagation());
+    controlPanel.addEventListener("touchstart", (e) => e.stopPropagation());
+
+    // 背景（キャンバス）を3回連続クリック／タップした時にパネルを再表示
+    canvasContainer.addEventListener("click", () => {
+      if (!(controlPanel.classList.contains("is-fully-hidden") || panelBody.classList.contains("is-collapsed"))) {
+        return;
+      }
+      const now = Date.now();
+      showPanelClickTimestamps.push(now);
+      showPanelClickTimestamps = showPanelClickTimestamps.filter((t) => now - t <= SHOW_PANEL_CLICK_WINDOW);
+      if (showPanelClickTimestamps.length >= 3) {
+        showPanel();
+        showPanelClickTimestamps = [];
+      }
+    });
+  }
+
+  // ---------- スライダーのタッチ操作 ----------
+  // タッチ操作の場合はつまみ（●）を掴んだ時だけ値を変更できるようにする
   // （トラック部分に触れただけで意図せず値が変わってしまうのを防ぐため。
   //   PCのマウス／カーソル操作はこの判定を通らないため、これまでと同じ挙動のまま）
   // ＋ つまみを正しく掴んでいる場合でも、縦スワイプはページスクロールと
   //   衝突しないようにする（モバイル）
   function initSliderTouchPrevention() {
-    const THUMB_HIT_RADIUS = 22; // つまみの中心からこの範囲内のタッチだけを「掴んだ」とみなす（px）
-    const THUMB_SIZE = 14; // CSS側のつまみの幅・高さ(14px)と合わせる
-
     function getThumbCenterX(slider, rect) {
       const min = parseFloat(slider.min) || 0;
       const max = parseFloat(slider.max) || 100;
@@ -2109,8 +2543,7 @@
       return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
     }
 
-    const sliders = document.querySelectorAll('input[type="range"]');
-    sliders.forEach((slider) => {
+    document.querySelectorAll('input[type="range"]').forEach((slider) => {
       let startX = 0, startY = 0, isVertical = false, touchOnThumb = true;
 
       slider.addEventListener("touchstart", (e) => {
@@ -2150,15 +2583,32 @@
     });
   }
 
-  // デスクトップ用パネル・ドラッグ移動
+  // ---------- パネルのドラッグ移動（PCのみ） ----------
   function initDraggable() {
     let isDragging = false;
     let startX = 0, startY = 0;
     let initialLeft = 0, initialTop = 0;
 
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      const maxLeft = window.innerWidth - controlPanel.offsetWidth;
+      const maxTop = window.innerHeight - controlPanel.offsetHeight;
+      const newLeft = Math.max(0, Math.min(initialLeft + (e.clientX - startX), maxLeft));
+      const newTop = Math.max(0, Math.min(initialTop + (e.clientY - startY), maxTop));
+
+      controlPanel.style.left = `${newLeft}px`;
+      controlPanel.style.top = `${newTop}px`;
+    }
+
+    function onMouseUp() {
+      isDragging = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    }
+
     panelHeader.addEventListener("mousedown", (e) => {
-      if (window.innerWidth <= 600) return;
-      if (e.target.tagName === "BUTTON" || e.target.closest("button")) return;
+      if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+      if (e.target.closest("button")) return;
 
       isDragging = true;
       startX = e.clientX;
@@ -2175,34 +2625,11 @@
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     });
-
-    function onMouseMove(e) {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      const maxLeft = window.innerWidth - controlPanel.offsetWidth;
-      const maxTop = window.innerHeight - controlPanel.offsetHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      controlPanel.style.left = `${newLeft}px`;
-      controlPanel.style.top = `${newTop}px`;
-    }
-
-    function onMouseUp() {
-      isDragging = false;
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    }
   }
 
-  // 設定パネルの各セクション（■ テキスト／■ パーティクル／■ カラー／■ システム）を
-  // 見出しクリックで個別に開閉できるアコーディオンにする（排他制御なし）
+  // ---------- アコーディオン ----------
+  // 設定パネルの各セクション（■ テキスト／■ パーティクル／■ カラー／■ システム／■ 設定の保存）を
+  // 見出しクリックで個別に開閉できるようにする（排他制御なし）
   function initAccordion() {
     document.querySelectorAll(".control-section").forEach((section) => {
       const toggle = section.querySelector(".section-toggle");
@@ -2215,9 +2642,9 @@
     });
   }
 
-  // ===== テキスト管理モーダル =====
+  // ---------- テキスト管理モーダル ----------
   function renderModalList() {
-    modalWordList.innerHTML = "";
+    modalWordList.replaceChildren();
 
     if (words.length === 0) {
       const empty = document.createElement("div");
@@ -2237,8 +2664,8 @@
       text.title = "クリックしてこの単語を表示";
       text.addEventListener("click", () => {
         wordIndex = i;
-        updateWord(words[i]);
-        resetTimer();
+        refreshCurrentWord();
+        restartAutoCycle();
       });
 
       const delBtn = document.createElement("button");
@@ -2253,122 +2680,120 @@
   }
 
   function addWordFromModal() {
-    const val = modalNewWordInput.value.trim().toUpperCase().slice(0, 12);
+    const val = modalNewWordInput.value.trim().toUpperCase().slice(0, MAX_WORD_LENGTH);
     if (!val) return;
     words.push(val);
     modalNewWordInput.value = "";
     renderModalList();
+    scheduleSave();
     modalNewWordInput.focus();
   }
 
   function deleteWord(index) {
     if (words.length <= 1) {
-      alert("最後の1つは削除できません");
+      showStatus("最後の1つは削除できません", true);
       return;
     }
     words.splice(index, 1);
     if (index === wordIndex) {
       wordIndex = Math.min(wordIndex, words.length - 1);
-      updateWord(words[wordIndex]);
+      refreshCurrentWord();
     } else if (index < wordIndex) {
       wordIndex--;
     }
     renderModalList();
+    scheduleSave();
   }
 
   function openModal() {
     renderModalList();
     wordModalOverlay.classList.add("open");
-    if (intervalTimer) clearInterval(intervalTimer);
+    pauseAutoCycle("modal");
   }
 
   function closeModal() {
     wordModalOverlay.classList.remove("open");
-    resetTimer();
+    modalStatusMessage.textContent = "";
+    resumeAutoCycle("modal");
   }
 
-  addWordBtn.addEventListener("click", openModal);
-  modalCloseBtn.addEventListener("click", closeModal);
+  function initModal() {
+    addWordBtn.addEventListener("click", openModal);
+    modalCloseBtn.addEventListener("click", closeModal);
 
-  wordModalOverlay.addEventListener("click", (e) => {
-    if (e.target === wordModalOverlay) closeModal();
-  });
+    wordModalOverlay.addEventListener("click", (e) => {
+      if (e.target === wordModalOverlay) closeModal();
+    });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && wordModalOverlay.classList.contains("open")) {
-      closeModal();
-    }
-  });
 
-  modalAddBtn.addEventListener("click", addWordFromModal);
-  modalNewWordInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") addWordFromModal();
-  });
+    modalAddBtn.addEventListener("click", addWordFromModal);
+    modalNewWordInput.addEventListener("keydown", (e) => {
+      // 日本語変換を確定するEnterで、未確定の文字が追加されないようにする
+      if (e.key === "Enter" && !e.isComposing) addWordFromModal();
+    });
 
-  modalSaveBtn.addEventListener("click", () => {
-    const dataStr = JSON.stringify(words, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "particle-words.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
+    modalSaveBtn.addEventListener("click", () => {
+      downloadJson(words, "particle-words.json");
+    });
 
-  modalRestoreBtn.addEventListener("click", () => {
-    modalFileInput.value = "";
-    modalFileInput.click();
-  });
+    modalRestoreBtn.addEventListener("click", () => {
+      modalFileInput.value = "";
+      modalFileInput.click();
+    });
 
-  modalFileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    modalFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        if (Array.isArray(parsed) && parsed.every(w => typeof w === "string")) {
-          let restored = parsed.map(w => w.toUpperCase().slice(0, 12)).filter(w => w.trim().length > 0);
-          if (restored.length === 0) restored = [...DEFAULT_WORDS];
-          words = restored;
-          wordIndex = 0;
-          renderModalList();
-          updateWord(words[0]);
-          resetTimer();
-        } else {
-          alert("JSONの形式が正しくありません（文字列の配列である必要があります）");
+      readJsonFile(file, (data) => {
+        const restored = normalizeWordList(data);
+        if (!restored) {
+          showStatus("JSONの形式が正しくありません（文字列の配列である必要があります）", true);
+          return;
         }
-      } catch (err) {
-        alert("JSONの読み込みに失敗しました");
-      }
-    };
-    reader.readAsText(file);
-  });
+        applyLoadedData(null, restored);
+        saveNow();
+        showStatus("テキストを読み込みました");
+      }, () => {
+        showStatus("JSONの読み込みに失敗しました", true);
+      });
+    });
+  }
 
-  // Init
-  resizeCanvas();
-  resetTimer();
+  // ============================================================
+  // INIT — 起動処理
+  // ============================================================
+  // 前回の保存データを読み込む（無い・壊れている項目は初期値のまま）
+  const stored = loadStoredData();
+  if (stored.settings) Object.assign(config, sanitizeConfig(stored.settings));
+  if (stored.words) {
+    const storedWords = normalizeWordList(stored.words);
+    if (storedWords) words = storedWords;
+  }
+
+  syncUIFromConfig();
+  applyAllVisualSettings();
+  bindControls();
+  initWordInput();
+  initPanelVisibility();
   initDraggable();
   initSliderTouchPrevention();
   initAccordion();
-  if (config.morphPattern === "shatter") {
-    startShatterCycle();
-  }
-  animate();
+  initModal();
+  initSettingsStorage();
+  resetBtn.addEventListener("click", resetAll);
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    requestWordRefresh();
+  });
 
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  resizeCanvas();
+  refreshCurrentWord();
+  restartAutoCycle();
+  requestAnimationFrame(animate);
 
-    for (let i = 0; i < particles.length; i++) {
-      particles[i].update(config.morphSpeed);
-      particles[i].draw(ctx, config.enableGlow, currentDpr);
-    }
-
-    requestAnimationFrame(animate);
+  if (stored.hadError) {
+    showStatus("保存データの一部を読み込めなかったため、その部分は初期値で起動しました", true);
   }
 </script>
 
