@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Flow Field — 流れ場</title>
+  <link rel="icon" href="../icon/favicon.png" type="image/png">
+
+  <style>
+    /* アクセント色は珊瑚色 #ff8f7a（STYLE.md の例外。DECISIONS.md 参照）。それ以外は STYLE.md どおり */
+    :root {
+      --accent: #ff8f7a;
+      --accent-rgb: 255, 143, 122;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      /* 背景色（JSで設定の背景色に合わせて上書きする。Canvasは透明で、この色が透けて見える） */
+      background: #06070d;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+    }
+
+    /* 全画面Canvas（実際の描画解像度はJSで画面の表示倍率に合わせる） */
+    #flow-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      z-index: 1;
+      cursor: crosshair;
+      touch-action: none; /* 指でなぞった時に画面がスクロールせず、流れに渦を作れるようにする */
+    }
+
+    /* ---------- 調整コントロールパネル ---------- */
+    .control-panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: rgba(15, 23, 42, 0.88);
+      color: #ffffff;
+      border: 1px solid rgba(var(--accent-rgb), 0.3);
+      border-radius: 12px;
+      padding: 0; /* ヘッダーを固定表示にするため、余白はヘッダー／本文側に持たせる */
+      width: 320px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      user-select: none;
+      touch-action: pan-y;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .control-panel.is-fully-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .control-panel::-webkit-scrollbar { width: 5px; }
+    .control-panel::-webkit-scrollbar-thumb {
+      background: rgba(var(--accent-rgb), 0.4);
+      border-radius: 3px;
+    }
+
+    .panel-header {
+      /* スクロールしても常に見える位置に固定（sticky） */
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 12px;
+      padding: 16px 18px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: move;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(10px);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--accent);
+      pointer-events: none;
+    }
+
+    .panel-content { padding: 0 18px 16px; }
+    .panel-content.is-collapsed { display: none; }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn,
+    .toggle-btn,
+    .text-btn {
+      background: transparent;
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      color: var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .icon-btn {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn svg { width: 14px; height: 14px; }
+
+    .toggle-btn {
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      height: 26px;
+    }
+
+    /* 文字入りの汎用ボタン（エクスポート／インポート、描き直し、画像の保存など） */
+    .text-btn {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+    }
+    .text-btn.is-full { width: 100%; }
+    .button-stack { display: flex; flex-direction: column; gap: 8px; }
+
+    .icon-btn:hover,
+    .toggle-btn:hover,
+    .text-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
+
+    .icon-btn:active,
+    .toggle-btn:active,
+    .text-btn:active { transform: scale(0.94); }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .io-note {
+      margin: 0 0 8px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    .io-status {
+      margin: 8px 0 0;
+      min-height: 1.2em;
+      font-size: 0.72rem;
+      color: var(--accent);
+    }
+    .io-status.is-error { color: #f87171; }
+
+    /* キーボード操作時のフォーカス枠（マウス操作時は出ない） */
+    .section-toggle:focus-visible,
+    .icon-btn:focus-visible,
+    .toggle-btn:focus-visible,
+    .text-btn:focus-visible,
+    .control-group input:focus-visible,
+    .control-group select:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* ---------- セクション（アコーディオン） ---------- */
+    .control-section { margin-bottom: 14px; }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .section-toggle {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .section-chevron {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      color: #9ca3af;
+      transition: transform 0.2s ease;
+    }
+    .control-section:not(.is-collapsed) .section-chevron { transform: rotate(180deg); }
+    .control-section.is-collapsed .section-body { display: none; }
+
+    /* ---------- 各コントロール ---------- */
+    .control-group { margin-bottom: 10px; }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+      color: #e5e7eb;
+    }
+    .control-group label .value { white-space: nowrap; }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+      height: 6px;
+      touch-action: pan-y;
+    }
+
+    .control-group input[type="color"] {
+      width: 100%;
+      height: 32px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .control-group.inline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .control-group.inline-row label { margin-bottom: 0; }
+
+    .control-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ---------- レスポンシブ（幅768px以下）：パネルを画面下部に固定 ---------- */
+    @media (max-width: 768px) {
+      .control-panel {
+        /* ドラッグで付いた位置指定（style属性）より優先させるため !important */
+        top: auto !important;
+        bottom: 16px !important;
+        left: 16px !important;
+        right: 16px !important;
+        width: auto !important;
+        max-height: 30vh;
+        border-radius: 16px;
+      }
+      .panel-header {
+        cursor: default;
+        margin: 0 0 6px;
+        padding: 10px 14px 6px;
+        border-radius: 16px 16px 0 0;
+      }
+      .panel-header h3 { font-size: 0.82rem; }
+      .panel-content { padding: 0 14px 10px; }
+      .control-section { margin-bottom: 8px; }
+      .section-title { font-size: 0.66rem; }
+      .section-toggle { margin-bottom: 5px; }
+      .control-group { margin-bottom: 6px; }
+      .control-group label { font-size: 0.72rem; margin-bottom: 2px; }
+      .control-group input[type="range"] { height: 10px; }
+      .control-group input[type="color"] { height: 24px; }
+    }
+
+    /* 選択肢（配色・マウスの効果） */
+    .control-group select {
+      width: 100%;
+      background: #1f2937;
+      color: #e5e7eb;
+      border: 1px solid rgba(var(--accent-rgb), 0.4);
+      border-radius: 6px;
+      padding: 5px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    /* 操作の説明 */
+    .control-note {
+      margin: 0 0 10px;
+      font-size: 0.7rem;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .control-group select { font-size: 0.72rem; padding: 3px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="flow-canvas" aria-label="見えない流れに乗って粒子が線を描き、模様ができていくアニメーション"></canvas>
+
+<div class="control-panel" id="draggable-panel">
+  <div class="panel-header" id="panel-header">
+    <h3>〰 流れ場 設定 ⠿</h3>
+    <div class="header-controls">
+      <button class="icon-btn" id="btn-reset-panel" type="button" title="初期値に戻す" aria-label="設定を初期値に戻す">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+      </button>
+      <button class="toggle-btn" id="btn-toggle-panel" type="button" aria-controls="panel-body" aria-expanded="true" title="パネルの表示／非表示（Esc）">非表示</button>
+    </div>
+  </div>
+  <!-- 各セクションは JS の SECTIONS から自動で作る -->
+  <div class="panel-content" id="panel-body"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ============================================================
+  // CONFIG：定数・初期値・パネルの定義
+  //   初期値は DEFAULT_CONFIG の1か所だけで管理する
+  // ============================================================
+  const APP_NAME = 'FlowField';
+  const STORAGE_VERSION = 1;                                        // データ構造を変えたら上げる
+  const STORAGE_KEY = `${APP_NAME}:v${STORAGE_VERSION}:settings`;   // FlowField:v1:settings
+  const SAVE_DELAY_MS = 300;        // スライダー操作中の保存をまとめる待ち時間
+  const STATUS_CLEAR_MS = 4000;     // 状態メッセージの表示時間
+  const BASE_FPS = 60;              // 動きの速さの基準。60fpsの1コマ分を 1 として経過時間で補正する
+  const MAX_DELTA_FRAMES = 3;       // タブ復帰時などに一気に進みすぎないための上限（60fps換算のコマ数）
+  const MAX_DPR = 2;                // 高解像度画面での描画倍率の上限（負荷対策）
+  const MOBILE_BREAKPOINT = 768;    // CSS の @media (max-width: 768px) と揃える
+  const TAU = Math.PI * 2;
+  const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+  // 配色プリセット（粒子の進む向きに合わせて、この色の間を行き来する）
+  const PALETTES = {
+    nightglow: { label: '夜光',     colors: ['#1e3a8a', '#3b82f6', '#a78bfa', '#f0abfc'] },
+    flame:     { label: '炎',       colors: ['#7f1d1d', '#dc2626', '#f97316', '#fde047'] },
+    ocean:     { label: '海',       colors: ['#0c4a6e', '#0891b2', '#2dd4bf', '#e0f2fe'] },
+    aurora:    { label: 'オーロラ', colors: ['#064e3b', '#10b981', '#a3e635', '#c084fc'] },
+    mono:      { label: 'モノクロ', colors: ['#4b5563', '#9ca3af', '#e5e7eb', '#ffffff'] }
+  };
+
+  const DEFAULT_CONFIG = Object.freeze({
+    count: 4000,          // 粒子の数
+    speed: 1.0,           // 進む速さの倍率
+    lineWidth: 1.0,       // 線の太さ(px)
+    lineAlpha: 12,        // 線の濃さ(%)
+    detail: 1.0,          // 模様の細かさの倍率
+    curl: 1.0,            // うねりの強さの倍率
+    evolve: 1.0,          // 流れが変わる速さの倍率
+    mouseMode: 'vortex',  // マウス・指の効果：vortex（渦）/ attract（吸い寄せ）/ none（なし）
+    mouseRadius: 160,     // 効果が届く範囲(px)
+    palette: 'nightglow',
+    bgColor: '#06070d',
+    fade: 8,              // 線の消え方(%)。0でずっと残す
+    hideDelay: 3          // パネルをたたんでから完全に消えるまでの秒数
+  });
+
+  const BASE_SPEED = 1.5;           // 速さ1倍の時、60fpsの1コマで進む距離(px)
+  const NOISE_FREQ = 0.002;         // 細かさ1倍の時の、流れの模様の細かさ
+  const EVOLVE_RATE = 0.05;         // 変わる速さ1倍の時、1秒で流れの模様が変わる量
+  const LIFE_MIN_SEC = 2;           // 粒子が描き続ける時間（秒）。過ぎたら別の場所から描き直す
+  const LIFE_MAX_SEC = 7;
+  const COLOR_BUCKETS = 32;         // 色の段階の数（同じ色の線をまとめて描き、速くする）
+  const FADE_MAX_ALPHA = 0.2;       // 消え方100%の時、60fpsの1コマで薄くする割合
+  const FADE_MIN_STEP = 0.08;       // 薄くする処理は、この割合以上たまってからまとめて行う（下記 applyFade 参照）
+  const MOUSE_STRENGTH = 0.9;       // カーソルの真上での効果の強さ（0〜1）
+
+  // パネルの構成。ここを書き換えればパネルの項目が変わる
+  //   type: range / checkbox / color / select / button / buttons / note
+  //   digits: 数値表示の小数点以下の桁数
+  //   onChange（値が変わった時の追加処理）は CHANGE_HANDLERS に書く
+  const SECTIONS = [
+    {
+      title: '粒子',
+      items: [
+        { key: 'count',     type: 'range', label: '粒子の数',   unit: '本', min: 500, max: 15000, step: 500, digits: 0 },
+        { key: 'speed',     type: 'range', label: '速さ',       unit: '倍', min: 0.2, max: 4,  step: 0.1, digits: 1 },
+        { key: 'lineWidth', type: 'range', label: '線の太さ',   unit: 'px', min: 0.5, max: 3,  step: 0.1, digits: 1 },
+        { key: 'lineAlpha', type: 'range', label: '線の濃さ',   unit: '%',  min: 2,   max: 50, step: 1,   digits: 0 }
+      ]
+    },
+    {
+      title: '流れ',
+      items: [
+        { key: 'detail', type: 'range', label: '模様の細かさ',     unit: '倍', min: 0.3, max: 4, step: 0.1, digits: 1 },
+        { key: 'curl',   type: 'range', label: 'うねりの強さ',     unit: '倍', min: 0.3, max: 3, step: 0.1, digits: 1 },
+        { key: 'evolve', type: 'range', label: '流れが変わる速さ', unit: '倍', min: 0,   max: 3, step: 0.1, digits: 1 },
+        { type: 'button', id: 'btn-new-pattern', label: '別の模様にする', action: newPattern }
+      ]
+    },
+    {
+      title: 'マウス・指',
+      items: [
+        { type: 'note', text: '画面の上でマウスを動かす（指でなぞる）と、その周りの流れが変わります。' },
+        { key: 'mouseMode', type: 'select', label: '効果', options: [
+          { value: 'vortex',  label: '渦を巻く' },
+          { value: 'attract', label: '吸い寄せる' },
+          { value: 'none',    label: '効果なし' }
+        ] },
+        { key: 'mouseRadius', type: 'range', label: '効果が届く範囲', unit: 'px', min: 50, max: 400, step: 10, digits: 0 }
+      ]
+    },
+    {
+      title: '色',
+      items: [
+        { key: 'palette', type: 'select', label: '配色', options: Object.entries(PALETTES).map(([value, p]) => ({ value, label: p.label })) },
+        { key: 'bgColor', type: 'color', label: '背景色' }
+      ]
+    },
+    {
+      title: '残像と画像',
+      items: [
+        { key: 'fade', type: 'range', label: '線の消え方（0でずっと残す）', unit: '%', min: 0, max: 100, step: 1, digits: 0 },
+        { type: 'buttons', buttons: [
+          { id: 'btn-clear', label: '描き直し', action: clearDrawing },
+          { id: 'btn-save-png', label: '画像として保存（PNG）', action: savePng }
+        ] }
+      ]
+    },
+    {
+      title: '環境 & システム',
+      items: [
+        { key: 'hideDelay', type: 'range', label: 'パネルが消える時間', unit: '秒', min: 1, max: 10, step: 1, digits: 0 }
+      ]
+    }
+  ];
+
+  // 保存・読み込みの対象になる設定項目（ボタン・説明文を除く）
+  const SETTING_DEFS = SECTIONS.flatMap((s) => s.items).filter((item) => item.key);
+
+
+  // ============================================================
+  // STATE：実行中に変わる値
+  // ============================================================
+  const config = { ...DEFAULT_CONFIG };   // 現在の設定
+
+  const state = {
+    particles: [],
+    width: 0,               // 画面サイズ（CSSピクセル）
+    height: 0,
+    dpr: 1,
+    lastTime: null,         // 前のコマの時刻（ms）
+    resizeQueued: false,
+    noise: null,            // 流れを作るノイズの関数
+    noiseZ: 0,              // ノイズの3つ目の軸（時間とともに進め、流れの形を少しずつ変える）
+    fadeKeep: 1,            // まだ薄くしていない分（applyFade 参照）
+    bucketColors: [],       // 色の段階ごとの色
+    pointer: null,          // カーソル・指の位置 { x, y }（画面の外なら null）
+    hideTimerId: null,
+    saveTimerId: null,
+    statusTimerId: null
+  };
+
+  const dom = {};            // よく使う要素（INITで取得）
+  const controlRefs = [];    // パネルの入力欄 { def, input, valueEl }
+
+
+  // ============================================================
+  // STORAGE：localStorage への保存と JSON エクスポート／インポート
+  //   保存形式: { version: 1, config: { ...設定 } }
+  // ============================================================
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  // 数値を範囲内に収め、刻み(step)に揃える。数値でなければ null
+  function snapToStep(def, value) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    let v = clamp(value, def.min, def.max);
+    v = Math.round((v - def.min) / def.step) * def.step + def.min;
+    return Number(clamp(v, def.min, def.max).toFixed(6)); // 0.1 + 0.2 のような小数誤差を除く
+  }
+
+  // 読み込んだ設定を項目ごとに検査し、使えない値・足りない値は初期値にする
+  function sanitizeConfig(raw) {
+    const result = { ...DEFAULT_CONFIG };
+    if (!raw || typeof raw !== 'object') return result;
+
+    for (const def of SETTING_DEFS) {
+      const value = raw[def.key];
+      if (value === undefined) continue;
+      if (def.type === 'checkbox') {
+        if (typeof value === 'boolean') result[def.key] = value;
+      } else if (def.type === 'color') {
+        if (typeof value === 'string' && HEX_COLOR.test(value)) result[def.key] = value.toLowerCase();
+      } else if (def.type === 'select') {
+        if (def.options.some((o) => o.value === value)) result[def.key] = value;
+      } else {
+        const snapped = snapToStep(def, value);
+        if (snapped !== null) result[def.key] = snapped;
+      }
+    }
+    return result;
+  }
+
+  function loadSettings() {
+    try {
+      const text = localStorage.getItem(STORAGE_KEY);
+      if (!text) return { ...DEFAULT_CONFIG };
+      const data = JSON.parse(text);
+      // 将来 STORAGE_VERSION を上げる時は、ここに古い形式からの変換を追加する
+      if (!data || typeof data !== 'object' || Number(data.version) > STORAGE_VERSION) return { ...DEFAULT_CONFIG };
+      return sanitizeConfig(data.config);
+    } catch (err) {
+      console.warn('設定の読み込みに失敗したため初期値を使います', err);
+      return { ...DEFAULT_CONFIG };
+    }
+  }
+
+  function saveSettingsNow() {
+    clearTimeout(state.saveTimerId);
+    state.saveTimerId = null;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, config: { ...config } }));
+    } catch (err) {
+      console.warn('設定の保存に失敗しました', err);
+    }
+  }
+
+  // スライダー操作中は保存をまとめ、操作が止まってから1回だけ保存する
+  function scheduleSave() {
+    clearTimeout(state.saveTimerId);
+    state.saveTimerId = setTimeout(saveSettingsNow, SAVE_DELAY_MS);
+  }
+
+  // 保存待ちが残っていれば即保存（ページを閉じる直前用）
+  function flushPendingSave() {
+    if (state.saveTimerId !== null) saveSettingsNow();
+  }
+
+  function formatDateStamp(date, withTime = false) {
+    const pad = (n) => String(n).padStart(2, '0');
+    const day = `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+    return withTime ? `${day}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}` : day;
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // 形式：{ app, version, exportedAt, config }
+  function exportSettings() {
+    const payload = {
+      app: APP_NAME,
+      version: STORAGE_VERSION,
+      exportedAt: new Date().toISOString(),
+      config: { ...config }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    downloadBlob(blob, `flow-field-${formatDateStamp(new Date())}.json`);
+  }
+
+  // JSONファイルを読み、検査済みの設定を返す（問題があれば Error を投げる）
+  async function readSettingsFile(file) {
+    const text = await file.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error('JSONファイルとして読み込めませんでした');
+    }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('ファイルの形式が正しくありません');
+    }
+    if (data.app !== APP_NAME) {
+      throw new Error('このアプリの設定ファイルではありません');
+    }
+    if (Number(data.version) > STORAGE_VERSION) {
+      throw new Error('新しい形式のファイルのため読み込めません');
+    }
+    if (!data.config || typeof data.config !== 'object') {
+      throw new Error('設定データが見つかりません');
+    }
+    return sanitizeConfig(data.config);
+  }
+
+  // 今の絵を、背景色を敷いたPNG画像として保存する（Canvasは透明なので背景色を合成する）
+  function savePng() {
+    const c = document.createElement('canvas');
+    c.width = dom.canvas.width;
+    c.height = dom.canvas.height;
+    const g = c.getContext('2d');
+    g.fillStyle = config.bgColor;
+    g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(dom.canvas, 0, 0);
+    c.toBlob((blob) => {
+      if (!blob) {
+        showStatus('画像の保存に失敗しました', true);
+        return;
+      }
+      downloadBlob(blob, `flow-field-${formatDateStamp(new Date(), true)}.png`);
+      showStatus('画像を保存しました');
+    }, 'image/png');
+  }
+
+
+  // ============================================================
+  // LOGIC：流れの計算・粒子の更新・描画
+  //   k は「60fpsで何コマ分の時間が経ったか」、dt は秒
+  // ============================================================
+
+  const rand = (min, max) => min + Math.random() * (max - min);
+
+  // 種(seed)から毎回同じ並びの乱数を作る
+  function seededRandom(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6D2B79F5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // パーリンノイズ（なめらかに変化する乱数）の3次元版。だいたい -1〜1 の値を返す
+  function createNoise3D(seed) {
+    const rnd = seededRandom(seed);
+    const perm = Array.from({ length: 256 }, (_, i) => i);
+    for (let i = 255; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [perm[i], perm[j]] = [perm[j], perm[i]];
+    }
+    const p = new Uint8Array(512);
+    for (let i = 0; i < 512; i++) p[i] = perm[i & 255];
+
+    const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const grad = (hash, x, y, z) => {
+      const h = hash & 15;
+      const u = h < 8 ? x : y;
+      const v = h < 4 ? y : (h === 12 || h === 14 ? x : z);
+      return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+    };
+
+    return (x, y, z) => {
+      const X = Math.floor(x) & 255;
+      const Y = Math.floor(y) & 255;
+      const Z = Math.floor(z) & 255;
+      x -= Math.floor(x);
+      y -= Math.floor(y);
+      z -= Math.floor(z);
+      const u = fade(x);
+      const v = fade(y);
+      const w = fade(z);
+      const A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z;
+      const B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;
+      return lerp(
+        lerp(lerp(grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z), u),
+             lerp(grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z), u), v),
+        lerp(lerp(grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1), u),
+             lerp(grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1), u), v),
+        w);
+    };
+  }
+
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  // 配色の色の間を、段階の数だけ作っておく
+  function rebuildBucketColors() {
+    const stops = PALETTES[config.palette].colors.map(hexToRgb);
+    const alpha = (config.lineAlpha / 100).toFixed(3);
+    state.bucketColors = Array.from({ length: COLOR_BUCKETS }, (_, b) => {
+      const t = (b / (COLOR_BUCKETS - 1)) * (stops.length - 1);
+      const i = Math.min(stops.length - 2, Math.floor(t));
+      const f = t - i;
+      const c = stops[i].map((v, n) => Math.round(v + (stops[i + 1][n] - v) * f));
+      return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
+    });
+  }
+
+  // 粒子を画面のどこかに置き直す（前の位置も同じにして、線がつながらないようにする）
+  function respawn(p) {
+    p.x = Math.random() * state.width;
+    p.y = Math.random() * state.height;
+    p.px = p.x;
+    p.py = p.y;
+    p.life = rand(LIFE_MIN_SEC, LIFE_MAX_SEC);
+  }
+
+  function createParticle() {
+    const p = { x: 0, y: 0, px: 0, py: 0, life: 0, speedJitter: rand(0.75, 1.25), bucket: 0 };
+    respawn(p);
+    p.life *= Math.random(); // 最初は寿命をばらけさせ、一斉に描き直さないようにする
+    return p;
+  }
+
+  function adjustParticleCount() {
+    while (state.particles.length < config.count) state.particles.push(createParticle());
+    if (state.particles.length > config.count) state.particles.length = config.count;
+  }
+
+  function newPattern() {
+    state.noise = createNoise3D((Math.random() * 2 ** 32) >>> 0);
+    clearDrawing();
+  }
+
+  function clearDrawing() {
+    dom.ctx.clearRect(0, 0, state.width, state.height);
+    state.fadeKeep = 1;
+    for (const p of state.particles) respawn(p);
+  }
+
+  // 位置 (x, y) で粒子が進む向き（ラジアン）。カーソルの近くでは渦・吸い寄せの向きを混ぜる
+  function flowAngle(x, y) {
+    const f = NOISE_FREQ * config.detail;
+    let angle = state.noise(x * f, y * f, state.noiseZ) * TAU * config.curl;
+
+    const ptr = state.pointer;
+    if (ptr && config.mouseMode !== 'none') {
+      const dx = x - ptr.x;
+      const dy = y - ptr.y;
+      const d = Math.hypot(dx, dy);
+      if (d < config.mouseRadius && d > 0.5) {
+        const w = (1 - d / config.mouseRadius) ** 2 * MOUSE_STRENGTH;
+        const target = config.mouseMode === 'vortex'
+          ? Math.atan2(dy, dx) + Math.PI / 2   // 中心の周りを回る向き
+          : Math.atan2(-dy, -dx);              // 中心へ向かう向き
+        // 向きを「矢印」として混ぜる（角度のまま平均すると、向きによっては逆を向くため）
+        const vx = Math.cos(angle) * (1 - w) + Math.cos(target) * w;
+        const vy = Math.sin(angle) * (1 - w) + Math.sin(target) * w;
+        angle = Math.atan2(vy, vx);
+      }
+    }
+    return angle;
+  }
+
+  // 進む向きを色の段階に変える（向きが一周すると色も行って戻る）
+  function bucketOf(angle) {
+    const t = (((angle % TAU) + TAU) % TAU) / TAU; // 0〜1
+    const mirrored = 1 - Math.abs(2 * t - 1);       // 0→1→0
+    return Math.min(COLOR_BUCKETS - 1, Math.floor(mirrored * COLOR_BUCKETS));
+  }
+
+  function updateParticles(k, dt) {
+    const W = state.width;
+    const H = state.height;
+    const step = BASE_SPEED * config.speed * k;
+    for (const p of state.particles) {
+      p.life -= dt;
+      if (p.life <= 0) {
+        respawn(p);
+        continue;
+      }
+      const a = flowAngle(p.x, p.y);
+      p.px = p.x;
+      p.py = p.y;
+      p.x += Math.cos(a) * step * p.speedJitter;
+      p.y += Math.sin(a) * step * p.speedJitter;
+      p.bucket = bucketOf(a);
+      if (p.x < 0 || p.x > W || p.y < 0 || p.y > H) respawn(p);
+    }
+  }
+
+  // 前の位置から今の位置へ線を引く。同じ色の線はまとめて1回で描く
+  function drawParticles(ctx) {
+    const paths = Array.from({ length: COLOR_BUCKETS }, () => null);
+    for (const p of state.particles) {
+      if (p.px === p.x && p.py === p.y) continue; // 置き直したばかり
+      let path = paths[p.bucket];
+      if (!path) path = paths[p.bucket] = new Path2D();
+      path.moveTo(p.px, p.py);
+      path.lineTo(p.x, p.y);
+    }
+    ctx.lineWidth = config.lineWidth;
+    ctx.lineCap = 'round';
+    for (let b = 0; b < COLOR_BUCKETS; b++) {
+      if (!paths[b]) continue;
+      ctx.strokeStyle = state.bucketColors[b];
+      ctx.stroke(paths[b]);
+    }
+  }
+
+  // 描いた線を少しずつ薄くする（透明な Canvas を少しずつ消していく）。
+  // 毎コマごく薄く消すと、色の細かさ(0〜255)の都合で薄い跡が消えきらずに残るため、
+  // 消す量がある程度たまってから、まとめて消す
+  function applyFade(ctx, k) {
+    if (config.fade <= 0) {
+      state.fadeKeep = 1;
+      return;
+    }
+    const perFrame = FADE_MAX_ALPHA * (config.fade / 100) ** 2;
+    state.fadeKeep *= Math.pow(1 - perFrame, k);
+    const pending = 1 - state.fadeKeep;
+    if (pending < FADE_MIN_STEP) return;
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = `rgba(0, 0, 0, ${pending.toFixed(3)})`;
+    ctx.fillRect(0, 0, state.width, state.height);
+    ctx.globalCompositeOperation = 'source-over';
+    state.fadeKeep = 1;
+  }
+
+  // 前のコマからの経過時間を「60fps換算のコマ数」で返す
+  function computeDeltaFrames(now) {
+    if (state.lastTime === null) {
+      state.lastTime = now;
+      return 1;
+    }
+    const frames = (now - state.lastTime) / (1000 / BASE_FPS);
+    state.lastTime = now;
+    return clamp(frames, 0, MAX_DELTA_FRAMES);
+  }
+
+  function frame(now) {
+    if (state.resizeQueued) resizeCanvas();
+    const k = computeDeltaFrames(now);
+    const dt = k / BASE_FPS;
+
+    state.noiseZ += dt * EVOLVE_RATE * config.evolve;
+    applyFade(dom.ctx, k);
+    updateParticles(k, dt);
+    drawParticles(dom.ctx);
+    requestAnimationFrame(frame);
+  }
+
+  // Canvasの実解像度を画面の表示倍率に合わせる（高DPIでぼやけないように）。
+  // 大きさを変えると描いた絵は消えるので、粒子も置き直して描き始める
+  function resizeCanvas() {
+    state.resizeQueued = false;
+    state.dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    state.width = window.innerWidth;
+    state.height = window.innerHeight;
+    dom.canvas.width = Math.round(state.width * state.dpr);
+    dom.canvas.height = Math.round(state.height * state.dpr);
+    dom.ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+    state.fadeKeep = 1;
+    for (const p of state.particles) respawn(p);
+  }
+
+  // ウィンドウサイズ変更中の作り直しは、次のコマでまとめて1回だけ行う
+  function queueResize() {
+    state.resizeQueued = true;
+  }
+
+
+  // ============================================================
+  // UI：パネル・操作
+  // ============================================================
+
+  // 設定項目ごとに、値が変わった時に追加で必要な処理
+  // （ここに無い項目は毎コマ config から直接読まれるので処理不要）
+  const CHANGE_HANDLERS = {
+    count: adjustParticleCount,
+    palette: rebuildBucketColors,
+    lineAlpha: rebuildBucketColors,
+    bgColor: applyBackground
+  };
+
+  function applyBackground() {
+    document.body.style.background = config.bgColor;
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function createChevronIcon() {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'section-chevron');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2.5');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    const line = document.createElementNS(ns, 'polyline');
+    line.setAttribute('points', '6 9 12 15 18 9');
+    svg.appendChild(line);
+    return svg;
+  }
+
+  function formatValue(def, value) {
+    return Number(value).toFixed(def.digits);
+  }
+
+  function readInputValue(def, input) {
+    if (def.type === 'range') return Number(input.value);
+    if (def.type === 'checkbox') return input.checked;
+    if (def.type === 'select') {
+      const opt = def.options.find((o) => String(o.value) === input.value);
+      return opt ? opt.value : DEFAULT_CONFIG[def.key];
+    }
+    return input.value;
+  }
+
+  function setConfigValue(key, value) {
+    config[key] = value;
+    const handler = CHANGE_HANDLERS[key];
+    if (handler) handler();
+    scheduleSave();
+  }
+
+  function createButton(spec, extraClass) {
+    const btn = el('button', `text-btn ${extraClass}`, spec.label);
+    btn.type = 'button';
+    btn.id = spec.id;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      spec.action();
+    });
+    return btn;
+  }
+
+  function buildControl(def) {
+    if (def.type === 'note') return el('p', 'control-note', def.text);
+
+    const group = el('div', 'control-group');
+
+    if (def.type === 'button') {
+      group.append(createButton(def, 'is-full'));
+      return group;
+    }
+    if (def.type === 'buttons') {
+      const stack = el('div', 'button-stack');
+      def.buttons.forEach((spec) => stack.append(createButton(spec, 'is-full')));
+      group.append(stack);
+      return group;
+    }
+
+    let input;
+    if (def.type === 'select') {
+      input = document.createElement('select');
+      for (const opt of def.options) {
+        const o = el('option', null, opt.label);
+        o.value = String(opt.value);
+        input.append(o);
+      }
+    } else {
+      input = document.createElement('input');
+      input.type = def.type;
+    }
+    input.id = `param-${def.key}`;
+    const label = el('label');
+    label.htmlFor = input.id;
+    let valueEl = null;
+
+    if (def.type === 'range') {
+      input.min = def.min;
+      input.max = def.max;
+      input.step = def.step;
+      valueEl = el('span');
+      const right = el('span', 'value');
+      right.append(valueEl, def.unit);
+      label.append(def.label, right);
+    } else {
+      label.textContent = def.label;
+      if (def.type === 'checkbox') group.classList.add('inline-row');
+    }
+    group.append(label, input);
+
+    const eventName = def.type === 'checkbox' || def.type === 'select' ? 'change' : 'input';
+    input.addEventListener(eventName, () => {
+      const value = readInputValue(def, input);
+      if (valueEl) valueEl.textContent = formatValue(def, value);
+      setConfigValue(def.key, value);
+    });
+
+    controlRefs.push({ def, input, valueEl });
+    return group;
+  }
+
+  function buildSection(title, contentNodes) {
+    const sectionEl = el('div', 'control-section is-collapsed');
+    const toggle = el('button', 'section-toggle');
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.append(el('span', 'section-title', `■ ${title}`), createChevronIcon());
+
+    const body = el('div', 'section-body');
+    body.append(...contentNodes);
+
+    // 各セクションは個別に開閉（他のセクションの開閉状態には影響しない）
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isCollapsed = sectionEl.classList.toggle('is-collapsed');
+      toggle.setAttribute('aria-expanded', String(!isCollapsed));
+    });
+
+    sectionEl.append(toggle, body);
+    return sectionEl;
+  }
+
+  // 「■ 設定の保存」セクション（エクスポート／インポート）
+  function buildSaveSection() {
+    const note = el('p', 'io-note', '設定はこのブラウザに自動保存されます。バックアップや別PCへの移行にはJSONファイルを使ってください。');
+    const row = el('div', 'button-row');
+    dom.exportBtn = el('button', 'text-btn', 'エクスポート');
+    dom.exportBtn.type = 'button';
+    dom.importBtn = el('button', 'text-btn', 'インポート');
+    dom.importBtn.type = 'button';
+    row.append(dom.exportBtn, dom.importBtn);
+
+    dom.fileInput = document.createElement('input');
+    dom.fileInput.type = 'file';
+    dom.fileInput.accept = '.json,application/json';
+    dom.fileInput.hidden = true;
+
+    return buildSection('設定の保存', [note, row, dom.fileInput]);
+  }
+
+  function buildPanel() {
+    for (const section of SECTIONS) {
+      dom.panelBody.append(buildSection(section.title, section.items.map(buildControl)));
+    }
+    dom.panelBody.append(buildSaveSection());
+    // 状態メッセージは、画像の保存でも使うのでパネルの一番下に置く
+    dom.ioStatus = el('p', 'io-status');
+    dom.ioStatus.setAttribute('role', 'status');
+    dom.ioStatus.setAttribute('aria-live', 'polite');
+    dom.panelBody.append(dom.ioStatus);
+  }
+
+  // 入力欄の表示を config の値にそろえる
+  function syncInputsFromConfig() {
+    for (const { def, input, valueEl } of controlRefs) {
+      const value = config[def.key];
+      if (def.type === 'checkbox') input.checked = value;
+      else input.value = String(value);
+      if (valueEl) valueEl.textContent = formatValue(def, value);
+    }
+  }
+
+  // 設定をまとめて反映する（起動時・リセット・インポート用）
+  function applyConfig(newConfig) {
+    Object.assign(config, newConfig);
+    syncInputsFromConfig();
+    new Set(Object.values(CHANGE_HANDLERS)).forEach((fn) => fn());
+  }
+
+  function showStatus(message, isError = false) {
+    clearTimeout(state.statusTimerId);
+    dom.ioStatus.textContent = message;
+    dom.ioStatus.classList.toggle('is-error', isError);
+    state.statusTimerId = setTimeout(() => {
+      dom.ioStatus.textContent = '';
+      dom.ioStatus.classList.remove('is-error');
+    }, STATUS_CLEAR_MS);
+  }
+
+  // --- パネルの表示／非表示 ---
+
+  function isPanelHidden() {
+    return dom.panel.classList.contains('is-fully-hidden') ||
+           dom.panelBody.classList.contains('is-collapsed');
+  }
+
+  // 指定秒数後にパネルを完全に消す
+  function startHideTimer() {
+    clearTimeout(state.hideTimerId);
+    state.hideTimerId = setTimeout(() => {
+      dom.panel.classList.add('is-fully-hidden');
+    }, config.hideDelay * 1000);
+  }
+
+  function showPanel() {
+    clearTimeout(state.hideTimerId);
+    dom.panel.classList.remove('is-fully-hidden');
+    dom.panelBody.classList.remove('is-collapsed');
+    dom.toggleBtn.textContent = '非表示';
+    dom.toggleBtn.setAttribute('aria-expanded', 'true');
+    clampPanelIntoView();
+  }
+
+  function collapsePanel() {
+    // たたむ中身にフォーカスがあれば、ボタンへ移しておく
+    if (dom.panelBody.contains(document.activeElement)) dom.toggleBtn.focus();
+    dom.panelBody.classList.add('is-collapsed');
+    dom.toggleBtn.textContent = '表示';
+    dom.toggleBtn.setAttribute('aria-expanded', 'false');
+    startHideTimer();
+  }
+
+  function togglePanel() {
+    if (dom.panelBody.classList.contains('is-collapsed')) showPanel();
+    else collapsePanel();
+  }
+
+  // ドラッグで移動したパネルが画面外へはみ出さないように戻す
+  function clampPanelIntoView() {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) return; // スマホ表示はCSSで位置固定
+    if (!dom.panel.style.left) return;                  // まだドラッグしていない
+    const maxLeft = Math.max(0, window.innerWidth - dom.panel.offsetWidth);
+    const maxTop = Math.max(0, window.innerHeight - dom.panel.offsetHeight);
+    dom.panel.style.left = `${clamp(parseFloat(dom.panel.style.left) || 0, 0, maxLeft)}px`;
+    dom.panel.style.top = `${clamp(parseFloat(dom.panel.style.top) || 0, 0, maxTop)}px`;
+  }
+
+  function initPanelButtons() {
+    dom.toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePanel();
+    });
+
+    dom.resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!window.confirm('設定を初期値に戻しますか？')) return;
+      applyConfig({ ...DEFAULT_CONFIG });
+      saveSettingsNow();
+      showStatus('設定を初期値に戻しました');
+    });
+
+    // 画面（Canvas）をクリック／タップした時の再表示
+    dom.canvas.addEventListener('click', () => {
+      if (isPanelHidden()) showPanel();
+    });
+  }
+
+  // カーソル・指の位置を覚える（Canvasの上だけ。パネルの上や画面の外では効果なし）
+  function initPointer() {
+    const canvas = dom.canvas;
+    const update = (e) => { state.pointer = { x: e.clientX, y: e.clientY }; };
+    canvas.addEventListener('pointermove', update);
+    canvas.addEventListener('pointerdown', update);
+    const forget = () => { state.pointer = null; };
+    canvas.addEventListener('pointerleave', forget);
+    canvas.addEventListener('pointercancel', forget);
+    canvas.addEventListener('pointerup', (e) => {
+      if (e.pointerType !== 'mouse') forget(); // 指を離したら効果も消す
+    });
+  }
+
+  function initDataButtons() {
+    dom.exportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      try {
+        exportSettings();
+        showStatus('JSONファイルを保存しました');
+      } catch (err) {
+        console.error(err);
+        showStatus('エクスポートに失敗しました', true);
+      }
+    });
+
+    dom.importBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dom.fileInput.click();
+    });
+
+    dom.fileInput.addEventListener('change', async () => {
+      const file = dom.fileInput.files[0];
+      dom.fileInput.value = ''; // 同じファイルを続けて選んでも反応するように
+      if (!file) return;
+      try {
+        applyConfig(await readSettingsFile(file));
+        saveSettingsNow();
+        showStatus('設定を読み込みました');
+      } catch (err) {
+        console.error(err);
+        showStatus(err.message || 'インポートに失敗しました', true);
+      }
+    });
+  }
+
+  // Escキーでパネルの表示／非表示を切り替え
+  function initKeyboard() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || e.isComposing) return;
+      if (isPanelHidden()) {
+        showPanel();
+        dom.toggleBtn.focus({ preventScroll: true }); // キーボードのままパネルを操作できるように
+      } else {
+        collapsePanel();
+      }
+    });
+  }
+
+  // パネルのドラッグ移動（PCのみ）
+  function initDraggable() {
+    const panel = dom.panel;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    function onMouseMove(e) {
+      const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+      panel.style.left = `${clamp(initialLeft + e.clientX - startX, 0, maxLeft)}px`;
+      panel.style.top = `${clamp(initialTop + e.clientY - startY, 0, maxTop)}px`;
+    }
+
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    dom.header.addEventListener('mousedown', (e) => {
+      if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+      if (e.target.closest('button')) return;
+
+      startX = e.clientX;
+      startY = e.clientY;
+      const rect = panel.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.left = `${initialLeft}px`;
+      panel.style.top = `${initialTop}px`;
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  // スライダー：タッチ操作の場合はつまみを掴んだ時だけ値を変えられるようにする
+  // （トラックに触れただけで値が飛ぶのを防ぐ。マウス操作は通常どおり）。
+  // つまみを掴んでいても、縦スワイプはパネルのスクロールを優先する
+  function initSliderTouchPrevention() {
+    const THUMB_HIT_RADIUS = 26; // つまみの中心からこの範囲のタッチだけ「掴んだ」とみなす(px)
+    const THUMB_SIZE = 20;       // ブラウザ既定のつまみのおおよその幅(px)
+
+    function getThumbCenterX(slider, rect) {
+      const min = parseFloat(slider.min) || 0;
+      const max = parseFloat(slider.max) || 100;
+      const val = parseFloat(slider.value);
+      const percent = max > min ? (val - min) / (max - min) : 0;
+      const usableWidth = Math.max(0, rect.width - THUMB_SIZE);
+      return rect.left + THUMB_SIZE / 2 + percent * usableWidth;
+    }
+
+    dom.panel.querySelectorAll('input[type="range"]').forEach((slider) => {
+      let startX = 0, startY = 0, isVertical = false, touchOnThumb = true;
+
+      slider.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isVertical = false;
+        const rect = slider.getBoundingClientRect();
+        const thumbX = getThumbCenterX(slider, rect);
+        const thumbY = rect.top + rect.height / 2;
+        touchOnThumb = Math.hypot(touch.clientX - thumbX, touch.clientY - thumbY) <= THUMB_HIT_RADIUS;
+        if (!touchOnThumb) e.preventDefault(); // 触れた位置へ値がジャンプする既定動作を無効化
+      }, { passive: false });
+
+      slider.addEventListener('touchmove', (e) => {
+        if (!touchOnThumb) {
+          e.preventDefault();
+          return;
+        }
+        if (isVertical) return;
+        const touch = e.touches[0];
+        const diffX = Math.abs(touch.clientX - startX);
+        const diffY = Math.abs(touch.clientY - startY);
+        if (diffY > diffX && diffY > 4) {
+          isVertical = true;
+          slider.style.pointerEvents = 'none';
+          setTimeout(() => { slider.style.pointerEvents = 'auto'; }, 300);
+        }
+      }, { passive: false });
+    });
+  }
+
+  // 表示倍率の変化（別モニターへのウィンドウ移動など）を検知して解像度を合わせ直す
+  function watchDevicePixelRatio() {
+    const mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mq.addEventListener('change', () => {
+      queueResize();
+      watchDevicePixelRatio();
+    }, { once: true });
+  }
+
+
+  // ============================================================
+  // INIT：起動処理
+  // ============================================================
+  function init() {
+    dom.canvas = document.getElementById('flow-canvas');
+    dom.ctx = dom.canvas.getContext('2d');
+    dom.panel = document.getElementById('draggable-panel');
+    dom.header = document.getElementById('panel-header');
+    dom.panelBody = document.getElementById('panel-body');
+    dom.toggleBtn = document.getElementById('btn-toggle-panel');
+    dom.resetBtn = document.getElementById('btn-reset-panel');
+
+    buildPanel();
+    state.noise = createNoise3D((Math.random() * 2 ** 32) >>> 0);
+    resizeCanvas();            // 粒子の位置に画面サイズを使うため、先に実行
+    applyConfig(loadSettings());
+
+    initPanelButtons();
+    initPointer();
+    initDataButtons();
+    initKeyboard();
+    initDraggable();
+    initSliderTouchPrevention();
+    watchDevicePixelRatio();
+
+    window.addEventListener('resize', () => {
+      queueResize();
+      clampPanelIntoView();
+    });
+    // タブを切り替えて戻った時に、経過時間を測り直す
+    document.addEventListener('visibilitychange', () => { state.lastTime = null; });
+    // 保存待ちのまま閉じられても設定が失われないように
+    window.addEventListener('pagehide', flushPendingSave);
+
+    requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+
+</body>
+</html>
