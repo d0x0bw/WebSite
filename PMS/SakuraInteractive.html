@@ -121,7 +121,21 @@
     .toggle-btn:hover { background: rgba(251, 165, 209, 0.15); }
     .toggle-btn:active { transform: scale(0.96); }
 
-    .control-section { margin-bottom: 14px; }
+    /* 左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
+    .control-section {
+      margin: 0 -10px 6px;
+      padding: 6px 9px 1px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方） */
+    .control-section:not(.is-collapsed) {
+      background: rgba(251, 165, 209, 0.13);
+      border-color: rgba(251, 165, 209, 0.35);
+    }
+    .control-section:not(.is-collapsed) .section-title,
+    .control-section:not(.is-collapsed) .section-chevron { color: #FBA5D1; }
     .section-title {
       font-size: 0.75rem; font-weight: bold; color: #9ca3af;
       text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
@@ -172,7 +186,7 @@
       .panel-header { cursor: default; margin: 0 0 6px; padding: 10px 14px 6px; border-radius: 16px 16px 0 0; }
       .panel-content { padding: 0 14px 10px; }
       .panel-header h3 { font-size: 0.82rem; }
-      .control-section { margin-bottom: 8px; }
+      .control-section { margin-bottom: 3px; padding: 4px 9px 1px; }
       .section-title { font-size: 0.66rem; margin-bottom: 5px; }
       .section-toggle { margin-bottom: 5px; }
       .control-group { margin-bottom: 6px; }

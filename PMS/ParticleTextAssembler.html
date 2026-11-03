@@ -5,1555 +5,1294 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Particle Text Assembler</title>
 
-  <link rel="icon" href="../icon/favicon.png" type="image/png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* ===================== 共通デザイン（STYLE.md 準拠） ===================== */
+    :root {
+      --accent: #c0ea2e;
+      --accent-border: rgba(192, 234, 46, 0.4);
+      --accent-border-panel: rgba(192, 234, 46, 0.3);
+      --accent-hover: rgba(192, 234, 46, 0.15);
+      --accent-open-bg: rgba(192, 234, 46, 0.13);     /* 開いている項目の背景 */
+      --accent-open-border: rgba(192, 234, 46, 0.35); /* 開いている項目の枠線 */
+      --page-bg: #070d16;
+      --panel-bg: rgba(15, 23, 42, 0.88);
+      --text: #e5e7eb;
+      --sub: #9ca3af;
+      --line: rgba(255, 255, 255, 0.1);
+      --error: #f87171;
+      --font: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
     }
 
-    body, html {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #0b0c10;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      color: #fff;
+      background-color: var(--page-bg);
+      font-family: var(--font);
+      color: var(--text);
+      transition: background-color 0.3s ease;
     }
 
+    /* 全画面Canvas（z-index 1） */
     #canvas {
-      display: block;
+      position: fixed;
+      inset: 0;
       width: 100vw;
       height: 100vh;
-      background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%);
+      display: block;
+      z-index: 1;
+      touch-action: none; /* タッチ操作で画面がスクロール・拡大しないようにする */
+      transition: background 0.3s ease;
     }
 
-    /* =======================================================
-       PC用コントロールパネル（画面下部固定・現行デザインを踏襲）
-       ======================================================= */
-    .control-panel {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 40px);
-      max-width: 1180px;
-      max-height: calc(100vh - 40px);
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ===================== フローティングパネル ===================== */
+    .panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 320px;
+      max-height: calc(100vh - 32px);
       overflow-y: auto;
-      padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px;
       z-index: 10;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--accent-border-panel);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       user-select: none;
+      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
     }
+    .panel.is-hidden {
+      opacity: 0;
+      transform: translateY(-8px);
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .panel::-webkit-scrollbar { width: 6px; }
+    .panel::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 
-    .control-panel::-webkit-scrollbar { width: 6px; }
-    .control-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
-
-    .panel-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      color: #66fcf1;
+    .panel-header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      white-space: nowrap;
-      padding-right: 12px;
-      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.96);
+      border-bottom: 1px solid var(--line);
+      border-radius: 12px 12px 0 0;
+      cursor: move;
+      touch-action: none;
     }
-
-    .panel-collapse-btn {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 14px;
-      padding: 5px 12px;
-      font-size: 0.72rem;
-      font-weight: 600;
+    .panel-header h1 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent);
       letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .panel-body { padding: 10px 12px 12px; }
+
+    /* ボタン */
+    .btn {
+      height: 26px;
+      padding: 0 10px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.75rem;
       cursor: pointer;
-      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      white-space: nowrap;
+      transition: background 0.2s ease, transform 0.2s ease;
     }
-    .panel-collapse-btn:hover {
-      border-color: #66fcf1;
-      color: #66fcf1;
-      background: rgba(102, 252, 241, 0.1);
-    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.94); }
+    .btn.is-danger { color: var(--error); border-color: rgba(248, 113, 113, 0.4); }
+    .btn.is-danger:hover { background: rgba(248, 113, 113, 0.15); }
+    .btn-icon { width: 26px; padding: 0; }
 
-    /* パネル折りたたみ時は操作部分だけを非表示にし、タイトルバーは常に見える状態を保つ */
-    .control-panel.is-collapsed {
-      padding-bottom: 16px;
-      gap: 0;
-    }
-    .control-panel.is-collapsed .controls-container {
-      display: none;
-    }
-    .control-panel.is-collapsed .panel-title {
-      border-right: none;
-      padding-right: 0;
-    }
-
-    .controls-container {
+    .actions {
       display: flex;
-      flex: 1;
       flex-wrap: wrap;
-      align-items: flex-end;
-      gap: 16px 20px;
+      gap: 6px;
+    }
+    .actions .btn { flex: 1; }
+
+    .note {
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: var(--sub);
+      line-height: 1.5;
     }
 
-    .control-panel .control-group {
+    /* 状態メッセージ */
+    .status {
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: var(--accent);
+      line-height: 1.5;
+    }
+    .status:empty { display: none; }
+    .status.is-error { color: var(--error); }
+
+    /* アコーディオン */
+    /* 区切り線は上辺だけ。左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
+    .section {
+      margin: 10px -8px 0;
+      padding: 0 7px;
+      border: 1px solid transparent;
+      border-top-color: var(--line);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方） */
+    .section:has(> .section-toggle[aria-expanded="true"]) {
+      background: var(--accent-open-bg);
+      border-color: var(--accent-open-border);
+      border-radius: 8px;
+    }
+    .section-toggle[aria-expanded="true"],
+    .section-toggle[aria-expanded="true"]:hover { color: var(--accent); }
+    .section-toggle {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      flex: 1;
-      min-width: 110px;
-    }
-
-    .control-panel .control-group.text-group {
-      min-width: 200px;
-      flex: 1.6;
-    }
-
-    .control-panel .control-group.bool-group {
-      flex: 0 0 auto;
-      min-width: auto;
-      flex-direction: row;
       align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 9px 0 7px;
+      background: none;
+      border: none;
+      color: var(--sub);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+    }
+    .section-toggle::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      margin-right: 4px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+      transition: transform 0.2s ease;
+    }
+    .section-toggle[aria-expanded="true"]::after {
+      transform: translateY(2px) rotate(225deg);
+    }
+    .section-toggle:hover { color: var(--text); }
+    .section-body { padding-bottom: 4px; }
+
+    /* 各設定項目 */
+    .field { margin: 8px 0 12px; }
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+    .field-value {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .field.is-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
+    .field.is-row .field-label { margin-bottom: 0; }
 
-    .control-panel .control-group label {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.85);
-      display: flex;
-      justify-content: space-between;
-      white-space: nowrap;
-    }
-
-    .control-panel .control-group label .val {
-      color: #66fcf1;
-      font-family: monospace;
-      font-weight: bold;
-    }
-
-    .control-panel .section-divider {
-      flex-basis: 100%;
-      height: 1px;
-      background: rgba(255, 255, 255, 0.12);
-      margin: 2px 0;
-    }
-
-    .control-panel textarea,
-    .control-panel input[type="text"] {
+    input[type="range"] {
+      display: block;
       width: 100%;
-      padding: 6px 10px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      color: #fff;
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
+      accent-color: var(--accent);
+      cursor: pointer;
     }
-
-    .control-panel textarea {
-      resize: vertical;
-      min-height: 38px;
-      max-height: 90px;
-      line-height: 1.3;
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
     }
-
-    .control-panel textarea:focus,
-    .control-panel input[type="text"]:focus {
-      border-color: #66fcf1;
-    }
-
-    .control-panel select {
+    textarea, select {
       width: 100%;
       padding: 6px 8px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      color: #fff;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      font-family: inherit;
       font-size: 0.8rem;
-      outline: none;
+      transition: border-color 0.2s ease;
+      user-select: text;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 52px;
+      max-height: 120px;
+      line-height: 1.4;
+    }
+    textarea:focus, select:focus { border-color: var(--accent-border); }
+    select option { background: #0f172a; }
+
+    .choice-group { display: flex; gap: 4px; }
+    .choice-group .btn { flex: 1; color: var(--sub); border-color: var(--line); }
+    .choice-group .btn[aria-pressed="true"] {
+      color: var(--accent);
+      border-color: var(--accent-border);
+      background: var(--accent-hover);
     }
 
-    .control-panel input[type="range"] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.2);
-      outline: none;
-    }
-
-    .control-panel input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #66fcf1;
-      cursor: pointer;
-      box-shadow: 0 0 8px rgba(102, 252, 241, 0.6);
-    }
-
-    .control-panel .color-picker-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .control-panel input[type="color"] {
-      -webkit-appearance: none;
-      border: none;
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      cursor: pointer;
-      background: none;
-    }
-
-    .control-panel input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .control-panel input[type="color"]::-webkit-color-swatch {
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
-    }
-
-    /* PC用トグルスイッチ */
-    .control-panel .switch-d {
-      position: relative;
-      display: inline-block;
+    .color-wrap { display: flex; align-items: center; gap: 8px; }
+    input[type="color"] {
       width: 40px;
-      height: 22px;
-      flex-shrink: 0;
-    }
-    .control-panel .switch-d input { opacity: 0; width: 0; height: 0; }
-    .control-panel .switch-d .track {
-      position: absolute; inset: 0;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 20px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .control-panel .switch-d .track::before {
-      content: "";
-      position: absolute;
-      height: 14px; width: 14px;
-      left: 3px; top: 3px;
-      background: #ccc;
-      border-radius: 50%;
-      transition: transform 0.2s, background 0.2s;
-    }
-    .control-panel .switch-d input:checked + .track {
-      background: rgba(102, 252, 241, 0.25);
-      border-color: #66fcf1;
-    }
-    .control-panel .switch-d input:checked + .track::before {
-      transform: translateX(18px);
-      background: #66fcf1;
-      box-shadow: 0 0 6px rgba(102,252,241,0.8);
-    }
-
-    /* PC用 形状トグル（丸／四角／三角） */
-    .control-panel .shape-toggle {
-      display: flex;
-      gap: 4px;
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      padding: 3px;
-    }
-    .control-panel .shape-btn {
-      flex: 1;
+      height: 26px;
+      padding: 0;
       background: none;
-      border: none;
-      color: rgba(255,255,255,0.6);
-      font-size: 0.95rem;
-      padding: 4px 0;
+      border: 1px solid var(--accent-border);
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
     }
-    .control-panel .shape-btn.active {
-      background: rgba(102, 252, 241, 0.18);
-      color: #66fcf1;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+    .color-hex {
+      min-width: 58px;
+      font-size: 0.7rem;
+      color: var(--sub);
+      font-variant-numeric: tabular-nums;
     }
 
-    button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
+    /* パネル非表示中に出す「表示」ボタン */
+    .show-panel-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: var(--panel-bg);
     }
+    .show-panel-btn[hidden] { display: none; }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #45a29e, #66fcf1);
-      color: #0b0c10;
-      box-shadow: 0 4px 12px rgba(102, 252, 241, 0.3);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 252, 241, 0.5); }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
-
-    .btn-danger {
-      background: rgba(255, 75, 75, 0.15);
-      color: #ff6b6b;
-      border: 1px solid rgba(255, 75, 75, 0.3);
-    }
-    .btn-danger:hover { background: rgba(255, 75, 75, 0.3); color: #fff; transform: translateY(-2px); }
-
-    /* PCパネルはスマホ幅では非表示（スマホは専用パネルに切り替え） */
+    /* ===================== スマホ幅（768px以下） ===================== */
     @media (max-width: 768px) {
-      .control-panel { display: none; }
-    }
-
-    /* =======================================================
-       スマホ用パラメータパネル（ParticleMorphingTextに準拠したデザイン）
-       ======================================================= */
-    :root {
-      --m-panel: #121218;
-      --m-surface: #1a1a22;
-      --m-surface-2: #21212b;
-      --m-line: #26262f;
-      --m-line-soft: #1b1b23;
-      --m-ink: #f2f1ee;
-      --m-dim: #74747f;
-      --m-dim-2: #45454f;
-      --m-blue: #a6c8ff;
-      --m-violet: #bd93f9;
-      --m-green: #50fa7b;
-      --m-amber: #ffb86c;
-      --m-red: #ff5555;
-      --m-font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
-    }
-
-    .mobile-control-panel { display: none; }
-
-    @media (max-width: 768px) {
-      .mobile-control-panel {
-        display: block;
-        position: fixed;
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        z-index: 20;
-        max-height: 50vh;
-        background-color: rgba(18, 18, 24, 0.92);
-        border: 1px solid var(--m-line);
-        border-radius: 16px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.03);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        color: var(--m-ink);
-        font-family: var(--m-font-mono);
-        user-select: none;
+      .panel {
+        top: auto;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        width: auto;
+        max-height: 30vh;
       }
-
-      .mobile-control-panel .panel-header {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px 10px;
-        border-bottom: 1px solid var(--m-line);
-        background-color: rgba(18, 18, 24, 0.92);
-        border-radius: 16px 16px 0 0;
-      }
-
-      .mobile-control-panel.is-collapsed .panel-header {
-        border-bottom: none;
-        border-radius: 16px;
-      }
-
-      .mobile-control-panel .panel-header h3 {
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: -0.2px;
-        color: var(--m-ink);
-      }
-
-      .mobile-control-panel .header-eyebrow {
-        display: block;
-        font-size: 0.58rem;
-        letter-spacing: 1.6px;
-        color: var(--m-dim);
-        text-transform: uppercase;
-        margin-bottom: 3px;
-      }
-
-      .mobile-control-panel .toggle-btn {
-        background-color: var(--m-surface);
-        border: 1px solid var(--m-line);
-        color: var(--m-ink);
-        border-radius: 14px;
-        padding: 0 12px;
-        height: 30px;
-        font-family: var(--m-font-mono);
-        font-size: 0.7rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .mobile-control-panel .panel-content {
-        max-height: calc(50vh - 48px);
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 14px 16px 16px;
-      }
-
-      .mobile-control-panel.is-collapsed .panel-content { display: none; }
-
-      .mobile-control-panel .panel-content::-webkit-scrollbar { width: 5px; }
-      .mobile-control-panel .panel-content::-webkit-scrollbar-thumb { background-color: var(--m-line); border-radius: 3px; }
-
-      .mobile-control-panel .control-section { margin-bottom: 16px; }
-      .mobile-control-panel .control-section:last-child { margin-bottom: 0; }
-
-      .mobile-control-panel .section-toggle {
-        all: unset;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        box-sizing: border-box;
-        cursor: pointer;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid var(--m-line-soft);
-      }
-
-      .mobile-control-panel .section-toggle:focus-visible {
-        outline: 2px solid var(--m-blue);
-        outline-offset: 3px;
-        border-radius: 4px;
-      }
-
-      .mobile-control-panel .section-title {
-        font-size: 0.62rem;
-        font-weight: 600;
-        color: var(--m-dim);
-        letter-spacing: 1.8px;
-        text-transform: uppercase;
-      }
-
-      .mobile-control-panel .section-chevron {
-        width: 15px;
-        height: 15px;
-        flex-shrink: 0;
-        margin-left: 8px;
-        color: var(--m-dim);
-        transition: transform 0.2s ease;
-      }
-
-      .mobile-control-panel .control-section:not(.is-collapsed) .section-chevron {
-        transform: rotate(180deg);
-      }
-
-      .mobile-control-panel .control-section.is-collapsed .section-body {
-        display: none;
-      }
-
-      .mobile-control-panel .control-group { margin-bottom: 12px; }
-      .mobile-control-panel .control-group:last-child { margin-bottom: 0; }
-
-      .mobile-control-panel .control-group.inline-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .mobile-control-panel .control-label {
-        font-size: 0.76rem;
-        color: #d6d5d2;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        white-space: nowrap;
-      }
-
-      .mobile-control-panel .control-label::before {
-        content: "";
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: var(--accent, var(--m-dim-2));
-        box-shadow: 0 0 6px var(--accent-glow, transparent);
-        flex-shrink: 0;
-      }
-
-      .mobile-control-panel .c-text, .mobile-control-panel .c-shape { --accent: var(--m-violet); --accent-glow: rgba(189,147,249,0.55); }
-      .mobile-control-panel .c-particle, .mobile-control-panel .c-weight { --accent: var(--m-green); --accent-glow: rgba(80,250,123,0.55); }
-      .mobile-control-panel .c-effect, .mobile-control-panel .c-auto { --accent: var(--m-amber); --accent-glow: rgba(255,184,108,0.55); }
-      .mobile-control-panel .c-glow { --accent: var(--m-blue); --accent-glow: rgba(166,200,255,0.55); }
-      .mobile-control-panel .c-color { --accent: var(--m-red); --accent-glow: rgba(255,85,85,0.55); }
-
-      .mobile-control-panel .range-label {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 7px;
-      }
-
-      .mobile-control-panel .value-badge {
-        background-color: var(--m-surface-2);
-        padding: 2px 9px;
-        border-radius: 8px;
-        font-size: 0.74rem;
-        font-weight: 600;
-        color: var(--accent, var(--m-ink));
-        text-shadow: 0 0 8px var(--accent-glow, transparent);
-      }
-
-      .mobile-control-panel textarea {
-        width: 100%;
-        background-color: var(--m-surface);
-        border: 1px solid var(--m-line);
-        border-radius: 9px;
-        color: var(--m-ink);
-        font-family: var(--m-font-mono);
-        font-size: 0.85rem;
-        padding: 8px 10px;
-        resize: vertical;
-        min-height: 56px;
-        max-height: 110px;
-        outline: none;
-      }
-      .mobile-control-panel textarea:focus {
-        border-color: var(--m-blue);
-        box-shadow: 0 0 0 3px rgba(166,200,255,0.15);
-      }
-
-      .mobile-control-panel select {
-        width: 100%;
-        background-color: var(--m-surface);
-        border: 1px solid var(--m-line);
-        border-radius: 9px;
-        color: var(--m-ink);
-        font-family: var(--m-font-mono);
-        font-size: 0.78rem;
-        padding: 7px 8px;
-        outline: none;
-      }
-
-      .mobile-control-panel input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 18px;
-        background-color: transparent;
-        background-image: radial-gradient(circle, var(--m-line) 1.4px, transparent 1.5px);
-        background-size: 9px 100%;
-        background-repeat: repeat-x;
-        background-position: left center;
-        outline: none;
-        cursor: pointer;
-        touch-action: pan-y;
-      }
-      .mobile-control-panel input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 14px; height: 14px;
-        border-radius: 50%;
-        background: var(--accent, var(--m-blue));
-        border: 2px solid var(--m-panel);
-        box-shadow: 0 0 10px 1px var(--accent-glow, rgba(166,200,255,0.55));
-        cursor: pointer;
-      }
-
-      .mobile-control-panel .switch {
-        position: relative;
-        display: inline-block;
-        width: 44px; height: 24px;
-        flex-shrink: 0;
-      }
-      .mobile-control-panel .switch input { opacity: 0; width: 0; height: 0; }
-      .mobile-control-panel .slider-toggle {
-        position: absolute; cursor: pointer; inset: 0;
-        background-color: var(--m-surface-2);
-        border: 1px solid var(--m-line);
-        border-radius: 30px;
-        transition: background-color 0.25s, border-color 0.25s;
-      }
-      .mobile-control-panel .slider-toggle::before {
-        position: absolute; content: "";
-        height: 16px; width: 16px;
-        left: 3px; bottom: 3px;
-        background-color: var(--m-dim-2);
-        border-radius: 50%;
-        transition: transform 0.25s, background-color 0.25s;
-      }
-      .mobile-control-panel input:checked + .slider-toggle {
-        background-color: rgba(166,200,255,0.15);
-        border-color: var(--m-blue);
-      }
-      .mobile-control-panel input:checked + .slider-toggle::before {
-        transform: translateX(20px);
-        background-color: var(--m-blue);
-        box-shadow: 0 0 10px 2px rgba(166,200,255,0.85);
-      }
-
-      .mobile-control-panel .pattern-toggle-group {
-        display: flex;
-        gap: 6px;
-        background-color: var(--m-surface);
-        border: 1px solid var(--m-line);
-        border-radius: 10px;
-        padding: 3px;
-      }
-      .mobile-control-panel .pattern-btn {
-        flex: 1;
-        background: none;
-        border: none;
-        color: var(--m-dim);
-        font-family: var(--m-font-mono);
-        font-size: 0.85rem;
-        padding: 7px 0;
-        border-radius: 7px;
-        cursor: pointer;
-      }
-      .mobile-control-panel .pattern-btn.active {
-        background-color: rgba(189, 147, 249, 0.15);
-        color: var(--m-violet);
-        box-shadow: 0 0 12px rgba(189, 147, 249, 0.3);
-      }
-
-      .mobile-control-panel .color-swatch-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-      .mobile-control-panel input[type="color"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 46px; height: 28px;
-        border: 1px solid var(--m-line);
-        border-radius: 8px;
-        cursor: pointer;
-        background: none;
-        padding: 0;
-      }
-      .mobile-control-panel input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-      .mobile-control-panel input[type="color"]::-webkit-color-swatch { border: none; border-radius: 7px; }
-
-      .mobile-control-panel .action-row {
-        display: flex;
-        gap: 8px;
-      }
-      .mobile-control-panel .action-btn {
-        flex: 1;
-        border: 1px solid var(--m-line);
-        border-radius: 10px;
-        padding: 10px 4px;
-        font-family: var(--m-font-mono);
-        font-size: 0.74rem;
-        font-weight: 600;
-        cursor: pointer;
-        color: var(--m-ink);
-        background-color: var(--m-surface);
-      }
-      .mobile-control-panel .action-btn.primary {
-        background: linear-gradient(135deg, #45a29e, #66fcf1);
-        color: #0b0c10;
-        border: none;
-      }
-      .mobile-control-panel .action-btn.danger {
-        background-color: rgba(255,85,85,0.15);
-        color: var(--m-red);
-        border-color: rgba(255,85,85,0.3);
-      }
+      .panel.is-hidden { transform: translateY(8px); }
+      .panel-header { cursor: default; }
+      .show-panel-btn { top: auto; bottom: 16px; }
     }
   </style>
 </head>
 <body>
 
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" aria-label="文字の形に集まる粒子のアニメーション"></canvas>
 
-  <!-- ============ PC用コントロールパネル ============ -->
-  <div class="control-panel">
-    <div class="panel-title">
-      <span>Text Assembler</span>
-      <button type="button" class="panel-collapse-btn" id="btnToggleDesktopPanel" title="パネルの表示/非表示">非表示</button>
+  <aside class="panel" id="panel" aria-label="設定パネル">
+    <div class="panel-header" id="panelHeader">
+      <h1>Particle Text Assembler</h1>
+      <button type="button" class="btn" id="btnHidePanel" title="パネルを隠す（Esc）">隠す</button>
     </div>
 
-    <div class="controls-container">
-      <div class="control-group text-group">
-        <label for="textInput">テキスト（Enterで改行）</label>
-        <textarea id="textInput" rows="2" placeholder="テキストを入力...（Enterで改行）">PARTICLE</textarea>
+    <div class="panel-body">
+      <div class="actions">
+        <button type="button" class="btn" id="btnAssemble" title="粒子をランダムな位置から集め直す">再集結</button>
+        <button type="button" class="btn" id="btnDisperse" title="粒子を弾き飛ばす">拡散</button>
+        <button type="button" class="btn is-danger" id="btnReset" title="すべての設定を初期値に戻す">リセット</button>
       </div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
 
-      <div class="control-group">
-        <label for="fontFamily">フォント</label>
-        <select id="fontFamily">
-          <option value="sans-serif">ゴシック体</option>
-          <option value="serif">明朝体</option>
-          <option value="monospace">等幅</option>
-          <option value="cursive">筆記体</option>
-        </select>
-      </div>
+      <!-- 設定項目のセクションは JS（UI の buildPanel）で SETTINGS 定義表から組み立てる -->
+      <div id="settingSections"></div>
 
-      <div class="control-group bool-group">
-        <label for="autoFit">自動フィット</label>
-        <label class="switch-d">
-          <input type="checkbox" id="autoFit" checked>
-          <span class="track"></span>
-        </label>
-      </div>
-
-      <div class="control-group bool-group">
-        <label for="boldToggle">太字</label>
-        <label class="switch-d">
-          <input type="checkbox" id="boldToggle" checked>
-          <span class="track"></span>
-        </label>
-      </div>
-
-      <div class="control-group">
-        <label for="fontScale">サイズ倍率 <span class="val" id="fontScaleVal">1.00</span></label>
-        <input type="range" id="fontScale" min="0.5" max="2" step="0.05" value="1">
-      </div>
-
-      <div class="control-group">
-        <label for="lineSpacing">行間 <span class="val" id="lineSpacingVal">1.20</span></label>
-        <input type="range" id="lineSpacing" min="1" max="2" step="0.05" value="1.2">
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="control-group">
-        <label for="particleSize">粒子サイズ <span class="val" id="sizeVal">2.5</span></label>
-        <input type="range" id="particleSize" min="1" max="6" step="0.5" value="2.5">
-      </div>
-
-      <div class="control-group">
-        <label for="density">密度 <span class="val" id="densityVal">4</span></label>
-        <input type="range" id="density" min="2" max="8" step="1" value="4">
-      </div>
-
-      <div class="control-group">
-        <label for="opacity">不透明度 <span class="val" id="opacityVal">1.00</span></label>
-        <input type="range" id="opacity" min="0.2" max="1" step="0.05" value="1">
-      </div>
-
-      <div class="control-group">
-        <label>粒子の形</label>
-        <div class="shape-toggle">
-          <button type="button" class="shape-btn active" data-shape="circle" id="shapeCircle" title="丸">●</button>
-          <button type="button" class="shape-btn" data-shape="square" id="shapeSquare" title="四角">■</button>
-          <button type="button" class="shape-btn" data-shape="triangle" id="shapeTriangle" title="三角">▲</button>
+      <div class="section">
+        <button type="button" class="section-toggle" aria-expanded="false" aria-controls="sectionStorage">■ 設定の保存</button>
+        <div class="section-body" id="sectionStorage" hidden>
+          <div class="actions">
+            <button type="button" class="btn" id="btnExport">エクスポート</button>
+            <button type="button" class="btn" id="btnImport">インポート</button>
+          </div>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+          <p class="note">設定はこのブラウザに自動で保存されます。別のPCへ移す時やバックアップにはエクスポートを使ってください。</p>
         </div>
       </div>
 
-      <div class="section-divider"></div>
-
-      <div class="control-group">
-        <label for="ease">収束速度 <span class="val" id="easeVal">0.08</span></label>
-        <input type="range" id="ease" min="0.01" max="0.2" step="0.01" value="0.08">
-      </div>
-
-      <div class="control-group">
-        <label for="mouseRadius">反発範囲 <span class="val" id="radiusVal">100</span></label>
-        <input type="range" id="mouseRadius" min="30" max="250" step="10" value="100">
-      </div>
-
-      <div class="control-group">
-        <label for="repulsion">反発力 <span class="val" id="repulsionVal">14</span></label>
-        <input type="range" id="repulsion" min="4" max="40" step="1" value="14">
-      </div>
-
-      <div class="control-group bool-group">
-        <label for="glowEnabled">グロー</label>
-        <label class="switch-d">
-          <input type="checkbox" id="glowEnabled">
-          <span class="track"></span>
-        </label>
-      </div>
-
-      <div class="control-group">
-        <label for="glowStrength">グロー強さ <span class="val" id="glowStrengthVal">8</span></label>
-        <input type="range" id="glowStrength" min="2" max="30" step="1" value="8">
-      </div>
-
-      <div class="section-divider"></div>
-
-      <div class="control-group bool-group">
-        <label for="autoCycle">自動サイクル</label>
-        <label class="switch-d">
-          <input type="checkbox" id="autoCycle">
-          <span class="track"></span>
-        </label>
-      </div>
-
-      <div class="control-group">
-        <label for="autoCycleInterval">サイクル間隔 <span class="val" id="autoCycleIntervalVal">4s</span></label>
-        <input type="range" id="autoCycleInterval" min="1" max="10" step="1" value="4">
-      </div>
-
-      <div class="control-group" style="min-width: auto; flex: 0;">
-        <label for="particleColor">粒子カラー</label>
-        <div class="color-picker-wrapper">
-          <input type="color" id="particleColor" value="#66fcf1">
-          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);" id="colorHex">#66fcf1</span>
-        </div>
-      </div>
-
-      <div class="control-group" style="min-width: auto; flex: 0;">
-        <label for="bgColor">背景カラー</label>
-        <div class="color-picker-wrapper">
-          <input type="color" id="bgColor" value="#0b0c10">
-          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);" id="bgColorHex">#0b0c10</span>
-        </div>
-      </div>
-
-      <div class="btn-group">
-        <button class="btn-primary" id="btnAssemble">再集結</button>
-        <button class="btn-secondary" id="btnDisperse">拡散</button>
-        <button class="btn-danger" id="btnReset">リセット</button>
-      </div>
+      <p class="note">Esc：パネルの表示／非表示（非表示中は画面を3回クリック・タップしても表示できます）</p>
     </div>
-  </div>
+  </aside>
 
-  <!-- ============ スマホ用コントロールパネル ============ -->
-  <div class="mobile-control-panel" id="mobileControlPanel">
-    <div class="panel-header" id="mobilePanelHeader">
-      <div>
-        <span class="header-eyebrow">Text Assembler</span>
-        <h3>◆ パラメータ設定</h3>
-      </div>
-      <button class="toggle-btn" id="mobileToggleBtn">非表示</button>
-    </div>
-
-    <div class="panel-content" id="mobilePanelContent">
-
-      <div class="control-section is-collapsed">
-        <button class="section-toggle" type="button" aria-expanded="false">
-          <span class="section-title">■ テキスト</span>
-          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="section-body">
-
-        <div class="control-group">
-          <span class="control-label c-text">テキスト（Enterで改行）</span>
-          <textarea id="textInputM" rows="3" placeholder="テキストを入力...（Enterで改行）">PARTICLE</textarea>
-        </div>
-
-        <div class="control-group">
-          <span class="control-label c-text">フォント</span>
-          <select id="fontFamilyM">
-            <option value="sans-serif">ゴシック体</option>
-            <option value="serif">明朝体</option>
-            <option value="monospace">等幅</option>
-            <option value="cursive">筆記体</option>
-          </select>
-        </div>
-
-        <div class="control-group inline-row c-text">
-          <span class="control-label">自動フィット（画面に収める）</span>
-          <label class="switch">
-            <input type="checkbox" id="autoFitM" checked>
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group inline-row c-weight">
-          <span class="control-label">太字</span>
-          <label class="switch">
-            <input type="checkbox" id="boldToggleM" checked>
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group c-weight">
-          <div class="range-label">
-            <span class="control-label">サイズ倍率</span>
-            <span class="value-badge" id="fontScaleValM">1.00</span>
-          </div>
-          <input type="range" id="fontScaleM" min="0.5" max="2" step="0.05" value="1">
-        </div>
-
-        <div class="control-group c-weight">
-          <div class="range-label">
-            <span class="control-label">行間</span>
-            <span class="value-badge" id="lineSpacingValM">1.20</span>
-          </div>
-          <input type="range" id="lineSpacingM" min="1" max="2" step="0.05" value="1.2">
-        </div>
-
-        </div>
-      </div>
-
-      <div class="control-section is-collapsed">
-        <button class="section-toggle" type="button" aria-expanded="false">
-          <span class="section-title">■ パーティクル</span>
-          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="section-body">
-
-        <div class="control-group c-particle">
-          <div class="range-label">
-            <span class="control-label">粒子サイズ</span>
-            <span class="value-badge" id="sizeValM">2.5</span>
-          </div>
-          <input type="range" id="particleSizeM" min="1" max="6" step="0.5" value="2.5">
-        </div>
-
-        <div class="control-group c-particle">
-          <div class="range-label">
-            <span class="control-label">密度</span>
-            <span class="value-badge" id="densityValM">4</span>
-          </div>
-          <input type="range" id="densityM" min="2" max="8" step="1" value="4">
-        </div>
-
-        <div class="control-group c-particle">
-          <div class="range-label">
-            <span class="control-label">不透明度</span>
-            <span class="value-badge" id="opacityValM">1.00</span>
-          </div>
-          <input type="range" id="opacityM" min="0.2" max="1" step="0.05" value="1">
-        </div>
-
-        <div class="control-group c-shape">
-          <div class="range-label"><span class="control-label">粒子の形</span></div>
-          <div class="pattern-toggle-group">
-            <button type="button" class="pattern-btn active" data-shape="circle" id="shapeCircleM">丸</button>
-            <button type="button" class="pattern-btn" data-shape="square" id="shapeSquareM">四角</button>
-            <button type="button" class="pattern-btn" data-shape="triangle" id="shapeTriangleM">三角</button>
-          </div>
-        </div>
-
-        </div>
-      </div>
-
-      <div class="control-section is-collapsed">
-        <button class="section-toggle" type="button" aria-expanded="false">
-          <span class="section-title">■ エフェクト</span>
-          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="section-body">
-
-        <div class="control-group c-effect">
-          <div class="range-label">
-            <span class="control-label">収束速度</span>
-            <span class="value-badge" id="easeValM">0.08</span>
-          </div>
-          <input type="range" id="easeM" min="0.01" max="0.2" step="0.01" value="0.08">
-        </div>
-
-        <div class="control-group c-effect">
-          <div class="range-label">
-            <span class="control-label">反発範囲</span>
-            <span class="value-badge" id="radiusValM">100</span>
-          </div>
-          <input type="range" id="mouseRadiusM" min="30" max="250" step="10" value="100">
-        </div>
-
-        <div class="control-group c-effect">
-          <div class="range-label">
-            <span class="control-label">反発力</span>
-            <span class="value-badge" id="repulsionValM">14</span>
-          </div>
-          <input type="range" id="repulsionM" min="4" max="40" step="1" value="14">
-        </div>
-
-        <div class="control-group inline-row c-glow">
-          <span class="control-label">グロー</span>
-          <label class="switch">
-            <input type="checkbox" id="glowEnabledM">
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group c-glow">
-          <div class="range-label">
-            <span class="control-label">グロー強さ</span>
-            <span class="value-badge" id="glowStrengthValM">8</span>
-          </div>
-          <input type="range" id="glowStrengthM" min="2" max="30" step="1" value="8">
-        </div>
-
-        <div class="control-group inline-row c-auto">
-          <span class="control-label">自動サイクル</span>
-          <label class="switch">
-            <input type="checkbox" id="autoCycleM">
-            <span class="slider-toggle"></span>
-          </label>
-        </div>
-
-        <div class="control-group c-auto">
-          <div class="range-label">
-            <span class="control-label">サイクル間隔</span>
-            <span class="value-badge" id="autoCycleIntervalValM">4s</span>
-          </div>
-          <input type="range" id="autoCycleIntervalM" min="1" max="10" step="1" value="4">
-        </div>
-
-        </div>
-      </div>
-
-      <div class="control-section is-collapsed">
-        <button class="section-toggle" type="button" aria-expanded="false">
-          <span class="section-title">■ カラー</span>
-          <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="section-body">
-
-        <div class="control-group color-swatch-row c-color">
-          <span class="control-label">粒子カラー</span>
-          <input type="color" id="particleColorM" value="#66fcf1">
-        </div>
-
-        <div class="control-group color-swatch-row c-color">
-          <span class="control-label">背景カラー</span>
-          <input type="color" id="bgColorM" value="#0b0c10">
-        </div>
-
-        </div>
-      </div>
-
-      <div class="control-section">
-        <div class="action-row">
-          <button class="action-btn primary" id="btnAssembleM">再集結</button>
-          <button class="action-btn" id="btnDisperseM">拡散</button>
-          <button class="action-btn danger" id="btnResetM">リセット</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  <button type="button" class="btn show-panel-btn" id="btnShowPanel" title="パネルを表示（Esc）" hidden>設定</button>
 
   <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+  'use strict';
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+  /* =====================================================================
+     CONFIG（固定値と設定項目の定義）
+     ===================================================================== */
+  const APP_NAME = 'ParticleTextAssembler';
+  const DATA_VERSION = 1;
+  const STORAGE_KEY = `${APP_NAME}:v${DATA_VERSION}:settings`;
 
-    function isMobileView() {
-      return window.matchMedia('(max-width: 768px)').matches;
+  const SAVE_DELAY_MS = 300;      // 操作が止まってから自動保存するまでの時間
+  const STATUS_MS = 4000;         // 状態メッセージを消すまでの時間
+  const MAX_PARTICLES = 30000;    // 粒子数の上限（超える時は間隔を自動で広げる）
+  const MAX_TEXT_LENGTH = 500;    // テキストの最大文字数
+  const SCATTER_MS = 900;         // 自動サイクルで散らばっている時間
+  const FRICTION = 0.86;          // 1コマ（60fps換算）ごとの減速率
+  const FRAME_MS = 1000 / 60;     // 速さの基準（60fpsの1コマ）
+  const MAX_FRAME_STEP = 3;       // 1回の描画で進める最大コマ数（タブ復帰時の暴走防止）
+  const SPRITE_CACHE_MAX = 40;    // 「粒子の画像」を覚えておく最大数
+  const MOBILE_QUERY = '(max-width: 768px)';
+
+  const SECTIONS = [
+    { id: 'text', title: 'テキスト' },
+    { id: 'particle', title: 'パーティクル' },
+    { id: 'effect', title: 'エフェクト' },
+    { id: 'color', title: 'カラー' },
+  ];
+
+  /*
+   * 設定項目の定義表。パネルの部品・初期値・読み込み時の検査はすべてこの表から作る。
+   * layout: true の項目は、変更すると文字の形（粒子の目標位置）を計算し直す。
+   */
+  const SETTINGS = [
+    { key: 'text', section: 'text', type: 'text', label: 'テキスト（Enterで改行）', def: 'PARTICLE', maxLength: MAX_TEXT_LENGTH, layout: true },
+    { key: 'fontFamily', section: 'text', type: 'select', label: 'フォント', def: 'sans-serif', layout: true,
+      options: [['sans-serif', 'ゴシック体'], ['serif', '明朝体'], ['monospace', '等幅'], ['cursive', '筆記体']] },
+    { key: 'autoFit', section: 'text', type: 'bool', label: '自動フィット（画面に収める）', def: true, layout: true },
+    { key: 'bold', section: 'text', type: 'bool', label: '太字', def: true, layout: true },
+    { key: 'fontScale', section: 'text', type: 'range', label: 'サイズ倍率', min: 0.5, max: 2, step: 0.05, def: 1, layout: true,
+      format: (v) => `${v.toFixed(2)}倍` },
+    { key: 'lineSpacing', section: 'text', type: 'range', label: '行間', min: 1, max: 2, step: 0.05, def: 1.2, layout: true,
+      format: (v) => `${v.toFixed(2)}倍` },
+
+    { key: 'size', section: 'particle', type: 'range', label: '粒子サイズ', min: 1, max: 6, step: 0.5, def: 2.5,
+      format: (v) => `${v.toFixed(1)}px` },
+    { key: 'density', section: 'particle', type: 'range', label: '密度（粒子の間隔）', min: 2, max: 8, step: 1, def: 4, layout: true,
+      format: (v) => `${v}px` },
+    { key: 'opacity', section: 'particle', type: 'range', label: '不透明度', min: 0.2, max: 1, step: 0.05, def: 1,
+      format: (v) => `${Math.round(v * 100)}%` },
+    { key: 'shape', section: 'particle', type: 'choice', label: '粒子の形', def: 'circle',
+      options: [['circle', '● 丸'], ['square', '■ 四角'], ['triangle', '▲ 三角']] },
+
+    { key: 'ease', section: 'effect', type: 'range', label: '収束速度', min: 0.01, max: 0.2, step: 0.01, def: 0.08,
+      format: (v) => v.toFixed(2) },
+    { key: 'mouseRadius', section: 'effect', type: 'range', label: '反発範囲', min: 30, max: 250, step: 10, def: 100,
+      format: (v) => `${v}px` },
+    { key: 'repulsion', section: 'effect', type: 'range', label: '反発力', min: 4, max: 40, step: 1, def: 14,
+      format: (v) => String(v) },
+    { key: 'glowEnabled', section: 'effect', type: 'bool', label: 'グロー（光彩）', def: false },
+    { key: 'glowStrength', section: 'effect', type: 'range', label: 'グロー強さ', min: 2, max: 30, step: 1, def: 8,
+      format: (v) => `${v}px` },
+    { key: 'autoCycle', section: 'effect', type: 'bool', label: '自動サイクル（拡散→再集結）', def: false },
+    { key: 'autoCycleInterval', section: 'effect', type: 'range', label: 'サイクル間隔', min: 1, max: 10, step: 1, def: 4,
+      format: (v) => `${v}秒` },
+
+    { key: 'color', section: 'color', type: 'color', label: '粒子カラー', def: '#66fcf1' },
+    { key: 'bgColor', section: 'color', type: 'color', label: '背景カラー', def: '#0b0c10' },
+  ];
+  const SETTING_MAP = new Map(SETTINGS.map((s) => [s.key, s]));
+
+  /* =====================================================================
+     STATE（実行中に変わる値）
+     ===================================================================== */
+  const config = createDefaultConfig();
+
+  const state = {
+    width: 0,              // 画面の幅（CSSピクセル）
+    height: 0,
+    dpr: 1,                // 画面の拡大率（devicePixelRatio）
+    particles: [],         // { x, y, vx, vy, hx, hy, sx, sy }  hx/hy=文字上の位置, sx/sy=散らばる先
+    scattered: false,      // 自動サイクルで散らばっている最中か
+    pointer: { x: 0, y: 0, active: false },
+    pending: { resize: true, layout: null },  // 次のコマでまとめて行う処理（layout: 'morph' | 'assemble'）
+    lastFrame: 0,
+    cappedStep: null,      // 上限のため広げた間隔（メッセージの重複表示を防ぐ）
+    cycleTimer: null,
+    saveTimer: null,
+    statusTimer: null,
+    panelHidden: false,
+    tapTimes: [],
+    drag: null,
+  };
+
+  const spriteCache = new Map();
+
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const offCanvas = document.createElement('canvas');                 // 文字を描いて形を読み取る作業用
+  const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+  const mobileMedia = window.matchMedia(MOBILE_QUERY);
+
+  /* =====================================================================
+     STORAGE（保存・読み込み・検査）
+     ===================================================================== */
+  function createDefaultConfig() {
+    const c = {};
+    for (const s of SETTINGS) c[s.key] = s.def;
+    return c;
+  }
+
+  /** 1項目の値を検査し、使えない値は初期値に、範囲外は範囲内に直して返す */
+  function sanitizeValue(def, value) {
+    switch (def.type) {
+      case 'range': {
+        const n = typeof value === 'number' ? value
+          : (typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN);
+        if (!Number.isFinite(n)) return def.def;
+        const clamped = Math.min(def.max, Math.max(def.min, n));
+        const snapped = def.min + Math.round((clamped - def.min) / def.step) * def.step;
+        return Number(Math.min(def.max, snapped).toFixed(6));
+      }
+      case 'bool':
+        return typeof value === 'boolean' ? value : def.def;
+      case 'select':
+      case 'choice':
+        return def.options.some(([v]) => v === value) ? value : def.def;
+      case 'color':
+        return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : def.def;
+      case 'text':
+        return typeof value === 'string' ? value.slice(0, def.maxLength) : def.def;
+      default:
+        return def.def;
     }
+  }
 
-    // ===== デフォルト設定値（リセット用） =====
-    const DEFAULT_CONFIG = {
-      text: 'PARTICLE',
-      fontFamily: 'sans-serif',
-      bold: true,
-      autoFit: true,
-      fontScale: 1,
-      lineSpacing: 1.2,
-      size: 2.5,
-      density: 4,
-      ease: 0.08,
-      shape: 'circle',
-      opacity: 1,
-      color: '#66fcf1',
-      bgColor: '#0b0c10',
-      mouseRadius: 100,
-      repulsion: 14,
-      glowEnabled: false,
-      glowStrength: 8,
-      autoCycle: false,
-      autoCycleInterval: 4
-    };
+  /** 設定オブジェクト全体を検査する。fixed は「直した項目があったか」 */
+  function sanitizeConfig(src) {
+    const out = createDefaultConfig();
+    let fixed = false;
+    const obj = src && typeof src === 'object' && !Array.isArray(src) ? src : null;
+    if (!obj) return { config: out, fixed: true };
+    for (const s of SETTINGS) {
+      if (!Object.hasOwn(obj, s.key)) { fixed = true; continue; }
+      const v = sanitizeValue(s, obj[s.key]);
+      if (v !== obj[s.key]) fixed = true;
+      out[s.key] = v;
+    }
+    return { config: out, fixed };
+  }
 
-    const config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  function loadSettings() {
+    let raw;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch (err) {
+      return { config: createDefaultConfig(), message: 'ブラウザの保存領域を読めなかったため、初期値で起動しました', error: true };
+    }
+    if (raw === null) return { config: createDefaultConfig() };
+    try {
+      const data = JSON.parse(raw);
+      const { config: loaded, fixed } = sanitizeConfig(data && data.config);
+      return { config: loaded, message: fixed ? '保存データの一部を初期値・範囲内の値に直しました' : null };
+    } catch (err) {
+      return { config: createDefaultConfig(), message: '保存データが壊れていたため、初期値で起動しました', error: true };
+    }
+  }
 
-    // マウス／タッチ位置管理
-    const mouse = { x: null, y: null, radius: config.mouseRadius };
-    const updateMousePos = (x, y) => { mouse.x = x; mouse.y = y; };
-    window.addEventListener('mousemove', (e) => updateMousePos(e.x, e.y));
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) updateMousePos(e.touches[0].clientX, e.touches[0].clientY);
-    });
-    const resetMouse = () => { mouse.x = null; mouse.y = null; };
-    window.addEventListener('mouseleave', resetMouse);
-    window.addEventListener('touchend', resetMouse);
+  function saveNow() {
+    clearTimeout(state.saveTimer);
+    state.saveTimer = null;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: DATA_VERSION, config }));
+    } catch (err) {
+      showStatus('設定を保存できませんでした（ブラウザの保存領域を確認してください）', true);
+    }
+  }
 
-    let particles = [];
-    let autoCycleTimer = null;
+  function scheduleSave() {
+    clearTimeout(state.saveTimer);
+    state.saveTimer = setTimeout(saveNow, SAVE_DELAY_MS);
+  }
 
-    // ===== パーティクルクラス =====
-    class Particle {
-      constructor(x, y, originX, originY) {
-        this.x = x;
-        this.y = y;
-        this.originX = originX;
-        this.originY = originY;
-        this.vx = (Math.random() - 0.5) * 10;
-        this.vy = (Math.random() - 0.5) * 10;
-        this.friction = 0.86;
-        this.ease = config.ease;
-        this.size = config.size;
-        this.color = config.color;
-        this.shape = config.shape;
-        this.repulsion = config.repulsion;
+  /** 保存待ちがあればすぐ書き込む（ページを離れる時など） */
+  function flushSave() {
+    if (state.saveTimer !== null) saveNow();
+  }
+
+  function dateStamp() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  function exportSettings() {
+    flushSave();
+    const data = { app: APP_NAME, version: DATA_VERSION, exportedAt: new Date().toISOString(), config: { ...config } };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `particle-text-assembler-${dateStamp()}.json`;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showStatus('設定をエクスポートしました');
+  }
+
+  async function importSettingsFile(file) {
+    try {
+      if (file.size > 1024 * 1024) throw new Error('ファイルが大きすぎます');
+      const data = JSON.parse(await file.text());
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('ファイルの形式が違います');
+      if (data.app !== undefined && data.app !== APP_NAME) throw new Error(`別のアプリ（${String(data.app)}）のファイルです`);
+      // 通常は { app, version, exportedAt, config } 形式。設定だけを書いたファイルも受け付ける
+      const src = data.config !== undefined ? data.config : data;
+      if (!src || typeof src !== 'object' || Array.isArray(src) || !SETTINGS.some((s) => Object.hasOwn(src, s.key))) {
+        throw new Error('設定項目が見つかりません');
       }
+      const { config: next, fixed } = sanitizeConfig(src);
+      Object.assign(config, next);
+      applyAllSettings('assemble');
+      saveNow();
+      showStatus(fixed ? '読み込みました（使えない値は初期値・範囲内の値に直しました）' : '設定を読み込みました');
+    } catch (err) {
+      const reason = err instanceof SyntaxError ? 'JSONの形式が正しくありません' : err.message;
+      showStatus(`読み込めませんでした：${reason}`, true);
+    }
+  }
 
-      draw() {
-        ctx.fillStyle = this.color;
-        if (this.shape === 'square') {
-          const s = this.size * 1.9;
-          ctx.fillRect(this.x - s / 2, this.y - s / 2, s, s);
-        } else if (this.shape === 'triangle') {
-          const s = this.size * 2.1;
-          ctx.beginPath();
-          ctx.moveTo(this.x, this.y - s * 0.6);
-          ctx.lineTo(this.x - s * 0.55, this.y + s * 0.45);
-          ctx.lineTo(this.x + s * 0.55, this.y + s * 0.45);
-          ctx.closePath();
-          ctx.fill();
-        } else {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.fill();
-        }
-      }
+  /* =====================================================================
+     LOGIC（文字の形の計算・粒子の動き・描画・自動サイクル）
+     ===================================================================== */
+  const TAU = Math.PI * 2;
 
-      update() {
-        if (mouse.x !== null && mouse.y !== null) {
-          const dx = mouse.x - this.x;
-          const dy = mouse.y - this.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < mouse.radius) {
-            const angle = Math.atan2(dy, dx);
-            const force = (mouse.radius - distance) / mouse.radius;
-            const push = force * this.repulsion;
-            this.vx -= Math.cos(angle) * push;
-            this.vy -= Math.sin(angle) * push;
-          }
-        }
+  function isMobileView() {
+    return mobileMedia.matches;
+  }
 
-        const dxOrigin = this.originX - this.x;
-        const dyOrigin = this.originY - this.y;
-        this.vx += dxOrigin * this.ease;
-        this.vy += dyOrigin * this.ease;
-        this.vx *= this.friction;
-        this.vy *= this.friction;
-        this.x += this.vx;
-        this.y += this.vy;
-      }
-
-      disperse() {
-        this.vx = (Math.random() - 0.5) * 50;
-        this.vy = (Math.random() - 0.5) * 50;
+  // ----- 文字列の折り返し（自動改行） -----
+  function splitByChar(measureCtx, text, maxWidth) {
+    const lines = [];
+    let current = '';
+    for (const ch of text) {
+      const test = current + ch;
+      if (measureCtx.measureText(test).width > maxWidth && current) {
+        lines.push(current);
+        current = ch;
+      } else {
+        current = test;
       }
     }
+    if (current) lines.push(current);
+    return lines.length ? lines : [text];
+  }
 
-    // ===== 文字列の折り返し（自動改行） =====
-    function splitByChar(measureCtx, text, maxWidth) {
+  function wrapLine(measureCtx, text, maxWidth) {
+    if (measureCtx.measureText(text).width <= maxWidth) return [text];
+    const words = text.split(' ');
+    if (words.length > 1) {
       const lines = [];
       let current = '';
-      for (const ch of text) {
-        const test = current + ch;
+      for (const w of words) {
+        const test = current ? `${current} ${w}` : w;
         if (measureCtx.measureText(test).width > maxWidth && current) {
           lines.push(current);
-          current = ch;
+          current = w;
         } else {
           current = test;
         }
       }
       if (current) lines.push(current);
-      return lines.length ? lines : [text];
+      return lines.flatMap((l) => (measureCtx.measureText(l).width > maxWidth ? splitByChar(measureCtx, l, maxWidth) : [l]));
     }
+    return splitByChar(measureCtx, text, maxWidth);
+  }
 
-    function wrapLine(measureCtx, text, maxWidth) {
-      if (measureCtx.measureText(text).width <= maxWidth) return [text];
-      const words = text.split(' ');
-      if (words.length > 1) {
-        const lines = [];
-        let current = '';
-        for (const w of words) {
-          const test = current ? current + ' ' + w : w;
-          if (measureCtx.measureText(test).width > maxWidth && current) {
-            lines.push(current);
-            current = w;
-          } else {
-            current = test;
+  function fontString(fontSize) {
+    return `${config.bold ? 'bold ' : ''}${fontSize}px ${config.fontFamily}`;
+  }
+
+  // ----- 折り返し・自動フィットを考慮したフォントサイズ計算 -----
+  function computeFitLayout(measureCtx, rawLines, maxWidth, maxHeight) {
+    const { lineSpacing, autoFit } = config;
+    let fontSize = Math.max(Math.min(maxHeight / Math.max(rawLines.length, 1) * 0.8, maxWidth * 0.3), 10);
+    let lines = rawLines.slice();
+
+    const buildLines = (fs) => {
+      measureCtx.font = fontString(fs);
+      if (!autoFit) return rawLines.slice();
+      const out = [];
+      for (const rl of rawLines) {
+        if (rl.trim() === '') { out.push(''); continue; }
+        out.push(...wrapLine(measureCtx, rl, maxWidth));
+      }
+      return out;
+    };
+
+    for (let i = 0; i < 60; i++) {
+      lines = buildLines(fontSize);
+      const totalHeight = fontSize * lineSpacing * lines.length;
+      let maxLineWidth = 0;
+      for (const l of lines) maxLineWidth = Math.max(maxLineWidth, measureCtx.measureText(l).width);
+      if ((!autoFit || maxLineWidth <= maxWidth) && totalHeight <= maxHeight) break;
+      fontSize *= 0.94;
+      if (fontSize < 8) { fontSize = 8; lines = buildLines(fontSize); break; }
+    }
+    return { fontSize, lines };
+  }
+
+  /**
+   * テキストを作業用Canvasに描き、粒子を置く位置を [x0, y0, x1, y1, ...] で返す。
+   * 文字の周りの範囲だけピクセルを読み取る（結果は画面全体を読む方式と同じ）。
+   */
+  function computeTargetPoints() {
+    const W = state.width;
+    const H = state.height;
+    const empty = { points: [], step: config.density };
+    const rawLines = config.text.split('\n');
+    if (!rawLines.some((l) => l.trim().length > 0) || W <= 0 || H <= 0) return empty;
+
+    if (offCanvas.width !== W) offCanvas.width = W;
+    if (offCanvas.height !== H) offCanvas.height = H;
+    offCtx.clearRect(0, 0, W, H);
+
+    const mobile = isMobileView();
+    const marginX = mobile ? 20 : 60;
+    const maxWidth = Math.max(W - marginX * 2, 40);
+    const maxHeight = Math.max(H * (mobile ? 0.58 : 0.7), 60);
+    const verticalShift = mobile ? H * 0.10 : 0;  // スマホ幅は下部パネルを避けて少し上へ
+
+    const scale = Math.max(config.fontScale, 0.05);
+    const fit = computeFitLayout(offCtx, rawLines, maxWidth / scale, maxHeight / scale);
+    const fontSize = fit.fontSize * scale;
+    const lines = fit.lines;
+
+    offCtx.fillStyle = '#ffffff';
+    offCtx.font = fontString(fontSize);
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+
+    const lineHeight = fontSize * config.lineSpacing;
+    const startY = H / 2 - verticalShift - (lineHeight * lines.length) / 2 + lineHeight / 2;
+    const cx = W / 2;
+
+    // 描きながら、文字が占める範囲（外枠）を求める
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    lines.forEach((line, i) => {
+      if (!line) return;
+      const y = startY + i * lineHeight;
+      offCtx.fillText(line, cx, y);
+      const m = offCtx.measureText(line);
+      minX = Math.min(minX, cx - m.actualBoundingBoxLeft);
+      maxX = Math.max(maxX, cx + m.actualBoundingBoxRight);
+      minY = Math.min(minY, y - m.actualBoundingBoxAscent);
+      maxY = Math.max(maxY, y + m.actualBoundingBoxDescent);
+    });
+    if (!Number.isFinite(minX)) return empty;
+
+    const PAD = 4;
+    const x0 = Math.max(0, Math.floor(minX) - PAD);
+    const y0 = Math.max(0, Math.floor(minY) - PAD);
+    const x1 = Math.min(W, Math.ceil(maxX) + PAD);
+    const y1 = Math.min(H, Math.ceil(maxY) + PAD);
+    if (x1 <= x0 || y1 <= y0) return empty;
+
+    const rw = x1 - x0;
+    const data = offCtx.getImageData(x0, y0, rw, y1 - y0).data;
+
+    // 画面の左上(0,0)から step 間隔の格子で、文字の上にある点を拾う
+    const scan = (step, onHit) => {
+      let count = 0;
+      for (let y = Math.ceil(y0 / step) * step; y < y1; y += step) {
+        const rowBase = (y - y0) * rw;
+        for (let x = Math.ceil(x0 / step) * step; x < x1; x += step) {
+          if (data[(rowBase + (x - x0)) * 4 + 3] > 128) {
+            count++;
+            if (onHit) onHit(x, y);
           }
         }
-        if (current) lines.push(current);
-        return lines.flatMap(l => measureCtx.measureText(l).width > maxWidth ? splitByChar(measureCtx, l, maxWidth) : [l]);
       }
-      return splitByChar(measureCtx, text, maxWidth);
+      return count;
+    };
+
+    // 粒子数が上限を超える場合は、間隔を1pxずつ広げる
+    let step = config.density;
+    while (scan(step) > MAX_PARTICLES) step++;
+
+    const points = [];
+    scan(step, (x, y) => points.push(x, y));
+    return { points, step };
+  }
+
+  function makeParticle(x, y, hx, hy, speed) {
+    return {
+      x, y,
+      vx: (Math.random() - 0.5) * speed,
+      vy: (Math.random() - 0.5) * speed,
+      hx, hy,
+      sx: Math.random() * state.width,
+      sy: Math.random() * state.height,
+    };
+  }
+
+  /** 全粒子をランダムな位置から新しく作り、文字の形へ集める（再集結） */
+  function assembleTo(points) {
+    const next = new Array(points.length / 2);
+    for (let j = 0; j < next.length; j++) {
+      next[j] = makeParticle(Math.random() * state.width, Math.random() * state.height, points[j * 2], points[j * 2 + 1], 10);
     }
+    state.particles = next;
+  }
 
-    // ===== 折り返し・自動フィットを考慮したフォントサイズ計算 =====
-    function computeFitLayout(measureCtx, rawLines, maxWidth, maxHeight, lineSpacing, autoFit, fontFamily, bold) {
-      const weightStr = bold ? 'bold ' : '';
-      let fontSize = Math.min(maxHeight / Math.max(rawLines.length, 1) * 0.8, maxWidth * 0.3);
-      fontSize = Math.max(fontSize, 10);
-      let lines = rawLines.slice();
+  /**
+   * 今ある粒子を使い回して、新しい文字の形へ移動させる。
+   * 足りない分は近くの粒子の位置から追加し、余った分は間引く（形全体に均等に割り当てる）。
+   */
+  function morphTo(points) {
+    const old = state.particles;
+    const m = old.length;
+    const n = points.length / 2;
+    if (m === 0) { assembleTo(points); return; }
 
-      const buildLines = (fs) => {
-        measureCtx.font = `${weightStr}${fs}px ${fontFamily}`;
-        if (!autoFit) return rawLines.slice();
-        const out = [];
-        rawLines.forEach(rl => {
-          if (rl.trim() === '') { out.push(''); return; }
-          out.push(...wrapLine(measureCtx, rl, maxWidth));
+    const next = new Array(n);
+    let lastSrc = -1;
+    for (let j = 0; j < n; j++) {
+      const src = Math.floor((j * m) / n);
+      const hx = points[j * 2];
+      const hy = points[j * 2 + 1];
+      if (src !== lastSrc) {
+        const p = old[src];
+        p.hx = hx;
+        p.hy = hy;
+        next[j] = p;
+      } else {
+        next[j] = makeParticle(old[src].x, old[src].y, hx, hy, 10);
+      }
+      lastSrc = src;
+    }
+    state.particles = next;
+  }
+
+  function runLayout(mode) {
+    const { points, step } = computeTargetPoints();
+    if (mode === 'assemble') assembleTo(points);
+    else morphTo(points);
+
+    // 上限で間隔を広げた時だけ知らせる（同じ内容は繰り返さない）
+    if (step !== config.density) {
+      if (state.cappedStep !== step) {
+        showStatus(`粒子が上限（${MAX_PARTICLES.toLocaleString()}個）を超えるため、間隔を ${step}px に広げて表示しています`);
+      }
+      state.cappedStep = step;
+    } else {
+      state.cappedStep = null;
+    }
+  }
+
+  /** 文字の形の再計算を予約する（次のコマで1回だけ行う）。'assemble' は 'morph' より優先 */
+  function requestLayout(mode) {
+    if (state.pending.layout !== 'assemble') state.pending.layout = mode;
+  }
+
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    state.width = window.innerWidth;
+    state.height = window.innerHeight;
+    canvas.width = Math.round(state.width * dpr);
+    canvas.height = Math.round(state.height * dpr);
+    if (dpr !== state.dpr) spriteCache.clear();
+    state.dpr = dpr;
+  }
+
+  // ----- 粒子の動き（60fpsを基準に、前のコマからの経過時間で補正） -----
+  function updateParticles(k) {
+    const ps = state.particles;
+    if (!ps.length) return;
+    const ease = config.ease * k;
+    const friction = Math.pow(FRICTION, k);
+    const { x: px, y: py, active } = state.pointer;
+    const radius = config.mouseRadius;
+    const radius2 = radius * radius;
+    const repulsion = config.repulsion * k;
+    const scattered = state.scattered;
+
+    for (let i = 0; i < ps.length; i++) {
+      const p = ps[i];
+      if (active) {
+        const dx = px - p.x;
+        const dy = py - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < radius2 && d2 > 0) {
+          const d = Math.sqrt(d2);
+          const push = ((radius - d) / radius) * repulsion;
+          p.vx -= (dx / d) * push;
+          p.vy -= (dy / d) * push;
+        }
+      }
+      const tx = scattered ? p.sx : p.hx;
+      const ty = scattered ? p.sy : p.hy;
+      p.vx = (p.vx + (tx - p.x) * ease) * friction;
+      p.vy = (p.vy + (ty - p.y) * ease) * friction;
+      p.x += p.vx * k;
+      p.y += p.vy * k;
+    }
+  }
+
+  // ----- 描画 -----
+  /** 1粒分の形をパスに追加する（塗りは呼び出し側で行う） */
+  function addShapePath(g, shape, x, y, size) {
+    if (shape === 'square') {
+      const s = size * 1.9;
+      g.rect(x - s / 2, y - s / 2, s, s);
+    } else if (shape === 'triangle') {
+      const s = size * 2.1;
+      g.moveTo(x, y - s * 0.6);
+      g.lineTo(x - s * 0.55, y + s * 0.45);
+      g.lineTo(x + s * 0.55, y + s * 0.45);
+      g.closePath();
+    } else {
+      g.moveTo(x + size, y);
+      g.arc(x, y, size, 0, TAU);
+    }
+  }
+
+  /** 「粒子の画像」（グロー込み）を作って覚えておく */
+  function getSprite() {
+    const { shape, size, color } = config;
+    const glow = config.glowEnabled ? config.glowStrength : 0;
+    const dpr = state.dpr;
+    const key = `${shape}|${size}|${color}|${glow}|${dpr}`;
+    const cached = spriteCache.get(key);
+    if (cached) return cached;
+
+    const extent = shape === 'square' ? size * 0.95 : shape === 'triangle' ? size * 2.1 * 0.6 : size;
+    const half = Math.ceil(extent + (glow > 0 ? glow * 1.5 + 2 : 1));
+    const c = document.createElement('canvas');
+    c.width = c.height = Math.ceil(half * 2 * dpr);
+    const g = c.getContext('2d');
+    g.scale(dpr, dpr);
+    g.fillStyle = color;
+    if (glow > 0) {
+      g.shadowBlur = glow * dpr;   // shadowBlur は拡大率の影響を受けないため、ここで掛ける
+      g.shadowColor = color;
+    }
+    g.beginPath();
+    addShapePath(g, shape, half, half, size);
+    g.fill();
+
+    const sprite = { canvas: c, half };
+    spriteCache.set(key, sprite);
+    if (spriteCache.size > SPRITE_CACHE_MAX) spriteCache.delete(spriteCache.keys().next().value);
+    return sprite;
+  }
+
+  function drawParticles() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const ps = state.particles;
+    if (!ps.length) return;
+
+    ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+    ctx.globalAlpha = config.opacity;
+
+    if (config.glowEnabled) {
+      // グローあり：粒子ごとに光彩を計算せず、作っておいた「光る粒子の画像」を貼る。
+      // 拡大・縮小なしで画面の画素に合わせて貼ると速い
+      const { canvas: img, half } = getSprite();
+      const dpr = state.dpr;
+      const offset = half * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      for (let i = 0; i < ps.length; i++) {
+        ctx.drawImage(img, Math.round(ps[i].x * dpr - offset), Math.round(ps[i].y * dpr - offset));
+      }
+    } else {
+      // 通常：1粒ずつ塗る（従来と同じ方式。重なった部分の濃さも従来どおり）
+      const { shape, size } = config;
+      ctx.fillStyle = config.color;
+      for (let i = 0; i < ps.length; i++) {
+        ctx.beginPath();
+        addShapePath(ctx, shape, ps[i].x, ps[i].y, size);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function frame(now) {
+    const dt = Math.min(Math.max(now - state.lastFrame, 0), FRAME_MS * MAX_FRAME_STEP);
+    state.lastFrame = now;
+
+    if (state.pending.resize) {
+      state.pending.resize = false;
+      resizeCanvas();
+    }
+    if (state.pending.layout) {
+      const mode = state.pending.layout;
+      state.pending.layout = null;
+      runLayout(mode);
+    }
+    updateParticles(dt / FRAME_MS);
+    drawParticles();
+    requestAnimationFrame(frame);
+  }
+
+  // ----- 拡散・自動サイクル -----
+  function disperseAll() {
+    for (const p of state.particles) {
+      p.vx = (Math.random() - 0.5) * 50;
+      p.vy = (Math.random() - 0.5) * 50;
+    }
+  }
+
+  /** 自動サイクルの「拡散」：画面のあちこちへ散らばらせる */
+  function scatterAll() {
+    for (const p of state.particles) {
+      p.sx = Math.random() * state.width;
+      p.sy = Math.random() * state.height;
+    }
+    disperseAll();
+    state.scattered = true;
+  }
+
+  function stopAutoCycle() {
+    clearTimeout(state.cycleTimer);
+    state.cycleTimer = null;
+    state.scattered = false;
+  }
+
+  /** 拡散（0.9秒）→ 今いる位置から再集結 → 「サイクル間隔」秒待つ、を繰り返す */
+  function runCycle() {
+    scatterAll();
+    state.cycleTimer = setTimeout(() => {
+      state.scattered = false;
+      state.cycleTimer = setTimeout(runCycle, config.autoCycleInterval * 1000);
+    }, SCATTER_MS);
+  }
+
+  /** 自動サイクルを最初からやり直す（OFFなら止めるだけ） */
+  function restartAutoCycle() {
+    stopAutoCycle();
+    if (config.autoCycle) state.cycleTimer = setTimeout(runCycle, config.autoCycleInterval * 1000);
+  }
+
+  // ----- 背景 -----
+  function shadeColor(hex, percent) {
+    const num = parseInt(hex.slice(1), 16);
+    const add = Math.round((255 * percent) / 100);
+    const ch = (v) => Math.min(255, Math.max(0, v + add));
+    const r = ch(num >> 16);
+    const g = ch((num >> 8) & 0xff);
+    const b = ch(num & 0xff);
+    return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
+  }
+
+  function applyBackground() {
+    const bg = config.bgColor;   // 検査済みの #rrggbb のみ
+    canvas.style.background = `radial-gradient(circle at center, ${shadeColor(bg, 35)} 0%, ${bg} 100%)`;
+    document.body.style.backgroundColor = bg;
+  }
+
+  /* =====================================================================
+     UI（パネルの組み立てと操作）
+     ===================================================================== */
+  const panel = document.getElementById('panel');
+  const panelHeader = document.getElementById('panelHeader');
+  const statusEl = document.getElementById('status');
+  const btnHidePanel = document.getElementById('btnHidePanel');
+  const btnShowPanel = document.getElementById('btnShowPanel');
+  const importFile = document.getElementById('importFile');
+  const controls = new Map();  // key → { set(value) }
+
+  function el(tag, props = {}, children = []) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'text') node.textContent = v;
+      else if (k === 'className') node.className = v;
+      else if (k in node) node[k] = v;
+      else node.setAttribute(k, v);
+    }
+    node.append(...children);
+    return node;
+  }
+
+  function showStatus(message, isError = false) {
+    clearTimeout(state.statusTimer);
+    statusEl.textContent = message;
+    statusEl.classList.toggle('is-error', isError);
+    state.statusTimer = setTimeout(() => {
+      statusEl.textContent = '';
+      statusEl.classList.remove('is-error');
+    }, STATUS_MS);
+  }
+
+  /** アコーディオン（初期状態は閉じる） */
+  function setupAccordion(toggle) {
+    const body = document.getElementById(toggle.getAttribute('aria-controls'));
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(open));
+      body.hidden = !open;
+    });
+  }
+
+  /** 定義表の1項目からパネルの部品を作る */
+  function createControl(def) {
+    const id = `ctl-${def.key}`;
+    const onChange = (raw) => handleSettingInput(def.key, raw);
+
+    switch (def.type) {
+      case 'range': {
+        const valueEl = el('span', { className: 'field-value' });
+        const input = el('input', { type: 'range', id, min: def.min, max: def.max, step: def.step });
+        input.addEventListener('input', () => onChange(input.value));
+        controls.set(def.key, { set: (v) => { input.value = v; valueEl.textContent = def.format(v); } });
+        return el('div', { className: 'field' }, [
+          el('div', { className: 'field-label' }, [el('label', { htmlFor: id, text: def.label }), valueEl]),
+          input,
+        ]);
+      }
+      case 'bool': {
+        const input = el('input', { type: 'checkbox', id });
+        input.addEventListener('change', () => onChange(input.checked));
+        controls.set(def.key, { set: (v) => { input.checked = v; } });
+        return el('div', { className: 'field is-row' }, [
+          el('label', { className: 'field-label', htmlFor: id, text: def.label }),
+          input,
+        ]);
+      }
+      case 'select': {
+        const select = el('select', { id }, def.options.map(([v, label]) => el('option', { value: v, text: label })));
+        select.addEventListener('change', () => onChange(select.value));
+        controls.set(def.key, { set: (v) => { select.value = v; } });
+        return el('div', { className: 'field' }, [
+          el('div', { className: 'field-label' }, [el('label', { htmlFor: id, text: def.label })]),
+          select,
+        ]);
+      }
+      case 'choice': {
+        const buttons = def.options.map(([v, label]) => {
+          const b = el('button', { type: 'button', className: 'btn', text: label });
+          b.dataset.value = v;
+          b.addEventListener('click', () => onChange(v));
+          return b;
         });
-        return out;
-      };
-
-      for (let i = 0; i < 60; i++) {
-        lines = buildLines(fontSize);
-        const lineHeight = fontSize * lineSpacing;
-        const totalHeight = lineHeight * lines.length;
-        let maxLineWidth = 0;
-        lines.forEach(l => { maxLineWidth = Math.max(maxLineWidth, measureCtx.measureText(l).width); });
-        const widthOk = !autoFit || maxLineWidth <= maxWidth;
-        const heightOk = totalHeight <= maxHeight;
-        if (widthOk && heightOk) break;
-        fontSize *= 0.94;
-        if (fontSize < 8) { fontSize = 8; lines = buildLines(fontSize); break; }
+        controls.set(def.key, {
+          set: (v) => buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === v))),
+        });
+        return el('div', { className: 'field' }, [
+          el('div', { className: 'field-label' }, [el('span', { id, text: def.label })]),
+          el('div', { className: 'choice-group', role: 'group', 'aria-labelledby': id }, buttons),
+        ]);
       }
-
-      return { fontSize, lines };
-    }
-
-    // ===== テキストからパーティクル座標を生成 =====
-    function initParticles() {
-      particles = [];
-      const rawLines = config.text.split('\n');
-      const hasContent = rawLines.some(l => l.trim().length > 0);
-      if (!hasContent) return;
-
-      const offscreen = document.createElement('canvas');
-      offscreen.width = width;
-      offscreen.height = height;
-      const offCtx = offscreen.getContext('2d');
-
-      const mobile = isMobileView();
-      const marginX = mobile ? 20 : 60;
-      const maxWidth = Math.max(width - marginX * 2, 40);
-      const maxHeight = Math.max(height * (mobile ? 0.58 : 0.7), 60);
-      const verticalShift = mobile ? height * 0.10 : 26;
-
-      const scale = Math.max(config.fontScale, 0.05);
-      const targetMaxWidth = maxWidth / scale;
-      const targetMaxHeight = maxHeight / scale;
-
-      let { fontSize, lines } = computeFitLayout(
-        offCtx, rawLines, targetMaxWidth, targetMaxHeight,
-        config.lineSpacing, config.autoFit, config.fontFamily, config.bold
-      );
-      fontSize *= scale;
-
-      offCtx.fillStyle = '#ffffff';
-      offCtx.font = `${config.bold ? 'bold ' : ''}${fontSize}px ${config.fontFamily}`;
-      offCtx.textAlign = 'center';
-      offCtx.textBaseline = 'middle';
-
-      const lineHeight = fontSize * config.lineSpacing;
-      const blockHeight = lineHeight * lines.length;
-      const startY = height / 2 - verticalShift - blockHeight / 2 + lineHeight / 2;
-
-      lines.forEach((line, i) => {
-        if (!line) return;
-        offCtx.fillText(line, width / 2, startY + i * lineHeight);
-      });
-
-      const pixelData = offCtx.getImageData(0, 0, width, height).data;
-      const step = config.density;
-
-      for (let y = 0; y < height; y += step) {
-        for (let x = 0; x < width; x += step) {
-          const idx = (y * width + x) * 4;
-          if (pixelData[idx + 3] > 128) {
-            const startX = Math.random() * width;
-            const startYp = Math.random() * height;
-            particles.push(new Particle(startX, startYp, x, y));
-          }
-        }
+      case 'color': {
+        const input = el('input', { type: 'color', id });
+        const hex = el('span', { className: 'color-hex' });
+        input.addEventListener('input', () => onChange(input.value));
+        controls.set(def.key, { set: (v) => { input.value = v; hex.textContent = v; } });
+        return el('div', { className: 'field is-row' }, [
+          el('label', { className: 'field-label', htmlFor: id, text: def.label }),
+          el('div', { className: 'color-wrap' }, [hex, input]),
+        ]);
       }
-    }
-
-    // ===== 背景カラー適用 =====
-    function shadeColor(hex, percent) {
-      const num = parseInt(hex.replace('#', ''), 16);
-      let r = (num >> 16) + Math.round((255 * percent) / 100);
-      let g = ((num >> 8) & 0x00ff) + Math.round((255 * percent) / 100);
-      let b = (num & 0x0000ff) + Math.round((255 * percent) / 100);
-      r = Math.min(255, Math.max(0, r));
-      g = Math.min(255, Math.max(0, g));
-      b = Math.min(255, Math.max(0, b));
-      return `#${(0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1)}`;
-    }
-    function applyBgColor() {
-      const inner = shadeColor(config.bgColor, 35);
-      canvas.style.background = `radial-gradient(circle at center, ${inner} 0%, ${config.bgColor} 100%)`;
-    }
-
-    // ===== メインアニメーションループ =====
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      ctx.globalAlpha = config.opacity;
-      ctx.shadowBlur = config.glowEnabled ? config.glowStrength : 0;
-      ctx.shadowColor = config.color;
-
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.ease = config.ease;
-        p.size = config.size;
-        p.color = config.color;
-        p.shape = config.shape;
-        p.repulsion = config.repulsion;
-        p.update();
-        p.draw();
+      case 'text': {
+        const textarea = el('textarea', { id, rows: 3, maxLength: def.maxLength, placeholder: 'テキストを入力...（Enterで改行）', spellcheck: false });
+        textarea.addEventListener('input', () => onChange(textarea.value));
+        controls.set(def.key, { set: (v) => { if (textarea.value !== v) textarea.value = v; } });
+        return el('div', { className: 'field' }, [
+          el('div', { className: 'field-label' }, [el('label', { htmlFor: id, text: def.label })]),
+          textarea,
+        ]);
       }
-
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-      requestAnimationFrame(animate);
+      default:
+        throw new Error(`未対応の項目の種類: ${def.type}`);
     }
+  }
 
-    // ===== 自動サイクル（拡散→再集結を繰り返す） =====
-    function startAutoCycle() {
-      stopAutoCycle();
-      autoCycleTimer = setInterval(() => {
-        particles.forEach(p => p.disperse());
-        setTimeout(() => { initParticles(); }, 900);
-      }, Math.max(config.autoCycleInterval, 1) * 1000);
+  function buildPanel() {
+    const container = document.getElementById('settingSections');
+    for (const sec of SECTIONS) {
+      const bodyId = `section-${sec.id}`;
+      const body = el('div', { className: 'section-body', id: bodyId, hidden: true },
+        SETTINGS.filter((s) => s.section === sec.id).map(createControl));
+      const toggle = el('button', { type: 'button', className: 'section-toggle', text: `■ ${sec.title}`,
+        'aria-expanded': 'false', 'aria-controls': bodyId });
+      container.append(el('div', { className: 'section' }, [toggle, body]));
     }
-    function stopAutoCycle() {
-      if (autoCycleTimer) { clearInterval(autoCycleTimer); autoCycleTimer = null; }
+    // 「■ 設定の保存」を含むすべてのアコーディオン
+    panel.querySelectorAll('.section-toggle').forEach(setupAccordion);
+  }
+
+  function syncControls() {
+    for (const [key, ctl] of controls) ctl.set(config[key]);
+  }
+
+  /** パネルで値が変わった時の共通処理 */
+  function handleSettingInput(key, raw) {
+    const def = SETTING_MAP.get(key);
+    const value = sanitizeValue(def, raw);
+    config[key] = value;
+    controls.get(key).set(value);
+
+    if (def.layout) requestLayout('morph');
+    if (key === 'bgColor') applyBackground();
+    if (key === 'autoCycle' || key === 'autoCycleInterval') restartAutoCycle();
+    scheduleSave();
+  }
+
+  /** 設定をまとめて入れ替えた後（読み込み・リセット）の反映 */
+  function applyAllSettings(layoutMode) {
+    syncControls();
+    applyBackground();
+    restartAutoCycle();
+    requestLayout(layoutMode);
+  }
+
+  function resetSettings() {
+    if (!window.confirm('すべての設定を初期値に戻しますか？\n（テキストも「PARTICLE」に戻ります）')) return;
+    Object.assign(config, createDefaultConfig());
+    applyAllSettings('assemble');
+    saveNow();
+    showStatus('初期値に戻しました');
+  }
+
+  // ----- パネルの表示／非表示 -----
+  function setPanelHidden(hidden) {
+    state.panelHidden = hidden;
+    panel.classList.toggle('is-hidden', hidden);
+    panel.inert = hidden;
+    btnShowPanel.hidden = !hidden;
+    if (hidden && panel.contains(document.activeElement)) btnShowPanel.focus();
+    if (!hidden && document.activeElement === btnShowPanel) btnHidePanel.focus();
+  }
+
+  // ----- パネルのドラッグ移動（PCのみ） -----
+  function movePanelTo(left, top) {
+    const rect = panel.getBoundingClientRect();
+    const maxLeft = Math.max(0, window.innerWidth - rect.width);
+    const maxTop = Math.max(0, window.innerHeight - 48);
+    panel.style.left = `${Math.min(maxLeft, Math.max(0, left))}px`;
+    panel.style.top = `${Math.min(maxTop, Math.max(0, top))}px`;
+    panel.style.right = 'auto';
+  }
+
+  function keepPanelInView() {
+    if (isMobileView()) {
+      panel.style.left = panel.style.top = panel.style.right = '';
+    } else if (panel.style.left) {
+      movePanelTo(parseFloat(panel.style.left), parseFloat(panel.style.top));
     }
+  }
 
-    // =======================================================
-    // PC／スマホ両パネルを同期させるための汎用バインド関数
-    // =======================================================
-    function wireRange(ids, valIds, format, onInput) {
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      const valEls = (valIds || []).map(id => document.getElementById(id)).filter(Boolean);
-      function apply(val) {
-        els.forEach(el => { el.value = val; });
-        valEls.forEach(v => { v.textContent = format ? format(val) : val; });
-      }
-      els.forEach(el => el.addEventListener('input', () => {
-        apply(el.value);
-        onInput(el.value);
-      }));
-      apply(els[0] ? els[0].value : '');
-      return { apply, els };
-    }
-
-    function wireCheckbox(ids, onInput) {
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      function apply(val) { els.forEach(el => { el.checked = val; }); }
-      els.forEach(el => el.addEventListener('input', () => {
-        apply(el.checked);
-        onInput(el.checked);
-      }));
-      return { apply, els };
-    }
-
-    function wireColor(ids, hexIds, onInput) {
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      const hexEls = (hexIds || []).map(id => document.getElementById(id)).filter(Boolean);
-      function apply(val) {
-        els.forEach(el => { el.value = val; });
-        hexEls.forEach(h => { h.textContent = val; });
-      }
-      els.forEach(el => el.addEventListener('input', () => {
-        apply(el.value);
-        onInput(el.value);
-      }));
-      return { apply, els };
-    }
-
-    function wireSelect(ids, onInput) {
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      function apply(val) { els.forEach(el => { el.value = val; }); }
-      els.forEach(el => el.addEventListener('input', () => {
-        apply(el.value);
-        onInput(el.value);
-      }));
-      return { apply, els };
-    }
-
-    function wireText(ids, onInput) {
-      const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-      function apply(val) { els.forEach(el => { el.value = val; }); }
-      els.forEach(el => el.addEventListener('input', () => {
-        apply(el.value);
-        onInput(el.value);
-      }));
-      return { apply, els };
-    }
-
-    function wireButtons(ids, handler) {
-      ids.map(id => document.getElementById(id)).filter(Boolean).forEach(el => el.addEventListener('click', handler));
-    }
-
-    function wireShapeButtons() {
-      const allBtns = ['shapeCircle', 'shapeSquare', 'shapeTriangle', 'shapeCircleM', 'shapeSquareM', 'shapeTriangleM']
-        .map(id => document.getElementById(id)).filter(Boolean);
-      function setActive(shape) {
-        allBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.shape === shape));
-      }
-      allBtns.forEach(btn => btn.addEventListener('click', () => {
-        config.shape = btn.dataset.shape;
-        setActive(config.shape);
-      }));
-      return { apply: setActive };
-    }
-
-    // ===== 各パラメータのバインド =====
-    const textCtl = wireText(['textInput', 'textInputM'], (val) => { config.text = val; initParticles(); });
-    const fontFamilyCtl = wireSelect(['fontFamily', 'fontFamilyM'], (val) => { config.fontFamily = val; initParticles(); });
-    const autoFitCtl = wireCheckbox(['autoFit', 'autoFitM'], (val) => { config.autoFit = val; initParticles(); });
-    const boldCtl = wireCheckbox(['boldToggle', 'boldToggleM'], (val) => { config.bold = val; initParticles(); });
-    const fontScaleCtl = wireRange(['fontScale', 'fontScaleM'], ['fontScaleVal', 'fontScaleValM'], v => parseFloat(v).toFixed(2), (val) => { config.fontScale = parseFloat(val); initParticles(); });
-    const lineSpacingCtl = wireRange(['lineSpacing', 'lineSpacingM'], ['lineSpacingVal', 'lineSpacingValM'], v => parseFloat(v).toFixed(2), (val) => { config.lineSpacing = parseFloat(val); initParticles(); });
-
-    const sizeCtl = wireRange(['particleSize', 'particleSizeM'], ['sizeVal', 'sizeValM'], v => parseFloat(v).toFixed(1), (val) => { config.size = parseFloat(val); });
-    const densityCtl = wireRange(['density', 'densityM'], ['densityVal', 'densityValM'], v => v, (val) => { config.density = parseInt(val); initParticles(); });
-    const opacityCtl = wireRange(['opacity', 'opacityM'], ['opacityVal', 'opacityValM'], v => parseFloat(v).toFixed(2), (val) => { config.opacity = parseFloat(val); });
-    const shapeCtl = wireShapeButtons();
-
-    const easeCtl = wireRange(['ease', 'easeM'], ['easeVal', 'easeValM'], v => parseFloat(v).toFixed(2), (val) => { config.ease = parseFloat(val); });
-    const radiusCtl = wireRange(['mouseRadius', 'mouseRadiusM'], ['radiusVal', 'radiusValM'], v => v, (val) => { config.mouseRadius = parseFloat(val); mouse.radius = config.mouseRadius; });
-    const repulsionCtl = wireRange(['repulsion', 'repulsionM'], ['repulsionVal', 'repulsionValM'], v => v, (val) => { config.repulsion = parseFloat(val); });
-    const glowCtl = wireCheckbox(['glowEnabled', 'glowEnabledM'], (val) => { config.glowEnabled = val; });
-    const glowStrengthCtl = wireRange(['glowStrength', 'glowStrengthM'], ['glowStrengthVal', 'glowStrengthValM'], v => v, (val) => { config.glowStrength = parseFloat(val); });
-
-    const autoCycleCtl = wireCheckbox(['autoCycle', 'autoCycleM'], (val) => { config.autoCycle = val; if (val) startAutoCycle(); else stopAutoCycle(); });
-    const autoCycleIntervalCtl = wireRange(['autoCycleInterval', 'autoCycleIntervalM'], ['autoCycleIntervalVal', 'autoCycleIntervalValM'], v => v + 's', (val) => { config.autoCycleInterval = parseFloat(val); if (config.autoCycle) startAutoCycle(); });
-
-    const colorCtl = wireColor(['particleColor', 'particleColorM'], ['colorHex', 'colorHexM'], (val) => { config.color = val; });
-    const bgColorCtl = wireColor(['bgColor', 'bgColorM'], ['bgColorHex', 'bgColorHexM'], (val) => { config.bgColor = val; applyBgColor(); });
-
-    wireButtons(['btnAssemble', 'btnAssembleM'], () => initParticles());
-    wireButtons(['btnDisperse', 'btnDisperseM'], () => particles.forEach(p => p.disperse()));
-    wireButtons(['btnReset', 'btnResetM'], () => doReset());
-
-    function doReset() {
-      Object.assign(config, JSON.parse(JSON.stringify(DEFAULT_CONFIG)));
-      textCtl.apply(config.text);
-      fontFamilyCtl.apply(config.fontFamily);
-      autoFitCtl.apply(config.autoFit);
-      boldCtl.apply(config.bold);
-      fontScaleCtl.apply(config.fontScale);
-      lineSpacingCtl.apply(config.lineSpacing);
-      sizeCtl.apply(config.size);
-      densityCtl.apply(config.density);
-      opacityCtl.apply(config.opacity);
-      shapeCtl.apply(config.shape);
-      easeCtl.apply(config.ease);
-      radiusCtl.apply(config.mouseRadius);
-      repulsionCtl.apply(config.repulsion);
-      glowCtl.apply(config.glowEnabled);
-      glowStrengthCtl.apply(config.glowStrength);
-      autoCycleCtl.apply(config.autoCycle);
-      autoCycleIntervalCtl.apply(config.autoCycleInterval);
-      colorCtl.apply(config.color);
-      bgColorCtl.apply(config.bgColor);
-
-      mouse.radius = config.mouseRadius;
-      stopAutoCycle();
-      applyBgColor();
-      initParticles();
-    }
-
-    // ===== PC用パネルの折りたたみ =====
-    const desktopPanel = document.querySelector('.control-panel');
-    const btnToggleDesktopPanel = document.getElementById('btnToggleDesktopPanel');
-
-    btnToggleDesktopPanel.addEventListener('click', () => {
-      const collapsed = desktopPanel.classList.toggle('is-collapsed');
-      btnToggleDesktopPanel.textContent = collapsed ? '表示' : '非表示';
+  function setupPanelDrag() {
+    panelHeader.addEventListener('pointerdown', (e) => {
+      if (isMobileView() || e.button !== 0 || e.target.closest('button')) return;
+      const rect = panel.getBoundingClientRect();
+      state.drag = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+      panelHeader.setPointerCapture(e.pointerId);
+      e.preventDefault();
     });
-
-    // ===== スマホ用パネルの折りたたみ =====
-    const mobilePanel = document.getElementById('mobileControlPanel');
-    const mobileToggleBtn = document.getElementById('mobileToggleBtn');
-
-    mobileToggleBtn.addEventListener('click', () => {
-      const collapsed = mobilePanel.classList.toggle('is-collapsed');
-      mobileToggleBtn.textContent = collapsed ? '表示' : '非表示';
+    panelHeader.addEventListener('pointermove', (e) => {
+      if (state.drag) movePanelTo(e.clientX - state.drag.dx, e.clientY - state.drag.dy);
     });
+    const end = () => { state.drag = null; };
+    panelHeader.addEventListener('pointerup', end);
+    panelHeader.addEventListener('pointercancel', end);
+  }
 
-    mobilePanel.addEventListener('touchstart', (e) => e.stopPropagation());
-    mobilePanel.addEventListener('mousedown', (e) => e.stopPropagation());
+  // ----- マウス・タッチ（Canvas の上だけで反応。パネルの上や画面外では反発しない） -----
+  function setupPointer() {
+    const move = (e) => {
+      state.pointer.x = e.clientX;
+      state.pointer.y = e.clientY;
+      state.pointer.active = true;
+    };
+    const leave = () => { state.pointer.active = false; };
+    canvas.addEventListener('pointermove', move);
+    canvas.addEventListener('pointerdown', move);
+    canvas.addEventListener('pointerleave', leave);
+    canvas.addEventListener('pointercancel', leave);
+    canvas.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') leave(); });
 
-    // ===== スマホ用パネル：セクションのアコーディオン開閉（排他制御なし） =====
-    document.querySelectorAll('.mobile-control-panel .control-section').forEach((section) => {
-      const toggle = section.querySelector('.section-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = section.classList.toggle('is-collapsed');
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
-      });
-    });
-
-    // キャンバスを3回連続タップでパネルを再表示
-    let tapTimestamps = [];
+    // パネル非表示中は、画面を3回連続でクリック・タップすると再表示
     canvas.addEventListener('click', () => {
-      if (!isMobileView() || !mobilePanel.classList.contains('is-collapsed')) return;
+      if (!state.panelHidden) return;
       const now = Date.now();
-      tapTimestamps.push(now);
-      tapTimestamps = tapTimestamps.filter(t => now - t <= 600);
-      if (tapTimestamps.length >= 3) {
-        mobilePanel.classList.remove('is-collapsed');
-        mobileToggleBtn.textContent = '非表示';
-        tapTimestamps = [];
+      state.tapTimes = state.tapTimes.filter((t) => now - t <= 600);
+      state.tapTimes.push(now);
+      if (state.tapTimes.length >= 3) {
+        state.tapTimes = [];
+        setPanelHidden(false);
       }
     });
+  }
 
-    // ===== リサイズ対応 =====
-    window.addEventListener('resize', () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      initParticles();
+  function setupEvents() {
+    document.getElementById('btnAssemble').addEventListener('click', () => {
+      requestLayout('assemble');
+      restartAutoCycle();
+    });
+    document.getElementById('btnDisperse').addEventListener('click', disperseAll);
+    document.getElementById('btnReset').addEventListener('click', resetSettings);
+    document.getElementById('btnExport').addEventListener('click', exportSettings);
+    document.getElementById('btnImport').addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', async () => {
+      const file = importFile.files && importFile.files[0];
+      if (file) await importSettingsFile(file);
+      importFile.value = '';
     });
 
-    // ===== 初期化実行 =====
-    applyBgColor();
-    initParticles();
-    animate();
+    btnHidePanel.addEventListener('click', () => setPanelHidden(true));
+    btnShowPanel.addEventListener('click', () => setPanelHidden(false));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !e.isComposing) setPanelHidden(!state.panelHidden);
+    });
+
+    window.addEventListener('resize', () => {
+      state.pending.resize = true;
+      requestLayout('morph');
+      keepPanelInView();
+    });
+    window.addEventListener('pagehide', flushSave);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushSave();
+    });
+
+    setupPointer();
+    setupPanelDrag();
+  }
+
+  /* =====================================================================
+     INIT
+     ===================================================================== */
+  function init() {
+    buildPanel();
+    setupEvents();
+
+    const loaded = loadSettings();
+    Object.assign(config, loaded.config);
+    resizeCanvas();
+    applyAllSettings('assemble');
+    if (loaded.message) showStatus(loaded.message, Boolean(loaded.error));
+
+    state.lastFrame = performance.now();
+    requestAnimationFrame(frame);
+  }
+
+  init();
   </script>
 </body>
 </html>

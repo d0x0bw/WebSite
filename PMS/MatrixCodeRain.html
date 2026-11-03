@@ -153,7 +153,26 @@
     }
     .toggle-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
 
-    .control-section { margin-bottom: 14px; }
+    /* 左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
+    .control-section {
+      margin: 0 -10px 6px;
+      padding: 6px 9px 1px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方）。
+       カラーテーマを変えると --accent-rgb に合わせて色も変わる */
+    .control-section:not(.is-collapsed) {
+      background: rgba(var(--accent-rgb), 0.13);
+      border-color: rgba(var(--accent-rgb), 0.35);
+    }
+
+    .control-section:not(.is-collapsed) .section-toggle,
+    .control-section:not(.is-collapsed) .section-title {
+      color: var(--accent);
+    }
 
     .section-title {
       font-size: 0.75rem;
@@ -195,8 +214,29 @@
       transform: rotate(180deg);
     }
 
+    /* 項目の開閉アニメーション（StarryNightAndMeteor と同じ方式）：
+       行の高さを 1fr ↔ 0fr に変えて、中身の高さに合わせて滑らかに伸縮させる */
+    .section-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+      transition: grid-template-rows 0.32s ease, opacity 0.28s ease 0.04s, visibility 0s linear 0s;
+    }
+
+    .section-body-inner {
+      min-height: 0;
+      overflow: hidden;
+      /* フォーカス枠（outline）が切れないよう内側に余白を取り、同じ分だけ外へずらして位置を保つ */
+      padding: 3px;
+      margin: -3px;
+    }
+
     .control-section.is-collapsed .section-body {
-      display: none;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      visibility: hidden; /* 閉じている間は中の部品にタブ移動・タップが届かないようにする */
+      transition: grid-template-rows 0.32s ease, opacity 0.18s ease, visibility 0s linear 0.32s;
     }
 
     .control-group { margin-bottom: 10px; }
@@ -267,27 +307,125 @@
       *, *::before, *::after { transition: none !important; }
     }
 
+    /* スマホ表示用の「設定を開く」ボタン・モーダルの背景・×ボタン（PC表示では使わない） */
+    .settings-fab,
+    .panel-backdrop,
+    .modal-close-btn {
+      display: none;
+    }
+
+    /* =====================================================
+       レスポンシブ表示（幅768px以下）：
+       右下の小さなボタンを押すと、設定パネルが画面中央のモーダル（手前に重なる画面）で開く
+    ===================================================== */
     @media (max-width: 768px) {
-      .control-panel {
-        top: auto !important;
-        bottom: 16px !important;
-        left: 16px !important;
-        right: 16px !important;
-        width: auto !important;
-        max-height: 40vh;
-        max-height: 40dvh;
+      /* 設定を開くボタン（右下に固定） */
+      .settings-fab {
+        position: fixed;
+        right: calc(16px + env(safe-area-inset-right, 0px));
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        z-index: 10;
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        background: rgba(0, 12, 4, 0.88);
+        border: 1px solid rgba(var(--accent-rgb), 0.4);
+        border-radius: 50%;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.2s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+      .settings-fab:active { transform: scale(0.92); }
+      .settings-fab svg { width: 24px; height: 24px; }
+      .settings-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+      .settings-fab.is-fully-hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      /* モーダルの背景（暗くして、タップで閉じる）。文字の雨の変化も見えるよう暗さは控えめ */
+      .panel-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 19;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+      }
+      .panel-backdrop.is-open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* 設定パネル本体：画面中央のモーダル（閉じている間は非表示）。
+         ドラッグで付いた位置指定（style属性）より優先させるため !important */
+      .control-panel,
+      .control-panel.is-fully-hidden {
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: min(560px, calc(100vw - 24px)) !important;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+        z-index: 20;
         border-radius: 16px;
         padding: 0;
+        overscroll-behavior: contain; /* 中のスクロールが背景へ伝わらないようにする */
+        transform: translate(-50%, -46%) scale(0.97);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        /* 閉じる時は、薄くなり終わってから「非表示」にする */
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s, border-color 0.3s ease;
       }
-      .panel-header { cursor: default; touch-action: auto; margin: 0 0 6px; padding: 10px 14px 6px; border-radius: 16px 16px 0 0; }
-      .panel-content { padding: 0 14px 10px; }
-      .panel-header h3 { font-size: 0.8rem; }
-      .control-section { margin-bottom: 8px; }
-      .section-title { font-size: 0.66rem; margin-bottom: 5px; }
-      .section-toggle { margin-bottom: 5px; }
-      .control-group { margin-bottom: 6px; }
-      .control-group label { font-size: 0.72rem; margin-bottom: 2px; }
-      .control-group input[type="range"] { height: 10px; }
+      .control-panel.is-modal-open,
+      .control-panel.is-modal-open.is-fully-hidden {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        /* 開く時は即座に「表示」扱いにする（すぐに×ボタンへフォーカスを移せるように） */
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s, border-color 0.3s ease;
+      }
+
+      /* モーダルでは本文を常に表示する（PCで「非表示」にした状態を引き継がない） */
+      .panel-content.is-collapsed { display: block; }
+
+      /* 「非表示」ボタンとドラッグの目印は使わず、×ボタンで閉じる */
+      #btn-toggle-panel,
+      .drag-hint { display: none; }
+
+      .modal-close-btn {
+        display: flex;
+        font-size: 1.4rem;
+        line-height: 1;
+      }
+
+      .header-controls { gap: 8px; }
+      .header-controls .icon-btn { width: 36px; height: 36px; }
+      .header-controls .icon-btn svg { width: 16px; height: 16px; }
+
+      .panel-header {
+        cursor: default;
+        touch-action: auto;
+        margin: 0 0 8px;
+        padding: 12px 14px 10px;
+        border-radius: 16px 16px 0 0;
+      }
+      .panel-content { padding: 0 14px 16px; }
+      .control-group input[type="range"] { height: 10px; } /* 指で操作しやすい高さ */
     }
   </style>
 </head>
@@ -295,9 +433,22 @@
 
 <canvas id="matrix" aria-hidden="true"></canvas>
 
+<!-- スマホ表示：設定モーダルを開くボタンと、モーダルの背景 -->
+<button class="settings-fab" id="btn-open-settings" type="button" aria-label="設定を開く" aria-haspopup="dialog" title="設定を開く">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <line x1="4" y1="6" x2="20" y2="6"></line>
+    <line x1="4" y1="12" x2="20" y2="12"></line>
+    <line x1="4" y1="18" x2="20" y2="18"></line>
+    <circle cx="9" cy="6" r="2.4" fill="#000c04"></circle>
+    <circle cx="15" cy="12" r="2.4" fill="#000c04"></circle>
+    <circle cx="8" cy="18" r="2.4" fill="#000c04"></circle>
+  </svg>
+</button>
+<div class="panel-backdrop" id="panel-backdrop"></div>
+
 <div class="control-panel" id="draggable-panel" role="region" aria-label="パラメータ設定">
   <div class="panel-header" id="panel-header">
-    <h3>パラメータ設定 <span aria-hidden="true">⠿</span></h3>
+    <h3>パラメータ設定 <span class="drag-hint" aria-hidden="true">⠿</span></h3>
     <div class="header-controls">
       <button class="icon-btn" id="btn-pause" type="button" title="一時停止 (Space)" aria-label="一時停止" aria-pressed="false">
         <svg id="pause-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
@@ -312,6 +463,7 @@
         </svg>
       </button>
       <button class="toggle-btn" id="btn-toggle-panel" type="button" aria-controls="panel-body" aria-expanded="true">非表示</button>
+      <button class="icon-btn modal-close-btn" id="btn-close-modal" type="button" title="閉じる" aria-label="閉じる">×</button>
     </div>
   </div>
 
@@ -957,7 +1109,9 @@
           <span class="section-title"><span aria-hidden="true">■ </span>${escapeHtml(section.title)}</span>${chevron}
         </button>
         <div class="section-body" id="section-${section.id}" role="group" aria-label="${escapeHtml(section.title)}">
-          ${SETTINGS.filter(s => s.section === section.id).map(renderControl).join('')}
+          <div class="section-body-inner">
+            ${SETTINGS.filter(s => s.section === section.id).map(renderControl).join('')}
+          </div>
         </div>
       </div>`).join('');
   }
@@ -1009,19 +1163,30 @@
 
   /* -----------------------------------------------------
      パネルの開閉と自動非表示
+     【PC】
      ・「非表示」で本文を畳み、3 秒後にパネルごと消える
-     ・画面のクリック／タップ、または H キーで再表示
+     ・画面のクリック、または H キーで再表示
+     【スマホ表示（幅768px以下）】
+     ・右下の「設定を開く」ボタンで、パネルを画面中央のモーダルとして開く
+     ・×ボタン／背景のタップ／Esc キーで閉じる。閉じて 3 秒後にボタンも消える
+     ・ボタンが消えている時は、画面をタップするとボタンが再び出る
   ----------------------------------------------------- */
   const panelUI = {
     panel: null,
     body: null,
     toggleBtn: null,
+    fab: null,
+    backdrop: null,
+    closeBtn: null,
     hideTimerId: null,
 
     init() {
       this.panel = document.getElementById('draggable-panel');
       this.body = document.getElementById('panel-body');
       this.toggleBtn = document.getElementById('btn-toggle-panel');
+      this.fab = document.getElementById('btn-open-settings');
+      this.backdrop = document.getElementById('panel-backdrop');
+      this.closeBtn = document.getElementById('btn-close-modal');
 
       this.toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1029,9 +1194,33 @@
         else this.collapse();
       });
 
+      this.fab.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openModal();
+      });
+      this.closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeModal();
+      });
+      this.backdrop.addEventListener('click', () => this.closeModal());
+
       // 画面（Canvas）をクリック／タップした時の再表示
       canvas.addEventListener('click', () => {
-        if (this.isCollapsed() || this.isFullyHidden()) this.show();
+        if (compactLayout.matches) {
+          if (this.isFabHidden()) this.revealFab();
+        } else if (this.isCollapsed() || this.isFullyHidden()) {
+          this.show();
+        }
+      });
+
+      // 画面の向きや幅が変わってPC／スマホ表示が切り替わったら、開閉の状態を初期状態に戻す
+      compactLayout.addEventListener('change', () => {
+        clearTimeout(this.hideTimerId);
+        this.closeModal(false);
+        this.panel.classList.remove('is-fully-hidden');
+        this.fab.classList.remove('is-fully-hidden');
+        this.body.classList.remove('is-collapsed');
+        this.updateToggleButton();
       });
 
       this.updateToggleButton();
@@ -1039,6 +1228,49 @@
 
     isCollapsed() { return this.body.classList.contains('is-collapsed'); },
     isFullyHidden() { return this.panel.classList.contains('is-fully-hidden'); },
+    isModalOpen() { return this.panel.classList.contains('is-modal-open'); },
+    isFabHidden() { return this.fab.classList.contains('is-fully-hidden'); },
+
+    // スマホ表示：設定パネルをモーダルとして開く
+    openModal() {
+      clearTimeout(this.hideTimerId);
+      this.fab.classList.remove('is-fully-hidden');
+      this.panel.classList.add('is-modal-open');
+      this.backdrop.classList.add('is-open');
+      this.panel.setAttribute('role', 'dialog');
+      this.panel.setAttribute('aria-modal', 'true');
+      this.panel.scrollTop = 0;
+      // 表示に切り替わってからでないとフォーカスできないため、次のコマで×ボタンへ移す
+      requestAnimationFrame(() => {
+        if (this.isModalOpen()) this.closeBtn.focus({ preventScroll: true });
+      });
+    },
+
+    // スマホ表示：モーダルを閉じる（startTimer: 閉じた後にボタンを自動で隠すか）
+    closeModal(startTimer = true) {
+      const wasOpen = this.isModalOpen();
+      this.panel.classList.remove('is-modal-open');
+      this.backdrop.classList.remove('is-open');
+      this.panel.setAttribute('role', 'region');
+      this.panel.removeAttribute('aria-modal');
+      if (wasOpen && startTimer) {
+        this.fab.focus({ preventScroll: true });
+        this.startFabHideTimer();
+      }
+    },
+
+    // 「設定を開く」ボタンを再び出し、しばらく触らなければまた隠す
+    revealFab() {
+      this.fab.classList.remove('is-fully-hidden');
+      this.startFabHideTimer();
+    },
+
+    startFabHideTimer() {
+      clearTimeout(this.hideTimerId);
+      this.hideTimerId = setTimeout(() => {
+        if (compactLayout.matches && !this.isModalOpen()) this.fab.classList.add('is-fully-hidden');
+      }, HIDE_DELAY_MS);
+    },
 
     // 本文を畳み、しばらくしたらパネルごと消す
     collapse() {
@@ -1057,7 +1289,13 @@
     },
 
     // H キー：開いていれば畳む、畳んでいる／消えていれば表示してボタンにフォーカス
+    //        （スマホ表示ではモーダルの開閉）
     toggleFromKeyboard() {
+      if (compactLayout.matches) {
+        if (this.isModalOpen()) this.closeModal();
+        else this.openModal();
+        return;
+      }
       if (this.isCollapsed() || this.isFullyHidden()) {
         this.show();
         this.toggleBtn.focus({ preventScroll: true });
@@ -1146,6 +1384,74 @@
   };
 
   /* -----------------------------------------------------
+     セクションのアコーディオン（StarryNightAndMeteor と同じ動き）
+     ・選んだ項目だけ開き、他の項目は自動で閉じる
+     ・開閉は CSS のアニメーション（0.32 秒）で滑らかに伸縮する
+     ・開閉中、押した見出しが画面上で動かないようにスクロール位置を補正し、
+       開き終わったら、項目の下端がパネルからはみ出していれば見える位置までスクロールする
+  ----------------------------------------------------- */
+  const accordion = {
+    ANIM_MS: 340, // CSS の開閉アニメーション（0.32s）に合わせた待ち時間
+    panel: null,
+    header: null,
+    sections: [],
+    animFrame: 0,
+    revealTimerId: null,
+
+    init() {
+      this.panel = document.getElementById('draggable-panel');
+      this.header = document.getElementById('panel-header');
+      this.sections = Array.from(document.querySelectorAll('.control-section'));
+
+      this.sections.forEach(section => {
+        const toggle = section.querySelector('.section-toggle');
+        if (!toggle) return;
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const willOpen = section.classList.contains('is-collapsed');
+          this.keepAnchor(toggle);
+          this.sections.forEach(other => { if (other !== section) this.setOpen(other, false); });
+          this.setOpen(section, willOpen);
+          clearTimeout(this.revealTimerId);
+          if (willOpen) this.revealTimerId = setTimeout(() => this.reveal(section), this.ANIM_MS);
+        });
+      });
+    },
+
+    setOpen(section, open) {
+      section.classList.toggle('is-collapsed', !open);
+      const toggle = section.querySelector('.section-toggle');
+      if (toggle) toggle.setAttribute('aria-expanded', String(open));
+    },
+
+    // アニメーション中、押した見出しの画面上の位置を保つ（上の項目が閉じて押し上げられるのを防ぐ）
+    keepAnchor(toggle) {
+      cancelAnimationFrame(this.animFrame);
+      const top0 = toggle.getBoundingClientRect().top;
+      const start = performance.now();
+      const step = (now) => {
+        const diff = toggle.getBoundingClientRect().top - top0;
+        if (Math.abs(diff) > 0.5) this.panel.scrollTop += diff;
+        if (now - start < this.ANIM_MS) this.animFrame = requestAnimationFrame(step);
+      };
+      this.animFrame = requestAnimationFrame(step);
+    },
+
+    // 開いた項目の下端がパネルからはみ出していたら、見える位置までスクロールする
+    reveal(section) {
+      const p = this.panel.getBoundingClientRect();
+      const r = section.getBoundingClientRect();
+      const topLimit = p.top + this.header.offsetHeight + 4;
+      let delta = 0;
+      if (r.bottom > p.bottom - 4) delta = r.bottom - p.bottom + 8;
+      if (r.top - delta < topLimit) delta = r.top - topLimit; // 見出しがヘッダーの裏に隠れないようにする
+      if (Math.abs(delta) > 1) {
+        this.panel.scrollBy({ top: delta, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      }
+    }
+  };
+
+  /* -----------------------------------------------------
      スライダーの誤操作防止（タッチ操作のみ）
      ・つまみ以外（トラック部分）に触れただけで値が飛ぶのを防ぐ
        → 触れた瞬間の値を覚えておき、そのタッチの間に値が変わっても元に戻す
@@ -1225,7 +1531,10 @@
   document.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 
-    if (e.code === 'Space') {
+    if (e.key === 'Escape') {
+      // スマホ表示のモーダルを閉じる（日本語入力の変換中は除く）
+      if (!e.isComposing && panelUI.isModalOpen()) panelUI.closeModal();
+    } else if (e.code === 'Space') {
       if (e.target.closest('input, select, textarea, button, [contenteditable]')) return;
       e.preventDefault();
       togglePause();
@@ -1241,16 +1550,7 @@
     renderAllValues();
     bindControls();
 
-    // 各セクションのアコーディオン開閉（他のセクションの開閉状態には影響しない）
-    document.querySelectorAll('.control-section').forEach(section => {
-      const toggle = section.querySelector('.section-toggle');
-      if (!toggle) return;
-      toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isCollapsed = section.classList.toggle('is-collapsed');
-        toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
-      });
-    });
+    accordion.init();
 
     document.getElementById('btn-pause').addEventListener('click', (e) => {
       e.stopPropagation();

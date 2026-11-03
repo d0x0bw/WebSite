@@ -322,8 +322,28 @@
       background-color: var(--btn-hover-bg);
     }
 
+    /* 左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
     .control-section {
-      margin-bottom: 18px;
+      margin: 0 -10px 10px;
+      padding: 6px 9px 1px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方） */
+    .control-section:not(.is-collapsed) {
+      background: rgba(166, 200, 255, 0.13);
+      border-color: rgba(166, 200, 255, 0.35);
+    }
+
+    .control-section:not(.is-collapsed) .section-toggle {
+      color: var(--p-blue);
+      border-bottom-color: rgba(166, 200, 255, 0.25);
+    }
+
+    .control-section:not(.is-collapsed) .section-title {
+      color: var(--p-blue);
     }
 
     .control-section:last-child {
@@ -671,7 +691,8 @@
       }
 
       .control-section {
-        margin-bottom: 14px;
+        margin-bottom: 6px;
+        padding: 4px 9px 1px;
       }
 
       .section-toggle {

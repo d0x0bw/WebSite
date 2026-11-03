@@ -16,6 +16,8 @@
       --accent-border: rgba(255, 153, 51, 0.4);
       --accent-border-panel: rgba(255, 153, 51, 0.3);
       --accent-hover: rgba(255, 153, 51, 0.15);
+      --accent-open-bg: rgba(255, 153, 51, 0.13);     /* 開いている項目の背景 */
+      --accent-open-border: rgba(255, 153, 51, 0.35); /* 開いている項目の枠線 */
       --panel-bg: rgba(15, 12, 8, 0.88);
       --text: #e5e7eb;
       --text-sub: #9ca3af;
@@ -226,8 +228,24 @@
     }
 
     /* ---- セクション（アコーディオン） ---- */
+    /* 左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
     .control-section {
-      margin-bottom: 14px;
+      margin: 0 -10px 6px;
+      padding: 6px 9px 1px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方） */
+    .control-section:not(.is-collapsed) {
+      background: var(--accent-open-bg);
+      border-color: var(--accent-open-border);
+    }
+
+    .control-section:not(.is-collapsed) .section-title,
+    .control-section:not(.is-collapsed) .section-chevron {
+      color: var(--accent);
     }
 
     .section-title {
@@ -353,7 +371,8 @@
       }
 
       .control-section {
-        margin-bottom: 8px;
+        margin-bottom: 3px;
+        padding: 4px 9px 1px;
       }
 
       .section-title {

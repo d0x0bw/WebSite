@@ -125,7 +125,21 @@
     }
 
     /* ---------- セクション（アコーディオン） ---------- */
-    .control-section { margin-bottom: 14px; }
+    /* 左右の負の余白で、枠を付けても中の部品の幅・位置は変わらない */
+    .control-section {
+      margin: 0 -10px 6px;
+      padding: 6px 9px 1px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    /* 今開いている項目：背景色と枠線、見出しの色で強調（StarryNightAndMeteor と同じ見せ方） */
+    .control-section:not(.is-collapsed) {
+      background: rgba(0, 240, 255, 0.13);
+      border-color: rgba(0, 240, 255, 0.35);
+    }
+    .control-section:not(.is-collapsed) .section-title,
+    .control-section:not(.is-collapsed) .section-chevron { color: #00f0ff; }
     .section-title {
       font-size: 0.75rem;
       font-weight: bold;
@@ -293,7 +307,7 @@
       }
       .panel-header h3 { font-size: 0.82rem; }
       .panel-content { padding: 0 14px 10px; }
-      .control-section { margin-bottom: 8px; }
+      .control-section { margin-bottom: 3px; padding: 4px 9px 1px; }
       .section-title { font-size: 0.66rem; margin-bottom: 5px; }
       .section-toggle { margin-bottom: 5px; }
       .control-group { margin-bottom: 6px; }

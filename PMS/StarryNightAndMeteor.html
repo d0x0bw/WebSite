@@ -591,6 +591,566 @@
         }
 
         #skyCanvas { touch-action: none; }
+
+        /* =========================== 星座ツアー =========================== */
+        body.tour-on .control-panel,
+        body.tour-on .settings-fab,
+        body.tour-on .panel-backdrop,
+        body.tour-on .con-info {
+            display: none !important;
+        }
+
+        .panel-tour-btn {
+            width: 100%;
+            height: 38px !important;
+            font-size: 0.92rem !important;
+            font-weight: bold;
+            color: #ffe3a6 !important;
+            border-color: rgba(255, 214, 120, 0.6) !important;
+            background: rgba(255, 214, 120, 0.1) !important;
+        }
+        .panel-tour-sub {
+            width: 100%;
+            height: 30px !important;
+        }
+
+        .con-info-tour {
+            margin-top: 10px;
+            width: 100%;
+            min-height: 36px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 214, 120, 0.55);
+            background: rgba(255, 214, 120, 0.1);
+            color: #ffe3a6;
+            font-size: 0.86rem;
+            cursor: pointer;
+        }
+        .con-info-tour:hover { background: rgba(255, 214, 120, 0.2); }
+        .con-info-actions { display: flex; gap: 8px; margin-top: 10px; }
+        .con-info-actions .con-info-tour { margin-top: 0; width: auto; flex: 1; }
+        .con-info-speak {
+            flex-shrink: 0;
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(138, 180, 248, 0.5);
+            background: rgba(138, 180, 248, 0.1);
+            color: #cfe0ff;
+            font-size: 0.86rem;
+            cursor: pointer;
+        }
+        .con-info-speak:hover { background: rgba(138, 180, 248, 0.2); }
+        .con-info-speak[aria-pressed="true"] { color: #ffe3a6; border-color: rgba(255, 214, 120, 0.6); }
+        .con-info-speak:focus-visible { outline: 2px solid #ffe3a6; outline-offset: 2px; }
+        .save-status.is-error { color: #f87171; }
+
+        .tour-ui[hidden] { display: none !important; }
+
+        .tour-top {
+            position: fixed;
+            top: calc(10px + env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(760px, calc(100vw - 20px));
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px 8px 14px;
+            background: rgba(10, 16, 32, 0.78);
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            border-radius: 14px;
+            backdrop-filter: blur(8px);
+            color: #e5e7eb;
+        }
+        .tour-progress { flex: 1; min-width: 0; }
+        .tour-progress-text {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+        }
+        .tour-course-label { color: #8ab4f8; overflow: hidden; text-overflow: ellipsis; }
+        .tour-count { color: #cbd5e1; font-variant-numeric: tabular-nums; }
+        .tour-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+        .tour-bar-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #8ab4f8, #ffe3a6);
+            transition: width 0.4s ease;
+        }
+        .tour-top-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .tour-mini {
+            min-height: 34px;
+            padding: 0 10px;
+            border-radius: 17px;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            background: rgba(138, 180, 248, 0.08);
+            color: #cfe0ff;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .tour-mini:hover { background: rgba(138, 180, 248, 0.2); }
+        .tour-mini.is-on { color: #ffe3a6; border-color: rgba(255, 214, 120, 0.6); background: rgba(255, 214, 120, 0.12); }
+        .tour-exit { width: 34px; padding: 0; font-size: 1rem; }
+
+        .tour-card {
+            position: fixed;
+            left: 50%;
+            bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            width: min(760px, calc(100vw - 20px));
+            max-height: 42vh;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            background: rgba(10, 16, 32, 0.88);
+            border: 1px solid rgba(138, 180, 248, 0.32);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            color: #e5e7eb;
+        }
+        .tour-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 16px 6px;
+        }
+        .tour-title { min-width: 0; }
+        .tour-title h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #ffe3a6;
+            letter-spacing: 0.04em;
+        }
+        .tour-sub { font-size: 0.82rem; color: #9ca3af; margin-top: 2px; }
+
+        .tour-stamp {
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: bold;
+            color: transparent;
+        }
+        .tour-stamp.is-got {
+            border: 2px solid rgba(255, 120, 110, 0.85);
+            color: rgba(255, 140, 125, 0.95);
+            transform: rotate(-12deg);
+            box-shadow: inset 0 0 0 3px rgba(255, 120, 110, 0.25);
+        }
+        .tour-stamp.is-new { animation: tour-stamp-in 0.55s cubic-bezier(.2, 1.6, .4, 1); }
+        @keyframes tour-stamp-in {
+            from { transform: rotate(-12deg) scale(2.2); opacity: 0; }
+            to { transform: rotate(-12deg) scale(1); opacity: 1; }
+        }
+
+        .tour-card-body {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 2px 16px 12px;
+            font-size: 0.92rem;
+            line-height: 1.75;
+        }
+        .tour-card-body::-webkit-scrollbar { width: 5px; }
+        .tour-card-body::-webkit-scrollbar-thumb { background: rgba(138, 180, 248, 0.4); border-radius: 3px; }
+        .tour-card-body p { margin: 0 0 6px; }
+        .tour-lead { color: #f1f5f9; }
+        .tour-h {
+            margin: 12px 0 4px;
+            font-size: 0.86rem;
+            color: #8ab4f8;
+            letter-spacing: 0.05em;
+        }
+        .tour-facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 6px;
+            margin: 8px 0 2px;
+        }
+        .tour-fact {
+            display: flex;
+            flex-direction: column;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(138, 180, 248, 0.08);
+            line-height: 1.45;
+        }
+        .tour-fact-label { font-size: 0.72rem; color: #9ca3af; }
+        .tour-fact-value { font-size: 0.86rem; }
+        .tour-stars { list-style: none; margin: 0; padding: 0; }
+        .tour-stars li { display: flex; align-items: center; gap: 8px; line-height: 1.9; }
+        .tour-star-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .tour-star-name { font-weight: bold; }
+        .tour-star-meta { color: #9ca3af; font-size: 0.82rem; }
+        .tour-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+        .tour-chip {
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 16px;
+            border: 1px solid var(--chip, #8ab4f8);
+            background: transparent;
+            color: var(--chip, #8ab4f8);
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+        .tour-chip.is-on { background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 2px rgba(255, 214, 120, 0.6); }
+        .tour-dso-detail { font-size: 0.86rem; color: #dbe4f0; }
+
+        .tour-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 12px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .tour-btn {
+            min-height: 44px;
+            min-width: 92px;
+            padding: 0 16px;
+            border-radius: 22px;
+            border: 1px solid rgba(138, 180, 248, 0.45);
+            background: rgba(138, 180, 248, 0.08);
+            color: #cfe0ff;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        .tour-btn:hover { background: rgba(138, 180, 248, 0.2); }
+        .tour-btn:active { transform: scale(0.96); }
+        .tour-play {
+            position: relative;
+            min-width: 54px;
+            width: 54px;
+            height: 54px;
+            padding: 0;
+            border-radius: 50%;
+            color: #ffe3a6;
+            border-color: rgba(255, 214, 120, 0.55);
+        }
+        .tour-play-svg { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); transform: rotate(-90deg); }
+        .tour-play-track { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 2.5; }
+        .tour-play-ring { fill: none; stroke: #ffe3a6; stroke-width: 2.5; stroke-dasharray: 100; stroke-dashoffset: 100; stroke-linecap: round; }
+        .tour-play-icon { position: relative; font-size: 1rem; }
+        .tour-dwell-label { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #9ca3af; margin-left: 4px; }
+        .tour-dwell-label select {
+            background: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            border-radius: 6px;
+            padding: 4px;
+            font-size: 0.82rem;
+        }
+
+        .tour-btn:focus-visible, .tour-mini:focus-visible, .tour-chip:focus-visible,
+        .tour-course:focus-visible, .tour-list-item:focus-visible, .tour-stamp-cell:focus-visible,
+        .con-info-tour:focus-visible, .panel-tour-btn:focus-visible {
+            outline: 2px solid #ffe3a6;
+            outline-offset: 2px;
+        }
+
+        .tour-toast {
+            position: fixed;
+            top: calc(78px + env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translate(-50%, -8px);
+            z-index: 40;
+            max-width: calc(100vw - 32px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(30, 24, 8, 0.9);
+            border: 1px solid rgba(255, 214, 120, 0.6);
+            color: #ffe3a6;
+            font-size: 0.9rem;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        .tour-toast.is-show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+        .tour-toast.is-standalone { top: calc(16px + env(safe-area-inset-top, 0px)); }
+
+        .tour-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* 閉じていく途中のモーダルがタップを受け取らないように */
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .tour-modal.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+        .tour-modal-box {
+            width: min(520px, 100%);
+            max-height: min(82vh, 82dvh);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 14px 16px 16px;
+            background: #0c1224;
+            border: 1px solid rgba(138, 180, 248, 0.35);
+            border-radius: 16px;
+            color: #e5e7eb;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+        .tour-modal-wide { width: min(760px, 100%); }
+        .tour-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .tour-modal-head h2 { margin: 0; font-size: 1.1rem; color: #ffe3a6; }
+        .tour-modal-close {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(138, 180, 248, 0.4);
+            background: transparent;
+            color: #cfe0ff;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .tour-modal-note { margin: 0 0 12px; font-size: 0.84rem; color: #9ca3af; line-height: 1.6; }
+
+        .tour-course-list { display: flex; flex-direction: column; gap: 8px; }
+        .tour-course {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2px 10px;
+            text-align: left;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            background: rgba(138, 180, 248, 0.06);
+            color: #e5e7eb;
+            cursor: pointer;
+        }
+        .tour-course:hover { background: rgba(138, 180, 248, 0.16); }
+        .tour-course:disabled { opacity: 0.45; cursor: not-allowed; }
+        .tour-course.is-resume { border-color: rgba(255, 214, 120, 0.6); background: rgba(255, 214, 120, 0.08); }
+        .tour-course-name { font-weight: bold; font-size: 0.98rem; }
+        .tour-course.is-resume .tour-course-name { color: #ffe3a6; }
+        .tour-course-count { font-size: 0.78rem; color: #8ab4f8; align-self: center; }
+        .tour-course-sub { grid-column: 1 / -1; font-size: 0.8rem; color: #9ca3af; }
+
+        .tour-list-items { display: flex; flex-direction: column; gap: 2px; }
+        .tour-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 40px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #e5e7eb;
+            font-size: 0.92rem;
+            text-align: left;
+            cursor: pointer;
+        }
+        .tour-list-item:hover { background: rgba(138, 180, 248, 0.12); }
+        .tour-list-item.is-current { background: rgba(255, 214, 120, 0.14); color: #ffe3a6; }
+        .tour-list-no { width: 2em; text-align: right; color: #6b7280; font-variant-numeric: tabular-nums; }
+        .tour-list-name { flex: 1; }
+        .tour-list-mark { color: rgba(255, 130, 120, 0.9); }
+
+        .tour-stamp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+            gap: 8px;
+        }
+        .tour-stamp-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 2px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            color: #6b7280;
+            cursor: pointer;
+        }
+        .tour-stamp-cell:hover { background: rgba(138, 180, 248, 0.12); }
+        .tour-stamp-mark {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem;
+            font-weight: bold;
+        }
+        .tour-stamp-cell.is-got { color: #e5e7eb; }
+        .tour-stamp-cell.is-got .tour-stamp-mark {
+            border: 2px solid rgba(255, 120, 110, 0.85);
+            color: rgba(255, 140, 125, 0.95);
+            transform: rotate(-12deg);
+        }
+        .tour-stamp-name { font-size: 0.7rem; text-align: center; line-height: 1.3; }
+        .tour-stamp-reset {
+            margin-top: 14px;
+            width: 100%;
+            min-height: 36px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+        }
+        .tour-stamp-reset.is-confirm { border-color: rgba(255, 120, 110, 0.7); color: #ff9a8f; }
+
+        /* スタンプ帳：表示の切り替え（一覧／全天スタンプ星図） */
+        .stamp-tabs { display: flex; gap: 6px; margin: 0 0 10px; }
+        .stamp-tab {
+            flex: 1;
+            min-height: 34px;
+            border-radius: 8px;
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            background: transparent;
+            color: #9ca3af;
+            font-size: 0.86rem;
+            cursor: pointer;
+        }
+        .stamp-tab[aria-selected="true"] { color: #ffe3a6; border-color: rgba(255, 214, 120, 0.6); background: rgba(255, 214, 120, 0.1); }
+        .stamp-tab:focus-visible { outline: 2px solid #ffe3a6; outline-offset: 2px; }
+        .stamp-map-wrap[hidden], .tour-stamp-grid[hidden] { display: none; }
+        .stamp-map { display: block; width: 100%; border-radius: 8px; cursor: pointer; }
+        .stamp-map-note { margin: 8px 0 0; font-size: 0.78rem; }
+
+        /* コンプリートした人だけに出る欄（フィナーレ・認定証） */
+        .stamp-complete {
+            margin: 0 0 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 214, 120, 0.55);
+            background: linear-gradient(135deg, rgba(255, 214, 120, 0.16), rgba(255, 214, 120, 0.04));
+        }
+        .stamp-complete[hidden] { display: none; }
+        .stamp-complete-text { color: #ffe3a6; font-weight: bold; margin-bottom: 8px; }
+        .stamp-complete-date { color: #cbd5e1; font-weight: normal; font-size: 0.82rem; margin-left: 6px; }
+        .stamp-complete-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        /* 金色のスタンプ帳（88個そろったとき） */
+        #tour-stamp-box.is-complete {
+            border-color: rgba(255, 214, 120, 0.75);
+            background: linear-gradient(160deg, #1d1a10 0%, #0c1224 45%, #0c1224 100%);
+            box-shadow: 0 0 0 1px rgba(255, 214, 120, 0.25), 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 214, 120, 0.12);
+        }
+        #tour-stamp-box.is-complete .tour-stamp-cell.is-got { border-color: rgba(255, 214, 120, 0.3); background: rgba(255, 214, 120, 0.06); }
+        #tour-stamp-box.is-complete .tour-stamp-cell.is-got .tour-stamp-mark {
+            border-color: rgba(255, 205, 110, 0.95);
+            color: #ffd98a;
+            box-shadow: 0 0 10px rgba(255, 205, 110, 0.35);
+        }
+
+        /* 認定証 */
+        .cert-canvas { display: block; width: 100%; height: auto; aspect-ratio: 1600 / 1130; border-radius: 8px; margin: 4px 0 12px; }
+        .cert-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 0.84rem; color: #cbd5e1; }
+        .cert-form input {
+            min-height: 38px;
+            padding: 0 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(138, 180, 248, 0.45);
+            background: #1f2937;
+            color: #e5e7eb;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        .cert-form input:focus-visible { outline: 2px solid #ffe3a6; outline-offset: 1px; }
+        .cert-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .cert-actions .tour-modal-close { width: auto; height: auto; border-radius: 22px; font-size: 0.95rem; }
+
+        /* フィナーレ：画面上の文字と、スキップボタン */
+        body.finale-on .control-panel,
+        body.finale-on .settings-fab,
+        body.finale-on .panel-backdrop,
+        body.finale-on .con-info,
+        body.finale-on .tour-top,
+        body.finale-on .tour-card,
+        body.finale-on .tour-toast {
+            display: none !important;
+        }
+        .finale-ui {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: calc(28px + env(safe-area-inset-top, 0px));
+            color: #ffe3a6;
+            text-align: center;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+        }
+        .finale-ui[hidden] { display: none; }
+        .finale-title { font-size: clamp(1.4rem, 4vw, 2.4rem); font-weight: bold; letter-spacing: 0.08em; animation: finale-in 1.6s ease both; }
+        .finale-sub { margin-top: 8px; font-size: clamp(0.85rem, 2.2vw, 1.05rem); color: #e5e7eb; animation: finale-in 1.6s ease 0.6s both; }
+        .finale-count { margin-top: 6px; min-height: 1.4em; font-size: clamp(0.9rem, 2.4vw, 1.15rem); font-variant-numeric: tabular-nums; }
+        .finale-skip {
+            pointer-events: auto;
+            position: absolute;
+            right: calc(16px + env(safe-area-inset-right, 0px));
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            min-height: 40px;
+            padding: 0 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 214, 120, 0.5);
+            background: rgba(10, 16, 32, 0.7);
+            color: #ffe3a6;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .finale-skip:focus-visible { outline: 2px solid #ffe3a6; outline-offset: 2px; }
+        @keyframes finale-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        @media (prefers-reduced-motion: reduce) {
+            .finale-title, .finale-sub { animation: none; }
+        }
+
+        @media (max-width: 768px) {
+            .tour-top { top: calc(6px + env(safe-area-inset-top, 0px)); width: calc(100vw - 12px); padding: 6px 8px 6px 10px; gap: 6px; }
+            .tour-progress-text { font-size: 0.74rem; margin-bottom: 4px; }
+            .tour-mini { min-height: 32px; padding: 0 8px; font-size: 0.72rem; }
+            .tour-exit { width: 32px; }
+            .tour-card { width: calc(100vw - 12px); bottom: calc(6px + env(safe-area-inset-bottom, 0px)); max-height: 47vh; max-height: 47dvh; }
+            .tour-card-head { padding: 10px 12px 4px; }
+            .tour-title h2 { font-size: 1.15rem; }
+            .tour-stamp { width: 42px; height: 42px; font-size: 0.7rem; }
+            .tour-card-body { padding: 2px 12px 10px; font-size: 0.88rem; }
+            .tour-facts { grid-template-columns: 1fr 1fr; }
+            .tour-controls { gap: 8px; padding: 6px 8px 8px; }
+            .tour-btn { min-width: 76px; padding: 0 10px; font-size: 0.88rem; }
+            .tour-play { width: 50px; height: 50px; min-width: 50px; }
+            .tour-dwell-text { display: none; }
+            .tour-toast { top: calc(64px + env(safe-area-inset-top, 0px)); font-size: 0.84rem; }
+        }
+        @media (max-width: 420px) {
+            #tour-btn-voice { font-size: 0; width: 32px; padding: 0; }
+            #tour-btn-voice::before { content: '🔈'; font-size: 0.9rem; }
+            #tour-btn-voice.is-on::before { content: '🔊'; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tour-stamp.is-new { animation: none; }
+            .tour-bar-fill { transition: none; }
+        }
     </style>
 </head>
 <body>
@@ -603,6 +1163,141 @@
         <div class="con-info-en" id="con-info-en"></div>
         <div class="con-info-view" id="con-info-view"></div>
         <p id="con-info-text"></p>
+        <div class="con-info-actions">
+            <button class="con-info-speak" id="con-info-speak" type="button" aria-pressed="false" title="この説明を読み上げる">🔈 読む</button>
+            <button class="con-info-tour" id="con-info-tour" type="button">✦ この星座から星座ツアーへ</button>
+        </div>
+    </div>
+
+    <!-- 星座ツアー（ツアー中だけ表示） -->
+    <div class="tour-ui" id="tour-ui" hidden>
+        <div class="tour-top" id="tour-top">
+            <div class="tour-progress">
+                <div class="tour-progress-text">
+                    <span class="tour-course-label" id="tour-course-label"></span>
+                    <span class="tour-count" id="tour-count"></span>
+                </div>
+                <div class="tour-bar"><div class="tour-bar-fill" id="tour-bar-fill"></div></div>
+            </div>
+            <div class="tour-top-btns">
+                <button class="tour-mini" id="tour-btn-voice" type="button" aria-pressed="false" title="説明を音声で読み上げる">🔈 読み上げ</button>
+                <button class="tour-mini" id="tour-btn-list" type="button" title="コースの星座の一覧から選ぶ">一覧</button>
+                <button class="tour-mini" id="tour-btn-stamps" type="button" title="スタンプ帳を開く">スタンプ帳</button>
+                <button class="tour-mini tour-exit" id="tour-btn-exit" type="button" aria-label="ツアーを終わる" title="ツアーを終わる（Esc）">✕</button>
+            </div>
+        </div>
+
+        <div class="tour-card" id="tour-card" aria-live="polite">
+            <div class="tour-card-head">
+                <div class="tour-title">
+                    <h2 id="tour-name"></h2>
+                    <div class="tour-sub" id="tour-sub"></div>
+                </div>
+                <div class="tour-stamp" id="tour-stamp" role="img"></div>
+            </div>
+            <div class="tour-card-body" id="tour-body"></div>
+            <div class="tour-controls">
+                <button class="tour-btn" id="tour-btn-prev" type="button" title="前の星座（←キー）">◀ 戻る</button>
+                <button class="tour-btn tour-play is-playing" id="tour-btn-play" type="button" aria-label="自動再生を止める">
+                    <svg class="tour-play-svg" viewBox="0 0 40 40" aria-hidden="true">
+                        <circle cx="20" cy="20" r="17" class="tour-play-track"></circle>
+                        <circle cx="20" cy="20" r="17" class="tour-play-ring" id="tour-play-ring" pathLength="100"></circle>
+                    </svg>
+                    <span class="tour-play-icon" id="tour-play-icon">❚❚</span>
+                </button>
+                <button class="tour-btn" id="tour-btn-next" type="button" title="次の星座（→キー）">次へ ▶</button>
+                <label class="tour-dwell-label" title="自動再生で1つの星座にとどまる時間">
+                    <span class="tour-dwell-text">とどまる時間</span>
+                    <select id="tour-dwell">
+                        <option value="10">10秒</option>
+                        <option value="20" selected>20秒</option>
+                        <option value="30">30秒</option>
+                        <option value="60">60秒</option>
+                        <option value="voice" hidden>読み上げ後3秒</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="tour-toast" id="tour-toast" role="status" aria-live="polite"></div>
+
+    <!-- 星座ツアー：コースを選ぶ -->
+    <div class="tour-modal" id="tour-start-modal" role="dialog" aria-modal="true" aria-labelledby="tour-start-title">
+        <div class="tour-modal-box">
+            <div class="tour-modal-head">
+                <h2 id="tour-start-title">✦ 星座ツアー</h2>
+                <button class="tour-modal-close" type="button" aria-label="閉じる">×</button>
+            </div>
+            <p class="tour-modal-note">星の中をワープで移動しながら、星座をひとつずつめぐります。着いた星座ではスタンプがもらえます。</p>
+            <div class="tour-course-list" id="tour-course-list"></div>
+        </div>
+    </div>
+
+    <!-- 星座ツアー：コースの一覧 -->
+    <div class="tour-modal" id="tour-list-modal" role="dialog" aria-modal="true" aria-labelledby="tour-list-title">
+        <div class="tour-modal-box">
+            <div class="tour-modal-head">
+                <h2 id="tour-list-title">一覧</h2>
+                <button class="tour-modal-close" type="button" aria-label="閉じる">×</button>
+            </div>
+            <div class="tour-list-items" id="tour-list-items"></div>
+        </div>
+    </div>
+
+    <!-- 星座ツアー：スタンプ帳 -->
+    <div class="tour-modal" id="tour-stamp-modal" role="dialog" aria-modal="true" aria-labelledby="tour-stamp-title">
+        <div class="tour-modal-box tour-modal-wide" id="tour-stamp-box">
+            <div class="tour-modal-head">
+                <h2 id="tour-stamp-title">スタンプ帳</h2>
+                <button class="tour-modal-close" type="button" aria-label="閉じる">×</button>
+            </div>
+            <p class="tour-modal-note" id="tour-stamp-note">ツアーで星座に着くとスタンプが押されます。88星座すべて集めると…？ 星座を押すと、その星座へ行けます。</p>
+            <div class="stamp-complete" id="stamp-complete" hidden>
+                <div class="stamp-complete-text">✦ 88星座マスター ✦ <span class="stamp-complete-date" id="stamp-complete-date"></span></div>
+                <div class="stamp-complete-btns">
+                    <button class="tour-mini" id="btn-finale-replay" type="button">✦ フィナーレをもう一度見る</button>
+                    <button class="tour-mini" id="btn-cert-open" type="button">📜 認定証を見る</button>
+                </div>
+            </div>
+            <div class="stamp-tabs" role="tablist" aria-label="スタンプ帳の表示">
+                <button class="stamp-tab" id="stamp-tab-list" type="button" role="tab" aria-selected="true">一覧</button>
+                <button class="stamp-tab" id="stamp-tab-map" type="button" role="tab" aria-selected="false">全天スタンプ星図</button>
+            </div>
+            <div class="tour-stamp-grid" id="tour-stamp-grid"></div>
+            <div class="stamp-map-wrap" id="stamp-map-wrap" hidden>
+                <canvas class="stamp-map" id="tour-stamp-map" role="img" aria-label="スタンプを星座の実際の位置に並べた全天の星図"></canvas>
+                <p class="tour-modal-note stamp-map-note">左が東・右が西、上が北・下が南です。真ん中の横線は天の赤道。スタンプを押すと、その星座へ行けます。</p>
+            </div>
+            <button class="tour-stamp-reset" id="tour-stamp-reset" type="button">スタンプをすべて消す</button>
+        </div>
+    </div>
+
+    <!-- 88星座コンプリート：認定証 -->
+    <div class="tour-modal" id="cert-modal" role="dialog" aria-modal="true" aria-labelledby="cert-title">
+        <div class="tour-modal-box tour-modal-wide cert-box">
+            <div class="tour-modal-head">
+                <h2 id="cert-title">📜 88星座マスター 認定証</h2>
+                <button class="tour-modal-close" type="button" aria-label="閉じる">×</button>
+            </div>
+            <canvas class="cert-canvas" id="cert-canvas" width="1600" height="1130" role="img" aria-label="88星座マスターの認定証"></canvas>
+            <div class="cert-form">
+                <label for="cert-name">認定証に入れる名前（任意・20文字まで）</label>
+                <input type="text" id="cert-name" maxlength="20" autocomplete="off" placeholder="例：ほしの たろう">
+            </div>
+            <div class="cert-actions">
+                <button class="tour-btn" id="cert-save" type="button">🖼 画像として保存（PNG）</button>
+                <button class="tour-btn tour-modal-close" type="button">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 88星座コンプリート：フィナーレの文字 -->
+    <div class="finale-ui" id="finale-ui" hidden>
+        <div class="finale-title">✦ 88星座 コンプリート ✦</div>
+        <div class="finale-sub" id="finale-sub"></div>
+        <div class="finale-count" id="finale-count" aria-live="polite"></div>
+        <button class="finale-skip" id="finale-skip" type="button" title="Escキーでも飛ばせます">スキップ ▶▶</button>
     </div>
 
     <!-- モバイル表示：設定モーダルを開くボタンと、モーダルの背景 -->
@@ -634,6 +1329,56 @@
         </div>
 
         <div class="panel-content" id="panel-body">
+            <!-- 星座ツアー -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 星座ツアー</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="section-body-inner">
+                <div class="obs-help">星の中をワープで移動しながら、88星座をめぐります。季節の星座・黄道十二星座・今夜見える星座などのコースも選べます。</div>
+                <div class="control-group">
+                    <button class="toggle-btn panel-tour-btn" id="panel-tour-start" type="button">✦ ツアーを始める</button>
+                </div>
+                <div class="control-group">
+                    <button class="toggle-btn panel-tour-sub" id="panel-tour-stamps" type="button">📖 スタンプ帳（0 / 88）</button>
+                </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- 音声読み上げ -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 音声読み上げ</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="section-body-inner">
+                <div class="obs-help">星座ツアーの説明（上のバーの「読み上げ」をオン）と、星座・星雲をタップしたときの説明カード（「🔈 読む」ボタン）を読み上げます。</div>
+                <div class="control-group">
+                    <label for="param-speech-voice" style="margin-bottom:6px;">声の種類</label>
+                    <select id="param-speech-voice" class="obs-num">
+                        <option value="">自動（この端末の日本語の声）</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="param-speech-rate">読む速さ: <span id="val-speech-rate">1.0</span>倍</label>
+                    <input type="range" id="param-speech-rate" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <button class="toggle-btn" id="btn-speech-test" type="button" style="width:100%;height:28px;font-size:0.8rem;">▶ 試しに聞く</button>
+                </div>
+                <div class="obs-msg" id="speech-msg" style="margin:0 0 10px;"></div>
+                </div>
+                </div>
+            </div>
+
             <!-- 1. 星：数量 & サイズ -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
@@ -1115,6 +1860,30 @@
                 </div>
             </div>
 
+            <!-- 天の川（88星座コンプリートのごほうび） -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title" id="milkyway-section-title">● 天の川（🔒 ごほうび）</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="section-body-inner">
+                <div class="obs-help" id="milkyway-msg"></div>
+                <div class="control-group">
+                    <label>天の川を表示
+                        <button class="toggle-btn" id="btn-toggle-milkyway" style="padding:2px 8px;font-size:0.78rem;height:25px;">非表示</button>
+                    </label>
+                </div>
+                <div class="control-group">
+                    <label>天の川の明るさ: <span id="val-milkyway-brightness">1.0</span>倍</label>
+                    <input type="range" id="param-milkyway-brightness" min="0.3" max="2.0" step="0.1" value="1.0">
+                </div>
+                </div>
+                </div>
+            </div>
+
             <!-- 6. 太陽と月 -->
             <div class="control-section is-collapsed">
                 <button class="section-toggle" type="button" aria-expanded="false">
@@ -1225,6 +1994,27 @@
                 </div>
                 </div>
             </div>
+
+            <!-- 設定の保存 -->
+            <div class="control-section is-collapsed">
+                <button class="section-toggle" type="button" aria-expanded="false">
+                    <span class="section-title">● 設定の保存</span>
+                    <svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="section-body">
+                <div class="section-body-inner">
+                <div class="obs-help">設定はこのブラウザに自動で保存されます。ブラウザのデータが消えたときや別のパソコンへ移すときのために、設定・表示する星座・星座ツアーのスタンプをJSONファイルに書き出し（エクスポート）、読み込む（インポート）ことができます。</div>
+                <div class="control-group" style="display:flex; gap:8px;">
+                    <button class="toggle-btn" id="btn-export" type="button" style="flex:1; height:30px;">エクスポート</button>
+                    <button class="toggle-btn" id="btn-import" type="button" style="flex:1; height:30px;">インポート</button>
+                    <input type="file" id="import-file" accept=".json,application/json" hidden>
+                </div>
+                <div class="obs-msg save-status" id="save-status" role="status" aria-live="polite" style="margin:0 0 10px;"></div>
+                </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1282,6 +2072,10 @@
             moonWaxing: true,
             moonAutoPhase: false,
             moonColor: '#f4f1e8',
+            speechVoice: '',   // 読み上げの声の名前（'' は自動：この端末の日本語の声）
+            speechRate: 1.0,   // 読み上げの速さ（倍）
+            showMilkyWay: false,      // 天の川（88星座コンプリートのごほうび）を表示するか
+            milkyWayBrightness: 1.0,  // 天の川の明るさ（倍）
             moonShadowColor: '#1b2438'
         };
 
@@ -1312,7 +2106,9 @@
             { id: 'param-moon-x', key: 'moonX', valId: 'val-moon-x', type: 'int' },
             { id: 'param-moon-y', key: 'moonY', valId: 'val-moon-y', type: 'int' },
             { id: 'param-moon-phase', key: 'moonPhase', valId: 'val-moon-phase', type: 'int' },
-            { id: 'param-moon-color', key: 'moonColor', type: 'color' }
+            { id: 'param-moon-color', key: 'moonColor', type: 'color' },
+            { id: 'param-speech-rate', key: 'speechRate', valId: 'val-speech-rate', type: 'float' },
+            { id: 'param-milkyway-brightness', key: 'milkyWayBrightness', valId: 'val-milkyway-brightness', type: 'float' }
         ];
 
         let hideTimerId = null;
@@ -1393,6 +2189,7 @@
             bindToggle('btn-toggle-lines', 'showLines', '表示中', '非表示');
             bindToggle('btn-toggle-sun', 'showSun', '表示中', '非表示');
             bindToggle('btn-toggle-moon', 'showMoon', '表示中', '非表示');
+            bindToggle('btn-toggle-milkyway', 'showMilkyWay', '表示中', '非表示');
             bindToggle('btn-toggle-moon-waxing', 'moonWaxing', '満ちていく', '欠けていく');
             bindToggle('btn-toggle-moon-auto', 'moonAutoPhase', '自転と連動', '手動', (on) => {
                 moonPhaseSlider.disabled = on;
@@ -1435,6 +2232,7 @@
                 centerSelect.value = config.centerStar;
                 syncObserveUI();
                 syncDsoUI();
+                fillVoiceSelect();
             };
 
             resetBtn.addEventListener('click', (e) => {
@@ -1536,6 +2334,7 @@
 
             // 設定パネルの再表示は、画面のダブルタップ／ダブルクリックで行う（initConstellationInfoで検出）
             showSettingsPanel = showPanel;
+            closeSettingsModal = () => closeModal(false); // 星座ツアーを始めるときに、スマホの設定モーダルを閉じる
 
             initDraggable();
             initSliderTouchPrevention();
@@ -1866,12 +2665,12 @@
                         const sB = de / h, cB = dn / h;
                         const sT = sB * view.cR + cB * view.sR;
                         const cT = cB * view.cR - sB * view.sR;
-                        p = { x: view.cx + r * sT, y: view.cy - r * cT };
+                        p = { x: view.cx - r * sT, y: view.cy - r * cT }; // 上が北・左が東
                         // 正距方位図法を180°の先まで延ばした位置（反対側の方位に、360°−角距離）。
                         // 実在の星はここには描かないが、星屑で画面全体を埋めて、上下や四隅が空っぽに見えないようにする
                         const r2 = view.k * (2 * Math.PI - c);
                         if (r2 < view.reach) {
-                            const q = { x: view.cx - r2 * sT, y: view.cy + r2 * cT };
+                            const q = { x: view.cx + r2 * sT, y: view.cy + r2 * cT };
                             if (inScreen(q)) {
                                 st.x2 = q.x;
                                 st.y2 = q.y;
@@ -1901,25 +2700,25 @@
             return Math.min(1, Math.max(0, horizonY() / height));
         }
 
-        function drawDust(cx, cy, maxR) {
+        // nv は通常モード（とツアー）の見え方 { ra(時), dec(度), ang(画面の端までの角度), rot(回転角), cx, cy }
+        function drawDust(nv, maxR) {
             if (!stars.length) return;
             // 1フレームに1回だけ、回転に必要な値を求める
-            const view = { obs: !!obsState, cx, cy };
+            const view = { obs: !!obsState, cx: nv.cx, cy: nv.cy };
             if (obsState) {
                 const L = obsState.lst * DEG;
                 const P = config.obsLat * DEG;
                 view.cL = Math.cos(L); view.sL = Math.sin(L);
                 view.cP = Math.cos(P); view.sP = Math.sin(P);
             } else {
-                const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
-                const a0 = center.ra * 15 * DEG;
-                const d0 = center.dec * DEG;
+                const a0 = nv.ra * 15 * DEG;
+                const d0 = nv.dec * DEG;
                 view.C = [Math.cos(d0) * Math.cos(a0), Math.cos(d0) * Math.sin(a0), Math.sin(d0)];
                 view.N = [-Math.sin(d0) * Math.cos(a0), -Math.sin(d0) * Math.sin(a0), Math.cos(d0)];
                 view.E = [-Math.sin(a0), Math.cos(a0)];
-                view.k = maxR / (viewAngDeg() * DEG); // 1ラジアンあたりのpx
-                view.cR = Math.cos(rotationDeg * DEG);
-                view.sR = Math.sin(rotationDeg * DEG);
+                view.k = maxR / (nv.ang * DEG); // 1ラジアンあたりのpx
+                view.cR = Math.cos(nv.rot * DEG);
+                view.sR = Math.sin(nv.rot * DEG);
                 view.reach = Math.hypot(width, height) / 2 + 10; // 画面の中心から四隅までの距離
             }
             const limit = dustLimit;
@@ -2006,7 +2805,7 @@
         function updateMeteors(dt) {
             // 60fpsで1フレームあたり 0.004×頻度 の確率だった出現を、1秒あたりの頻度に直す（平均 0.24×頻度 個/秒）
             const rate = 0.24 * config.meteorFreq;
-            if (meteors.length < MAX_METEORS && Math.random() < 1 - Math.exp(-rate * dt)) {
+            if (meteors.length < (finale.active ? MAX_METEORS_FINALE : MAX_METEORS) && Math.random() < 1 - Math.exp(-rate * dt)) {
                 meteors.push(new Meteor());
             }
             for (let i = meteors.length - 1; i >= 0; i--) {
@@ -2060,7 +2859,9 @@
                 const theta = (bearing + rotationDeg) * toRad;
                 const r = maxR * (cDeg / maxAngDeg);
 
-                this.x = cx + r * Math.sin(theta);
+                // 地上から見上げた空と同じ向き（上が北・左が東）にする。
+                // 東（赤経が大きい側）が右に来ると、星座が裏返しに見えてしまう
+                this.x = cx - r * Math.sin(theta);
                 this.y = cy - r * Math.cos(theta);
                 this.visible = true;
                 this.projOk = true;
@@ -2846,11 +3647,119 @@
             ], lines: [[1,0],[0,2]] }
         ];
 
+        // --- 星座線の補強（星座ツアーで形がわかるように） ---
+        // 元のデータで星が1〜2個しかない／線がない星座などに、主な星（J2000・簡略値）と星座線を足す。
+        // add の星は、その星座の stars の末尾に追加される（番号は既存の星の数から続く）。
+        // lines があれば、その星座の線をこの内容に置き換える
+        const SKY_PATCH = {
+            "うさぎ座": {
+                add: [[5.091, -22.371, 3.19], [5.216, -16.206, 3.29], [5.783, -14.822, 3.55], [5.741, -22.448, 3.60], [5.856, -20.879, 3.76], [5.940, -14.168, 3.71]],
+                lines: [[3,0],[0,4],[4,7],[0,1],[1,2],[1,5],[5,6]]
+            },
+            "うしかい座": {
+                add: [[14.686, 13.728, 3.78]],
+                lines: [[0,1],[1,4],[4,5],[5,2],[2,3],[3,0],[0,6],[0,7]]
+            },
+            "うみへび座": {
+                add: [[8.628, 5.704, 4.14], [8.646, 3.341, 4.45], [8.720, 3.399, 4.30], [8.780, 6.419, 3.38], [8.923, 5.946, 3.11],
+                      [9.239, 2.314, 3.88], [9.664, -1.143, 3.91], [9.858, -14.847, 4.12], [10.177, -12.354, 3.61], [10.434, -16.836, 3.81],
+                      [10.827, -16.194, 3.11], [11.550, -31.858, 3.54], [11.882, -33.908, 4.28], [13.315, -23.171, 3.00], [14.106, -26.682, 3.27]],
+                lines: [[1,4],[4,5],[5,3],[3,2],[2,1],[5,6],[6,7],[7,0],[0,8],[8,9],[9,10],[10,11],[11,12],[12,13],[13,14],[14,15]]
+            },
+            "おとめ座": {
+                add: [[11.845, 1.765, 3.61], [12.332, -0.667, 3.89], [12.694, -1.449, 2.74], [12.927, 3.397, 3.38], [13.036, 10.959, 2.85],
+                      [13.165, -5.539, 4.38], [13.578, -0.596, 3.37], [14.028, 1.544, 4.26], [14.267, -6.001, 4.08], [14.718, -5.658, 3.88], [14.770, 1.893, 3.72]],
+                lines: [[1,2],[2,3],[3,4],[4,5],[3,6],[6,0],[4,7],[7,8],[8,11],[7,9],[9,10]]
+            },
+            "きりん座": {
+                lines: [[0,1],[1,2]]
+            },
+            "くじら座": {
+                add: [[2.722, 3.236, 3.47], [2.658, 0.329, 4.07], [2.322, -2.977, 3.04], [1.858, -10.335, 3.73], [1.734, -15.937, 3.50],
+                      [0.324, -8.824, 3.56], [1.143, -10.182, 3.45], [1.400, -8.184, 3.60], [2.995, 8.907, 4.70], [2.749, 10.114, 4.27], [2.469, 8.460, 4.28]],
+                lines: [[0,10],[10,11],[11,12],[12,2],[2,0],[2,3],[3,4],[4,5],[5,6],[6,1],[1,7],[7,8],[8,9],[9,5]]
+            },
+            "ケンタウルス座": {
+                add: [[14.111, -36.370, 2.06], [12.692, -48.960, 2.17], [13.665, -53.466, 2.30], [14.592, -42.158, 2.31], [13.926, -47.288, 2.55],
+                      [12.139, -50.722, 2.52], [13.343, -36.712, 2.75], [14.986, -42.104, 3.13], [13.825, -42.474, 3.04], [13.827, -41.688, 3.41]],
+                lines: [[0,1],[1,4],[4,6],[6,5],[5,9],[4,3],[3,7],[6,10],[10,11],[11,2],[11,8]]
+            },
+            "こいぬ座": {
+                add: [[7.453, 8.289, 2.89]],
+                lines: [[0,1]]
+            },
+            "こぎつね座": {
+                add: [[19.270, 21.390, 4.77], [19.891, 24.080, 4.57]],
+                lines: [[1,0],[0,2]]
+            },
+            "さんかく座": {
+                add: [[2.289, 33.847, 4.01]],
+                lines: [[1,0],[0,2],[2,1]]
+            },
+            "とも座": {
+                add: [[7.822, -24.860, 3.34], [6.629, -43.196, 3.17], [6.832, -50.615, 2.93], [7.487, -43.301, 3.25]],
+                lines: [[2,3],[3,1],[1,4],[4,5],[5,6],[6,0],[0,2]]
+            },
+            "へび座": {
+                add: [[15.770, 15.422, 3.67], [15.941, 15.662, 3.85], [15.812, 18.142, 4.09], [15.580, 10.539, 3.80], [15.847, 4.478, 3.71],
+                      [15.827, -3.430, 3.54], [17.347, -12.847, 4.32], [17.627, -15.398, 3.54], [18.355, -2.899, 3.23], [18.937, 4.204, 4.62]],
+                lines: [[3,2],[2,1],[1,3],[1,4],[4,0],[0,5],[5,6],[7,8],[8,9],[9,10]]
+            },
+            "へびつかい座": {
+                add: [[16.961, 9.375, 3.20], [16.239, -3.694, 2.74], [16.305, -4.693, 3.24], [16.619, -10.567, 2.56], [17.173, -15.725, 2.43],
+                      [17.984, -9.774, 3.32], [17.725, 4.567, 2.76], [17.367, -24.999, 3.27]],
+                lines: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[5,8]]
+            },
+            "ほ座": {
+                add: [[9.133, -43.433, 2.21], [9.368, -55.011, 2.47], [10.779, -49.420, 2.69], [9.948, -54.568, 3.54], [9.511, -40.467, 3.60]],
+                lines: [[0,1],[1,3],[3,5],[5,4],[4,6],[6,2],[2,0]]
+            },
+            "りゅう座": {
+                lines: [[2,1],[1,4],[4,3],[3,2],[4,5],[5,6],[6,7],[7,8],[8,9],[9,12],[12,0],[0,11],[11,10]]
+            },
+            "りゅうこつ座": {
+                add: [[9.220, -69.717, 1.68], [8.375, -59.510, 1.86], [9.285, -59.275, 2.21], [10.716, -64.394, 2.76], [9.785, -65.072, 2.97],
+                      [10.229, -70.038, 3.29], [7.946, -52.982, 3.47], [10.533, -61.685, 3.30]],
+                lines: [[0,7],[7,2],[2,3],[3,8],[8,4],[4,6],[6,1],[1,5],[5,3]]
+            },
+            "いて座": {
+                add: [[18.097, -30.424, 2.99], [18.350, -29.828, 2.70], [18.466, -25.421, 2.81], [18.761, -26.991, 3.17], [19.116, -27.670, 3.32]],
+                lines: [[3,4],[3,0],[4,0],[0,2],[2,6],[6,4],[4,5],[5,6],[6,1],[1,7],[7,2]]
+            },
+            "さそり座": {
+                add: [[15.981, -26.114, 2.89], [16.353, -25.593, 2.89], [16.598, -28.216, 2.82], [16.836, -34.293, 2.29], [16.865, -38.048, 3.00],
+                      [16.910, -42.362, 3.62], [17.203, -43.239, 3.33], [17.793, -40.127, 2.99], [17.708, -39.030, 2.39]],
+                lines: [[0,1],[1,5],[1,6],[6,2],[2,7],[7,8],[8,9],[9,10],[10,11],[11,3],[3,12],[12,13],[13,4]]
+            },
+            "おうし座": {
+                lines: [[3,4],[4,5],[5,1],[3,0],[0,2]]
+            },
+            "オリオン座": {
+                add: [[5.585, 9.934, 3.39]],
+                lines: [[0,5],[2,3],[3,4],[4,5],[5,6],[3,1],[0,7],[7,2]]
+            },
+            "かんむり座": {
+                add: [[15.826, 26.068, 4.63], [15.960, 26.878, 4.15], [16.024, 29.851, 4.98]],
+                lines: [[1,0],[0,2],[2,3],[3,4],[4,5],[5,6]]
+            },
+            "わし座": {
+                add: [[19.090, 13.863, 2.99], [19.425, 3.115, 3.36], [20.188, -0.821, 3.23], [19.104, -4.882, 3.43]],
+                lines: [[1,0],[0,2],[2,3],[0,4],[4,6],[1,5]]
+            }
+        };
+        SKY_DATA.forEach(con => {
+            const p = SKY_PATCH[con.name];
+            if (!p) return;
+            if (p.add) p.add.forEach(s => con.stars.push(s.slice()));
+            if (p.lines) con.lines = p.lines.map(l => l.slice());
+        });
+
         const realStars = [];
         const lineSegments = [];
         const constellationVisible = SKY_DATA.map(() => true); // 星座ごとの表示/非表示フラグ
         let rotationDeg = 0;
         let lastFrameTime = performance.now();
+        let lastNormalView = null; // 直前のフレームの通常モードの見え方（ツアーの開始位置に使う）
 
         function buildSky() {
             SKY_DATA.forEach((con, ci) => {
@@ -2867,11 +3776,12 @@
         function drawConstellationLines() {
             if (!config.showLines) return;
             ctx.save();
-            ctx.globalAlpha = skyDim;
+            ctx.globalAlpha = skyDim * (tour.active || finale.active ? 0.45 : 1); // ツアー中・フィナーレ中はほかの線を控えめに
             ctx.strokeStyle = "rgba(150, 190, 255, 0.35)";
             ctx.lineWidth = 1;
             lineSegments.forEach(seg => {
                 if (!constellationVisible[seg.ci]) return;
+                if (tour.active && seg.ci === tour.ci) return; // 訪れている星座はツアーが描く
                 const path = segPath(realStars[seg.a], realStars[seg.b]);
                 if (!path) return;
                 ctx.beginPath();
@@ -3136,6 +4046,20 @@
             const maxR = Math.min(width, height) * (config.observeMode ? 0.43 : 0.47);
             setupObsProjection(cx, cy, maxR);
 
+            // 通常モードの見え方（中心・拡大・回転）。星座ツアー中はツアーのカメラが決める
+            if (finale.active) updateFinale(dt);
+            else if (tour.active) updateTour(dt, maxR);
+            let nv;
+            if (finale.active) {
+                nv = { ra: finale.view.ra, dec: finale.view.dec, ang: MAX_ANG_DEG / finale.view.zoom, rot: finale.view.rot, cx, cy: finale.view.cy };
+            } else if (tour.active) {
+                nv = { ra: tour.view.ra, dec: tour.view.dec, ang: MAX_ANG_DEG / tour.view.zoom, rot: tour.view.rot, cx, cy: tour.view.cy };
+            } else {
+                const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
+                nv = { ra: center.ra, dec: center.dec, ang: viewAngDeg(), rot: rotationDeg, cx, cy };
+            }
+            lastNormalView = nv;
+
             // 観測モード：シミュレーション時刻を進め、太陽・月・恒星時を計算する
             if (config.observeMode) {
                 if (obsLive && config.obsSpeed === 1) obsSimMs = Date.now();
@@ -3145,11 +4069,12 @@
                 drawDaySky(cx, cy, maxR);
             } else {
                 obsState = null;
-                skyDim = 1;
+                skyDim = finale.active ? 1 : tour.active ? tour.skyDim : 1; // ツアーのワープ中は星空を少し暗くして、流れる星を目立たせる
             }
 
             // 1. 背景の淡い星（実在データを持たない演出用の星屑。天球に固定して、空と一緒に動かす）
-            drawDust(cx, cy, maxR);
+            drawDust(nv, maxR);
+            drawMilkyWay(nv, maxR); // ごほうびの天の川（星屑と星座の間の層）
 
             if (obsState) drawObserveGround(cx, cy, maxR);
 
@@ -3159,12 +4084,10 @@
                 realStars.forEach(rs => rs.updateHorizontal(obsState, config.obsLat));
                 updateDeepSky(rs => rs.updateHorizontal(obsState, config.obsLat));
             } else {
-                // 通常：選択中の中心星（北極星 or シリウスなど）を基準に配置
-                const center = CENTER_PRESETS[config.centerStar] || CENTER_PRESETS.polaris;
-                const centerRaDeg = center.ra * 15;
-                const viewAng = viewAngDeg();
-                realStars.forEach(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, viewAng, rotationDeg));
-                updateDeepSky(rs => rs.updatePosition(centerRaDeg, center.dec, cx, cy, maxR, viewAng, rotationDeg));
+                // 通常：選択中の中心星（北極星 or シリウスなど）、またはツアーのカメラを基準に配置
+                const centerRaDeg = nv.ra * 15;
+                realStars.forEach(rs => rs.updatePosition(centerRaDeg, nv.dec, nv.cx, nv.cy, maxR, nv.ang, nv.rot));
+                updateDeepSky(rs => rs.updatePosition(centerRaDeg, nv.dec, nv.cx, nv.cy, maxR, nv.ang, nv.rot));
             }
 
             // 3. 星座線 → 4. 実在の星（表示ONの星座のみ描画）
@@ -3178,18 +4101,384 @@
             });
             ctx.restore();
 
-            // 選択中の星座を強調
-            drawSelectedConstellation();
+            if (finale.active) {
+                // コンプリートのフィナーレ：88星座が順に灯る（太陽・月は表示しない）
+                drawFinaleOverlay(maxR);
+            } else if (tour.active) {
+                // 星座ツアー：訪れている星座の線・星の名前と、ワープの流れる星を描く（太陽・月は表示しない）
+                drawTourOverlay(maxR);
+            } else {
+                // 選択中の星座を強調
+                drawSelectedConstellation();
 
-            // 4.5 太陽・月（近くの天体として星の手前に描画）
-            drawSun();
-            drawMoon();
+                // 4.5 太陽・月（近くの天体として星の手前に描画）
+                drawSun();
+                drawMoon();
+            }
 
             // 5. 流れ星（複数同時に流れる。観測モードでは空の部分だけ・昼間は見えない）
             updateMeteors(dt);
 
             requestAnimationFrame(animate);
         }
+
+        // --- 星座ツアー用の詳しい説明 ---
+        // abbr: 略符 / rank: 全天88星座の中での面積の順位 /
+        // stars: 名前を表示する星 [SKY_DATAの星の番号, 名前, 色] / myth: 神話・由来 / find: 見つけ方
+        const TOUR_INFO = {
+            "アンドロメダ座": { abbr: "And", rank: 19,
+                stars: [[0, "アルフェラッツ", "青白"], [2, "ミラク", "赤"], [3, "アルマク", "オレンジ"]],
+                myth: "エチオピアの王女アンドロメダ。母カシオペヤが「娘は海の精たちより美しい」と自慢したため海の神ポセイドンの怒りを買い、海の怪物（くじら座）へのいけにえとして海辺の岩に鎖でつながれました。そこへ怪物メドゥーサを退治した帰りの英雄ペルセウスが通りかかり、怪物を倒して王女を救い、二人は結ばれました。",
+                find: "秋の四辺形（ペガスス座）の北東の角の星アルフェラッツから、北東へ星が2列に伸びるのがアンドロメダ座です。ミラクから北西へ星を2つたどった先に、アンドロメダ銀河（M31）がぼんやりと見えます。" },
+            "いっかくじゅう座": { abbr: "Mon", rank: 35,
+                stars: [[0, "β星（三重星）", "青白"], [1, "α星", "オレンジ"]],
+                myth: "17世紀にオランダのプランシウスが設けた新しい星座で、伝説の動物ユニコーン（一角獣）を表します。ギリシア神話の物語はありません。",
+                find: "冬の大三角（ベテルギウス・シリウス・プロキオン）の内側にあります。暗い星ばかりですが、冬の天の川の中にあり、バラ星雲やクリスマスツリー星団など、双眼鏡や望遠鏡で楽しめる天体の多い場所です。" },
+            "いて座": { abbr: "Sgr", rank: 15,
+                stars: [[0, "カウス・アウストラリス", "白"], [1, "ヌンキ", "青白"], [2, "アスケラ", "白"]],
+                myth: "上半身が人、下半身が馬のケンタウルス族が弓を引きしぼる姿です。矢の先はさそり座のアンタレスに向けられていて、暴れるさそりを見張っているといわれます。賢者ケイロンの姿とする話もあります。",
+                find: "夏の南の低い空、さそり座の東にあります。6つの星が北斗七星を小さくしたように並ぶ「南斗六星」や、ティーポットの形が目印です。天の川が最も濃く見える方向で、この奥に天の川銀河の中心があります。" },
+            "いるか座": { abbr: "Del", rank: 69,
+                stars: [[0, "スアロキン", "青白"], [1, "ロタネブ", "黄白"]],
+                myth: "海の神ポセイドンが海の精アンフィトリテを妻に迎えたとき、隠れていた彼女を見つけて説得したいるかの手柄をたたえて星にしたといわれます。α星スアロキンとβ星ロタネブは、19世紀の天文台の助手ニコラウス・ウェナトルの名前を逆さにつづった、遊び心のある名前です。",
+                find: "夏の大三角のアルタイル（わし座）の北東に、小さなひし形と尾の星が並びます。暗めですが形がまとまっていて、見つけやすい星座です。" },
+            "インディアン座": { abbr: "Ind", rank: 49,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "16世紀末にオランダの航海者ケイセルとハウトマンの観測をもとに設けられた星座で、航海の途中で出会った先住民の姿を表すとされます。",
+                find: "南天の、つる座とくじゃく座の間にあります。日本では秋に、南の地平線近くに北側の一部が見えるだけの、目立たない星座です。" },
+            "うお座": { abbr: "Psc", rank: 14,
+                stars: [[0, "アルレシャ", "白"], [1, "アルフェルグ", "黄"]],
+                myth: "美の女神アフロディテと息子エロスが怪物テュフォンに襲われたとき、魚に姿を変えて川へ逃げ込みました。はぐれないように二人をリボンで結んだ姿がうお座だといわれます。α星アルレシャは「結び目」という意味です。",
+                find: "秋の四辺形（ペガスス座）の南と東を囲むように、2匹の魚をリボンでつないだ大きな「V」字形に星が並びます。暗い星ばかりなので、四辺形の南にある小さな星の輪（サークレット）を手がかりに探しましょう。春分点はこの星座の中にあります。" },
+            "うさぎ座": { abbr: "Lep", rank: 51,
+                stars: [[0, "アルネブ", "黄白"], [1, "ニハル", "黄"]],
+                myth: "狩人オリオンの足もとで、オリオンとその猟犬（おおいぬ座）に追われているうさぎの姿とされます。",
+                find: "冬、オリオン座のリゲルの真南にあります。リゲルの下に、うさぎの胴体をつくる小さな四角形と、耳にあたる星の並びが見えます。" },
+            "うしかい座": { abbr: "Boo", rank: 13,
+                stars: [[0, "アークトゥルス", "オレンジ"], [1, "イザール", "オレンジ"], [6, "ムフリッド", "黄"]],
+                myth: "牛飼い、または熊の番人の姿です。熊に変えられた母カリスト（おおぐま座）を、それと知らずに狩ろうとした息子アルカスの姿ともいわれます。アークトゥルスは「熊の番人」という意味で、北天で最も明るい恒星です。",
+                find: "北斗七星の柄のカーブをそのまま延ばした「春の大曲線」で、まずオレンジ色に輝くアークトゥルスへ。そこから北へ、ネクタイ（アイスクリームのコーン）のような形に星が並びます。" },
+            "うみへび座": { abbr: "Hya", rank: 1,
+                stars: [[0, "アルファルド", "オレンジ"]],
+                myth: "英雄ヘラクレスが退治した、9つの頭をもつ怪物ヒドラ。頭を切り落としてもすぐに生えてくる難敵でしたが、ヘラクレスは切り口を火で焼いて倒しました。全天で最も大きな星座で、東西に100度以上も伸びています。",
+                find: "春の宵、しし座のレグルスの南西に、ぽつんと光るオレンジ色のアルファルド（「孤独なもの」の意味）が目印です。頭はかに座の南の小さな星の輪で、そこから南東へ長い体が続き、背中にコップ座とからす座を乗せています。" },
+            "エリダヌス座": { abbr: "Eri", rank: 6,
+                stars: [[3, "アケルナル", "青白"], [0, "クルサ", "白"], [1, "ザウラク", "赤"], [2, "アカマル", "白"]],
+                myth: "ギリシア神話のエリダノス川。太陽神ヘリオスの息子パエトンが父の太陽の馬車を暴走させてしまい、ゼウスの雷に打たれて落ちた川だと伝えられます。",
+                find: "オリオン座のリゲルのすぐ西にあるクルサから始まり、南西へ曲がりくねって長く流れる川の形です。終点の1等星アケルナル（「川の果て」の意味）はとても南にあり、日本では九州南部より南でしか見えません。" },
+            "おうし座": { abbr: "Tau", rank: 17,
+                stars: [[0, "アルデバラン", "オレンジ"], [1, "エルナト", "青白"], [6, "すばる", "青白"]],
+                myth: "大神ゼウスが白い牛に姿を変えてフェニキアの王女エウロパに近づき、背中に乗せて海を渡り、クレタ島へ連れて行ったときの姿とされます。「ヨーロッパ」という名前の由来になった話です。",
+                find: "オリオン座の三つ星を右上（北西）へ延ばすと、オレンジ色の1等星アルデバランに届きます。アルデバランのまわりのV字形の星の集まりがヒアデス星団で牛の顔、その先の小さな星の集まりがすばる（プレアデス星団）です。アルデバランは星団より手前にあり、実は星団の仲間ではありません。" },
+            "おおいぬ座": { abbr: "CMa", rank: 43,
+                stars: [[0, "シリウス", "白"], [3, "アダラ", "青白"], [2, "ウェズン", "黄白"], [1, "ムルジム", "青白"]],
+                myth: "狩人オリオンの猟犬とも、どんな獲物も必ず捕まえる猟犬レラプスともいわれます。シリウスは「焼きこがすもの」という意味です。古代エジプトでは、夜明け前の東の空にシリウスが見えはじめるころにナイル川が増水したので、暦の目印として大切にされました。",
+                find: "オリオン座の三つ星を左下（南東）へ延ばした先に、全天で最も明るい恒星シリウスが輝きます。シリウスから南へ、犬の体と後ろ足の星が三角形に並びます。" },
+            "おおかみ座": { abbr: "Lup", rank: 46,
+                stars: [[0, "α星", "青白"]],
+                myth: "古代ギリシアでは「けもの」と呼ばれ、ケンタウルスが神々へのいけにえとして槍で突いている獣の姿とされました。おおかみとして描かれるようになったのは、のちの時代です。",
+                find: "さそり座のアンタレスの南西、ケンタウルス座との間の、天の川のふちにあります。日本では初夏に、南の地平線近くに北側の一部が見えます。" },
+            "おおぐま座": { abbr: "UMa", rank: 3,
+                stars: [[0, "ドゥベ", "オレンジ"], [4, "アリオト", "白"], [5, "ミザール", "白"], [6, "アルカイド", "青白"]],
+                myth: "大神ゼウスに愛された森の妖精カリストが、ゼウスの妻ヘラの怒りで熊の姿に変えられてしまいました。のちに息子アルカスが母と知らずに熊を射ようとしたため、ゼウスが二人を天に上げ、おおぐま座とこぐま座（またはうしかい座）にしたといわれます。",
+                find: "北の空のひしゃく形の北斗七星が、おおぐま座の背中からしっぽにあたります。ひしゃくの先の2つの星（メラクとドゥベ）を結んだ線を5倍延ばすと、北極星に届きます。ミザールのすぐそばには4等星アルコルがあり、昔は視力試しに使われたといわれます。" },
+            "おとめ座": { abbr: "Vir", rank: 2,
+                stars: [[0, "スピカ", "青白"], [3, "ポリマ", "黄白"], [5, "ビンデミアトリックス", "黄"]],
+                myth: "農業の女神デメテル、またはその娘ペルセポネの姿とされます。手に持った麦の穂の位置に輝くのがスピカ（「麦の穂」の意味）です。正義の女神アストライアとする話もあり、その天秤がとなりのてんびん座です。全天で2番目に大きな星座です。",
+                find: "春の大曲線を、北斗七星の柄からアークトゥルスへ、さらに同じくらい延ばすと、青白い1等星スピカに着きます。スピカから北西へ「Y」の字のように星が並び、おとめ座の体をつくります。北側の空は、たくさんの銀河が集まる「おとめ座銀河団」の方向です。" },
+            "おひつじ座": { abbr: "Ari", rank: 39,
+                stars: [[0, "ハマル", "オレンジ"], [1, "シェラタン", "白"], [2, "メサルティム", "白"]],
+                myth: "金色の毛をもつ空飛ぶ羊。継母にいじめられていた王子プリクソスと王女ヘレを背中に乗せて逃がしました。その金の毛皮は、のちに英雄イアソンたちがアルゴ船で探しに行く宝物になりました。",
+                find: "秋の終わり、アンドロメダ座の南、おうし座のすばるの西に、ハマル・シェラタン・メサルティムの3つの星が「く」の字に並びます。約2000年前には春分点がこの星座にあったため、黄道十二星座の最初の星座とされています。" },
+            "オリオン座": { abbr: "Ori", rank: 26,
+                stars: [[0, "ベテルギウス", "赤"], [1, "リゲル", "青白"], [2, "ベラトリックス", "青白"], [4, "アルニラム", "青白"]],
+                myth: "巨人の狩人オリオン。力自慢で「この世に自分が倒せない獣はいない」と言ったため、大地の女神ガイア（またはヘラ）が放ったさそりに刺されて死んだといわれます。そのため、さそり座が東から昇るとオリオン座は西へ沈み、二人は同じ空に並ばないと語られます。日本では形を鼓（つづみ）に見立てて「つづみ星」とも呼びました。",
+                find: "冬の南の空。赤いベテルギウスと青白いリゲル、その間に3つの星が等間隔に並ぶ「三つ星」で、すぐに見つかります。三つ星の下に縦に並ぶ「小三つ星」の真ん中に、オリオン大星雲（M42）がぼんやりと見えます。" },
+            "がか座": { abbr: "Pic", rank: 59,
+                stars: [[0, "α星", "白"], [1, "β星", "白"]],
+                myth: "18世紀にフランスの天文学者ラカイユが設けた星座で、画家の画架（イーゼル）とパレットを表します。β星のまわりにはちりの円盤と惑星が見つかっていて、惑星が生まれる現場として知られています。",
+                find: "りゅうこつ座のカノープスの南西、かじき座との間にあります。日本からは、β星などがごく南の地平線すれすれに見えるだけです。" },
+            "カシオペヤ座": { abbr: "Cas", rank: 25,
+                stars: [[1, "シェダル", "オレンジ"], [0, "カフ", "黄白"], [2, "ツィー", "青白"], [3, "ルクバー", "白"]],
+                myth: "エチオピアの王妃カシオペヤ。娘アンドロメダの美しさを自慢しすぎて、海の神の怒りを買いました。罰として、天の北極のまわりを回りながら、一年の半分はいすごと逆さまになって過ごしているといわれます。",
+                find: "北の空、北極星をはさんで北斗七星の反対側に、5つの星が「W」（季節によっては「M」）の字に並びます。Wの両はしの2本の線を延ばして交わった点と、真ん中の星を結び、その方向へ約5倍延ばすと北極星が見つかります。" },
+            "かじき座": { abbr: "Dor", rank: 72,
+                stars: [[0, "α星", "白"]],
+                myth: "16世紀末にオランダの航海者ケイセルとハウトマンの観測をもとに設けられた星座で、かじき（またはシイラ）を表します。天の川銀河のとなりの銀河・大マゼラン雲の大部分が、この星座の中にあります。",
+                find: "南天の星座で、日本からはほとんど見えません。南半球では、カノープスとアケルナルの間の南の空に、ぼんやり光る大マゼラン雲が目印になります。" },
+            "かに座": { abbr: "Cnc", rank: 31,
+                stars: [[0, "アルタルフ", "オレンジ"], [1, "アセルス・アウストラリス", "オレンジ"], [2, "アセルス・ボレアリス", "白"], [3, "アクベンス", "白"]],
+                myth: "英雄ヘラクレスが怪物ヒドラと戦っていたとき、女神ヘラが送り込んだ大きなかに。ヘラクレスの足をはさもうとして踏みつぶされましたが、ヘラがその働きをたたえて星にしたといわれます。",
+                find: "春、ふたご座のポルックスとしし座のレグルスの間にある、暗い星の集まりです。中央にぼんやり見えるプレセペ星団（M44）が目印で、暗い空なら肉眼でも光のしみのように見えます。" },
+            "かみのけ座": { abbr: "Com", rank: 42,
+                stars: [[1, "ディアデム", "黄白"], [0, "β星", "黄"]],
+                myth: "古代エジプトの王妃ベレニケが、戦いに出た夫プトレマイオス3世の無事を祈って、自慢の美しい髪を神殿に捧げました。翌日その髪が消えてしまい、天文学者が「神々が天に上げて星にした」と説明したことが由来です。",
+                find: "春、しし座のデネボラとうしかい座のアークトゥルスの間にあります。暗い空では、細かな星が群がる「かみのけ座星団（Mel 111）」が、ぼんやりと広がって見えます。" },
+            "カメレオン座": { abbr: "Cha", rank: 79,
+                stars: [[0, "α星", "黄白"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、航海の途中で見た珍しい生き物カメレオンを表します。となりのはえ座を、舌で狙っているかのような位置にあります。",
+                find: "天の南極の近くにある南天の星座で、日本からは見えません。" },
+            "からす座": { abbr: "Crv", rank: 70,
+                stars: [[0, "ギェナー", "青白"], [3, "クラズ", "黄"], [1, "アルゴラブ", "白"], [2, "ミンカル", "オレンジ"]],
+                myth: "太陽神アポロンの使いのカラスは、もとは銀色の羽で、人の言葉を話したといわれます。しかし、うそをついたためアポロンの怒りにふれ、黒い羽にされて言葉も奪われ、空に上げられました。となりのコップ座の水を、いつまでも飲めないようにされているといわれます。",
+                find: "春、おとめ座のスピカの西（右下）に、4つの3等星が小さな台形をつくります。暗い星の多い南の空で、よく目立つ形です。" },
+            "かんむり座": { abbr: "CrB", rank: 73,
+                stars: [[2, "アルフェッカ", "白"], [0, "ヌサカン", "白"]],
+                myth: "クレタ島の王女アリアドネが、酒の神ディオニソスと結婚したときに贈られた冠とされます。宝石のようにきらめく半円の星の並びが、冠の形です。",
+                find: "初夏、うしかい座のアークトゥルスとこと座のベガの間（アークトゥルス寄り）に、7つの星が小さな半円形に並びます。中央の明るい星がアルフェッカです。" },
+            "きょしちょう座": { abbr: "Tuc", rank: 48,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、大きなくちばしをもつ南米の鳥オオハシ（巨嘴鳥）を表します。小マゼラン雲や、全天で2番目に明るい球状星団「きょしちょう座47（47 Tuc）」がこの星座にあります。",
+                find: "南天の星座で、日本からはほとんど見えません。南半球では、アケルナルの南、小マゼラン雲のあたりが目印です。" },
+            "ぎょしゃ座": { abbr: "Aur", rank: 21,
+                stars: [[0, "カペラ", "黄"], [1, "メンカリナン", "白"], [4, "アルマーズ", "黄白"]],
+                myth: "馬車を発明したといわれるアテネの王エリクトニオスの姿です。足が不自由だった王は、馬車を使って自由に動き回り、その工夫をたたえられて星になったといわれます。カペラは「小さな雌やぎ」の意味で、ぎょしゃは雌やぎを抱いた姿で描かれます。",
+                find: "冬、天頂近くに黄色く輝く1等星カペラと、近くの星で大きな五角形をつくります。ε星アルマーズは、約27年ごとに2年近くも暗くなる、変わった食変光星です。" },
+            "きりん座": { abbr: "Cam", rank: 18,
+                stars: [[0, "β星", "黄"]],
+                myth: "17世紀にオランダのプランシウスが設けた星座で、キリンを表します。北極星の近くの広い範囲を占めていますが、4等星より暗い星ばかりです。",
+                find: "北の空、カシオペヤ座とぎょしゃ座のカペラ、北極星に囲まれた、暗い星の多い場所にあります。双眼鏡で、星がまっすぐに連なる「ケンブルの滝（カスケード）」を探してみましょう。" },
+            "くじゃく座": { abbr: "Pav", rank: 44,
+                stars: [[0, "ピーコック", "青白"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、くじゃくを表します。α星は英語でそのまま「ピーコック（くじゃく）」と呼ばれています。",
+                find: "南天の星座で、日本からはほとんど見えません。南半球では、いて座の南の空に見えます。" },
+            "くじら座": { abbr: "Cet", rank: 4,
+                stars: [[1, "ディフダ", "オレンジ"], [0, "メンカル", "赤"], [4, "ミラ", "赤"]],
+                myth: "王妃カシオペヤの自慢に怒った海の神ポセイドンが、エチオピアの海岸へ送り込んだ海の怪物（化けくじら）。王女アンドロメダを襲おうとしたところを、英雄ペルセウスに退治されました。",
+                find: "秋、うお座の南に広がる大きな星座です。秋の四辺形の東の辺を南へ延ばすと、秋の南の空で目立つ2等星ディフダに着きます。くじらの首のあたりのミラは、約332日の周期で2等星から10等星近くまで明るさを変える「不思議な星」です。" },
+            "ケフェウス座": { abbr: "Cep", rank: 27,
+                stars: [[0, "アルデラミン", "白"], [1, "アルフィルク", "青白"], [2, "エライ", "オレンジ"]],
+                myth: "エチオピアの王ケフェウス。王妃カシオペヤ、王女アンドロメダとともに、秋の空に一家で並んでいます。",
+                find: "北の空、カシオペヤ座の西に、とんがり屋根の家のような五角形に星が並びます。γ星エライは、地球の自転軸の首振り（歳差）によって、約1000年後に北極星の役目を受け継ぐ星です。" },
+            "ケンタウルス座": { abbr: "Cen", rank: 9,
+                stars: [[0, "リギル・ケンタウルス", "黄"], [1, "ハダル", "青白"], [2, "メンケント", "オレンジ"]],
+                myth: "上半身が人、下半身が馬のケンタウルス族の賢者ケイロン。医術や音楽に通じ、ヘラクレスやアキレウスなど多くの英雄を育てました。ヘラクレスの毒矢が誤って当たり、不死の身のまま苦しみ続けたため、ゼウスが天に上げたといわれます。",
+                find: "南天の星座で、α星リギル・ケンタウルスとβ星ハダルは日本からは見えませんが、北側のメンケントなどは春の南の低い空に見えます。α星は太陽系に最も近い恒星系で、距離は約4.3光年です。" },
+            "けんびきょう座": { abbr: "Mic", rank: 66,
+                stars: [[0, "γ星", "黄"]],
+                myth: "18世紀にラカイユが設けた星座で、顕微鏡を表します。4等星より暗い星ばかりの小さな星座です。",
+                find: "秋の初め、やぎ座の南、みなみのうお座のフォーマルハウトの西の低い空にあります。日本からも見えますが、とても暗く、探すのが難しい星座です。" },
+            "こいぬ座": { abbr: "CMi", rank: 71,
+                stars: [[0, "プロキオン", "黄白"], [1, "ゴメイサ", "青白"]],
+                myth: "狩人アクタイオンの猟犬とも、オリオンが連れていた2匹目の猟犬ともいわれます。プロキオンは「犬の先に」という意味で、おおいぬ座のシリウスより少し先に東の空へ昇ってきます。",
+                find: "冬の大三角の東の頂点の1等星プロキオンと、すぐそばのゴメイサの2つの星でできた、小さな星座です。" },
+            "こうま座": { abbr: "Equ", rank: 87,
+                stars: [[0, "キタルファ", "黄"]],
+                myth: "天馬ペガススの兄弟の馬とも伝えられる小さな馬で、ペガスス座の頭の先に、馬の頭だけが描かれます。古代ギリシアのプトレマイオスがまとめた48星座のひとつです。",
+                find: "秋の初め、いるか座とペガスス座の鼻先の間に、4等星が小さな四角形をつくります。全天で2番目に小さな星座です。" },
+            "こぎつね座": { abbr: "Vul", rank: 55,
+                stars: [[0, "アンセル", "赤"]],
+                myth: "17世紀にポーランドのヘベリウスが設けた星座で、もとは「がちょうをくわえたこぎつね」でした。α星アンセルは「がちょう」の意味です。",
+                find: "夏の大三角の中、はくちょう座のくちばしの星アルビレオの南東にあります。暗い星ばかりですが、あれい状星雲（M27）がある星座として知られています。" },
+            "こぐま座": { abbr: "UMi", rank: 56,
+                stars: [[0, "ポラリス（北極星）", "黄白"], [1, "コカブ", "オレンジ"], [2, "フェルカド", "白"]],
+                myth: "熊に変えられたカリスト（おおぐま座）の息子アルカスの姿とされます。ゼウスがしっぽをつかんで天に投げ上げたので、しっぽが長く伸びてしまったという話も伝わります。",
+                find: "北斗七星のひしゃくの先の2つの星を結んだ線を5倍延ばすと、北極星（ポラリス）に届きます。北極星から小さなひしゃく形（小北斗）が伸び、その先のコカブとフェルカドは、北極星のまわりを回る「北極星の番人」と呼ばれます。" },
+            "こじし座": { abbr: "LMi", rank: 64,
+                stars: [[0, "プラエキプア", "オレンジ"]],
+                myth: "17世紀にヘベリウスが設けた星座で、しし座の上にいる小さなライオンを表します。α星がなく、いちばん明るい星は46番星のプラエキプアです。",
+                find: "春、しし座の頭（ししの大がま）と、おおぐま座の後ろ足の間にある、暗い星の小さな星座です。" },
+            "コップ座": { abbr: "Crt", rank: 53,
+                stars: [[3, "δ星", "オレンジ"], [0, "アルケス", "オレンジ"]],
+                myth: "太陽神アポロンの杯（さかずき）。水をくんでくるよう命じられたカラスが、途中でいちじくが熟すのを待って遅れ、うそをついたため、アポロンは杯とカラスを空に上げ、カラスが水を飲めないようにしたといわれます。",
+                find: "春、からす座の西（右）、うみへび座の背中に乗るように、4等星が杯の形に並びます。" },
+            "こと座": { abbr: "Lyr", rank: 52,
+                stars: [[0, "ベガ", "白"], [3, "シェリアク", "青白"], [4, "スラファト", "青白"]],
+                myth: "竪琴の名人オルフェウスの竪琴。亡くなった妻エウリディケを取り戻すため冥界へ行き、竪琴の音色で冥界の王を感動させましたが、「地上に出るまで振り返ってはならない」という約束を最後に破り、妻を失いました。ベガは七夕の「おりひめ星（織女星）」です。",
+                find: "夏の夜、ほぼ天頂に白く輝く1等星ベガが目印で、夏の大三角の頂点のひとつです。ベガの南に小さな平行四辺形が並び、その南側の2つの星の間に、リング星雲（M57）があります。" },
+            "コンパス座": { abbr: "Cir", rank: 85,
+                stars: [[0, "α星", "白"]],
+                myth: "18世紀にラカイユが設けた星座で、製図に使うコンパス（両脚器）を表します。",
+                find: "ケンタウルス座のα星のすぐ東にある小さな南天の星座で、日本からは見えません。" },
+            "さいだん座": { abbr: "Ara", rank: 63,
+                stars: [[1, "β星", "オレンジ"], [0, "α星", "青白"]],
+                myth: "神々がティタン族との戦いの前に、誓いを立てた祭壇とされます。祭壇から立ち昇る煙が、天の川に見えるともいわれます。",
+                find: "さそり座の尾の南にある南天の星座です。日本からは、夏の南の地平線すれすれに一部が見えるだけです。" },
+            "さそり座": { abbr: "Sco", rank: 33,
+                stars: [[2, "アンタレス", "赤"], [4, "シャウラ", "青白"], [3, "サルガス", "黄白"], [1, "ジュバ", "青白"]],
+                myth: "狩人オリオンを刺した大さそり。そのためオリオンは、さそり座が東から昇るとすぐ西へ沈み、今も逃げ続けているといわれます。アンタレスは「火星に対抗するもの」という意味で、赤さが火星と競うほどだとして名づけられました。",
+                find: "夏の宵、南の空に赤く輝く1等星アンタレスが目印です。アンタレスを心臓に、S字に曲がった星の列が尾まで続きます。日本では尾の形を釣り針に見立てて「うおつり星」とも呼びました。" },
+            "さんかく座": { abbr: "Tri", rank: 78,
+                stars: [[0, "β星", "白"], [1, "モタラー", "黄白"]],
+                myth: "ナイル川のデルタ（三角州）や、シチリア島の形を表すともいわれる、古代ギリシアのプトレマイオスの48星座のひとつです。",
+                find: "秋の終わり、アンドロメダ座のミラクとおひつじ座のハマルの間にある、細長い三角形です。近くには、肉眼で見える最も遠い天体のひとつ、さんかく座銀河（M33）があります。" },
+            "しし座": { abbr: "Leo", rank: 12,
+                stars: [[0, "レグルス", "青白"], [1, "デネボラ", "白"], [2, "アルギエバ", "オレンジ"]],
+                myth: "英雄ヘラクレスの「12の難業」の最初に退治された、ネメアの森の人食いライオン。どんな武器も通さない毛皮をもっていましたが、ヘラクレスは素手で首を絞めて倒し、その皮を身にまといました。",
+                find: "春の宵、東から南の空高くに、「？」を裏返したような形の「ししの大がま」が目立ちます。その根元の1等星がレグルス（「小さな王」の意味）、しっぽの先がデネボラで、デネボラは春の大三角の頂点のひとつです。" },
+            "じょうぎ座": { abbr: "Nor", rank: 74,
+                stars: [[0, "γ2星", "黄"]],
+                myth: "18世紀にラカイユが設けた星座で、直角定規を表します。星座の境界が整理されたときに、もとのα星とβ星がとなりの星座に移ったため、α星とβ星がありません。",
+                find: "さそり座のアンタレスの南、天の川の中にある南天の星座で、日本からはほとんど見えません。" },
+            "たて座": { abbr: "Sct", rank: 84,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "17世紀にヘベリウスが設けた星座で、ウィーンを守ったポーランド王ヤン3世ソビエスキの盾を表します。実在の人物にちなむ珍しい星座です。",
+                find: "夏、わし座のアルタイルの南西、天の川の中にあります。暗い星座ですが、天の川が特に濃い「たて座の星雲（スタークラウド）」や野鴨星団（M11）があり、双眼鏡で楽しめます。" },
+            "ちょうこくぐ座": { abbr: "Cae", rank: 81,
+                stars: [[0, "α星", "黄白"]],
+                myth: "18世紀にラカイユが設けた星座で、彫刻に使う道具「のみ（たがね）」を表します。",
+                find: "冬、うさぎ座の南西、はと座の西にある、ごく暗い星座です。日本からも見えますが、南の低い空で見つけるのは難しい星座です。" },
+            "ちょうこくしつ座": { abbr: "Scl", rank: 36,
+                stars: [[0, "α星", "青白"]],
+                myth: "18世紀にラカイユが設けた星座で、彫刻家のアトリエ（彫刻室）を表します。天の川銀河の円盤から真下の方向（銀河の南極）がこの星座の中にあり、たくさんの遠い銀河が見えます。",
+                find: "秋、くじら座のディフダとみなみのうお座のフォーマルハウトの間の南の空にあります。暗い星ばかりですが、明るい渦巻銀河NGC 253（ちょうこくしつ座銀河）があります。" },
+            "つる座": { abbr: "Gru", rank: 45,
+                stars: [[0, "アルナイル", "青白"], [1, "ティアキ", "赤"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、首の長い鶴を表します。",
+                find: "秋、みなみのうお座のフォーマルハウトの南にあります。日本では南の地平線近くに、鶴の首から胴のあたりが見えます。" },
+            "テーブルさん座": { abbr: "Men", rank: 75,
+                stars: [[0, "α星", "黄"]],
+                myth: "18世紀にラカイユが設けた星座で、彼が観測を行った南アフリカ・ケープタウンのテーブル山を表します。大マゼラン雲の一部がかかり、山にかかる雲に見立てられました。山の名前がついた唯一の星座です。",
+                find: "天の南極の近くにある南天の星座で、日本からは見えません。最も明るい星でも5等星という、全天で最も暗い星座です。" },
+            "てんびん座": { abbr: "Lib", rank: 29,
+                stars: [[0, "ズベンエルゲヌビ", "白"], [1, "ズベンエスカマリ", "青白"]],
+                myth: "正義の女神アストライア（おとめ座）が、人の善悪をはかった天秤とされます。昔はさそり座のはさみの一部と考えられていて、α星とβ星の名前は「南のはさみ」「北のはさみ」という意味です。",
+                find: "初夏、おとめ座のスピカとさそり座のアンタレスの間に、3等星が「く」の字（四角形）に並びます。β星ズベンエスカマリは、緑色がかって見えるという人もいる珍しい星です。" },
+            "とかげ座": { abbr: "Lac", rank: 68,
+                stars: [[0, "α星", "白"]],
+                myth: "17世紀にヘベリウスが設けた星座で、とかげを表します。はくちょう座とアンドロメダ座の間のすき間を埋めるように設けられました。",
+                find: "秋の初め、はくちょう座のデネブとカシオペヤ座の間の天の川の中に、4等星がジグザグに並びます。" },
+            "とけい座": { abbr: "Hor", rank: 58,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "18世紀にラカイユが設けた星座で、振り子時計を表します。",
+                find: "エリダヌス座のアケルナルの北にある南天の星座です。日本では冬に、南の地平線近くにα星など北側の一部が見えます。" },
+            "とびうお座": { abbr: "Vol", rank: 76,
+                stars: [[0, "β星", "オレンジ"], [2, "γ星", "黄"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、航海中に見た空飛ぶ魚、とびうおを表します。",
+                find: "りゅうこつ座の南、天の南極に近い南天の星座で、日本からは見えません。" },
+            "とも座": { abbr: "Pup", rank: 20,
+                stars: [[0, "ナオス", "青白"], [1, "π星", "オレンジ"], [2, "トゥレイス", "黄白"]],
+                myth: "金の羊の毛皮を求めて、英雄イアソンたちが乗った巨大な船「アルゴ船」の船尾（とも）です。アルゴ船はあまりに大きな星座だったため、18世紀にとも座・ほ座・りゅうこつ座などに分けられました。ζ星ナオスは、肉眼で見える星の中でも特に高温の星です。",
+                find: "冬から春、おおいぬ座のシリウスの東から南東にかけての、南の低い空にあります。天の川の中にあり、散開星団M46・M47など、双眼鏡で楽しめる星団が多くあります。" },
+            "はえ座": { abbr: "Mus", rank: 77,
+                stars: [[0, "α星", "青白"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、はえ（はじめは「みつばち」）を表します。",
+                find: "天の南極の近く、みなみじゅうじ座のすぐ南にある南天の星座で、日本からは見えません。" },
+            "はくちょう座": { abbr: "Cyg", rank: 16,
+                stars: [[0, "デネブ", "白"], [4, "アルビレオ", "オレンジ"], [1, "サドル", "黄白"]],
+                myth: "大神ゼウスが、スパルタの王妃レダに会うために姿を変えた白鳥とされます。竪琴の名手オルフェウスが死後に白鳥となり、愛用の竪琴（こと座）のそばに置かれたという話もあります。",
+                find: "夏から秋、天頂近くの天の川の中に、大きな十字形に星が並ぶ「北十字」です。尾の1等星デネブは夏の大三角の頂点のひとつ。くちばしのアルビレオは、望遠鏡で見るとオレンジと青の美しい二重星です。" },
+            "はちぶんぎ座": { abbr: "Oct", rank: 50,
+                stars: [[0, "ν星", "オレンジ"]],
+                myth: "18世紀にラカイユが設けた星座で、天体の高さを測る道具「八分儀」を表します。天の南極がこの星座の中にあります。",
+                find: "天の南極を含む南天の星座で、日本からは見えません。北の北極星のような明るい「南極星」はなく、天の南極に最も近いσ星は5等星の暗い星です。" },
+            "はと座": { abbr: "Col", rank: 54,
+                stars: [[0, "ファクト", "青白"], [1, "ワズン", "オレンジ"]],
+                myth: "17世紀にプランシウスが設けた星座で、ノアの箱舟から放たれ、オリーブの枝をくわえて戻ってきた鳩を表すといわれます。",
+                find: "冬、うさぎ座の南の低い空にある星座です。日本からも見えますが、南の地平線に近い場所です。" },
+            "ふうちょう座": { abbr: "Aps", rank: 67,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、ニューギニア島などにすむ美しい鳥、ふうちょう（極楽鳥）を表します。",
+                find: "天の南極の近くにある南天の星座で、日本からは見えません。" },
+            "ふたご座": { abbr: "Gem", rank: 30,
+                stars: [[1, "ポルックス", "オレンジ"], [0, "カストル", "白"], [2, "アルヘナ", "白"]],
+                myth: "スパルタの王妃レダの双子の兄弟、カストルとポルックス。兄カストルが戦いで亡くなると、不死の身だった弟ポルックスは兄とずっと一緒にいたいと父ゼウスに願い、二人はそろって星になったといわれます。",
+                find: "冬から春、オリオン座の北東に、明るい2つの星カストルとポルックスが並びます。2つの星からオリオン座の方向へ、双子の体が平行に伸びています。白いカストルより、少しオレンジ色のポルックスのほうが明るい星です。" },
+            "ペガスス座": { abbr: "Peg", rank: 7,
+                stars: [[0, "マルカブ", "青白"], [1, "シェアト", "赤"], [2, "アルゲニブ", "青白"]],
+                myth: "英雄ペルセウスが怪物メドゥーサを退治したとき、その血から生まれたといわれる、翼をもつ天馬ペガスス。のちに英雄ベレロフォンを乗せて、怪物キマイラの退治に活躍しました。",
+                find: "秋の宵、南の空高くに、4つの星がつくる大きな四角形「秋の四辺形（ペガススの四辺形）」が目印です。北東の角の星アルフェラッツは、アンドロメダ座の星です。" },
+            "へび座": { abbr: "Ser", rank: 23,
+                stars: [[0, "ウヌカルハイ", "オレンジ"]],
+                myth: "へびつかい座の名医アスクレピオスがつかんでいるへび。へびは脱皮して若返ることから、古くから医術や再生の象徴とされてきました。",
+                find: "夏、へびつかい座をはさんで、西側の「頭部」と東側の「尾部」の2つに分かれた、全天で唯一の星座です。頭はかんむり座の南、尾はわし座の近くまで伸びています。" },
+            "へびつかい座": { abbr: "Oph", rank: 11,
+                stars: [[0, "ラスアルハゲ", "白"], [5, "サビク", "白"], [7, "ケバルライ", "オレンジ"], [2, "イェド・プリオル", "赤"]],
+                myth: "死んだ人を生き返らせるほどの名医アスクレピオス。人が死ななくなることを心配した冥界の王ハデスの訴えで、ゼウスの雷に打たれましたが、その功績をたたえて星にされたといわれます。",
+                find: "夏、さそり座の北に広がる、将棋の駒のような大きな五角形です。頭の星ラスアルハゲは、すぐ西にあるヘルクレス座の頭の星ラスアルゲティと並んでいます。黄道が通る星座で、太陽はさそり座よりも長い期間、へびつかい座の中を通ります。" },
+            "ヘルクレス座": { abbr: "Her", rank: 5,
+                stars: [[2, "ラスアルゲティ", "赤"], [0, "コルネフォロス", "黄"]],
+                myth: "大神ゼウスの息子で、ギリシア神話いちばんの英雄ヘラクレス。女神ヘラに憎まれながら、ライオン退治やヒドラ退治など「12の難業」をやりとげました。星座では、さかさまの姿で描かれています。",
+                find: "夏の宵、天頂近く、こと座のベガとうしかい座のアークトゥルスの間にあります。4つの星がつくる台形「キーストーン」が目印で、その西の辺に球状星団M13があり、双眼鏡でも丸い光のかたまりに見えます。" },
+            "ペルセウス座": { abbr: "Per", rank: 24,
+                stars: [[0, "ミルファク", "黄白"], [1, "アルゴル", "青白"]],
+                myth: "大神ゼウスの息子の英雄ペルセウス。見た者を石に変える怪物メドゥーサを、女神アテナの盾に映しながら近づいて退治しました。その帰り道、海の怪物に襲われていた王女アンドロメダを救い出しました。",
+                find: "秋の終わりから冬、カシオペヤ座の南東の天の川の中に、「人」の字のように星が並びます。メドゥーサの頭の位置にあるアルゴルは、約2日21時間ごとに暗くなる食変光星で、「悪魔の星」とも呼ばれました。毎年8月中ごろのペルセウス座流星群は、この方向から流れ出します。" },
+            "ほ座": { abbr: "Vel", rank: 32,
+                stars: [[0, "レゴル", "青白"], [2, "スハイル", "オレンジ"]],
+                myth: "アルゴ船の帆（ほ）の部分です。アルゴ船が分けられたときに、α星とβ星はりゅうこつ座に入ったため、ほ座にはα星とβ星がありません。",
+                find: "春、りゅうこつ座の北の天の川の中にある南天の星座です。日本では、λ星スハイルなど北側の一部が、南の地平線近くに見えます。" },
+            "ぼうえんきょう座": { abbr: "Tel", rank: 57,
+                stars: [[0, "α星", "青白"]],
+                myth: "18世紀にラカイユが設けた星座で、望遠鏡を表します。",
+                find: "いて座とみなみのかんむり座の南にある南天の星座です。日本では夏に、南の地平線近くに一部が見えますが、暗い星ばかりです。" },
+            "ほうおう座": { abbr: "Phe", rank: 37,
+                stars: [[1, "アンカー", "オレンジ"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、自らを炎で焼き、灰の中からよみがえるという伝説の不死鳥（フェニックス）を表します。",
+                find: "秋、くじら座の南、エリダヌス座のアケルナルの北にある南天の星座です。日本では、南の地平線近くにα星アンカーなど北側の一部が見えます。" },
+            "ポンプ座": { abbr: "Ant", rank: 62,
+                stars: [[0, "α星", "オレンジ"]],
+                myth: "18世紀にラカイユが設けた星座で、物理の実験に使う空気ポンプを表します。",
+                find: "春、うみへび座の南にある暗い星座です。日本からも南の低い空に見えますが、目立つ星はありません。" },
+            "みずがめ座": { abbr: "Aqr", rank: 10,
+                stars: [[0, "サダルスード", "黄"], [1, "サダルメリク", "黄"], [2, "スカト", "白"]],
+                myth: "ゼウスが変身したワシ（わし座）にさらわれ、神々の宴で酒をつぐ役になった美少年ガニメデが、水がめから水を注ぐ姿とされます。",
+                find: "秋の宵、ペガスス座の四辺形の南西にあります。水がめの口にあたる4つの星の小さな「Y」字形が目印で、そこから南へ水の流れが続き、みなみのうお座のフォーマルハウトの口へ注いでいます。" },
+            "みずへび座": { abbr: "Hyi", rank: 61,
+                stars: [[1, "β星", "黄"], [0, "α星", "黄白"]],
+                myth: "16世紀末にケイセルとハウトマンが設けた星座で、海へびを表します。β星は太陽によく似た性質をもつ、約24光年の近い恒星です。",
+                find: "天の南極の近く、大マゼラン雲と小マゼラン雲の間にある南天の星座で、日本からは見えません。" },
+            "みなみじゅうじ座": { abbr: "Cru", rank: 88,
+                stars: [[0, "アクルックス", "青白"], [1, "ミモザ", "青白"], [2, "ガクルックス", "赤"]],
+                myth: "もとはケンタウルス座の一部でしたが、16〜17世紀に南半球へ航海した人々に十字架として親しまれ、独立した星座になりました。全天で最も小さな星座で、オーストラリアやニュージーランドなどの国旗にも描かれています。",
+                find: "南天の星座で、日本では沖縄・石垣島など南の島で、春の南の地平線すれすれに見えます。十字の縦の棒を約4.5倍延ばすと、天の南極の位置がわかります。" },
+            "みなみのうお座": { abbr: "PsA", rank: 60,
+                stars: [[0, "フォーマルハウト", "白"]],
+                myth: "美の女神アフロディテが怪物テュフォンから逃れるために化けた魚、またはその親の魚とされます。みずがめ座の水がめから注がれる水を、口で受けて飲んでいる姿で描かれます。",
+                find: "秋の宵、南の低い空にぽつんと輝く1等星フォーマルハウト（「魚の口」の意味）が目印です。秋の空で唯一の1等星で、「南のひとつ星」とも呼ばれます。秋の四辺形の西の辺を南へ延ばすと見つかります。" },
+            "みなみのかんむり座": { abbr: "CrA", rank: 80,
+                stars: [[2, "メリディアナ", "白"], [3, "β星", "オレンジ"]],
+                myth: "古代ギリシアの48星座のひとつで、ケンタウルス（いて座）の足もとに落ちた冠とも、酒の神ディオニソスが冥界から母を救い出したときに置いた冠ともいわれます。",
+                find: "夏、いて座の南斗六星の南の低い空に、小さな星が半円形に並びます。日本からも見えますが、地平線に近く、暗い星座です。" },
+            "みなみのさんかく座": { abbr: "TrA", rank: 83,
+                stars: [[0, "アトリア", "オレンジ"]],
+                myth: "16世紀末にケイセルとハウトマンの観測をもとに設けられた星座で、正三角形に近い3つの明るい星の並びです。",
+                find: "ケンタウルス座のα星の東にある南天の星座で、日本からは見えません。" },
+            "や座": { abbr: "Sge", rank: 86,
+                stars: [[0, "γ星", "赤"]],
+                myth: "古代ギリシアの48星座のひとつで、ヘラクレスが、プロメテウスの肝臓をついばむワシを射落とした矢とも、恋の神エロスの矢ともいわれます。全天で3番目に小さな星座です。",
+                find: "夏の大三角の中、わし座のアルタイルの北に、4等星が矢の形に並びます。" },
+            "やぎ座": { abbr: "Cap", rank: 40,
+                stars: [[0, "デネブ・アルゲディ", "白"], [5, "ダビー", "黄"], [6, "アルゲディ", "黄"]],
+                myth: "牧神パンが、怪物テュフォンに襲われてナイル川に飛び込んだとき、上半身はやぎ、水につかった下半身は魚の姿になってしまいました。そのあわてた姿のまま星座になったといわれます。",
+                find: "秋の初め、わし座のアルタイルの南、みずがめ座の西に、逆三角形（ぼうしのような形）に星が並びます。アルゲディは、目のよい人なら2つに分かれて見える二重星です。" },
+            "やまねこ座": { abbr: "Lyn", rank: 28,
+                stars: [[0, "α星", "赤"]],
+                myth: "17世紀にヘベリウスが設けた星座で、オオヤマネコを表します。「ヤマネコのように目がよくないと見えない」ほど暗い星座だから名づけた、とヘベリウス自身が書き残しています。",
+                find: "冬から春、ぎょしゃ座のカペラとしし座の間、おおぐま座の前足の西にある、細長い星座です。α星のほかはとても暗い星ばかりです。" },
+            "らしんばん座": { abbr: "Pyx", rank: 65,
+                stars: [[0, "α星", "青白"]],
+                myth: "18世紀にラカイユが設けた星座で、船の方位を知る羅針盤を表します。アルゴ船のそばに置かれています。",
+                find: "春、とも座の東、うみへび座の南の低い空に、3つの4等星が並んだ小さな星座です。" },
+            "りゅう座": { abbr: "Dra", rank: 8,
+                stars: [[1, "エルタニン", "オレンジ"], [2, "ラスタバン", "黄"], [0, "トゥバン", "白"]],
+                myth: "女神ヘラの果樹園で黄金のりんごを守っていた、眠らない竜ラドン。英雄ヘラクレスが黄金のりんごを手に入れたとき（12の難業のひとつ）に倒され、ヘラが星にしたといわれます。",
+                find: "北の空、北斗七星とこぐま座の間を、くねくねと曲がりながらこと座のベガの近くまで伸びる長い星座です。竜の頭の4つの星が、ベガの北西に小さな四角形をつくります。α星トゥバンは、約5000年前、エジプトでピラミッドが造られたころの北極星でした。" },
+            "りゅうこつ座": { abbr: "Car", rank: 34,
+                stars: [[0, "カノープス", "白"], [1, "ミアプラキドゥス", "白"], [2, "アヴィオール", "オレンジ"]],
+                myth: "アルゴ船の竜骨（船底の骨組み）の部分です。カノープスは、トロイア戦争で活躍した船の水先案内人の名前にちなむといわれます。中国では「南極老人星」と呼ばれ、見ると長生きできる縁起のよい星とされました。",
+                find: "冬、おおいぬ座のシリウスのほぼ真南の地平線すれすれに、全天で2番目に明るい恒星カノープスが見えます。日本では関東より南で見られ、北限は福島県あたりです。そのほかの星は日本からはほとんど見えません。" },
+            "りょうけん座": { abbr: "CVn", rank: 38,
+                stars: [[0, "コル・カロリ", "白"]],
+                myth: "17世紀にヘベリウスが設けた星座で、うしかい座が連れている2匹の猟犬を表します。α星コル・カロリは「チャールズの心臓」という意味で、イギリス王チャールズにちなんで名づけられました。",
+                find: "春、北斗七星の柄のカーブの南側にあります。目印はα星コル・カロリで、近くには子持ち銀河（M51）や球状星団M3があります。" },
+            "レチクル座": { abbr: "Ret", rank: 82,
+                stars: [[0, "α星", "黄"]],
+                myth: "18世紀にラカイユが設けた星座で、望遠鏡の視野に入れて星の位置を測る「網目（レチクル）」を表します。",
+                find: "大マゼラン雲の近くにある南天の星座で、日本からは見えません。" },
+            "ろ座": { abbr: "For", rank: 41,
+                stars: [[0, "ダリム", "黄白"]],
+                myth: "18世紀にラカイユが設けた星座で、化学の実験に使う炉（加熱器）を表します。ハッブル宇宙望遠鏡が宇宙のはるか遠くを写した「ハッブル・ウルトラ・ディープ・フィールド」は、この星座の方向です。",
+                find: "秋の終わりから冬、くじら座の南、エリダヌス座の川が曲がるところに囲まれた暗い星座で、日本では南の空に見えます。" },
+            "ろくぶんぎ座": { abbr: "Sex", rank: 47,
+                stars: [[0, "α星", "白"]],
+                myth: "17世紀にヘベリウスが設けた星座で、彼が星の位置の観測に使った六分儀を表します。",
+                find: "春、しし座のレグルスの南、うみへび座のアルファルドの東にある、ごく暗い星座です。" },
+            "わし座": { abbr: "Aql", rank: 22,
+                stars: [[0, "アルタイル", "白"], [2, "タラゼド", "オレンジ"], [1, "アルシャイン", "黄"]],
+                myth: "大神ゼウスの使いのワシ。美少年ガニメデをさらって、神々の住むオリンポスへ連れて行ったといわれます。アルタイルは七夕の「ひこ星（牽牛星）」で、天の川をはさんで、こと座のベガ（おりひめ星）と向かい合っています。",
+                find: "夏の夜、南の空高く、天の川の東岸に輝く1等星アルタイルが目印です。両わきに小さな星を従えて3つ並び、夏の大三角の南の頂点になっています。" }
+        };
 
         // --- 星座の説明（星座をクリック／タップすると表示） ---
         const CONSTELLATION_INFO = {
@@ -3690,11 +4979,14 @@
             document.getElementById('con-info-view').textContent = info.view;
             document.getElementById('con-info-text').textContent = info.text;
             document.getElementById('con-info').classList.add('is-open');
+            document.getElementById('con-info-tour').hidden = false;
+            if (speech.owner === 'card') stopSpeaking(); // 別の説明を開いたら、読み上げを止める
             selectedCon = ci;
             selectedDso = -1;
         }
 
         function closeConstellationInfo() {
+            if (speech.owner === 'card') stopSpeaking();
             selectedCon = -1;
             selectedDso = -1;
             document.getElementById('con-info').classList.remove('is-open');
@@ -3737,6 +5029,11 @@
             // 星雲・星団・銀河や星座に当たったときに説明を表示する。
             let lastTap = { t: 0, x: 0, y: 0 };
             canvas.addEventListener('click', (e) => {
+                // 星座ツアー中は、画面のタップで説明を開かない（左右のスワイプで前後へ移動）
+                if (tour.active || finale.active) {
+                    e.stopImmediatePropagation();
+                    return;
+                }
                 // ドラッグして向きを変えた直後のクリックは無視する
                 if (obsDragMoved) {
                     obsDragMoved = false;
@@ -4679,7 +5976,7 @@
                 const rpx = Math.hypot(sx, sy);
                 if (rpx < 1e-6) return;
                 const cr = (rpx / (skyGeom.maxR || 1) * viewAngDeg()) * DEG;                 // 動かす角距離
-                const brg = (Math.atan2(sx, -sy) / DEG - rotationDeg) * DEG;                 // 地図上の方位（自転を除く）
+                const brg = (Math.atan2(-sx, -sy) / DEG - rotationDeg) * DEG;                // 地図上の方位（自転を除く。左が東）
                 const ra0 = c.ra * 15 * DEG;
                 const dec0 = c.dec * DEG;
                 const dec1 = Math.asin(Math.sin(dec0) * Math.cos(cr) + Math.cos(dec0) * Math.sin(cr) * Math.cos(brg));
@@ -4716,6 +6013,7 @@
             }
 
             canvasEl.addEventListener('pointerdown', (e) => {
+                if (tour.active || finale.active) return; // 星座ツアー・フィナーレ中は、ドラッグ・ピンチで向きを変えない
                 pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
                 if (pointers.size === 2 && canZoom()) {
                     // 2本目の指が触れたらドラッグを中止してピンチを始める
@@ -4789,7 +6087,7 @@
                 endPinchIfNeeded();
             });
             canvasEl.addEventListener('wheel', (e) => {
-                if (!canZoom()) return;
+                if (tour.active || finale.active || !canZoom()) return;
                 e.preventDefault();
                 applyZoomFactor(Math.exp(-e.deltaY * 0.001)); // ホイールを奥へ回すと縮小
             }, { passive: false });
@@ -5555,7 +6853,7 @@
         }
 
         function drawDeepSky() {
-            if (!config.showDso) {
+            if (finale.active || (!config.showDso && !tour.active)) { // フィナーレ中は星座だけを見せる
                 deepSkyObjects.forEach(o => { o.shown = false; });
                 if (selectedDso >= 0) closeConstellationInfo();
                 return;
@@ -5565,7 +6863,9 @@
             deepSkyObjects.forEach((o, i) => {
                 const d = o.data;
                 o.shown = false;
-                if (d.mag > config.dsoLimit || !o.pos.visible || !o.pos.projOk) return;
+                if (tour.active && d.con !== tour.name) return; // ツアー中は、訪れている星座の天体だけを表示
+                if (!tour.active && d.mag > config.dsoLimit) return;
+                if (!o.pos.visible || !o.pos.projOk) return;
                 const k = o.geomOk ? o.pxPerDeg : 3;
                 const rx = Math.min(4000, Math.max(5, 0.5 * d.major / 60 * k * scale));
                 const ry = Math.min(4000, Math.max(Math.min(rx, 3), 0.5 * d.minor / 60 * k * scale));
@@ -5643,7 +6943,7 @@
                     ctx.fill();
                     ctx.stroke();
                 }
-                if (i === selectedDso) { // 選択中の天体を金色の輪で強調
+                if (i === (tour.active ? tour.dsoFocus : selectedDso)) { // 選択中の天体を金色の輪で強調
                     ctx.setLineDash([]);
                     ctx.globalAlpha = 0.65 + 0.35 * Math.sin(Date.now() / 350);
                     ctx.strokeStyle = '#ffd78a';
@@ -5654,7 +6954,7 @@
                 }
                 ctx.restore();
 
-                if (config.dsoLabels && skyDim > 0.001) {
+                if ((config.dsoLabels || tour.active) && skyDim > 0.001) {
                     labels.push({
                         text: d.short, x, y, rr,
                         color: `rgba(${rgb}, ${Math.min(1, alBase + 0.1) * skyDim})`, // 昼間（skyDim=0）は名前も消す
@@ -5730,6 +7030,8 @@
                 typeName + '／' + d.con + '／' + magTxt + '見かけの大きさ 約' + size + '／見ごろ：' + d.season;
             document.getElementById('con-info-text').textContent = d.text;
             document.getElementById('con-info').classList.add('is-open');
+            document.getElementById('con-info-tour').hidden = true; // 星雲・星団の説明では出さない
+            if (speech.owner === 'card') stopSpeaking();
             selectedDso = i;
             selectedCon = -1;
         }
@@ -5754,46 +7056,2081 @@
             };
         }
 
+        // =====================================================================
+        // 音声読み上げ（ブラウザの音声合成 Web Speech API）
+        // 星座ツアーの説明と、星座・星雲をタップしたときの説明カードで使う
+        // =====================================================================
+        const speech = {
+            supported: 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window,
+            owner: null,       // いま読んでいるもの（'tour' ツアー / 'card' 説明カード / 'test' 試しに聞く）
+            token: 0,          // 読み上げごとの番号（止めたあとに古い「読み終わり」の知らせが来ても無視する）
+            utterances: [],    // 読み上げ中の文（途中でブラウザに捨てられないよう、参照を持っておく）
+            onDone: null
+        };
+
+        // この端末で使える日本語の声
+        function japaneseVoices() {
+            if (!speech.supported) return [];
+            return window.speechSynthesis.getVoices().filter(v => /^ja([-_]|$)/i.test(v.lang));
+        }
+
+        // 使う声：設定で選んだ声 → 端末に入っている日本語の声（オフラインでも使える）→ ほかの日本語の声 → ブラウザの標準
+        function pickVoice() {
+            if (!speech.supported) return null;
+            if (config.speechVoice) {
+                const v = window.speechSynthesis.getVoices().find(x => x.name === config.speechVoice);
+                if (v) return v;
+            }
+            const ja = japaneseVoices();
+            return ja.find(v => v.localService) || ja[0] || null;
+        }
+
+        // 文章を「。」などで区切って、少しずつ読む単位に分ける
+        // （1つの長い文章で読ませると、Chromeでは途中で止まることがあるため）
+        function splitForSpeech(text) {
+            const parts = String(text).replace(/\s+/g, ' ').split(/(?<=[。！？!?])/);
+            const out = [];
+            let buf = '';
+            parts.forEach(p => {
+                if (buf && (buf + p).length > 120) {
+                    out.push(buf);
+                    buf = p;
+                } else {
+                    buf += p;
+                }
+            });
+            if (buf.trim()) out.push(buf);
+            return out.map(s => s.trim()).filter(Boolean);
+        }
+
+        // いくつかの文を「。」でつないで、読み上げる1つの文章にする
+        function joinForSpeech(parts) {
+            return parts.filter(Boolean).map(s => String(s).trim().replace(/[。、\s]+$/, '')).filter(Boolean).join('。') + '。';
+        }
+
+        function stopSpeaking() {
+            if (!speech.supported) return;
+            speech.token++;
+            const done = speech.onDone;
+            speech.owner = null;
+            speech.onDone = null;
+            speech.utterances = [];
+            window.speechSynthesis.cancel();
+            if (done) done(false);
+            updateSpeakButtons();
+        }
+
+        // text を読む。owner は読み上げの持ち主。onDone(読み終えたか) は、読み終えたとき・止めたときに呼ぶ
+        function speakText(text, owner, onDone) {
+            if (!speech.supported) {
+                if (onDone) onDone(false);
+                return false;
+            }
+            stopSpeaking();
+            const chunks = splitForSpeech(text);
+            if (!chunks.length) {
+                if (onDone) onDone(true);
+                return false;
+            }
+            const token = ++speech.token;
+            speech.owner = owner;
+            speech.onDone = onDone || null;
+            const voice = pickVoice();
+            const finish = (ok) => {
+                if (token !== speech.token) return;
+                const done = speech.onDone;
+                speech.owner = null;
+                speech.onDone = null;
+                speech.utterances = [];
+                updateSpeakButtons();
+                if (done) done(ok);
+            };
+            speech.utterances = chunks.map((c, i) => {
+                const u = new SpeechSynthesisUtterance(c);
+                u.lang = 'ja-JP';
+                if (voice) u.voice = voice;
+                u.rate = config.speechRate;
+                if (i === chunks.length - 1) u.onend = () => finish(true);
+                // 止めたとき（interrupted / canceled）以外のエラーは、読み終わりとして扱う
+                u.onerror = (e) => { if (e.error !== 'interrupted' && e.error !== 'canceled') finish(false); };
+                return u;
+            });
+            // 止めた直後にすぐ読み始めると無視されることがあるため、少しだけ待ってから読む
+            setTimeout(() => {
+                if (token !== speech.token) return;
+                speech.utterances.forEach(u => window.speechSynthesis.speak(u));
+            }, 60);
+            updateSpeakButtons();
+            return true;
+        }
+
+        // 読み上げボタンの表示（読んでいる間は「止める」にする）
+        function updateSpeakButtons() {
+            const card = document.getElementById('con-info-speak');
+            if (card) {
+                const on = speech.owner === 'card';
+                card.textContent = on ? '■ 止める' : '🔈 読む';
+                card.setAttribute('aria-pressed', String(on));
+            }
+            const test = document.getElementById('btn-speech-test');
+            if (test) test.textContent = speech.owner === 'test' ? '■ 止める' : '▶ 試しに聞く';
+        }
+
+        // 説明カード（星座・星雲・星団・銀河）に表示している内容を読む
+        function speakInfoCard() {
+            if (speech.owner === 'card') {
+                stopSpeaking();
+                return;
+            }
+            const $ = (id) => document.getElementById(id);
+            const view = $('con-info-view').textContent.replace(/／/g, '、');
+            speakText(joinForSpeech([$('con-info-name').textContent, view, $('con-info-text').textContent]), 'card');
+        }
+
+        // 設定パネルの「声の種類」の選択肢を作り直す（声の一覧は、あとから読み込まれることがある）
+        function fillVoiceSelect() {
+            const sel = document.getElementById('param-speech-voice');
+            const msg = document.getElementById('speech-msg');
+            const test = document.getElementById('btn-speech-test');
+            if (!sel) return;
+            if (!speech.supported) {
+                sel.disabled = true;
+                test.disabled = true;
+                document.getElementById('param-speech-rate').disabled = true;
+                msg.textContent = 'このブラウザでは音声読み上げを使えません。';
+                return;
+            }
+            while (sel.options.length > 1) sel.remove(1);
+            const ja = japaneseVoices();
+            ja.forEach(v => {
+                const o = document.createElement('option');
+                o.value = v.name;
+                o.textContent = v.name + (v.localService ? '' : '（オンライン）');
+                sel.appendChild(o);
+            });
+            // 保存した声がこの端末に無いときは「自動」を表示する（設定はそのまま残し、見つかれば使う）
+            sel.value = ja.some(v => v.name === config.speechVoice) ? config.speechVoice : '';
+            const v = pickVoice();
+            if (!ja.length) {
+                msg.textContent = '日本語の声が見つかりません。Windowsの設定で日本語の音声を追加すると、日本語で読み上げられます。';
+            } else if (v && !v.localService) {
+                msg.textContent = `いま使う声：${v.name}。「（オンライン）」の声は、インターネットに接続していないと使えないことがあります。`;
+            } else {
+                msg.textContent = `いま使う声：${v ? v.name : 'ブラウザの標準'}`;
+            }
+        }
+
+        function initSpeech() {
+            const sel = document.getElementById('param-speech-voice');
+            const test = document.getElementById('btn-speech-test');
+            const cardBtn = document.getElementById('con-info-speak');
+            if (!speech.supported) cardBtn.hidden = true;
+            cardBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                speakInfoCard();
+            });
+            sel.addEventListener('change', () => {
+                config.speechVoice = sel.value;
+                fillVoiceSelect();
+            });
+            test.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (speech.owner === 'test') {
+                    stopSpeaking();
+                    return;
+                }
+                speakText('こんにちは。星空の説明を、この声と速さで読み上げます。', 'test');
+            });
+            if (speech.supported) {
+                window.speechSynthesis.addEventListener('voiceschanged', fillVoiceSelect);
+                // ページを閉じる・別のページへ移るときは、読み上げを止める
+                window.addEventListener('pagehide', () => window.speechSynthesis.cancel());
+            }
+            fillVoiceSelect();
+            updateSpeakButtons();
+        }
+
+        // =====================================================================
+        // 星座ツアー：ワープで星の中を移動しながら、88星座をめぐる
+        // =====================================================================
+        const TOUR_STORAGE_KEY = 'StarryNightAndMeteor:v1:tour';
+        const LEGACY_TOUR_STORAGE_KEY = 'starryNightAndMeteor.tour.v1'; // 以前のキー（起動時に新しいキーへ引き継ぐ）
+        const TOUR_STORE_VERSION = 2; // 2：達成日（completedAt）と認定証の名前（certName）を追加。1のデータもそのまま読める
+        const TOUR_DWELLS = [10, 20, 30, 60];   // 自動再生で1つの星座にとどまる秒数の選択肢
+        const VOICE_DWELL = 3;                   // 読み上げを使っているときは、読み終わってから3秒で次へ進む
+        const ZODIAC_ORDER = ['おひつじ座', 'おうし座', 'ふたご座', 'かに座', 'しし座', 'おとめ座',
+            'てんびん座', 'さそり座', 'いて座', 'やぎ座', 'みずがめ座', 'うお座'];
+
+        const tour = {
+            active: false,
+            courseKey: 'all',
+            courseLabel: '',
+            list: [],            // めぐる星座（SKY_DATAの番号）の並び
+            pos: 0,              // list の何番目にいるか
+            ci: -1,              // いま訪れている星座（SKY_DATAの番号）
+            name: '',            // その星座の名前
+            playing: true,       // 自動で次へ進むか
+            dwell: 20,
+            voice: false,
+            phase: 'idle',       // warp（移動中）→ arrive（星座線を描く）→ stay（とどまる）
+            t: 0,                // いまの段階の経過秒数
+            dur: 1,              // いまの段階の長さ（秒）
+            from: null,          // ワープの出発点のカメラ { vec, zoom, rot, cy }
+            to: null,            // 到着点のカメラ
+            dist: 0,             // 出発点から到着点までの角距離（度）
+            view: { ra: 0, dec: 0, zoom: 1, rot: 0, cy: 0 }, // いまのカメラ
+            warpW: 0,            // ワープの強さ（0〜1）
+            skyDim: 1,
+            vp: { x: 0, y: 0 },  // 流れる星が飛び出してくる点（進む方向）
+            lineP: 0,            // 星座線を描き終えた割合（0〜1）
+            labelA: 0,           // 星の名前の不透明度
+            stayElapsed: 0,
+            lastInteract: 0,
+            speaking: false,
+            dsoFocus: -1,        // 説明カードで選んだ星雲・星団（deepSkyObjectsの番号）
+            savedObserve: false, // ツアー前の観測モード
+            stamps: new Set(),   // スタンプを押した星座の名前
+            last: null,          // 前回の続き { course, name }
+            completedAt: null,   // 88星座をはじめてコンプリートした日時（ISO形式）。スタンプを消しても残る
+            certName: ''         // 認定証に入れる名前（任意）
+        };
+
+        // ---------- 小さな道具 ----------
+        const radecToVec = (raH, decDeg) => {
+            const a = raH * 15 * DEG, d = decDeg * DEG;
+            return [Math.cos(d) * Math.cos(a), Math.cos(d) * Math.sin(a), Math.sin(d)];
+        };
+        const vecToRadec = (v) => {
+            const n = Math.hypot(v[0], v[1], v[2]) || 1;
+            const dec = Math.asin(Math.max(-1, Math.min(1, v[2] / n))) / DEG;
+            const ra = ((Math.atan2(v[1], v[0]) / DEG / 15) % 24 + 24) % 24;
+            return { ra, dec };
+        };
+        const vecAngle = (a, b) => Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]))) / DEG;
+        // 2つの方向の間を、球面に沿って補間する（大円に沿って進む）
+        function slerp(a, b, t) {
+            const om = Math.acos(Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2])));
+            if (om < 1e-6) return a.slice();
+            const s = Math.sin(om);
+            const k1 = Math.sin((1 - t) * om) / s, k2 = Math.sin(t * om) / s;
+            return [a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2];
+        }
+        const easeInOut = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const clamp01 = (t) => Math.max(0, Math.min(1, t));
+        const tourEl = (id) => document.getElementById(id);
+
+        // ---------- 星座ごとの位置と大きさ（一度だけ計算） ----------
+        const conGeomCache = [];
+        function conGeom(ci) {
+            if (conGeomCache[ci]) return conGeomCache[ci];
+            const st = SKY_DATA[ci].stars;
+            const sum = [0, 0, 0];
+            const vecs = st.map(s => radecToVec(s[0], s[1]));
+            vecs.forEach(v => { sum[0] += v[0]; sum[1] += v[1]; sum[2] += v[2]; });
+            const n = Math.hypot(sum[0], sum[1], sum[2]) || 1;
+            const c = [sum[0] / n, sum[1] / n, sum[2] / n];
+            let radius = 0;
+            vecs.forEach(v => { radius = Math.max(radius, vecAngle(c, v)); });
+            const g = { vec: c, ...vecToRadec(c), radius: Math.max(4, radius) };
+            conGeomCache[ci] = g;
+            return g;
+        }
+
+        // ツアー中に星座を表示する領域（上のバーと下の説明カードの間）
+        function tourArea() {
+            const top = tourEl('tour-top');
+            const card = tourEl('tour-card');
+            const t = top ? top.getBoundingClientRect().bottom + 8 : 0;
+            const b = card ? card.getBoundingClientRect().top - 8 : height;
+            const bottom = b > t + 80 ? b : height;
+            return { top: t, bottom, cy: (t + bottom) / 2, h: bottom - t };
+        }
+
+        // 星座全体が表示領域にちょうど収まるカメラ（中心の方向と拡大率）。
+        // 画面に置いたときの星の範囲（外枠）を求め、その中心が表示領域の中心に来て、
+        // 外枠が領域の幅・高さに収まるように合わせる（細長い星座も大きく表示できる）
+        const conFitCache = new Map();
+        function conFit(ci, maxR) {
+            const area = tourArea();
+            const key = `${ci}|${Math.round(width)}|${Math.round(area.h)}|${Math.round(maxR)}`;
+            const hit = conFitCache.get(key);
+            if (hit) return hit;
+            const g = conGeom(ci);
+            const vecs = SKY_DATA[ci].stars.map(s => radecToVec(s[0], s[1]));
+            const fitW = width * 0.82, fitH = area.h * 0.78;
+            let center = g.vec;
+            let zoom = Math.max(0.4, Math.min(30, MAX_ANG_DEG * 0.4 * Math.min(fitW, fitH) / (maxR * g.radius)));
+            for (let iter = 0; iter < 3; iter++) {
+                const rd = vecToRadec(center);
+                const nv = { ra: rd.ra, dec: rd.dec, ang: MAX_ANG_DEG / zoom, rot: 0, cx: 0, cy: 0 };
+                let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+                vecs.forEach(v => {
+                    const p = projectNormal(v, nv, maxR);
+                    x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x);
+                    y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+                });
+                // 外枠の中心へカメラを向け直す（画面上のずれ → 天球上の移動）
+                const dx = (x0 + x1) / 2, dy = (y0 + y1) / 2;
+                const k = maxR / (nv.ang * DEG); // 1ラジアンあたりのpx
+                const c = Math.hypot(dx, dy) / k;
+                if (c > 1e-6) {
+                    const th = Math.atan2(-dx, -dy);
+                    const a0 = rd.ra * 15 * DEG, d0 = rd.dec * DEG;
+                    const d1 = Math.asin(Math.sin(d0) * Math.cos(c) + Math.cos(d0) * Math.sin(c) * Math.cos(th));
+                    const a1 = a0 + Math.atan2(Math.sin(th) * Math.sin(c) * Math.cos(d0), Math.cos(c) - Math.sin(d0) * Math.sin(d1));
+                    center = radecToVec(a1 / DEG / 15, d1 / DEG);
+                }
+                // 外枠が領域に収まる拡大率（小さな星座は大きくなりすぎないよう、最小でも幅8°ぶんにする）
+                const bw = Math.max(x1 - x0, 8 * DEG * k), bh = Math.max(y1 - y0, 8 * DEG * k);
+                zoom = Math.max(0.4, Math.min(30, zoom * Math.min(fitW / bw, fitH / bh)));
+            }
+            const fit = { vec: center, zoom };
+            if (conFitCache.size > 300) conFitCache.clear();
+            conFitCache.set(key, fit);
+            return fit;
+        }
+
+        // 通常モードの見え方で、赤経・赤緯の点が画面のどこに来るか（RealStar.updatePosition と同じ式）
+        function projectNormal(vec, nv, maxR) {
+            const c0 = radecToVec(nv.ra, nv.dec);
+            const a0 = nv.ra * 15 * DEG, d0 = nv.dec * DEG;
+            const N = [-Math.sin(d0) * Math.cos(a0), -Math.sin(d0) * Math.sin(a0), Math.cos(d0)];
+            const E = [-Math.sin(a0), Math.cos(a0), 0];
+            const c = Math.acos(Math.max(-1, Math.min(1, vec[0] * c0[0] + vec[1] * c0[1] + vec[2] * c0[2])));
+            const dn = vec[0] * N[0] + vec[1] * N[1] + vec[2] * N[2];
+            const de = vec[0] * E[0] + vec[1] * E[1];
+            const th = Math.atan2(de, dn) + nv.rot * DEG;
+            const r = maxR * (c / DEG) / nv.ang;
+            return { x: nv.cx - r * Math.sin(th), y: nv.cy - r * Math.cos(th), angDeg: c / DEG };
+        }
+
+        // ---------- コース ----------
+        // 季節：星座の説明の「見ごろ」から、最初に出てくる季節で分ける（北の空・南天は別のコース）
+        function seasonOf(name) {
+            const v = (CONSTELLATION_INFO[name] || {}).view || '';
+            if (v.indexOf('北の空') >= 0) return 'north';
+            if (v.indexOf('南天') >= 0) return 'south';
+            let best = null, bestPos = Infinity;
+            [['春', 'spring'], ['夏', 'summer'], ['秋', 'autumn'], ['冬', 'winter']].forEach(([k, key]) => {
+                const i = v.indexOf(k);
+                if (i >= 0 && i < bestPos) { bestPos = i; best = key; }
+            });
+            return best;
+        }
+
+        // 恒星時（度）：時刻 ms・経度 lonDeg の地点
+        function lstAt(ms, lonDeg) {
+            const d = julianDate(ms) - 2451545.0;
+            return ((280.46061837 + 360.98564736629 * d + lonDeg) % 360 + 360) % 360;
+        }
+
+        // 「今夜見える星座」の時刻：いまが夜ならいま、そうでなければ今日の21時
+        function tonightTime() {
+            const now = Date.now();
+            const lst = lstAt(now, config.obsLon);
+            const sun = sunEquatorial(julianDate(now));
+            const alt = equatorialToHorizontal(sun.raDeg, sun.decDeg, lst, config.obsLat).alt;
+            if (alt < -12) return now;
+            const d = new Date();
+            d.setHours(21, 0, 0, 0);
+            return d.getTime();
+        }
+
+        function placeLabel() {
+            const sel = document.getElementById('param-obs-place');
+            const opt = sel ? Array.from(sel.options).find(o => o.value === config.obsPlace) : null;
+            if (opt && config.obsPlace !== 'custom') return opt.textContent;
+            return `緯度${config.obsLat.toFixed(1)}°・経度${config.obsLon.toFixed(1)}°`;
+        }
+
+        // 指定した時刻に、観測地で高度10°以上に見えている星座
+        function tonightList(ms) {
+            const lst = lstAt(ms, config.obsLon);
+            const out = [];
+            SKY_DATA.forEach((con, ci) => {
+                const g = conGeom(ci);
+                const altC = equatorialToHorizontal(g.ra * 15, g.dec, lst, config.obsLat).alt;
+                let up = 0;
+                con.stars.forEach(s => {
+                    if (equatorialToHorizontal(s[0] * 15, s[1], lst, config.obsLat).alt >= 10) up++;
+                });
+                if (altC >= 10 || up / con.stars.length >= 0.5) out.push(ci);
+            });
+            return out;
+        }
+
+        function buildCourse(key) {
+            const all = SKY_DATA.map((_, i) => i);
+            if (key === 'zodiac') return ZODIAC_ORDER.map(n => SKY_DATA.findIndex(c => c.name === n)).filter(i => i >= 0);
+            if (key === 'tonight') return tonightList(tonightTime());
+            if (key === 'all') return all;
+            return all.filter(i => seasonOf(SKY_DATA[i].name) === key);
+        }
+
+        function courseDefs() {
+            const t = new Date(tonightTime());
+            const hh = String(t.getHours()).padStart(2, '0'), mm = String(t.getMinutes()).padStart(2, '0');
+            return [
+                { key: 'all', label: '全88星座', sub: '五十音順にすべての星座をめぐります' },
+                { key: 'spring', label: '春の星座', sub: '春の宵に見ごろを迎える星座' },
+                { key: 'summer', label: '夏の星座', sub: '夏の宵に見ごろを迎える星座' },
+                { key: 'autumn', label: '秋の星座', sub: '秋の宵に見ごろを迎える星座' },
+                { key: 'winter', label: '冬の星座', sub: '冬の宵に見ごろを迎える星座' },
+                { key: 'north', label: '北の空の星座', sub: '北極星のまわりの、一年中見える星座' },
+                { key: 'south', label: '南天の星座', sub: '日本からはほとんど見えない、南半球の星座' },
+                { key: 'zodiac', label: '黄道十二星座', sub: '太陽の通り道にある12星座（おひつじ座から順に）' },
+                { key: 'tonight', label: '今夜見える星座', sub: `${placeLabel()}・${hh}:${mm}ごろに、高度10°以上に見える星座` }
+            ];
+        }
+
+        // ---------- 説明カードの内容 ----------
+        // 日本から見えるか（星の赤緯から判定。東京 北緯35.7°・那覇 北緯26.2°、地平線から1°以上）
+        function visibilityText(ci) {
+            const decs = SKY_DATA[ci].stars.map(s => s[1]);
+            const limTokyo = -(90 - 35.7) + 1;
+            const limNaha = -(90 - 26.2) + 1;
+            const allT = decs.every(d => d > limTokyo), someT = decs.some(d => d > limTokyo);
+            const allN = decs.every(d => d > limNaha), someN = decs.some(d => d > limNaha);
+            if (allT && decs.every(d => d > 90 - 35.7)) return '東京などでは一年中地平線に沈まず、北の空に見えます';
+            if (allT) return '日本のどこからでも、星座の全体が見えます';
+            if (someT) return '日本からは北側の一部が見えます（南側は地平線の下）' + (allN ? '。沖縄などでは全体が見えます' : '');
+            if (someN) return '日本では沖縄など南の地域で、南の地平線近くに一部が見えます';
+            return '日本からは見えません（南半球で見られる星座です）';
+        }
+
+        // 20時ごろに真南に来る（南中する）時期。赤経から求める（9月21日ごろの20時に赤経20時が南中）
+        function culminationText(ci) {
+            const ra = conGeom(ci).ra;
+            const days = ((ra - 20 + 24) % 24) / 24 * 365.25;
+            const d = new Date(2026, 8, 21);
+            d.setDate(d.getDate() + Math.round(days));
+            const part = d.getDate() <= 10 ? '上旬' : d.getDate() <= 20 ? '中旬' : '下旬';
+            return `${d.getMonth() + 1}月${part}`;
+        }
+
+        const STAR_COLORS = { '青白': '#a9c8ff', '白': '#f4f7ff', '黄白': '#fff4d6', '黄': '#ffe7a3', 'オレンジ': '#ffc27a', '赤': '#ff9a7a' };
+
+        function el(tag, cls, text) {
+            const e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (text !== undefined) e.textContent = text;
+            return e;
+        }
+
+        function renderTourCard() {
+            const ci = tour.ci;
+            const con = SKY_DATA[ci];
+            const name = con.name;
+            const basic = CONSTELLATION_INFO[name] || { en: '', view: '', text: '' };
+            const info = TOUR_INFO[name] || { abbr: '', rank: 0, stars: [], myth: '', find: '' };
+
+            tourEl('tour-name').textContent = name;
+            tourEl('tour-sub').textContent = [basic.en, info.abbr].filter(Boolean).join(' ・ ');
+            updateStampBadge(false);
+
+            const body = tourEl('tour-body');
+            body.textContent = '';
+            body.scrollTop = 0;
+
+            if (basic.text) body.appendChild(el('p', 'tour-lead', basic.text));
+
+            // 基本データ
+            const facts = el('div', 'tour-facts');
+            const fact = (label, value) => {
+                const f = el('div', 'tour-fact');
+                f.append(el('span', 'tour-fact-label', label), el('span', 'tour-fact-value', value));
+                facts.appendChild(f);
+            };
+            if (basic.view) fact('見ごろ', basic.view.replace(/^見ごろ：/, ''));
+            fact('20時ごろ真南に', culminationText(ci));
+            if (info.rank) fact('大きさ', `全天88星座中 ${info.rank}位`);
+            fact('日本からの見え方', visibilityText(ci));
+            body.appendChild(facts);
+
+            // 主な星
+            if (info.stars.length) {
+                body.appendChild(el('h3', 'tour-h', '主な星'));
+                const ul = el('ul', 'tour-stars');
+                info.stars.forEach(([idx, sname, color]) => {
+                    const s = con.stars[idx];
+                    if (!s) return;
+                    const li = el('li');
+                    const dot = el('span', 'tour-star-dot');
+                    dot.style.background = STAR_COLORS[color] || '#fff';
+                    dot.style.boxShadow = `0 0 6px ${STAR_COLORS[color] || '#fff'}`;
+                    li.append(dot, el('span', 'tour-star-name', sname), el('span', 'tour-star-meta', `${s[2].toFixed(1)}等・${color}`));
+                    ul.appendChild(li);
+                });
+                body.appendChild(ul);
+            }
+
+            if (info.myth) {
+                body.appendChild(el('h3', 'tour-h', '神話・由来'));
+                body.appendChild(el('p', null, info.myth));
+            }
+            if (info.find) {
+                body.appendChild(el('h3', 'tour-h', '見つけ方'));
+                body.appendChild(el('p', null, info.find));
+            }
+
+            // この星座にある星雲・星団・銀河
+            const dsos = deepSkyObjects.map((o, i) => ({ o, i })).filter(x => x.o.data.con === name);
+            if (dsos.length) {
+                body.appendChild(el('h3', 'tour-h', 'この星座にある星雲・星団・銀河'));
+                const chips = el('div', 'tour-chips');
+                const detail = el('p', 'tour-dso-detail');
+                detail.hidden = true;
+                dsos.forEach(({ o, i }) => {
+                    const d = o.data;
+                    const b = el('button', 'tour-chip', `${d.code}　${d.short || d.name}`);
+                    b.type = 'button';
+                    b.style.setProperty('--chip', `rgb(${DSO_STYLE[d.type].rgb})`);
+                    b.addEventListener('click', () => {
+                        const on = tour.dsoFocus !== i;
+                        tour.dsoFocus = on ? i : -1;
+                        chips.querySelectorAll('.tour-chip').forEach(c => c.classList.remove('is-on'));
+                        detail.hidden = !on;
+                        if (on) {
+                            b.classList.add('is-on');
+                            const typeName = d.typeName || DSO_STYLE[d.type].name;
+                            detail.textContent = `${d.name}（${typeName}）：${d.text}`;
+                        }
+                        tour.lastInteract = performance.now();
+                    });
+                    chips.appendChild(b);
+                });
+                body.append(chips, detail);
+            }
+
+            // 上のバー（コース名・進み具合）
+            tourEl('tour-course-label').textContent = tour.courseLabel;
+            tourEl('tour-count').textContent = `${tour.pos + 1} / ${tour.list.length}`;
+            tourEl('tour-bar-fill').style.width = `${(tour.pos + 1) / tour.list.length * 100}%`;
+            updateStampCounter();
+        }
+
+        // ---------- スタンプラリー ----------
+        // 保存形式：{ version, stamps（スタンプを押した星座の名前・押した順）, dwell（とどまる秒数）, voice（読み上げ）,
+        //            last（前回の続き）, completedAt（コンプリートした日時）, certName（認定証の名前） }
+        function tourStoreData() {
+            return {
+                version: TOUR_STORE_VERSION, stamps: Array.from(tour.stamps), dwell: tour.dwell, voice: tour.voice, last: tour.last,
+                completedAt: tour.completedAt, certName: tour.certName
+            };
+        }
+        // 値を検査して取り込む（localStorage・インポート共通）。存在しない星座名・選べない秒数などは無視する
+        function applyTourData(s) {
+            if (!s || typeof s !== 'object') return;
+            if (Array.isArray(s.stamps)) s.stamps.forEach(n => { if (SKY_DATA.some(c => c.name === n)) tour.stamps.add(n); });
+            if (TOUR_DWELLS.includes(s.dwell)) tour.dwell = s.dwell;
+            tour.voice = s.voice === true && speech.supported;
+            if (s.last && typeof s.last.course === 'string' && typeof s.last.name === 'string' &&
+                SKY_DATA.some(c => c.name === s.last.name)) tour.last = { course: s.last.course, name: s.last.name };
+            // version 2 で追加した項目（version 1 のデータには無いので、初期値のまま）
+            if (typeof s.completedAt === 'string' && Number.isFinite(Date.parse(s.completedAt))) tour.completedAt = new Date(s.completedAt).toISOString();
+            if (typeof s.certName === 'string') tour.certName = s.certName.replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 20);
+        }
+        function resetTourStore() {
+            tour.stamps.clear();
+            tour.dwell = 20;
+            tour.voice = false;
+            tour.last = null;
+            tour.completedAt = null;
+            tour.certName = '';
+        }
+        function loadTourStore() {
+            applyTourData(readStorageWithMigration(TOUR_STORAGE_KEY, LEGACY_TOUR_STORAGE_KEY));
+        }
+        function saveTourStore() {
+            try {
+                localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(tourStoreData()));
+            } catch (e) { /* 保存できない環境では何もしない */ }
+        }
+
+        function updateStampBadge(justGot) {
+            const badge = tourEl('tour-stamp');
+            const has = tour.stamps.has(tour.name);
+            badge.classList.toggle('is-got', has);
+            badge.textContent = has ? (TOUR_INFO[tour.name] || {}).abbr || '★' : '';
+            badge.setAttribute('aria-label', has ? 'スタンプ獲得ずみ' : 'まだスタンプがありません');
+            badge.title = has ? 'スタンプ獲得ずみ' : '星座に着くとスタンプがもらえます';
+            if (justGot) {
+                badge.classList.remove('is-new');
+                void badge.offsetWidth; // アニメーションをやり直す
+                badge.classList.add('is-new');
+            }
+        }
+        function updateStampCounter() {
+            const n = tour.stamps.size;
+            tourEl('tour-btn-stamps').textContent = `スタンプ帳 ${n}/88`;
+            const p = tourEl('panel-tour-stamps');
+            if (p) p.textContent = `📖 スタンプ帳（${n} / 88）`;
+            updateMilkyWayLock();
+        }
+
+        function giveStamp() {
+            if (tour.stamps.has(tour.name)) return;
+            tour.stamps.add(tour.name);
+            saveTourStore();
+            updateStampBadge(true);
+            updateStampCounter();
+            const n = tour.stamps.size;
+            if (n >= SKY_DATA.length) {
+                if (!tour.completedAt) {
+                    tour.completedAt = new Date().toISOString(); // はじめてのコンプリートの日時を記録する
+                    saveTourStore();
+                    finale.firstUnlock = true; // フィナーレのあと、ごほうびの天の川を表示する
+                }
+                showTourToast('🎉 88星座すべてのスタンプを集めました！', 2200);
+                setTimeout(() => { if (tour.active) startFinale(); }, 1600); // スタンプが押されるのを見てから、フィナーレへ
+            } else {
+                showTourToast(`スタンプ獲得！ ${tour.name}（${n} / 88）`, 2600);
+            }
+        }
+
+        let toastTimer = 0;
+        function showTourToast(text, ms) {
+            const t = tourEl('tour-toast');
+            t.textContent = text;
+            t.classList.add('is-show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('is-show'), ms || 2500);
+        }
+
+        // ---------- 読み上げ（ブラウザの音声合成） ----------
+        function stopSpeech() {
+            tour.speaking = false;
+            if (speech.owner === 'tour') stopSpeaking();
+        }
+        // 読む順：星座の名前 → 概要 → 神話・由来 → 見つけ方
+        function speakCurrent() {
+            stopSpeech();
+            if (!tour.voice || !speech.supported) return;
+            const basic = CONSTELLATION_INFO[tour.name] || {};
+            const info = TOUR_INFO[tour.name] || {};
+            const text = joinForSpeech([
+                tour.name, basic.text,
+                info.myth ? '神話・由来' : '', info.myth,
+                info.find ? '見つけ方' : '', info.find
+            ]);
+            if (speakText(text, 'tour', () => { tour.speaking = false; })) {
+                tour.speaking = true;
+                tour.speakStart = performance.now();
+                tour.stayElapsed = 0; // 読み終わってから、改めて3秒を数える
+            }
+        }
+
+        // ---------- 移動 ----------
+        function goTo(pos, instant) {
+            const n = tour.list.length;
+            if (!n) return;
+            tour.pos = ((pos % n) + n) % n;
+            tour.ci = tour.list[tour.pos];
+            tour.name = SKY_DATA[tour.ci].name;
+            tour.dsoFocus = -1;
+            stopSpeech();
+            renderTourCard();
+            tour.last = { course: tour.courseKey, name: tour.name };
+            saveTourStore();
+
+            const maxR = Math.min(width, height) * 0.47;
+            const area = tourArea();
+            const fit = conFit(tour.ci, maxR);
+            tour.to = { vec: fit.vec, zoom: fit.zoom, rot: 0, cy: area.cy };
+            const v = tour.view;
+            tour.from = { vec: radecToVec(v.ra, v.dec), zoom: v.zoom, rot: v.rot, cy: v.cy };
+            tour.dist = vecAngle(tour.from.vec, tour.to.vec);
+            tour.stayElapsed = 0;
+            tour.lineP = 0;
+            tour.labelA = 0;
+            if (instant) {
+                Object.assign(tour.view, vecToRadec(fit.vec), { zoom: tour.to.zoom, rot: 0, cy: area.cy });
+                startArrive();
+                return;
+            }
+            tour.phase = 'warp';
+            tour.t = 0;
+            tour.dur = Math.max(2.4, Math.min(4.2, 2.2 + tour.dist / 60));
+            // 遠いほど大きく引いてから近づく（引きの拡大率は、出発点と到着点がだいたい画面に入る大きさ）
+            const wideZ = MAX_ANG_DEG / Math.min(170, tour.dist * 0.6 + 35);
+            tour.dip = Math.max(0, Math.log(Math.min(tour.from.zoom, tour.to.zoom) / wideZ));
+            tour.warpMax = 0.65 + 0.35 * Math.min(1, tour.dist / 60);
+        }
+
+        function startArrive() {
+            tour.phase = 'arrive';
+            tour.t = 0;
+            const segs = (SKY_DATA[tour.ci].lines || []).length;
+            tour.dur = Math.min(2.6, 0.5 + 0.22 * segs);
+            tour.warpW = 0;
+            tour.skyDim = 1;
+        }
+
+        function next() { goTo(tour.pos + 1); }
+        function prev() { goTo(tour.pos - 1); }
+
+        function setPlaying(on) {
+            tour.playing = on;
+            const b = tourEl('tour-btn-play');
+            b.classList.toggle('is-playing', on);
+            b.setAttribute('aria-label', on ? '自動再生を止める' : '自動再生する');
+            b.title = on ? '停止（スペースキー）' : '再生（スペースキー）';
+            tourEl('tour-play-icon').textContent = on ? '❚❚' : '▶';
+            if (on && tour.phase === 'stay' && tour.stayElapsed >= effectiveDwell()) next();
+        }
+
+        // 毎フレーム：カメラとワープの状態を進める
+        function updateTour(dt, maxR) {
+            tour.t += dt;
+            const area = tourArea();
+            if (tour.phase === 'warp') {
+                const t = clamp01(tour.t / tour.dur);
+                const s = easeInOut(t);
+                const v = slerp(tour.from.vec, tour.to.vec, s);
+                const rd = vecToRadec(v);
+                tour.view.ra = rd.ra;
+                tour.view.dec = rd.dec;
+                // 拡大率：対数で補間し、途中で一度引く
+                const lz = Math.log(tour.from.zoom) + (Math.log(tour.to.zoom) - Math.log(tour.from.zoom)) * s - tour.dip * Math.sin(Math.PI * t);
+                tour.view.zoom = Math.exp(lz);
+                let dr = ((tour.to.rot - tour.from.rot) % 360 + 540) % 360 - 180;
+                tour.view.rot = tour.from.rot + dr * s;
+                tour.view.cy = tour.from.cy + (area.cy - tour.from.cy) * s;
+                tour.warpW = tour.warpMax * Math.pow(Math.sin(Math.PI * t), 1.4);
+                tour.skyDim = 1 - 0.7 * tour.warpW;
+                if (t >= 1) {
+                    Object.assign(tour.view, vecToRadec(tour.to.vec), { zoom: tour.to.zoom, rot: 0 });
+                    startArrive();
+                }
+            } else {
+                // 画面の大きさや説明カードの高さが変わったら、なめらかに合わせ直す
+                const k = 1 - Math.pow(0.001, dt);
+                const fit = conFit(tour.ci, maxR);
+                const cur = radecToVec(tour.view.ra, tour.view.dec);
+                Object.assign(tour.view, vecToRadec(slerp(cur, fit.vec, k)));
+                tour.view.zoom = Math.exp(Math.log(tour.view.zoom) + (Math.log(fit.zoom) - Math.log(tour.view.zoom)) * k);
+                tour.view.cy += (area.cy - tour.view.cy) * k;
+            }
+
+            if (tour.phase === 'arrive') {
+                tour.lineP = clamp01(tour.t / tour.dur);
+                tour.labelA = clamp01((tour.t - tour.dur * 0.6) / 0.7);
+                if (tour.t >= tour.dur + 0.5) {
+                    tour.phase = 'stay';
+                    tour.t = 0;
+                    tour.stayElapsed = 0;
+                    tour.labelA = 1;
+                    giveStamp();
+                    speakCurrent();
+                }
+            } else if (tour.phase === 'stay') {
+                tour.lineP = 1;
+                tour.labelA = 1;
+                const now = performance.now();
+                const anyModal = document.querySelector('.tour-modal.is-open');
+                // 説明を読んでいる（操作した直後）・読み上げ中・一覧を開いている間は、次へ進まない
+                // 読み上げが終わった知らせが来ない環境もあるので、4分たったら待つのをやめる
+                const speakingNow = tour.speaking && now - tour.speakStart < 240000;
+                if (tour.playing && !anyModal && !speakingNow && now - tour.lastInteract > 2500) {
+                    tour.stayElapsed += dt;
+                    if (tour.stayElapsed >= effectiveDwell()) {
+                        if (tour.pos >= tour.list.length - 1) {
+                            setPlaying(false);
+                            showTourToast('コースをひとまわりしました。「次へ」で最初の星座に戻ります', 4000);
+                        } else {
+                            next();
+                        }
+                    }
+                }
+            }
+            // 再生ボタンのまわりの輪：次の星座へ進むまでの残り時間
+            const ring = tourEl('tour-play-ring');
+            if (ring) {
+                const frac = tour.phase === 'stay' && tour.playing ? clamp01(tour.stayElapsed / effectiveDwell()) : 0;
+                ring.style.strokeDashoffset = String(100 - frac * 100);
+            }
+        }
+
+        // ---------- ワープの流れる星 ----------
+        const warpParticles = [];
+        function initWarpParticles() {
+            warpParticles.length = 0;
+            for (let i = 0; i < 260; i++) warpParticles.push(newWarpParticle(Math.random()));
+        }
+        function newWarpParticle(z) {
+            const a = Math.random() * Math.PI * 2;
+            const r = 0.06 + Math.pow(Math.random(), 0.7) * 1.1;
+            return { x: Math.cos(a) * r, y: Math.sin(a) * r, z, b: 0.5 + Math.random() * 0.5 };
+        }
+
+        function drawWarp(dt) {
+            const w = tour.warpW;
+            if (w < 0.01) return;
+            const F = Math.min(width, height) * 0.5;
+            const speed = 0.25 + 2.4 * w;           // 1秒あたりに進む奥行き
+            const trail = speed * dt * (3 + 9 * w); // 尾の長さ
+            ctx.save();
+            ctx.lineCap = 'round';
+            for (const p of warpParticles) {
+                p.z -= speed * dt;
+                if (p.z <= 0.03) Object.assign(p, newWarpParticle(1));
+                const z0 = Math.min(1.2, p.z + trail);
+                const x1 = tour.vp.x + p.x * F / p.z, y1 = tour.vp.y + p.y * F / p.z;
+                if (x1 < -50 || x1 > width + 50 || y1 < -50 || y1 > height + 50) {
+                    Object.assign(p, newWarpParticle(1));
+                    continue;
+                }
+                const x0 = tour.vp.x + p.x * F / z0, y0 = tour.vp.y + p.y * F / z0;
+                const near = clamp01((1 - p.z) * 1.4);
+                ctx.globalAlpha = w * near * p.b;
+                ctx.strokeStyle = 'rgba(225, 235, 255, 1)';
+                ctx.lineWidth = 0.6 + 1.6 * near;
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // ---------- 訪れている星座を描く ----------
+        let lastOverlayTime = performance.now();
+        function drawTourOverlay(maxR) {
+            const now = performance.now();
+            const dt = Math.min(0.1, (now - lastOverlayTime) / 1000);
+            lastOverlayTime = now;
+
+            // 流れる星は、到着する星座の方向から飛び出してくる（画面の中心から少しだけずらす）
+            if (lastNormalView && tour.to) {
+                const p = projectNormal(tour.to.vec, lastNormalView, maxR);
+                const lim = Math.min(width, height) * 0.22;
+                let dx = p.x - lastNormalView.cx, dy = p.y - lastNormalView.cy;
+                const d = Math.hypot(dx, dy);
+                if (d > lim) { dx *= lim / d; dy *= lim / d; }
+                tour.vp.x = lastNormalView.cx + dx;
+                tour.vp.y = lastNormalView.cy + dy;
+            }
+            drawWarp(dt);
+
+            if (tour.phase === 'warp') return;
+            const con = SKY_DATA[tour.ci];
+            const offset = realStars.findIndex(rs => rs.conIndex === tour.ci);
+            if (offset < 0) return;
+            const segs = con.lines || [];
+
+            // 星座線：1本ずつ順に伸びていく
+            ctx.save();
+            ctx.lineCap = 'round';
+            const total = segs.length * tour.lineP;
+            for (let k = 0; k < segs.length; k++) {
+                const f = clamp01(total - k);
+                if (f <= 0) break;
+                const a = realStars[offset + segs[k][0]], b = realStars[offset + segs[k][1]];
+                const x2 = a.x + (b.x - a.x) * f, y2 = a.y + (b.y - a.y) * f;
+                ctx.strokeStyle = 'rgba(170, 205, 255, 0.22)';
+                ctx.lineWidth = 6;
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(x2, y2); ctx.stroke();
+                ctx.strokeStyle = 'rgba(225, 236, 255, 0.92)';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(x2, y2); ctx.stroke();
+            }
+            ctx.restore();
+
+            // 星座の星（「表示する星座」で隠していても、ツアーでは描く）
+            ctx.save();
+            for (let k = 0; k < con.stars.length; k++) {
+                const rs = realStars[offset + k];
+                rs.update();
+                ctx.globalAlpha = Math.min(1, rs.alpha + 0.15);
+                const size = (0.5 + rs.brightness * 2.6) * config.realStarScale * 1.15;
+                drawStarSprite(rs.x, rs.y, size, (3 + rs.brightness * 11) * Math.max(0.6, config.glowScale));
+            }
+            ctx.restore();
+
+            // 主な星の名前
+            const info = TOUR_INFO[con.name];
+            if (info && tour.labelA > 0) {
+                ctx.save();
+                ctx.globalAlpha = tour.labelA;
+                ctx.font = '600 13px sans-serif';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                ctx.shadowBlur = 4 * dpr;
+                info.stars.forEach(([idx, sname], j) => {
+                    const rs = realStars[offset + idx];
+                    if (!rs) return;
+                    const r = (0.5 + rs.brightness * 2.6) * config.realStarScale + 6;
+                    // 右側に置き、画面の右端に近いときは左側に置く
+                    const w = ctx.measureText(sname).width;
+                    const right = rs.x + r + w < width - 8;
+                    ctx.textAlign = right ? 'left' : 'right';
+                    ctx.fillStyle = j === 0 ? '#ffe3a6' : 'rgba(235, 242, 255, 0.95)';
+                    ctx.fillText(sname, rs.x + (right ? r : -r), rs.y - 2);
+                });
+                ctx.restore();
+            }
+        }
+
+        // ---------- 開始・終了 ----------
+        let closeSettingsModal = () => {};
+
+        function startTour(courseKey, startName) {
+            const list = buildCourse(courseKey);
+            if (!list.length) {
+                showTourToast('このコースで見られる星座がありません', 3000);
+                return;
+            }
+            const def = courseDefs().find(c => c.key === courseKey);
+            closeTourModals();
+            closeSettingsModal();
+            closeConstellationInfo();
+
+            const wasActive = tour.active;
+            tour.active = true;
+            tour.courseKey = courseKey;
+            tour.courseLabel = def ? def.label : '';
+            tour.list = list;
+            let pos = startName ? list.findIndex(i => SKY_DATA[i].name === startName) : 0;
+            if (pos < 0) pos = 0;
+
+            if (!wasActive) {
+                tour.savedObserve = config.observeMode;
+                if (config.observeMode) {
+                    config.observeMode = false; // ツアーは通常の星図の上で行う（終わったら元に戻す）
+                    obsState = null;
+                }
+                // 出発点：いまの星空の見え方
+                const nv = lastNormalView || { ra: CENTER_PRESETS.polaris.ra, dec: CENTER_PRESETS.polaris.dec, ang: viewAngDeg(), rot: rotationDeg, cy: height / 2 };
+                Object.assign(tour.view, { ra: nv.ra, dec: nv.dec, zoom: MAX_ANG_DEG / nv.ang, rot: nv.rot, cy: nv.cy });
+                document.body.classList.add('tour-on');
+                tourEl('tour-ui').hidden = false;
+                initWarpParticles();
+                tour.lastInteract = 0;
+            }
+            setPlaying(true);
+            updateVoiceButton();
+            goTo(pos);
+        }
+
+        function exitTour() {
+            if (!tour.active) return;
+            stopSpeech();
+            closeTourModals();
+            tour.active = false;
+            tour.phase = 'idle';
+            tour.dsoFocus = -1;
+            document.body.classList.remove('tour-on');
+            tourEl('tour-ui').hidden = true;
+            if (tour.savedObserve) {
+                config.observeMode = true;
+                syncObserveUI();
+            } else {
+                // ツアーを終えた場所から、そのまま自由に星空を見られるようにする
+                CENTER_PRESETS.custom.ra = tour.view.ra;
+                CENTER_PRESETS.custom.dec = tour.view.dec;
+                config.centerStar = 'custom';
+                document.getElementById('param-center-star').value = 'custom';
+                config.viewZoom = clampZoom(tour.view.zoom);
+                rotationDeg = 0;
+            }
+        }
+
+        // ---------- 一覧・スタンプ帳・コース選び ----------
+        function closeTourModals() {
+            document.querySelectorAll('.tour-modal.is-open').forEach(m => m.classList.remove('is-open'));
+            // フィナーレの最後に出した認定証を閉じたら、フィナーレを終える
+            if (finale.active && finale.waitingCert) endFinale();
+        }
+        function openTourModal(id) {
+            closeTourModals();
+            const m = tourEl(id);
+            m.classList.add('is-open');
+            const first = m.querySelector('button');
+            if (first) first.focus({ preventScroll: true });
+        }
+
+        function openStartModal() {
+            const box = tourEl('tour-course-list');
+            box.textContent = '';
+            if (tour.last) {
+                const ci = SKY_DATA.findIndex(c => c.name === tour.last.name);
+                const def = courseDefs().find(c => c.key === tour.last.course);
+                if (ci >= 0 && def && tour.last.course !== 'tonight') {
+                    const b = el('button', 'tour-course is-resume');
+                    b.type = 'button';
+                    b.append(el('span', 'tour-course-name', `▶ 続きから：${tour.last.name}`), el('span', 'tour-course-sub', `${def.label}の途中から再開します`));
+                    b.addEventListener('click', () => startTour(tour.last.course, tour.last.name));
+                    box.appendChild(b);
+                }
+            }
+            courseDefs().forEach(def => {
+                const list = buildCourse(def.key);
+                const got = list.filter(i => tour.stamps.has(SKY_DATA[i].name)).length;
+                const b = el('button', 'tour-course');
+                b.type = 'button';
+                b.disabled = !list.length;
+                b.append(el('span', 'tour-course-name', def.label), el('span', 'tour-course-count', `${list.length}星座・スタンプ ${got}/${list.length}`), el('span', 'tour-course-sub', def.sub));
+                b.addEventListener('click', () => startTour(def.key));
+                box.appendChild(b);
+            });
+            openTourModal('tour-start-modal');
+        }
+
+        function openListModal() {
+            const box = tourEl('tour-list-items');
+            box.textContent = '';
+            tourEl('tour-list-title').textContent = `${tour.courseLabel}（${tour.list.length}星座）`;
+            tour.list.forEach((ci, pos) => {
+                const name = SKY_DATA[ci].name;
+                const b = el('button', 'tour-list-item' + (pos === tour.pos ? ' is-current' : ''));
+                b.type = 'button';
+                b.append(el('span', 'tour-list-no', String(pos + 1)), el('span', 'tour-list-name', name),
+                    el('span', 'tour-list-mark', tour.stamps.has(name) ? '●' : ''));
+                b.addEventListener('click', () => { closeTourModals(); goTo(pos); });
+                box.appendChild(b);
+            });
+            openTourModal('tour-list-modal');
+            const cur = box.querySelector('.is-current');
+            if (cur) cur.scrollIntoView({ block: 'center' });
+        }
+
+        function openStampModal() {
+            const grid = tourEl('tour-stamp-grid');
+            grid.textContent = '';
+            tourEl('tour-stamp-title').textContent = `スタンプ帳（${tour.stamps.size} / 88）`;
+            SKY_DATA.forEach(con => {
+                const has = tour.stamps.has(con.name);
+                const b = el('button', 'tour-stamp-cell' + (has ? ' is-got' : ''));
+                b.type = 'button';
+                b.title = has ? `${con.name}：スタンプ獲得ずみ` : `${con.name}：まだ訪れていません`;
+                b.append(el('span', 'tour-stamp-mark', has ? (TOUR_INFO[con.name] || {}).abbr || '★' : ''), el('span', 'tour-stamp-name', con.name));
+                b.addEventListener('click', () => goToConstellationFromBook(SKY_DATA.indexOf(con)));
+                grid.appendChild(b);
+            });
+            const reset = tourEl('tour-stamp-reset');
+            reset.textContent = hasCompleted() ? 'スタンプをすべて消す（認定証・ごほうびは残ります）' : 'スタンプをすべて消す';
+            reset.classList.remove('is-confirm');
+            updateStampBookComplete();
+            openTourModal('tour-stamp-modal');
+            setStampTab(stampTab);
+        }
+
+        // スタンプ帳で選んだ星座へ行く（ツアー中ならコースの中で移動、そうでなければ全88星座のツアーを始める）
+        function goToConstellationFromBook(ci) {
+            if (tour.active) {
+                const pos = tour.list.indexOf(ci);
+                if (pos >= 0) { closeTourModals(); goTo(pos); return; }
+            }
+            startTour('all', SKY_DATA[ci].name);
+        }
+
+        // 自動再生で1つの星座にとどまる秒数（読み上げ中は、読み終わってから3秒）
+        function effectiveDwell() {
+            return tour.voice && speech.supported ? VOICE_DWELL : tour.dwell;
+        }
+
+        function updateVoiceButton() {
+            const b = tourEl('tour-btn-voice');
+            const ok = speech.supported;
+            b.hidden = !ok;
+            b.classList.toggle('is-on', tour.voice);
+            b.setAttribute('aria-pressed', String(tour.voice));
+            b.textContent = tour.voice ? '🔊 読み上げ' : '🔈 読み上げ';
+            // 読み上げ中は「とどまる時間」を「読み上げ後3秒」に固定する（選んでいた秒数は保存したまま、オフで元に戻る）
+            const sel = tourEl('tour-dwell');
+            const voiceOn = tour.voice && ok;
+            sel.disabled = voiceOn;
+            sel.value = voiceOn ? 'voice' : String(tour.dwell);
+            sel.parentElement.title = voiceOn ? '読み上げを使っている間は、読み終わってから3秒で次の星座へ進みます' : '自動再生で1つの星座にとどまる時間';
+        }
+
+        // ---------- 操作の準備 ----------
+        function initTour() {
+            loadTourStore();
+            updateStampCounter();
+
+            tourEl('panel-tour-start').addEventListener('click', (e) => { e.stopPropagation(); openStartModal(); });
+            tourEl('panel-tour-stamps').addEventListener('click', (e) => { e.stopPropagation(); openStampModal(); });
+            tourEl('con-info-tour').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const name = selectedCon >= 0 ? SKY_DATA[selectedCon].name : null;
+                if (name) startTour('all', name);
+            });
+
+            tourEl('tour-btn-prev').addEventListener('click', () => { prev(); tour.lastInteract = 0; });
+            tourEl('tour-btn-next').addEventListener('click', () => { next(); tour.lastInteract = 0; });
+            tourEl('tour-btn-play').addEventListener('click', () => setPlaying(!tour.playing));
+            tourEl('tour-btn-exit').addEventListener('click', exitTour);
+            tourEl('tour-btn-list').addEventListener('click', openListModal);
+            tourEl('tour-btn-stamps').addEventListener('click', openStampModal);
+            tourEl('tour-btn-voice').addEventListener('click', () => {
+                tour.voice = !tour.voice;
+                saveTourStore();
+                updateVoiceButton();
+                if (tour.voice && tour.phase === 'stay') speakCurrent(); else if (!tour.voice) stopSpeech();
+            });
+            tourEl('tour-dwell').addEventListener('change', (e) => {
+                if (e.target.value === 'voice') return;
+                tour.dwell = Number(e.target.value) || 20;
+                saveTourStore();
+            });
+
+            // 説明を読んでいる間（スクロール・タップ）は、自動で次へ進むのを少し待つ
+            const card = tourEl('tour-card');
+            ['pointerdown', 'wheel', 'touchstart'].forEach(ev => card.addEventListener(ev, () => { tour.lastInteract = performance.now(); }, { passive: true }));
+            tourEl('tour-body').addEventListener('scroll', () => { tour.lastInteract = performance.now(); }, { passive: true });
+
+            // モーダル：背景のタップ・×ボタンで閉じる
+            document.querySelectorAll('.tour-modal').forEach(m => {
+                m.addEventListener('click', (e) => { if (e.target === m) closeTourModals(); });
+                m.querySelectorAll('.tour-modal-close').forEach(b => b.addEventListener('click', closeTourModals));
+            });
+
+            const reset = tourEl('tour-stamp-reset');
+            reset.addEventListener('click', () => {
+                if (!reset.classList.contains('is-confirm')) {
+                    reset.classList.add('is-confirm');
+                    reset.textContent = 'もう一度押すと消えます';
+                    return;
+                }
+                tour.stamps.clear(); // 達成日・認定証の名前（コンプリートの記録）は残す
+                saveTourStore();
+                updateStampCounter();
+                if (tour.active) updateStampBadge(false);
+                openStampModal();
+            });
+
+            // 画面の左右スワイプで前後の星座へ
+            let swipe = null;
+            canvas.addEventListener('pointerdown', (e) => {
+                if (tour.active) swipe = { x: e.clientX, y: e.clientY, t: performance.now() };
+            });
+            canvas.addEventListener('pointerup', (e) => {
+                if (!tour.active || finale.active || !swipe) return;
+                const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+                const quick = performance.now() - swipe.t < 800;
+                swipe = null;
+                if (quick && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                    if (dx < 0) next(); else prev();
+                }
+            });
+
+            // キーボード：← → で前後、スペースで再生／停止、Escで閉じる・終わる
+            document.addEventListener('keydown', (e) => {
+                if (!tour.active || finale.active) return;
+                const tag = (e.target && e.target.tagName) || '';
+                if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+                if (e.key === 'Escape') {
+                    if (document.querySelector('.tour-modal.is-open')) closeTourModals(); else exitTour();
+                    e.preventDefault();
+                    return;
+                }
+                if (document.querySelector('.tour-modal.is-open')) return;
+                if (e.key === 'ArrowRight') { next(); e.preventDefault(); }
+                else if (e.key === 'ArrowLeft') { prev(); e.preventDefault(); }
+                else if (e.key === ' ' && tag !== 'BUTTON') { setPlaying(!tour.playing); e.preventDefault(); }
+            });
+            // ツアー前でも、スタンプ帳などのモーダルは Esc で閉じる
+            document.addEventListener('keydown', (e) => {
+                if (!tour.active && e.key === 'Escape' && document.querySelector('.tour-modal.is-open')) closeTourModals();
+            });
+
+            // 音声の一覧は後から読み込まれることがある
+            if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = () => {};
+        }
+
+        // =====================================================================
+        // ごほうび：天の川（88星座のスタンプをすべて集めると表示できる）
+        // 銀河面（天の川銀河の円盤の方向）に沿って、ぼんやりした光と細かな星を散らして描く
+        // =====================================================================
+        const MW_HAZE_COUNT = 900;    // ぼんやりした光のかたまりの数
+        const MW_GRAIN_COUNT = 2600;  // 細かな星の数
+        const mwHaze = [];
+        const mwGrain = [];
+        let mwHazeSprites = null;     // 光のかたまりの画像（暖色・寒色）
+        const MW_HAZE_SCALE = 4;      // ぼんやりした光を描く別キャンバスの縮小率
+        let mwHazeCanvas = null, mwHazeCtx = null;
+
+        // 銀河座標（l：銀経, b：銀緯）→ 赤道座標の単位ベクトル（J2000）。
+        // 赤道座標 → 銀河座標の回転行列の転置をかける
+        const GAL_TO_EQ = [
+            [-0.0548755604, 0.4941094279, -0.8676661490],
+            [-0.8734370902, -0.4448296300, -0.1980763734],
+            [-0.4838350155, 0.7469822445, 0.4559837762]
+        ];
+        function galToEq(lDeg, bDeg) {
+            const l = lDeg * DEG, b = bDeg * DEG;
+            const g = [Math.cos(b) * Math.cos(l), Math.cos(b) * Math.sin(l), Math.sin(b)];
+            return [
+                GAL_TO_EQ[0][0] * g[0] + GAL_TO_EQ[0][1] * g[1] + GAL_TO_EQ[0][2] * g[2],
+                GAL_TO_EQ[1][0] * g[0] + GAL_TO_EQ[1][1] * g[1] + GAL_TO_EQ[1][2] * g[2],
+                GAL_TO_EQ[2][0] * g[0] + GAL_TO_EQ[2][1] * g[1] + GAL_TO_EQ[2][2] * g[2]
+            ];
+        }
+
+        // 銀経 l ごとの明るさ：いて座の方向（銀河の中心 l=0°）がいちばん明るく、
+        // はくちょう座（l≒75°）・りゅうこつ座（l≒285°）のあたりも明るい。反対側（ぎょしゃ座のあたり）は淡い
+        function mwDensity(l) {
+            const dl = Math.min(l, 360 - l);
+            return 0.30 + 0.70 * Math.exp(-((dl / 35) ** 2))
+                + 0.30 * Math.exp(-(((l - 75) / 18) ** 2))
+                + 0.22 * Math.exp(-(((l - 285) / 20) ** 2));
+        }
+        // 銀緯方向の広がり（度）。銀河の中心のあたりは厚く膨らんでいる
+        function mwSpread(l) {
+            const dl = Math.min(l, 360 - l);
+            return 3.5 + 5.5 * Math.exp(-((dl / 25) ** 2));
+        }
+        // 暗い部分：はくちょう座からいて座へ続く「暗黒帯（グレートリフト）」と、石炭袋
+        function mwDarkness(l, b) {
+            let k = 1;
+            if (l > 15 && l < 70 && b > -0.5 && b < 4.0) k *= 0.25;
+            if (Math.hypot(l - 301, (b + 1) * 1.4) < 4) k *= 0.35;
+            return k;
+        }
+        function gaussian() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        }
+        // 明るさの分布に合わせて、天の川の中の点を1つ選ぶ（棄却法：確率に合わない点は選び直す）
+        function sampleMilkyWayPoint() {
+            for (let tries = 0; tries < 50; tries++) {
+                const l = Math.random() * 360;
+                const b = gaussian() * mwSpread(l);
+                if (Math.random() * 1.3 < mwDensity(l) * mwDarkness(l, b)) return { l, b };
+            }
+            return { l: 0, b: 0 };
+        }
+
+        function buildMilkyWay() {
+            if (mwHaze.length) return;
+            for (let i = 0; i < MW_HAZE_COUNT; i++) {
+                const { l, b } = sampleMilkyWayPoint();
+                const v = galToEq(l, b);
+                const dl = Math.min(l, 360 - l);
+                mwHaze.push({ x: v[0], y: v[1], z: v[2], deg: 2 + Math.random() * 2.5, a: 0.05 + Math.random() * 0.07, warm: dl < 45 });
+            }
+            for (let i = 0; i < MW_GRAIN_COUNT; i++) {
+                const { l, b } = sampleMilkyWayPoint();
+                const v = galToEq(l, b * 0.8);
+                mwGrain.push({ x: v[0], y: v[1], z: v[2], s: 0.5 + Math.random() * 0.7, a: 0.12 + Math.random() * 0.3 });
+            }
+            const makeSprite = (rgb) => {
+                const cv = document.createElement('canvas');
+                cv.width = cv.height = 64;
+                const c = cv.getContext('2d');
+                const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+                g.addColorStop(0, `rgba(${rgb}, 1)`);
+                g.addColorStop(0.4, `rgba(${rgb}, 0.45)`);
+                g.addColorStop(1, `rgba(${rgb}, 0)`);
+                c.fillStyle = g;
+                c.fillRect(0, 0, 64, 64);
+                return cv;
+            };
+            mwHazeSprites = { warm: makeSprite('255, 232, 205'), cool: makeSprite('205, 218, 255') };
+        }
+
+        // いまの見え方で、赤道座標の単位ベクトルを画面に置く関数と、1ラジアンあたりのpx
+        function milkyWayProjector(nv, maxR) {
+            if (obsState) {
+                const L = obsState.lst * DEG, P = config.obsLat * DEG;
+                const cL = Math.cos(L), sL = Math.sin(L), cP = Math.cos(P), sP = Math.sin(P);
+                const k = skyGeom.mode === 'perspective' ? skyGeom.f : skyGeom.maxR / (Math.PI / 2);
+                return {
+                    k,
+                    proj: (ex, ey, ez) => {
+                        const ch = ex * cL + ey * sL;
+                        const u = sP * ez + cP * ch;
+                        if (u < 0) return null; // 地平線より下
+                        return obsProj(-ex * sL + ey * cL, ez * cP - sP * ch, u);
+                    }
+                };
+            }
+            const a0 = nv.ra * 15 * DEG, d0 = nv.dec * DEG;
+            const C = [Math.cos(d0) * Math.cos(a0), Math.cos(d0) * Math.sin(a0), Math.sin(d0)];
+            const N = [-Math.sin(d0) * Math.cos(a0), -Math.sin(d0) * Math.sin(a0), Math.cos(d0)];
+            const E = [-Math.sin(a0), Math.cos(a0)];
+            const k = maxR / (nv.ang * DEG);
+            const cR = Math.cos(nv.rot * DEG), sR = Math.sin(nv.rot * DEG);
+            return {
+                k,
+                proj: (ex, ey, ez) => {
+                    const dc = ex * C[0] + ey * C[1] + ez * C[2];
+                    const dn = ex * N[0] + ey * N[1] + ez * N[2];
+                    const de = ex * E[0] + ey * E[1];
+                    const r = k * Math.acos(Math.max(-1, Math.min(1, dc)));
+                    const h = Math.hypot(de, dn);
+                    if (h < 1e-9) return { x: nv.cx, y: nv.cy };
+                    const sB = de / h, cB = dn / h;
+                    const sT = sB * cR + cB * sR, cT = cB * cR - sB * sR;
+                    return { x: nv.cx - r * sT, y: nv.cy - r * cT }; // 上が北・左が東
+                }
+            };
+        }
+
+        function milkyWayUnlocked() {
+            return hasCompleted();
+        }
+
+        // 天の川の層（描いた結果を取っておく別キャンバス）。見え方が変わったときだけ描き直す
+        let mwLayer = null, mwLayerCtx = null;
+        let mwLayerKey = '';
+        let mwLayerRot = 0;
+
+        // 描き直しが必要かを判断するための、見え方の「鍵」（回転角は別に扱う）
+        function milkyWayViewKey(nv) {
+            const common = [Math.round(width), Math.round(height), dpr, config.milkyWayBrightness.toFixed(2)];
+            if (obsState) {
+                return ['o', skyGeom.mode, skyGeom.wide, obsState.lst.toFixed(2), config.obsLat.toFixed(3),
+                    config.obsYaw.toFixed(2), config.obsPitch.toFixed(2), config.obsFov.toFixed(2),
+                    skyGeom.cx.toFixed(1), skyGeom.cy.toFixed(1), skyGeom.maxR.toFixed(1), ...common].join('|');
+            }
+            return ['n', nv.ra.toFixed(4), nv.dec.toFixed(4), nv.ang.toFixed(4), nv.cx.toFixed(1), nv.cy.toFixed(1), ...common].join('|');
+        }
+
+        // 天の川を、層のキャンバスに描く（明るさは設定の倍率だけ。夜明けやフィナーレの浮かび上がりは、重ねるときに掛ける）
+        function renderMilkyWayLayer(nv, maxR) {
+            const pw = Math.round(width * dpr), ph = Math.round(height * dpr);
+            if (!mwLayer) {
+                mwLayer = document.createElement('canvas');
+                mwLayerCtx = mwLayer.getContext('2d');
+            }
+            if (mwLayer.width !== pw || mwLayer.height !== ph) {
+                mwLayer.width = pw;
+                mwLayer.height = ph;
+            }
+            const lc = mwLayerCtx;
+            lc.setTransform(1, 0, 0, 1, 0, 0);
+            lc.globalCompositeOperation = 'source-over';
+            lc.globalAlpha = 1;
+            lc.clearRect(0, 0, pw, ph);
+
+            const { k, proj } = milkyWayProjector(nv, maxR);
+            const bright = config.milkyWayBrightness;
+            const margin = 80;
+
+            // ぼんやりした光は、画面の1/4の大きさのキャンバスに描いてから引き伸ばす（ぼかした光なので見た目はほぼ同じで軽い）
+            const S = MW_HAZE_SCALE;
+            const hw = Math.max(1, Math.ceil(width / S)), hh = Math.max(1, Math.ceil(height / S));
+            if (!mwHazeCanvas) {
+                mwHazeCanvas = document.createElement('canvas');
+                mwHazeCtx = mwHazeCanvas.getContext('2d');
+            }
+            if (mwHazeCanvas.width !== hw || mwHazeCanvas.height !== hh) {
+                mwHazeCanvas.width = hw;
+                mwHazeCanvas.height = hh;
+            }
+            const hc = mwHazeCtx;
+            hc.globalCompositeOperation = 'source-over';
+            hc.clearRect(0, 0, hw, hh);
+            hc.globalCompositeOperation = 'lighter'; // 重なるほど明るくなる
+            for (const p of mwHaze) {
+                const q = proj(p.x, p.y, p.z);
+                if (!q || q.x < -margin || q.x > width + margin || q.y < -margin || q.y > height + margin) continue;
+                const r = Math.max(4, Math.min(140, k * p.deg * DEG)) / S;
+                hc.globalAlpha = Math.min(1, p.a * bright);
+                hc.drawImage(p.warm ? mwHazeSprites.warm : mwHazeSprites.cool, q.x / S - r, q.y / S - r, r * 2, r * 2);
+            }
+            lc.setTransform(dpr, 0, 0, dpr, 0, 0);
+            lc.imageSmoothingEnabled = true;
+            lc.drawImage(mwHazeCanvas, 0, 0, hw * S, hh * S);
+
+            // 細かな星
+            lc.fillStyle = '#ffffff';
+            for (const p of mwGrain) {
+                const q = proj(p.x, p.y, p.z);
+                if (!q || q.x < 0 || q.x > width || q.y < 0 || q.y > height) continue;
+                lc.globalAlpha = Math.min(1, p.a * bright);
+                lc.fillRect(q.x, q.y, p.s, p.s);
+            }
+            lc.globalAlpha = 1;
+        }
+
+        // 天の川を描く。フィナーレでは、星座がそろったあとに浮かび上がらせる
+        function drawMilkyWay(nv, maxR) {
+            let reveal = 0;
+            if (config.showMilkyWay && milkyWayUnlocked()) reveal = 1;
+            if (finale.active) reveal = Math.max(reveal, clamp01((finale.t - FINALE.LIGHT_END) / 2.5));
+            if (reveal <= 0.001 || skyDim <= 0.001) return;
+            buildMilkyWay();
+
+            // 通常モードで回転だけが変わったときは、取っておいた層を画面の中心のまわりに回して使う
+            // （回転は中心まわりの回転そのものなので、ずれは出ない。大きく回ったら描き直す）
+            const key = milkyWayViewKey(nv);
+            const rotNow = obsState ? 0 : nv.rot;
+            let dRot = ((rotNow - mwLayerRot) % 360 + 540) % 360 - 180;
+            if (key !== mwLayerKey || Math.abs(dRot) > 2) {
+                renderMilkyWayLayer(nv, maxR);
+                mwLayerKey = key;
+                mwLayerRot = rotNow;
+                dRot = 0;
+            }
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = reveal * skyDim;
+            if (dRot !== 0) {
+                ctx.translate(nv.cx, nv.cy);
+                ctx.rotate(-dRot * DEG);
+                ctx.translate(-nv.cx, -nv.cy);
+            }
+            ctx.drawImage(mwLayer, 0, 0, width, height);
+            ctx.restore();
+        }
+
+        // 設定パネルの「天の川」：スタンプが88個そろうまではロックしておく
+        function updateMilkyWayLock() {
+            const unlocked = milkyWayUnlocked();
+            const btn = document.getElementById('btn-toggle-milkyway');
+            const slider = document.getElementById('param-milkyway-brightness');
+            const msg = document.getElementById('milkyway-msg');
+            if (!btn) return;
+            btn.disabled = !unlocked;
+            slider.disabled = !unlocked;
+            document.getElementById('milkyway-section-title').textContent = unlocked ? '● 天の川（ごほうび）' : '● 天の川（🔒 ごほうび）';
+            msg.textContent = unlocked
+                ? '88星座コンプリートのごほうびです。いて座の方向（天の川銀河の中心）がいちばん明るく、はくちょう座からいて座へは暗い筋（暗黒帯）が見えます。'
+                : `🔒 星座ツアーで88星座すべてのスタンプを集めると、天の川を表示できるようになります（いま ${tour.stamps.size} / 88）。`;
+        }
+
+        // =====================================================================
+        // 88星座コンプリート：フィナーレ演出・認定証・全天スタンプ星図
+        // =====================================================================
+        const FINALE_ZOOM = 0.66;      // 全天が画面に入る拡大率（中心から約175°まで）
+        const FINALE = { ZOOM_END: 2.5, LIGHT_END: 12.5, SHOWER_START: 13.0, SHOWER_END: 17.0, CERT_AT: 17.8 };
+        const MAX_METEORS_FINALE = 80;
+
+        const finale = {
+            active: false,
+            t: 0,
+            order: [],            // 星座が灯る順（スタンプを集めた順。SKY_DATAの番号）
+            from: null,
+            view: { ra: 0, dec: 0, zoom: 1, rot: 0, cy: 0 },
+            lit: 0,               // 灯った星座の数
+            showered: 0,          // 降らせた流れ星の数
+            waitingCert: false,   // 認定証を表示中（閉じたらフィナーレを終える）
+            savedObserve: false,  // フィナーレ前の観測モード（ツアーの外から始めたとき）
+            wasTour: false
+        };
+
+        // コンプリートしたことがあるか（認定証・ごほうびは、スタンプを消しても残る）
+        function hasCompleted() {
+            return !!tour.completedAt || tour.stamps.size >= SKY_DATA.length;
+        }
+
+        function formatDateJa(iso) {
+            if (!iso) return '記録なし';
+            const d = new Date(iso);
+            if (!Number.isFinite(d.getTime())) return '記録なし';
+            return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+
+        // ---------- フィナーレ ----------
+        function startFinale() {
+            if (finale.active) return;
+            closeTourModals();
+            closeSettingsModal();
+            closeConstellationInfo();
+            stopSpeaking();
+            finale.active = true;
+            finale.t = 0;
+            finale.lit = 0;
+            finale.showered = 0;
+            finale.waitingCert = false;
+            finale.mwCaption = false;
+            finale.wasTour = tour.active;
+            if (tour.active) setPlaying(false); // ツアーは一時停止（終わったら続きから）
+
+            // ツアーの外から始めたときは、観測モードを一時的に切る（終わったら戻す）
+            finale.savedObserve = !tour.active && config.observeMode;
+            if (finale.savedObserve) {
+                config.observeMode = false;
+                obsState = null;
+            }
+
+            // 灯る順：スタンプを集めた順（集めていない星座は最後に五十音順）
+            const order = Array.from(tour.stamps).map(n => SKY_DATA.findIndex(c => c.name === n)).filter(i => i >= 0);
+            SKY_DATA.forEach((_, i) => { if (!order.includes(i)) order.push(i); });
+            finale.order = order;
+
+            const nv = lastNormalView || { ra: CENTER_PRESETS.polaris.ra, dec: CENTER_PRESETS.polaris.dec, ang: viewAngDeg(), rot: rotationDeg, cy: height / 2 };
+            finale.from = { ra: nv.ra, dec: nv.dec, zoom: MAX_ANG_DEG / nv.ang, rot: nv.rot, cy: nv.cy };
+            Object.assign(finale.view, finale.from);
+
+            document.body.classList.add('finale-on');
+            tourEl('finale-ui').hidden = false;
+            tourEl('finale-count').textContent = '';
+            tourEl('finale-sub').textContent = 'あなたが星座をめぐった順に、星座が灯ります';
+
+            if (tour.voice && speech.supported) {
+                speakText('88星座すべてのスタンプを集めました。おめでとうございます。あなたは、88星座マスターです。', 'finale');
+            }
+        }
+
+        function updateFinale(dt) {
+            finale.t += dt;
+            const t = finale.t;
+            const v = finale.view, f = finale.from;
+            // カメラ：最初の2.5秒で全天が見えるまで引き、北を上にする。その後はゆっくり回る
+            const s = easeInOut(clamp01(t / FINALE.ZOOM_END));
+            v.zoom = Math.exp(Math.log(f.zoom) + (Math.log(FINALE_ZOOM) - Math.log(f.zoom)) * s);
+            const dr = ((0 - f.rot) % 360 + 540) % 360 - 180;
+            v.rot = f.rot + dr * s + Math.max(0, t - FINALE.ZOOM_END) * 1.5;
+            v.cy = f.cy + (height / 2 - f.cy) * s;
+
+            // 星座が順に灯る
+            const n = finale.order.length;
+            const lit = Math.min(n, Math.max(0, Math.floor((t - FINALE.ZOOM_END) / (FINALE.LIGHT_END - FINALE.ZOOM_END) * n) + (t >= FINALE.ZOOM_END ? 1 : 0)));
+            if (lit !== finale.lit) {
+                finale.lit = lit;
+                const name = lit > 0 ? SKY_DATA[finale.order[lit - 1]].name : '';
+                tourEl('finale-count').textContent = lit > 0 ? `${lit} / ${n}　${name}` : '';
+                if (lit >= n) tourEl('finale-sub').textContent = '全天88星座が、そろいました';
+            }
+            if (t >= FINALE.LIGHT_END + 0.3 && !finale.mwCaption) {
+                finale.mwCaption = true;
+                tourEl('finale-sub').textContent = 'ごほうびに、天の川が浮かび上がります';
+            }
+
+            // 大流星群
+            if (t >= FINALE.SHOWER_START && t < FINALE.SHOWER_END) {
+                const want = Math.floor((t - FINALE.SHOWER_START) / (FINALE.SHOWER_END - FINALE.SHOWER_START) * 60);
+                while (finale.showered < want && meteors.length < MAX_METEORS_FINALE) {
+                    meteors.push(new Meteor());
+                    finale.showered++;
+                }
+            }
+
+            // 最後に認定証を表示する
+            if (t >= FINALE.CERT_AT && !finale.waitingCert) {
+                tourEl('finale-sub').textContent = '88星座マスターの認定証をどうぞ';
+                openCertificate();
+                finale.waitingCert = true;
+            }
+        }
+
+        // 灯った星座の線を描く（金色に光る線と、灯った瞬間に広がる光の輪）
+        function drawFinaleOverlay(maxR) {
+            const t = finale.t;
+            const n = finale.order.length;
+            const step = (FINALE.LIGHT_END - FINALE.ZOOM_END) / n;
+            ctx.save();
+            ctx.lineCap = 'round';
+            for (let k = 0; k < finale.lit; k++) {
+                const ci = finale.order[k];
+                const t0 = FINALE.ZOOM_END + k * step;
+                const a = clamp01((t - t0) / 0.6);
+                const con = SKY_DATA[ci];
+                const offset = conStarOffset(ci);
+                (con.lines || []).forEach(([i, j]) => {
+                    const p = realStars[offset + i], q = realStars[offset + j];
+                    // 全天を1枚に描くと、地図の端をまたぐ線が画面を横切ることがあるので描かない
+                    if (Math.hypot(p.x - q.x, p.y - q.y) > maxR * 0.7) return;
+                    ctx.globalAlpha = a * 0.35;
+                    ctx.strokeStyle = 'rgba(255, 214, 140, 1)';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+                    ctx.globalAlpha = a * 0.95;
+                    ctx.strokeStyle = 'rgba(255, 240, 205, 1)';
+                    ctx.lineWidth = 1.3;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+                });
+                // 灯った瞬間の光の輪
+                const age = t - t0;
+                if (age < 1.0) {
+                    const c = projectNormal(conGeom(ci).vec, lastNormalView, maxR);
+                    ctx.globalAlpha = (1 - age) * 0.8;
+                    ctx.strokeStyle = 'rgba(255, 227, 166, 1)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, 6 + age * 40, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
+
+        function endFinale() {
+            if (!finale.active) return;
+            finale.active = false;
+            finale.waitingCert = false;
+            if (speech.owner === 'finale') stopSpeaking();
+            document.body.classList.remove('finale-on');
+            tourEl('finale-ui').hidden = true;
+            if (finale.savedObserve) {
+                config.observeMode = true;
+                syncObserveUI();
+            } else if (!finale.wasTour) {
+                // 全天を見渡した向きのまま、自由に見られるようにする
+                CENTER_PRESETS.custom.ra = finale.view.ra;
+                CENTER_PRESETS.custom.dec = finale.view.dec;
+                config.centerStar = 'custom';
+                document.getElementById('param-center-star').value = 'custom';
+                config.viewZoom = clampZoom(finale.view.zoom);
+                rotationDeg = ((finale.view.rot % 360) + 360) % 360;
+            }
+            onFinaleEnded();
+        }
+        // フィナーレが終わったあと：はじめてのコンプリートなら、ごほうびの天の川を表示して知らせる
+        function onFinaleEnded() {
+            updateMilkyWayLock();
+            if (!finale.firstUnlock) return;
+            finale.firstUnlock = false;
+            config.showMilkyWay = true;
+            toggleBindings.forEach(b => b.sync());
+            if (tour.active) showTourToast('🎁 ごほうび：天の川が見られるようになりました（設定パネル「● 天の川」で切り替えられます）', 6000);
+            else showRewardNotice();
+        }
+
+        // ツアーの外でフィナーレを見たときの、ごほうびのお知らせ
+        function showRewardNotice() {
+            const t = tourEl('tour-toast');
+            t.textContent = '🎁 ごほうび：天の川が見られるようになりました（設定パネル「● 天の川」で切り替えられます）';
+            t.classList.add('is-show', 'is-standalone');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('is-show', 'is-standalone'), 6000);
+        }
+
+        function skipFinale() {
+            if (!finale.active) return;
+            if (finale.waitingCert) { closeTourModals(); return; }
+            finale.t = Math.max(finale.t, FINALE.CERT_AT);
+            finale.lit = finale.order.length;
+            tourEl('finale-count').textContent = `${finale.order.length} / ${finale.order.length}`;
+        }
+
+        // SKY_DATAの星座 ci の最初の星が、realStars の何番目か
+        const conStarOffsetCache = [];
+        function conStarOffset(ci) {
+            if (conStarOffsetCache[ci] === undefined) conStarOffsetCache[ci] = realStars.findIndex(rs => rs.conIndex === ci);
+            return conStarOffsetCache[ci];
+        }
+
+        // ---------- 全天スタンプ星図（スタンプを、星座の実際の位置に並べる） ----------
+        // 横が赤経（左が東。中央が12時、両端が0時）、縦が赤緯（上が北極、下が南極）の地図
+        function drawStampMap(c, x, y, w, h, opts) {
+            const gold = !!(opts && opts.gold);
+            const raToX = (raH) => x + w * (0.5 - (raH - 12) / 24);
+            const decToY = (dec) => y + h * (0.5 - dec / 180);
+            c.save();
+            c.beginPath();
+            c.rect(x, y, w, h);
+            c.clip();
+            const bg = c.createLinearGradient(0, y, 0, y + h);
+            bg.addColorStop(0, '#0b1430');
+            bg.addColorStop(0.5, '#101b3a');
+            bg.addColorStop(1, '#0b1430');
+            c.fillStyle = bg;
+            c.fillRect(x, y, w, h);
+
+            // 目盛り：赤経2時ごとの縦線、赤緯30°ごとの横線（天の赤道は少し明るく）
+            c.lineWidth = Math.max(0.5, w / 1400);
+            for (let ra = 0; ra < 24; ra += 2) {
+                c.strokeStyle = 'rgba(138, 180, 248, 0.10)';
+                c.beginPath(); c.moveTo(raToX(ra), y); c.lineTo(raToX(ra), y + h); c.stroke();
+            }
+            [-60, -30, 0, 30, 60].forEach(d => {
+                c.strokeStyle = d === 0 ? 'rgba(138, 180, 248, 0.32)' : 'rgba(138, 180, 248, 0.10)';
+                c.beginPath(); c.moveTo(x, decToY(d)); c.lineTo(x + w, decToY(d)); c.stroke();
+            });
+
+            // 星座線（スタンプを集めた星座は金色）
+            SKY_DATA.forEach(con => {
+                const has = tour.stamps.has(con.name);
+                c.strokeStyle = has ? 'rgba(255, 214, 140, 0.55)' : 'rgba(140, 170, 220, 0.18)';
+                c.lineWidth = Math.max(0.6, w / 1100);
+                (con.lines || []).forEach(([i, j]) => {
+                    const a = con.stars[i], b = con.stars[j];
+                    const x1 = raToX(a[0]), x2 = raToX(b[0]);
+                    if (Math.abs(x1 - x2) > w / 2) return; // 地図の端（赤経0時）をまたぐ線は描かない
+                    c.beginPath(); c.moveTo(x1, decToY(a[1])); c.lineTo(x2, decToY(b[1])); c.stroke();
+                });
+            });
+
+            // スタンプ
+            const r = Math.max(5, w / 75);
+            const hits = [];
+            SKY_DATA.forEach((con, ci) => {
+                const g = conGeom(ci);
+                const sx = raToX(g.ra), sy = decToY(g.dec);
+                const has = tour.stamps.has(con.name);
+                hits.push({ ci, x: sx, y: sy, r });
+                if (has) {
+                    const col = gold ? '255, 205, 110' : '255, 120, 110';
+                    c.fillStyle = `rgba(${col}, 0.16)`;
+                    c.strokeStyle = `rgba(${col}, 0.9)`;
+                    c.lineWidth = Math.max(1, r / 6);
+                    c.beginPath(); c.arc(sx, sy, r, 0, Math.PI * 2); c.fill(); c.stroke();
+                    if (r >= 8) {
+                        c.fillStyle = `rgba(${col}, 0.95)`;
+                        c.font = `bold ${Math.round(r * 0.75)}px sans-serif`;
+                        c.textAlign = 'center';
+                        c.textBaseline = 'middle';
+                        c.fillText((TOUR_INFO[con.name] || {}).abbr || '', sx, sy + 0.5);
+                    }
+                } else {
+                    c.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+                    c.lineWidth = 1;
+                    c.setLineDash([2, 3]);
+                    c.beginPath(); c.arc(sx, sy, r * 0.7, 0, Math.PI * 2); c.stroke();
+                    c.setLineDash([]);
+                }
+            });
+            c.restore();
+            c.strokeStyle = gold ? 'rgba(255, 214, 120, 0.6)' : 'rgba(138, 180, 248, 0.35)';
+            c.lineWidth = Math.max(1, w / 900);
+            c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+            return hits;
+        }
+
+        let stampMapHits = [];
+        function renderStampMapCanvas() {
+            const cv = tourEl('tour-stamp-map');
+            const w = Math.max(200, cv.clientWidth);
+            const h = Math.round(w / 2);
+            const pr = Math.min(3, window.devicePixelRatio || 1);
+            cv.width = Math.round(w * pr);
+            cv.height = Math.round(h * pr);
+            cv.style.height = h + 'px';
+            const c = cv.getContext('2d');
+            c.setTransform(pr, 0, 0, pr, 0, 0);
+            stampMapHits = drawStampMap(c, 0, 0, w, h, { gold: tour.stamps.size >= SKY_DATA.length });
+        }
+
+        let stampTab = 'list';
+        function setStampTab(tab) {
+            stampTab = tab;
+            tourEl('stamp-tab-list').setAttribute('aria-selected', String(tab === 'list'));
+            tourEl('stamp-tab-map').setAttribute('aria-selected', String(tab === 'map'));
+            tourEl('tour-stamp-grid').hidden = tab !== 'list';
+            tourEl('stamp-map-wrap').hidden = tab !== 'map';
+            if (tab === 'map') renderStampMapCanvas();
+        }
+
+        // スタンプ帳の、コンプリートに関わる表示（金色のスタンプ帳・フィナーレ／認定証のボタン）
+        function updateStampBookComplete() {
+            const full = tour.stamps.size >= SKY_DATA.length;
+            tourEl('tour-stamp-box').classList.toggle('is-complete', full);
+            const done = hasCompleted();
+            tourEl('stamp-complete').hidden = !done;
+            tourEl('stamp-complete-date').textContent = `達成日：${formatDateJa(tour.completedAt)}`;
+            tourEl('tour-stamp-note').textContent = full
+                ? 'おめでとうございます！ 全天88星座のスタンプがそろいました。星座を押すと、その星座へ行けます。'
+                : 'ツアーで星座に着くとスタンプが押されます。88星座すべて集めると…？ 星座を押すと、その星座へ行けます。';
+        }
+
+        // ---------- 認定証 ----------
+        const CERT_W = 1600, CERT_H = 1130;
+        const CERT_SERIF = "'Yu Mincho', 'YuMincho', 'Hiragino Mincho ProN', 'MS Mincho', serif";
+
+        // 同じ並びの星を毎回描けるよう、決まった乱数を使う
+        function seededRandom(seed) {
+            let s = seed >>> 0;
+            return () => {
+                s = (s * 1664525 + 1013904223) >>> 0;
+                return s / 4294967296;
+            };
+        }
+
+        // 文章を、幅 maxW に収まるように1文字ずつ折り返す
+        function wrapText(c, text, maxW) {
+            const lines = [];
+            let line = '';
+            for (const ch of text) {
+                if (c.measureText(line + ch).width > maxW && line) {
+                    // 行頭に句読点が来ないようにする
+                    if ('、。」）'.includes(ch)) { line += ch; continue; }
+                    lines.push(line);
+                    line = ch;
+                } else {
+                    line += ch;
+                }
+            }
+            if (line) lines.push(line);
+            return lines;
+        }
+
+        function drawCertificate() {
+            const cv = tourEl('cert-canvas');
+            cv.width = CERT_W;
+            cv.height = CERT_H;
+            const c = cv.getContext('2d');
+            const W = CERT_W, H = CERT_H;
+
+            // 背景：夜空のグラデーションと星
+            const bg = c.createRadialGradient(W / 2, H * 0.35, 50, W / 2, H / 2, W * 0.75);
+            bg.addColorStop(0, '#1a2a55');
+            bg.addColorStop(1, '#070d1f');
+            c.fillStyle = bg;
+            c.fillRect(0, 0, W, H);
+            const rnd = seededRandom(88);
+            for (let i = 0; i < 420; i++) {
+                const x = rnd() * W, y = rnd() * H, r = rnd() * 1.6 + 0.3;
+                c.globalAlpha = 0.25 + rnd() * 0.6;
+                c.fillStyle = rnd() < 0.15 ? '#ffe3a6' : '#ffffff';
+                c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+            }
+            c.globalAlpha = 1;
+
+            // 金の二重枠と、四隅の星
+            c.strokeStyle = '#d9b46a';
+            c.lineWidth = 6;
+            c.strokeRect(36, 36, W - 72, H - 72);
+            c.lineWidth = 2;
+            c.strokeRect(54, 54, W - 108, H - 108);
+            const star4 = (x, y, r) => {
+                c.beginPath();
+                for (let k = 0; k < 8; k++) {
+                    const a = k * Math.PI / 4 - Math.PI / 2;
+                    const rr = k % 2 === 0 ? r : r * 0.32;
+                    c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+                }
+                c.closePath();
+                c.fill();
+            };
+            c.fillStyle = '#ffe3a6';
+            [[54, 54], [W - 54, 54], [54, H - 54], [W - 54, H - 54]].forEach(([x, y]) => star4(x, y, 22));
+
+            c.textAlign = 'center';
+            c.textBaseline = 'alphabetic';
+            // 見出し
+            c.fillStyle = '#d9b46a';
+            c.font = `600 40px ${CERT_SERIF}`;
+            c.fillText('認　定　証', W / 2, 150);
+            const tg = c.createLinearGradient(0, 180, 0, 290);
+            tg.addColorStop(0, '#fff3cf');
+            tg.addColorStop(1, '#e0b25a');
+            c.fillStyle = tg;
+            c.font = `bold 104px ${CERT_SERIF}`;
+            c.fillText('88星座マスター', W / 2, 275);
+            c.fillStyle = 'rgba(217, 180, 106, 0.85)';
+            c.font = `28px ${CERT_SERIF}`;
+            c.fillText('Master of the 88 Constellations', W / 2, 322);
+
+            // 名前（入力があるときだけ）
+            let y = 400;
+            const name = (tour.certName || '').trim();
+            if (name) {
+                c.fillStyle = '#ffffff';
+                c.font = `bold 60px ${CERT_SERIF}`;
+                c.fillText(`${name}　さま`, W / 2, y + 20);
+                c.strokeStyle = 'rgba(217, 180, 106, 0.7)';
+                c.lineWidth = 2;
+                c.beginPath(); c.moveTo(W / 2 - 380, y + 42); c.lineTo(W / 2 + 380, y + 42); c.stroke();
+                y += 100;
+            } else {
+                y += 20;
+            }
+
+            // 本文
+            c.fillStyle = '#e8edf7';
+            c.font = `36px ${CERT_SERIF}`;
+            const body = 'あなたは「星座ツアー」で全天88星座をすべてめぐり、すべてのスタンプを集めました。その星空への探究心をたたえ、ここに88星座マスターであることを認定します。';
+            wrapText(c, body, 1180).forEach((ln, i) => c.fillText(ln, W / 2, y + i * 56));
+            y += wrapText(c, body, 1180).length * 56 + 14;
+
+            // 最初・最後に訪れた星座
+            const list = Array.from(tour.stamps);
+            c.fillStyle = '#cbd5e1';
+            c.font = `30px ${CERT_SERIF}`;
+            if (list.length) c.fillText(`最初に訪れた星座：${list[0]}　　最後に訪れた星座：${list[list.length - 1]}`, W / 2, y);
+
+            // 全天スタンプ星図
+            const mw = 860, mh = 215;
+            drawStampMap(c, (W - mw) / 2, y + 30, mw, mh, { gold: true });
+
+            // 達成日・発行元・印
+            c.textAlign = 'left';
+            c.fillStyle = '#e8edf7';
+            c.font = `32px ${CERT_SERIF}`;
+            c.fillText(`達成日　${formatDateJa(tour.completedAt)}`, 150, H - 120);
+            c.fillStyle = 'rgba(217, 180, 106, 0.9)';
+            c.font = `26px ${CERT_SERIF}`;
+            c.fillText('Starry Night & Meteor　星座ツアー', 150, H - 78);
+
+            c.save();
+            c.translate(W - 230, H - 140);
+            c.rotate(-0.2);
+            c.strokeStyle = 'rgba(220, 60, 50, 0.85)';
+            c.fillStyle = 'rgba(220, 60, 50, 0.85)';
+            c.lineWidth = 7;
+            c.beginPath(); c.arc(0, 0, 78, 0, Math.PI * 2); c.stroke();
+            c.lineWidth = 2;
+            c.beginPath(); c.arc(0, 0, 66, 0, Math.PI * 2); c.stroke();
+            c.textAlign = 'center';
+            c.font = `bold 58px ${CERT_SERIF}`;
+            c.fillText('88', 0, 6);
+            c.font = `bold 26px ${CERT_SERIF}`;
+            c.fillText('星座制覇', 0, 42);
+            c.restore();
+        }
+
+        function openCertificate() {
+            tourEl('cert-name').value = tour.certName || '';
+            drawCertificate();
+            openTourModal('cert-modal');
+        }
+
+        function saveCertificatePng() {
+            const cv = tourEl('cert-canvas');
+            cv.toBlob((blob) => {
+                if (!blob) {
+                    showTourToast('画像を作れませんでした', 3000);
+                    return;
+                }
+                const d = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `starry-night-88-certificate-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.png`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }, 'image/png');
+        }
+
+        function initFinale() {
+            tourEl('finale-skip').addEventListener('click', skipFinale);
+            tourEl('btn-finale-replay').addEventListener('click', () => startFinale());
+            tourEl('btn-cert-open').addEventListener('click', () => openCertificate());
+            tourEl('cert-save').addEventListener('click', saveCertificatePng);
+
+            let nameTimer = 0;
+            tourEl('cert-name').addEventListener('input', (e) => {
+                // 改行などの制御文字を除き、20文字までにする
+                tour.certName = e.target.value.replace(/[\u0000-\u001f\u007f]/g, '').slice(0, 20);
+                drawCertificate();
+                clearTimeout(nameTimer);
+                nameTimer = setTimeout(saveTourStore, 300);
+            });
+
+            tourEl('stamp-tab-list').addEventListener('click', () => setStampTab('list'));
+            tourEl('stamp-tab-map').addEventListener('click', () => setStampTab('map'));
+            tourEl('tour-stamp-map').addEventListener('click', (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                let best = null, bestD = Infinity;
+                stampMapHits.forEach(hh => {
+                    const d = Math.hypot(hh.x - x, hh.y - y);
+                    if (d < bestD && d <= Math.max(hh.r * 1.4, 14)) { bestD = d; best = hh; }
+                });
+                if (best) goToConstellationFromBook(best.ci);
+            });
+            window.addEventListener('resize', () => {
+                if (stampTab === 'map' && tourEl('tour-stamp-modal').classList.contains('is-open')) renderStampMapCanvas();
+            });
+
+            // Esc：フィナーレを飛ばす（認定証を表示中なら閉じる）
+            document.addEventListener('keydown', (e) => {
+                if (!finale.active || e.key !== 'Escape') return;
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                skipFinale();
+            }, true);
+        }
+
         // --- 設定の保存と読み込み（このブラウザの localStorage に保存。次に開いたときも同じ設定で始まる） ---
-        const STORAGE_KEY = 'starryNightAndMeteor.settings.v1';
+        // 保存キーは「アプリ名:v1:用途」の形式。以前のキー（旧形式）のデータは、起動時に新しいキーへ引き継ぐ
+        const APP_ID = 'StarryNightAndMeteor';
+        const STORAGE_KEY = 'StarryNightAndMeteor:v1:settings';
+        const LEGACY_STORAGE_KEY = 'starryNightAndMeteor.settings.v1';
+        const SETTINGS_VERSION = 1;
+        const EXPORT_VERSION = 2; // 2：星座ツアーのデータ（tour）を含む。1：含まない（読み込みは両方に対応）
         let lastSaved = '';
 
-        function settingsSnapshot() {
-            return JSON.stringify({
-                config,
+        // 新しいキーに無ければ旧キーから読み、新しいキーへ書き込めたら旧キーを消す
+        function readStorageWithMigration(key, legacyKey) {
+            let raw = null;
+            try {
+                raw = localStorage.getItem(key);
+                if (raw === null) {
+                    const old = localStorage.getItem(legacyKey);
+                    if (old !== null) {
+                        raw = old;
+                        localStorage.setItem(key, old);
+                        localStorage.removeItem(legacyKey);
+                    }
+                }
+            } catch (e) { /* 保存できない環境（プライベートブラウズなど）では、読めた分だけ使う */ }
+            if (raw === null) return null;
+            try { return JSON.parse(raw); } catch (e) { return null; } // 壊れたデータは無視する
+        }
+
+        function settingsData() {
+            // 星座ツアー中は観測モードを一時的に切っているので、ツアー前の状態を保存する
+            const cfg = tour.active ? { ...config, observeMode: tour.savedObserve }
+                : (finale.active && finale.savedObserve) ? { ...config, observeMode: true } : config;
+            return {
+                version: SETTINGS_VERSION,
+                config: cfg,
                 constellations: constellationVisible,
                 custom: { ra: CENTER_PRESETS.custom.ra, dec: CENTER_PRESETS.custom.dec }
+            };
+        }
+        function settingsSnapshot() {
+            return JSON.stringify(settingsData());
+        }
+
+        // 読み込んだ設定の値を検査する（localStorage・インポート共通）。
+        // 型を初期値と比べ、色は #rrggbb、選択肢は存在する値だけ、スライダーの値は範囲内に収める。使えない値は取り込まない
+        const RANGE_INPUT_IDS = { obsYaw: 'param-obs-yaw', obsPitch: 'param-obs-pitch', obsFov: 'param-obs-fov', dsoScale: 'param-dso-scale' };
+        const SELECT_IDS = { obsProjection: 'param-obs-proj', obsLens: 'param-obs-lens', obsPlace: 'param-obs-place', obsSpeed: 'param-obs-speed', dsoLimit: 'param-dso-limit' };
+        const NUMBER_RANGES = { obsLat: [-90, 90], obsLon: [-180, 180], viewZoom: [ZOOM_MIN, ZOOM_MAX] };
+        const COLOR_KEYS = ['bgCenter', 'bgOuter', 'sunColor', 'moonColor', 'moonShadowColor'];
+
+        function sanitizeConfigValue(key, v) {
+            const def = defaultConfig[key];
+            if (typeof v !== typeof def) return undefined;
+            if (typeof v === 'number' && !Number.isFinite(v)) return undefined;
+            if (COLOR_KEYS.includes(key)) return /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : undefined;
+            if (key === 'centerStar') return CENTER_PRESETS[v] ? v : undefined;
+            if (key === 'speechVoice') return v.length <= 200 ? v : undefined; // 声は端末ごとに違うので、名前だけ確かめる
+            if (SELECT_IDS[key]) {
+                const sel = document.getElementById(SELECT_IDS[key]);
+                const ok = sel && Array.from(sel.options).some(o => (typeof def === 'number' ? Number(o.value) === v : o.value === v));
+                return ok ? v : undefined;
+            }
+            const ctl = controls.find(c => c.key === key);
+            const rangeEl = ctl ? document.getElementById(ctl.id) : (RANGE_INPUT_IDS[key] ? document.getElementById(RANGE_INPUT_IDS[key]) : null);
+            if (rangeEl && rangeEl.type === 'range') {
+                let x = Math.min(Number(rangeEl.max), Math.max(Number(rangeEl.min), v));
+                if (ctl && ctl.type === 'int') x = Math.round(x);
+                return x;
+            }
+            if (NUMBER_RANGES[key]) return Math.min(NUMBER_RANGES[key][1], Math.max(NUMBER_RANGES[key][0], v));
+            return v;
+        }
+
+        // 保存データ／インポートファイルの中身を反映する（ファイルに無い項目は、今の値のまま）
+        function applySettingsData(saved) {
+            if (saved.config && typeof saved.config === 'object') {
+                Object.keys(defaultConfig).forEach(k => {
+                    if (!(k in saved.config)) return;
+                    const v = sanitizeConfigValue(k, saved.config[k]);
+                    if (v !== undefined) config[k] = v;
+                });
+            }
+            if (Array.isArray(saved.constellations) && saved.constellations.length === constellationVisible.length) {
+                saved.constellations.forEach((v, i) => { constellationVisible[i] = v !== false; });
+            }
+            document.querySelectorAll('#constellation-checkboxes input[type="checkbox"]').forEach((cb, i) => {
+                cb.checked = constellationVisible[i];
             });
+            updateConstellationSummary();
+            if (saved.custom && Number.isFinite(saved.custom.ra) && Number.isFinite(saved.custom.dec)) {
+                CENTER_PRESETS.custom.ra = ((saved.custom.ra % 24) + 24) % 24;
+                CENTER_PRESETS.custom.dec = Math.max(-90, Math.min(90, saved.custom.dec));
+            }
+            syncAllUI();
         }
 
         function loadSettings() {
-            let saved = null;
-            try {
-                saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-            } catch (e) {
-                saved = null; // 保存できない環境（プライベートブラウズなど）や壊れたデータは無視する
-            }
+            const saved = readStorageWithMigration(STORAGE_KEY, LEGACY_STORAGE_KEY);
             if (!saved || typeof saved !== 'object') return;
-            // 今の版にある項目で、型が同じものだけを取り込む（古い版のデータが混ざっても壊れないように）
-            if (saved.config && typeof saved.config === 'object') {
-                Object.keys(defaultConfig).forEach(k => {
-                    const v = saved.config[k];
-                    if (typeof v === typeof defaultConfig[k] && (typeof v !== 'number' || Number.isFinite(v))) config[k] = v;
-                });
-            }
-            if (!CENTER_PRESETS[config.centerStar]) config.centerStar = defaultConfig.centerStar;
-            if (Array.isArray(saved.constellations) && saved.constellations.length === constellationVisible.length) {
-                saved.constellations.forEach((v, i) => { constellationVisible[i] = v !== false; });
-                document.querySelectorAll('#constellation-checkboxes input[type="checkbox"]').forEach((cb, i) => {
-                    cb.checked = constellationVisible[i];
-                });
-                updateConstellationSummary();
-            }
-            if (saved.custom && Number.isFinite(saved.custom.ra) && Number.isFinite(saved.custom.dec)) {
-                CENTER_PRESETS.custom.ra = saved.custom.ra;
-                CENTER_PRESETS.custom.dec = saved.custom.dec;
-            }
-            syncAllUI();
+            applySettingsData(saved);
         }
 
         // 変更があったときだけ保存する（1秒ごとに確認。ページを閉じる直前にも保存）
@@ -5804,6 +9141,92 @@
                 localStorage.setItem(STORAGE_KEY, snap);
                 lastSaved = snap;
             } catch (e) { /* 保存できない環境では何もしない */ }
+        }
+
+        // --- エクスポート／インポート（JSONファイル） ---
+        let saveStatusTimer = 0;
+        function showSaveStatus(text, isError) {
+            const el = document.getElementById('save-status');
+            el.textContent = text;
+            el.classList.toggle('is-error', !!isError);
+            clearTimeout(saveStatusTimer);
+            saveStatusTimer = setTimeout(() => { el.textContent = ''; el.classList.remove('is-error'); }, 4000);
+        }
+
+        function exportSettings() {
+            const s = settingsData();
+            const data = {
+                app: APP_ID,
+                version: EXPORT_VERSION,
+                exportedAt: new Date().toISOString(),
+                config: s.config,
+                constellations: s.constellations,
+                custom: s.custom,
+                tour: tourStoreData()
+            };
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const name = `starry-night-and-meteor-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+            const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showSaveStatus(`「${name}」を書き出しました。`);
+        }
+
+        async function importSettingsFile(file) {
+            let data;
+            try {
+                data = JSON.parse(await file.text());
+            } catch (e) {
+                showSaveStatus('ファイルを読み込めませんでした（JSONファイルではないか、壊れています）。', true);
+                return;
+            }
+            if (!data || typeof data !== 'object' || data.app !== APP_ID) {
+                showSaveStatus('このアプリ（Starry Night & Meteor）の設定ファイルではないため、読み込みませんでした。', true);
+                return;
+            }
+            if (data.version !== 1 && data.version !== 2) {
+                showSaveStatus('対応していない版の設定ファイルのため、読み込みませんでした。', true);
+                return;
+            }
+            if (tour.active) exitTour();
+            closeConstellationInfo();
+            // いったん初期値に戻してから、ファイルの値を反映する（ファイルに無い項目は初期値になる）
+            Object.assign(config, defaultConfig);
+            constellationVisible.fill(true);
+            CENTER_PRESETS.custom.ra = CENTER_PRESETS.polaris.ra;
+            CENTER_PRESETS.custom.dec = CENTER_PRESETS.polaris.dec;
+            applySettingsData(data);
+            // 星座ツアーのデータ（スタンプなど）が入っていれば、それに置き換える
+            if (data.tour && typeof data.tour === 'object') {
+                resetTourStore();
+                applyTourData(data.tour);
+                saveTourStore();
+                updateStampCounter();
+            }
+            saveSettingsIfChanged();
+            showSaveStatus(`「${file.name}」を読み込みました。`);
+        }
+
+        function initSaveSection() {
+            const input = document.getElementById('import-file');
+            document.getElementById('btn-export').addEventListener('click', (e) => {
+                e.stopPropagation();
+                exportSettings();
+            });
+            document.getElementById('btn-import').addEventListener('click', (e) => {
+                e.stopPropagation();
+                input.value = ''; // 同じファイルをもう一度選んでも読み込めるように
+                input.click();
+            });
+            input.addEventListener('change', () => {
+                if (input.files && input.files[0]) importSettingsFile(input.files[0]);
+            });
         }
 
         // --- リサイズイベント ---
@@ -5820,6 +9243,10 @@
             initUI();
             initObserve();
             initDeepSky();
+            initSpeech();
+            initTour();
+            initFinale();
+            initSaveSection();
             updateBgColor();
             buildSky();
             buildConstellationCheckboxes();
