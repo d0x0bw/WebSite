@@ -59,9 +59,13 @@
        季節イベントごとの配色（JSが body にクラスを付与）
        ========================================== */
 
-    /* クリスマス・正月（12/24〜1/6） */
+    /* クリスマス・正月（12/24〜1/6）。背景は Snowfall と同じ色 */
     body.is-christmas {
-      --bg: #1a2634;
+      --bg: #050a18;
+      /* 背景は Snowfall と同じ夜空のグラデーション（上 #050a18 → 下 #1a2a44）。
+         スクロールしても画面に対して固定し、Snowfall と同じ見え方にする */
+      background-image: linear-gradient(180deg, #050a18 0%, #1a2a44 100%);
+      background-attachment: fixed;
       --text: #ffffff;
       --heading: #ffffff;
       --title: #f39801;
@@ -497,6 +501,14 @@
       margin-top: 10px;
     }
 
+    /* 保存した期間を使っているかの表示 */
+    .period-note {
+      margin: 6px 0 0;
+      font-size: 0.75rem;
+      color: #666;
+      line-height: 1.4;
+    }
+
     /* 隠し要素用トリガーのカーソル設定 */
     #secret-icon {
       cursor: pointer;
@@ -519,7 +531,6 @@
     <input type="date" id="test-date">
     <div>
       <button class="btn-primary" onclick="testEffect()">判定実行</button>
-      <button class="btn-secondary" onclick="clearStorage()">LocalStorageリセット</button>
     </div>
     <p id="status-message" style="margin-bottom: 0; font-size: 0.85rem; line-height: 1.4;"></p>
 
@@ -598,8 +609,9 @@
 
       <div class="period-actions">
         <button class="btn-primary" onclick="savePeriodSettings()">設定を保存して判定</button>
-        <button class="btn-secondary" onclick="resetPeriodSettings()">デフォルトに戻す</button>
+        <button class="btn-secondary" onclick="resetPeriodSettings()">保存した期間を消す（初期値に戻す）</button>
       </div>
+      <p id="period-saved-note" class="period-note"></p>
       <p id="period-status-message" style="margin-bottom: 0; margin-top: 6px; font-size: 0.8rem; line-height: 1.4;"></p>
     </div>
   </div>
@@ -608,7 +620,7 @@
     <h1 lang="en">
       <span class="christmas-decor" style="display:none;">🎄 </span>
       <span class="color-1">I</span><span class="color-2">N</span><span class="color-3">D</span><span class="color-4">E</span><span class="color-5">X</span> 
-      <span id="secret-icon" title="7回タップで隠しパネル切り替え">🗂️</span>
+      <span id="secret-icon">🗂️</span>
       <span class="christmas-decor" style="display:none;"> ❄️</span>
     </h1>
   </header>
@@ -689,15 +701,20 @@
   // ==========================================
   // 各イベントの有効期間設定（隠しパネルから編集可能）
   // ==========================================
-  const PERIOD_STORAGE_KEY = 'event_period_settings';
+  // 保存キーは「アプリ名:v1:用途」の形式（同じサイトの他のページと名前がぶつからないように）。
+  // 2026-11-03 に旧キーから変更し、旧キーの保存内容は起動時に引き継ぐ
+  const PERIOD_STORAGE_KEY = 'SiteIndex:v1:eventPeriods';
+  const LEGACY_PERIOD_STORAGE_KEY = 'event_period_settings'; // 2026-11-03 までのキー
+  const PERIOD_STORAGE_VERSION = 1;                          // 保存形式：{ version, settings }
+  const PERIOD_FIELDS = ['startMonth', 'startDay', 'endMonth', 'endDay'];
 
-  // デフォルトの有効期間
+  // デフォルトの有効期間（隠しパネルで保存していないブラウザでは、この値が使われる）
   const DEFAULT_EVENT_SETTINGS = {
     christmas:   { startMonth: 12, startDay: 24, endMonth: 1,  endDay: 6,  label: 'クリスマス' },
     sakura:      { startMonth: 3,  startDay: 27, endMonth: 4,  endDay: 7,  label: '桜' },
     firefly:     { startMonth: 5,  startDay: 9,  endMonth: 5,  endDay: 23, label: '蛍' },
-    fireworks:   { startMonth: 8,  startDay: 21,  endMonth: 8,  endDay: 25, label: '花火' },
-    starrynight: { startMonth: 10,  startDay: 1,  endMonth: 11,  endDay: 30, label: '星空・流れ星' } // 七夕の時期を仮の初期値として設定。パネルから変更可
+    fireworks:   { startMonth: 8,  startDay: 21, endMonth: 8,  endDay: 25, label: '花火' },
+    starrynight: { startMonth: 10, startDay: 1,  endMonth: 11, endDay: 30, label: '星空・流れ星' } // 星空がきれいな秋を初期値とする。パネルから変更可
   };
 
   function cloneDefaultSettings() {
@@ -710,30 +727,81 @@
     return table[month - 1] || 31;
   }
 
-  // 保存済み設定を読み込み、不足・不正な値はデフォルトで補完する
-  function loadEventSettings() {
-    const merged = cloneDefaultSettings();
+  const isValidMonth = n => Number.isInteger(n) && n >= 1 && n <= 12;
+  const isValidDay = (n, m) => Number.isInteger(n) && n >= 1 && n <= daysInMonth(m);
+
+  // 1イベント分の期間が正しいか（月:1〜12、日:各月の実在日）
+  function isValidPeriod(s) {
+    return !!s && isValidMonth(s.startMonth) && isValidMonth(s.endMonth) &&
+      isValidDay(s.startDay, s.startMonth) && isValidDay(s.endDay, s.endMonth);
+  }
+
+  // 状態メッセージを表示する（文字は textContent で入れる。ok=true は緑、false は赤）
+  function setStatus(el, text, ok) {
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = ok ? '#2e7d32' : '#c62828';
+  }
+
+  // 保存用に、期間の4項目だけを取り出す
+  function pickPeriods(settings) {
+    const result = {};
+    for (const key in settings) {
+      result[key] = {};
+      PERIOD_FIELDS.forEach(f => { result[key][f] = settings[key][f]; });
+    }
+    return result;
+  }
+
+  function writeSavedPeriods(settings) {
+    try {
+      localStorage.setItem(PERIOD_STORAGE_KEY, JSON.stringify({ version: PERIOD_STORAGE_VERSION, settings: pickPeriods(settings) }));
+      return true;
+    } catch (e) {
+      return false; // 保存できない環境（プライベートブラウズなど）では何もしない
+    }
+  }
+
+  function hasSavedPeriods() {
+    try {
+      return localStorage.getItem(PERIOD_STORAGE_KEY) !== null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 保存済みの期間を読む。新しいキーが無く旧キーがあれば、旧キーの内容を返す（fromLegacy=true）
+  function readSavedPeriods() {
     try {
       const raw = localStorage.getItem(PERIOD_STORAGE_KEY);
       if (raw) {
-        const saved = JSON.parse(raw);
-        for (const key in merged) {
-          if (saved[key]) {
-            const s = saved[key];
-            const month = n => Number.isInteger(n) && n >= 1 && n <= 12;
-            const day = (n, m) => Number.isInteger(n) && n >= 1 && n <= daysInMonth(m);
-            if (month(s.startMonth) && month(s.endMonth) &&
-                day(s.startDay, s.startMonth) && day(s.endDay, s.endMonth)) {
-              merged[key].startMonth = s.startMonth;
-              merged[key].startDay = s.startDay;
-              merged[key].endMonth = s.endMonth;
-              merged[key].endDay = s.endDay;
-            }
-          }
-        }
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object' || Number(data.version) > PERIOD_STORAGE_VERSION) return null;
+        return { settings: data.settings, fromLegacy: false };
       }
+      const legacy = localStorage.getItem(LEGACY_PERIOD_STORAGE_KEY);
+      if (legacy) return { settings: JSON.parse(legacy), fromLegacy: true };
     } catch (e) {
       // 壊れたデータの場合はデフォルトのまま使用
+    }
+    return null;
+  }
+
+  // 保存済み設定を読み込み、不足・不正な値はデフォルトで補完する
+  function loadEventSettings() {
+    const merged = cloneDefaultSettings();
+    const saved = readSavedPeriods();
+    if (saved && saved.settings && typeof saved.settings === 'object') {
+      for (const key in merged) {
+        const s = saved.settings[key];
+        if (isValidPeriod(s)) {
+          PERIOD_FIELDS.forEach(f => { merged[key][f] = s[f]; });
+        }
+      }
+      // 旧キーの内容は新しいキーへ移し、書き込めたら旧キーを消す
+      if (saved.fromLegacy && writeSavedPeriods(merged)) {
+        try { localStorage.removeItem(LEGACY_PERIOD_STORAGE_KEY); } catch (e) { /* 消せなくても動作は続ける */ }
+      }
     }
     return merged;
   }
@@ -801,28 +869,28 @@
     stopEffect();
 
     if (isChristmasSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: クリスマス期間内です（${formatPeriod(eventSettings.christmas)}）。クリスマス演出と雪を有効化します。</span>`;
+      setStatus(message, `⭕ ${formattedDateMsg}: クリスマス期間内です（${formatPeriod(eventSettings.christmas)}）。クリスマス演出と雪を有効化します。`, true);
       document.body.classList.add('is-christmas');
       decors.forEach(el => el.style.display = 'inline');
       startEffect('snow');
     } else if (isSakuraSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 桜イベント期間内です（${formatPeriod(eventSettings.sakura)}）。桜吹雪エフェクトを有効化します。</span>`;
+      setStatus(message, `⭕ ${formattedDateMsg}: 桜イベント期間内です（${formatPeriod(eventSettings.sakura)}）。桜吹雪エフェクトを有効化します。`, true);
       document.body.classList.add('is-sakura');
       startEffect('sakura');
     } else if (isFireflySeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 蛍イベント期間内です（${formatPeriod(eventSettings.firefly)}）。蛍エフェクトを有効化します。</span>`;
+      setStatus(message, `⭕ ${formattedDateMsg}: 蛍イベント期間内です（${formatPeriod(eventSettings.firefly)}）。蛍エフェクトを有効化します。`, true);
       document.body.classList.add('is-firefly');
       startEffect('firefly');
     } else if (isFireworksSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 花火イベント期間内です（${formatPeriod(eventSettings.fireworks)}）。花火エフェクトを有効化します。</span>`;
+      setStatus(message, `⭕ ${formattedDateMsg}: 花火イベント期間内です（${formatPeriod(eventSettings.fireworks)}）。花火エフェクトを有効化します。`, true);
       document.body.classList.add('is-fireworks');
       startEffect('fireworks');
     } else if (isStarryNightSeason(date)) {
-      if (message) message.innerHTML = `<span style="color:#2e7d32;">⭕ ${formattedDateMsg}: 星空・流れ星イベント期間内です（${formatPeriod(eventSettings.starrynight)}）。満天の星と流れ星エフェクトを有効化します。</span>`;
+      setStatus(message, `⭕ ${formattedDateMsg}: 星空・流れ星イベント期間内です（${formatPeriod(eventSettings.starrynight)}）。満天の星と流れ星エフェクトを有効化します。`, true);
       document.body.classList.add('is-starrynight');
       startEffect('starrynight');
     } else {
-      if (message) message.innerHTML = `<span style="color:#c62828;">❌ ${formattedDateMsg}: イベント期間外です（クリスマス:${formatPeriod(eventSettings.christmas)}、桜:${formatPeriod(eventSettings.sakura)}、蛍:${formatPeriod(eventSettings.firefly)}、花火:${formatPeriod(eventSettings.fireworks)}、星空・流れ星:${formatPeriod(eventSettings.starrynight)}）。</span>`;
+      setStatus(message, `❌ ${formattedDateMsg}: イベント期間外です（クリスマス:${formatPeriod(eventSettings.christmas)}、桜:${formatPeriod(eventSettings.sakura)}、蛍:${formatPeriod(eventSettings.firefly)}、花火:${formatPeriod(eventSettings.fireworks)}、星空・流れ星:${formatPeriod(eventSettings.starrynight)}）。`, false);
     }
   }
 
@@ -830,17 +898,10 @@
   function testEffect() {
     const inputVal = document.getElementById('test-date').value;
     if (!inputVal) return;
-    
+
     const parts = inputVal.split('-');
     const testDate = new Date(parts[0], parts[1] - 1, parts[2]);
     checkAndRun(testDate);
-  }
-
-  // LocalStorageのリセット
-  function clearStorage() {
-    localStorage.removeItem('santa_effect_last_shown');
-    alert('表示記録をリセットしました。');
-    testEffect();
   }
 
   // ==========================================
@@ -860,6 +921,15 @@
     });
   }
 
+  // このブラウザで保存した期間を使っているか（コードの初期値より優先されるため）を表示する
+  function updateSavedNote() {
+    const note = document.getElementById('period-saved-note');
+    if (!note) return;
+    note.textContent = hasSavedPeriods()
+      ? '※ このブラウザでは、保存した期間を使っています（コードの初期値より優先）。'
+      : '※ このブラウザでは、コードの初期値を使っています。';
+  }
+
   // パネルの入力値を検証して保存し、その場で判定をやり直す
   function savePeriodSettings() {
     const periodMessage = document.getElementById('period-status-message');
@@ -875,40 +945,43 @@
         values[input.getAttribute('data-field')] = parseInt(input.value, 10);
       });
 
-      const monthOk = n => Number.isInteger(n) && n >= 1 && n <= 12;
-      const dayOk = (n, m) => Number.isInteger(n) && n >= 1 && n <= daysInMonth(m);
-
-      if (monthOk(values.startMonth) && monthOk(values.endMonth) &&
-          dayOk(values.startDay, values.startMonth) && dayOk(values.endDay, values.endMonth)) {
-        draft[key].startMonth = values.startMonth;
-        draft[key].startDay = values.startDay;
-        draft[key].endMonth = values.endMonth;
-        draft[key].endDay = values.endDay;
+      if (isValidPeriod(values)) {
+        PERIOD_FIELDS.forEach(f => { draft[key][f] = values[f]; });
       } else {
         hasError = true;
       }
     });
 
+    eventSettings = draft;
+    const saved = writeSavedPeriods(eventSettings);
+
     if (hasError) {
-      if (periodMessage) periodMessage.innerHTML = `<span style="color:#c62828;">❌ 入力値が不正な項目があります（月:1〜12、日:各月の実在日）。該当イベントは直前の設定のまま保持しました。</span>`;
+      setStatus(periodMessage, '❌ 入力値が不正な項目があります（月:1〜12、日:各月の実在日）。該当イベントは直前の設定のまま保持しました。', false);
+    } else if (!saved) {
+      setStatus(periodMessage, '❌ このブラウザでは保存できませんでした（今回の判定にだけ使います）。', false);
     } else {
-      if (periodMessage) periodMessage.innerHTML = `<span style="color:#2e7d32;">✅ 有効期間を保存しました。</span>`;
+      setStatus(periodMessage, '✅ 有効期間を保存しました。', true);
     }
 
-    eventSettings = draft;
-    localStorage.setItem(PERIOD_STORAGE_KEY, JSON.stringify(eventSettings));
     populatePeriodInputs();
+    updateSavedNote();
     testEffect(); // 現在選択中の日付で再判定
   }
 
-  // 全イベントの有効期間をデフォルトに戻す
+  // 保存した期間をこのブラウザから消し、コードの初期値（DEFAULT_EVENT_SETTINGS）に戻す
   function resetPeriodSettings() {
+    try {
+      localStorage.removeItem(PERIOD_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_PERIOD_STORAGE_KEY);
+    } catch (e) {
+      // 保存できない環境では何もしない
+    }
     eventSettings = cloneDefaultSettings();
-    localStorage.setItem(PERIOD_STORAGE_KEY, JSON.stringify(eventSettings));
     populatePeriodInputs();
+    updateSavedNote();
 
     const periodMessage = document.getElementById('period-status-message');
-    if (periodMessage) periodMessage.innerHTML = `<span style="color:#2e7d32;">✅ デフォルトの有効期間に戻しました。</span>`;
+    setStatus(periodMessage, '✅ 保存した期間を消しました。コードの初期値を使います。', true);
 
     testEffect();
   }
@@ -937,11 +1010,24 @@
 
   // ==========================================
   // 背景アニメーション（Canvas統合処理）
+  //   速さは60fpsを基準に、前のコマからの経過時間で補正する
+  //   （k ＝ 60fps換算で何コマ分の時間が経ったか。144Hzの画面でも同じ速さになる）
   // ==========================================
+  const FRAME_MS = 1000 / 60;
+  const MAX_FRAMES_PER_STEP = 3;    // タブ復帰時などに一気に進みすぎないための上限（コマ数）
+  const MAX_DPR = 2;                // 高解像度画面での描画倍率の上限（負荷対策）
+  const STILL_STEPS = 120;          // 「動きを減らす」設定時、静止画を作るために進めるコマ数
+  const TAU = Math.PI * 2;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   let effectAnimationId = null;
   let currentMode = null;
+  let lastFrameTime = null;
+  let resizeQueued = false;
   const canvas = document.getElementById('effect-canvas');
   const ctx = canvas.getContext('2d');
+  let viewW = 0;                    // 画面サイズ（CSSピクセル）
+  let viewH = 0;
   let particles = [];
   let fireworkTimer = 0;
   let nextLaunch = 0;
@@ -955,7 +1041,7 @@
     starMinSize: 0.2,
     starMaxSize: 1.4,
     twinkleSpeed: 1.0,
-    glowScale: 1.0,
+    glowScale: 0.7,   // 星の輝き（グロー）の強さ。2026-11-03 に 1.0 から少し弱めた
     meteorFreq: 1.0,
     meteorSpeed: 1.6,
     meteorLength: 2.4,
@@ -1273,14 +1359,31 @@
   let nightLineSegments = [];
   let nightMeteor = null;
   let nightRotationDeg = 0;
-  let nightLastFrameTime = 0;
   let nightSkyBuilt = false;
+  let glowSprite = null;            // 星の光のにじみの画像（shadowBlur の代わり）
 
+  // 「60fpsで1コマあたり割合 rate」の変化を、k コマ分に換算する
+  const perFrames = (rate, k) => 1 - Math.pow(1 - rate, k);
+
+  // Canvasの実解像度を画面の表示倍率に合わせる（高DPIでぼやけないように）。
+  // 描く時の座標は viewW × viewH のCSSピクセルで扱う
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    resizeQueued = false;
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    viewW = window.innerWidth;
+    viewH = window.innerHeight;
+    canvas.width = Math.round(viewW * dpr);
+    canvas.height = Math.round(viewH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // 「動きを減らす」設定時は、大きさを変えると消えてしまう静止画を描き直す
+    if (reduceMotion && currentMode) renderStill();
   }
-  window.addEventListener('resize', resizeCanvas);
+  // ウィンドウサイズ変更中の作り直しは、次のコマでまとめて1回だけ行う
+  window.addEventListener('resize', () => {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(resizeCanvas);
+  });
   resizeCanvas();
 
   function createParticles(mode) {
@@ -1290,29 +1393,22 @@
     nextLaunch = 0;
 
     if (mode === 'snow') {
-      const count = Math.floor(window.innerWidth / 15);
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 3 + 1,
-          speedY: Math.random() * 1 + 0.5,
-          speedX: Math.random() * 0.5 - 0.25,
-          opacity: Math.random() * 0.7 + 0.3
-        });
-      }
+      for (let i = 0; i < SNOW_CONFIG.amount; i++) particles.push(createSnowflake());
+      resetSnowGround();
     } else if (mode === 'firefly') {
       const count = 35;
       for (let i = 0; i < count; i++) {
         const isLongGlow = Math.random() < 0.30;
         particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * viewW,
+          y: Math.random() * viewH,
           radius: Math.random() * 1.2 + 1.3,
           speedX: (Math.random() - 0.5) * 0.5,
           speedY: (Math.random() - 0.5) * 0.5 - 0.08,
           hue: 60 + Math.random() * 30,
-          wobble: Math.random() * Math.PI * 2,
+          wobble: Math.random() * TAU,
+          flicker: 1,
+          flickerTimer: 0,
 
           phase: 'idle',
           phaseTimer: Math.random() * 90,
@@ -1333,12 +1429,208 @@
     }
   }
 
+  // ==========================================
+  // クリスマス（雪）の演出
+  //   Particle Magic Studio の Snowfall と同じ作り（マウス・指で起こす風は除く）。
+  //   奥・中・手前の3層で奥行きを出し、画面下に雪が積もる
+  // ==========================================
+  const SNOW_CONFIG = {
+    amount: 300,        // 雪の粒の数
+    sizeScale: 1.0,     // 雪の大きさの倍率
+    fallSpeed: 1.0,     // 落ちる速さの倍率
+    sway: 1.0,          // 左右の揺れの倍率
+    blur: 1.0,          // 手前の雪のぼけ（0でくっきり）
+    nearRatio: 12,      // 手前の層になる雪の割合（%）
+    windBase: 0,        // いつも吹く風（マイナスで左、プラスで右）
+    accumulate: true,   // 雪を積もらせるか
+    accumRate: 1.0,     // 積もる速さの倍率
+    accumMax: 12        // 積雪の最大の高さ（画面の高さに対する%）
+  };
+
+  // 奥行きの3層。size: 半径(px) / speed: 落ちる速さ(px/コマ) / sway: 揺れ幅 / wind: 風の効きやすさ
+  const SNOW_LAYERS = [
+    { size: [0.5, 1.1], speed: [0.35, 0.6],  alpha: 0.55, sway: 0.25, wind: 0.45 }, // 奥
+    { size: [1.1, 2.0], speed: [0.75, 1.15], alpha: 0.85, sway: 0.45, wind: 0.75 }, // 中
+    { size: [2.8, 5.5], speed: [1.5, 2.3],   alpha: 0.6,  sway: 0.8,  wind: 1.0 }   // 手前
+  ];
+  const SNOW_LAYER_FAR = 0;
+  const SNOW_LAYER_MID = 1;
+  const SNOW_LAYER_NEAR = 2;
+  const SNOW_MID_SHARE = 0.45;      // 手前以外の雪のうち、中の層になる割合
+  const SNOW_SPRITE_SIZE = 64;      // 雪の粒の画像の大きさ(px)
+  const SNOW_ACCUM_SECONDS = 90;    // 積雪が最大の高さに近づくまでのおおよその秒数
+  const SNOW_GROUND_STEP = 6;       // 積雪の輪郭を描く間隔(px)
+
+  let snowSprites = null;           // 層ごとの雪の粒の画像
+  let snowLevel = 0;                // 積雪の基準の高さ(px)
+  let snowProfilePhases = [0, 0, 0];// 積雪の凸凹の形を決める乱数
+
+  const snowLerp = (a, b, t) => a + (b - a) * t;
+
+  // 雪ごとの乱数 roll と「手前の雪の割合」から、どの層の雪かを決める
+  function snowLayerOf(roll) {
+    const near = SNOW_CONFIG.nearRatio / 100;
+    if (roll < near) return SNOW_LAYER_NEAR;
+    if (roll < near + (1 - near) * SNOW_MID_SHARE) return SNOW_LAYER_MID;
+    return SNOW_LAYER_FAR;
+  }
+
+  // initial: true なら画面全体に、false なら画面の上の外側に置く
+  function placeSnowflake(f, initial) {
+    f.rSize = Math.random();
+    f.rSpeed = Math.random();
+    f.x = Math.random() * viewW;
+    f.y = initial ? Math.random() * viewH : -(10 + Math.random() * 50);
+  }
+
+  function createSnowflake() {
+    const f = {
+      x: 0, y: 0, r: 1,
+      layer: snowLayerOf(Math.random()),
+      rSize: 0, rSpeed: 0,
+      phase: Math.random() * TAU,
+      swaySpeed: 0.6 + Math.random() * 0.8   // 揺れの速さ（ラジアン/秒）
+    };
+    placeSnowflake(f, true);
+    return f;
+  }
+
+  // 雪の粒の画像（中心が明るく外側へ透明になる丸）。core は「くっきりした部分」の割合
+  function makeSnowSprite(core, centerAlpha) {
+    const c = document.createElement('canvas');
+    c.width = SNOW_SPRITE_SIZE;
+    c.height = SNOW_SPRITE_SIZE;
+    const g = c.getContext('2d');
+    const h = SNOW_SPRITE_SIZE / 2;
+    const grad = g.createRadialGradient(h, h, 0, h, h, h);
+    grad.addColorStop(0, `rgba(250, 252, 255, ${centerAlpha})`);
+    grad.addColorStop(core, `rgba(240, 247, 255, ${centerAlpha * 0.9})`);
+    grad.addColorStop(1, 'rgba(230, 242, 255, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, SNOW_SPRITE_SIZE, SNOW_SPRITE_SIZE);
+    return c;
+  }
+
+  function getSnowSprites() {
+    if (snowSprites) return snowSprites;
+    const nearCore = Math.min(0.75, Math.max(0.05, 0.75 - 0.35 * SNOW_CONFIG.blur));
+    snowSprites = [
+      makeSnowSprite(0.35, 1),
+      makeSnowSprite(0.4, 1),
+      makeSnowSprite(nearCore, 1 - 0.15 * SNOW_CONFIG.blur)
+    ];
+    return snowSprites;
+  }
+
+  // 画像の外側はぼかしなので、見た目の大きさに合わせて少し大きめに描く
+  function snowSpriteSpread(layer) {
+    return layer === SNOW_LAYER_NEAR ? 1.4 + SNOW_CONFIG.blur * 0.6 : 1.6;
+  }
+
+  // 積雪の凸凹の形（0.7〜1.3倍くらい）
+  function snowGroundProfile(x) {
+    const p = snowProfilePhases;
+    return 1 + 0.16 * Math.sin(x / 110 + p[0]) + 0.09 * Math.sin(x / 43 + p[1]) + 0.04 * Math.sin(x / 17 + p[2]);
+  }
+
+  function snowGroundY(x) {
+    return viewH - snowLevel * snowGroundProfile(x);
+  }
+
+  function resetSnowGround() {
+    snowLevel = 0;
+    snowProfilePhases = [Math.random() * TAU, Math.random() * TAU, Math.random() * TAU];
+  }
+
+  // 積雪の高さを進める。最大の高さに近づくほどゆっくりになり、超えていれば溶けて戻る
+  function updateSnowGround(dt) {
+    const maxPx = viewH * SNOW_CONFIG.accumMax / 100;
+    if (!SNOW_CONFIG.accumulate || maxPx <= 0) {
+      snowLevel = 0;
+      return;
+    }
+    const rate = (maxPx / SNOW_ACCUM_SECONDS) * SNOW_CONFIG.accumRate; // px/秒
+    snowLevel = Math.max(0, snowLevel + rate * (1 - snowLevel / maxPx) * dt);
+  }
+
+  function updateSnowflakes(k, dt) {
+    for (const f of particles) {
+      const L = SNOW_LAYERS[f.layer];
+      f.r = snowLerp(L.size[0], L.size[1], f.rSize) * SNOW_CONFIG.sizeScale;
+      const vy = snowLerp(L.speed[0], L.speed[1], f.rSpeed) * SNOW_CONFIG.fallSpeed;
+
+      f.phase += f.swaySpeed * dt;
+      f.x += (Math.sin(f.phase) * L.sway * SNOW_CONFIG.sway + SNOW_CONFIG.windBase * L.wind) * k;
+      f.y += vy * k;
+
+      // 左右は画面の反対側へ回り込む
+      const margin = f.r * 3 + 4;
+      if (f.x < -margin) f.x += viewW + margin * 2;
+      else if (f.x > viewW + margin) f.x -= viewW + margin * 2;
+
+      // 中の層は積雪の表面に着いたら消える（積もったことにする）。
+      // 奥の層は積雪の後ろへ隠れ、手前の層は画面の下を通り過ぎる
+      const landed = f.layer === SNOW_LAYER_MID ? f.y >= snowGroundY(f.x) : f.y - f.r * 2 > viewH;
+      if (landed) placeSnowflake(f, false);
+    }
+  }
+
+  function drawSnowLayer(layer) {
+    const sprite = getSnowSprites()[layer];
+    const spread = snowSpriteSpread(layer);
+    ctx.globalAlpha = SNOW_LAYERS[layer].alpha;
+    for (const f of particles) {
+      if (f.layer !== layer) continue;
+      const d = f.r * 2 * spread;
+      ctx.drawImage(sprite, f.x - d / 2, f.y - d / 2, d, d);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function traceSnowGroundLine() {
+    for (let x = 0; x <= viewW + SNOW_GROUND_STEP; x += SNOW_GROUND_STEP) ctx.lineTo(x, snowGroundY(x));
+  }
+
+  function drawSnowGround() {
+    if (snowLevel < 0.3) return;
+    ctx.beginPath();
+    ctx.moveTo(0, viewH);
+    traceSnowGroundLine();
+    ctx.lineTo(viewW + SNOW_GROUND_STEP, viewH);
+    ctx.closePath();
+    const top = viewH - Math.max(1, snowLevel * 1.3);
+    const grad = ctx.createLinearGradient(0, top, 0, viewH);
+    grad.addColorStop(0, 'rgba(236, 243, 255, 0.96)');
+    grad.addColorStop(1, 'rgba(160, 182, 214, 0.96)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // 表面のふち（月明かりの照り返し）
+    ctx.beginPath();
+    ctx.moveTo(0, snowGroundY(0));
+    traceSnowGroundLine();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // 雪の1コマ分（描く順は 奥 → 中 → 積雪 → 手前）
+  function drawSnow(k) {
+    const dt = k / 60;
+    updateSnowGround(dt);
+    updateSnowflakes(k, dt);
+    drawSnowLayer(SNOW_LAYER_FAR);
+    drawSnowLayer(SNOW_LAYER_MID);
+    drawSnowGround();
+    drawSnowLayer(SNOW_LAYER_NEAR);
+  }
+
   // 桜の花びら1枚分の初期状態を生成（isInit=trueなら画面全体に、falseなら画面上部外側に配置）
   function createSakuraPetal(isInit) {
     return {
-      x: Math.random() * canvas.width,
-      y: isInit ? Math.random() * canvas.height : -50,
-      angle: Math.random() * Math.PI * 2,
+      x: Math.random() * viewW,
+      y: isInit ? Math.random() * viewH : -50,
+      angle: Math.random() * TAU,
       flipAngle: Math.random() * Math.PI,
       randomSize: Math.random(),
       randomSpeedY: Math.random(),
@@ -1352,7 +1644,7 @@
   // 光の粒（花びら）を放射状にばら撒くヘルパー（菊・牡丹共通）
   function spawnShell(x, y, opts) {
     for (let j = 0; j < opts.count; j++) {
-      const angle = (Math.PI * 2 / opts.count) * j + (Math.random() - 0.5) * 0.15;
+      const angle = (TAU / opts.count) * j + (Math.random() - 0.5) * 0.15;
       // 速度にばらつきを持たせ、輪郭だけでなく内側も光の粒で満たして球状に見せる
       const speed = opts.speedBase * (0.55 + Math.random() * (opts.speedVariance || 0.5));
 
@@ -1370,7 +1662,8 @@
         decay: opts.decay + Math.random() * 0.002,
         size: opts.size + Math.random() * 0.6,
         maxHistory: opts.historyLen,
-        history: []
+        history: [],
+        historyAcc: 0
       });
     }
   }
@@ -1387,17 +1680,27 @@
     });
   }
 
-  // 背景の瞬く星を1つ生成
+  // 光の尾のための過去の位置を、60fpsの1コマ分の時間ごとに記録する
+  // （画面のHzが高くても尾の長さが変わらないように）
+  function recordHistory(p, maxLen, k) {
+    p.historyAcc = (p.historyAcc || 0) + k;
+    if (p.historyAcc < 1) return;
+    p.historyAcc -= Math.floor(p.historyAcc);
+    p.history.push({ x: p.x, y: p.y });
+    if (p.history.length > maxLen) p.history.shift();
+  }
+
+  // 背景の瞬く星を1つ生成（位置は画面に対する割合で持ち、画面の大きさが変わっても全体に広がるようにする）
   function createNightStar() {
     const minSize = Math.min(STARRY_CONFIG.starMinSize, STARRY_CONFIG.starMaxSize);
     const maxSize = Math.max(STARRY_CONFIG.starMinSize, STARRY_CONFIG.starMaxSize);
     return {
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      fx: Math.random(),
+      fy: Math.random(),
       size: Math.random() * (maxSize - minSize) + minSize,
       flickerSpeed: Math.random() * 0.05 + 0.01,
       baseAlpha: Math.random() * 0.7 + 0.3,
-      flickerOffset: Math.random() * Math.PI * 2
+      flickerOffset: Math.random() * TAU
     };
   }
 
@@ -1410,7 +1713,7 @@
       brightness,
       baseAlpha: 0.45 + brightness * 0.55,
       flickerSpeed: Math.random() * 0.025 + 0.006,
-      flickerOffset: Math.random() * Math.PI * 2,
+      flickerOffset: Math.random() * TAU,
       x: 0, y: 0, alpha: 1
     };
   }
@@ -1435,7 +1738,7 @@
   }
 
   function resetNightMeteor(m) {
-    m.x = Math.random() * canvas.width;
+    m.x = Math.random() * viewW;
     m.y = -Math.random() * 100;
 
     const baseLength = Math.random() * 80 + 50;
@@ -1467,28 +1770,50 @@
     }
     nightMeteor.active = false;
     nightRotationDeg = 0;
-    nightLastFrameTime = performance.now();
+  }
+
+  // 星の光のにじみ画像（中心から外へ透明になる白い丸）。
+  // 星ごとに shadowBlur でぼかすと毎コマ重いため、作っておいた画像を貼る
+  function getGlowSprite() {
+    if (glowSprite) return glowSprite;
+    const size = 64;
+    const h = size / 2;
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(h, h, 0, h, h, h);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0.55)');
+    grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.18)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    glowSprite = c;
+    return c;
+  }
+
+  // (x, y) を中心に、半径 r の光のにじみを描く
+  function drawGlow(x, y, r) {
+    ctx.drawImage(getGlowSprite(), x - r, y - r, r * 2, r * 2);
   }
 
   // 背景の瞬く星屑を描画
   function drawNightBackgroundStars() {
-    nightStars.forEach(star => {
-      star.alpha = star.baseAlpha + Math.sin(Date.now() * (star.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + star.flickerOffset) * 0.3;
-      if (star.alpha < 0) star.alpha = 0;
-      if (star.alpha > 1) star.alpha = 1;
-
-      ctx.save();
-      ctx.globalAlpha = star.alpha;
-      if (STARRY_CONFIG.glowScale > 0) {
-        ctx.shadowBlur = 6 * STARRY_CONFIG.glowScale;
-        ctx.shadowColor = 'white';
-      }
-      ctx.fillStyle = 'white';
+    const now = Date.now();
+    const glow = STARRY_CONFIG.glowScale;
+    ctx.fillStyle = 'white';
+    for (const star of nightStars) {
+      let alpha = star.baseAlpha + Math.sin(now * (star.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + star.flickerOffset) * 0.3;
+      alpha = Math.min(1, Math.max(0, alpha));
+      const x = star.fx * viewW;
+      const y = star.fy * viewH;
+      ctx.globalAlpha = alpha;
+      if (glow > 0) drawGlow(x, y, star.size + 6 * glow);
       ctx.beginPath();
-      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.arc(x, y, star.size, 0, TAU);
       ctx.fill();
-      ctx.restore();
-    });
+    }
+    ctx.globalAlpha = 1;
   }
 
   // 指定した中心天体からの角距離・方位角をもとに、実在の星の画面座標を更新（正距方位図法）
@@ -1533,38 +1858,34 @@
 
   // 実在の星を描画
   function drawNightRealStars() {
-    nightRealStars.forEach(rs => {
-      rs.alpha = rs.baseAlpha + Math.sin(Date.now() * (rs.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + rs.flickerOffset) * 0.18 * (0.4 + rs.brightness);
-      if (rs.alpha < 0.08) rs.alpha = 0.08;
-      if (rs.alpha > 1) rs.alpha = 1;
-
+    const now = Date.now();
+    const glow = STARRY_CONFIG.glowScale;
+    ctx.fillStyle = '#ffffff';
+    for (const rs of nightRealStars) {
+      let alpha = rs.baseAlpha + Math.sin(now * (rs.flickerSpeed * STARRY_CONFIG.twinkleSpeed) + rs.flickerOffset) * 0.18 * (0.4 + rs.brightness);
+      alpha = Math.min(1, Math.max(0.08, alpha));
       const size = (0.5 + rs.brightness * 2.6) * STARRY_CONFIG.realStarScale;
-      ctx.save();
-      ctx.globalAlpha = rs.alpha;
-      if (STARRY_CONFIG.glowScale > 0) {
-        ctx.shadowBlur = (3 + rs.brightness * 11) * STARRY_CONFIG.glowScale;
-        ctx.shadowColor = 'white';
-      }
-      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = alpha;
+      if (glow > 0) drawGlow(rs.x, rs.y, size + (3 + rs.brightness * 11) * glow);
       ctx.beginPath();
-      ctx.arc(rs.x, rs.y, size, 0, Math.PI * 2);
+      ctx.arc(rs.x, rs.y, size, 0, TAU);
       ctx.fill();
-      ctx.restore();
-    });
+    }
+    ctx.globalAlpha = 1;
   }
 
   // 流れ星の位置更新
-  function updateNightMeteorPos(m) {
-    m.x += m.dx;
-    m.y += m.dy;
-    m.alpha -= 0.012 * STARRY_CONFIG.meteorSpeed;
+  function updateNightMeteorPos(m, k) {
+    m.x += m.dx * k;
+    m.y += m.dy * k;
+    m.alpha -= 0.012 * STARRY_CONFIG.meteorSpeed * k;
 
-    if (m.x > canvas.width + m.length || m.y > canvas.height + m.length || m.alpha <= 0) {
+    if (m.x > viewW + m.length || m.y > viewH + m.length || m.alpha <= 0) {
       m.active = false;
     }
   }
 
-  // 流れ星を描画
+  // 流れ星を描画（1つだけなので、頭の光は shadowBlur のままにする）
   function drawNightMeteor(m) {
     if (!m.active) return;
 
@@ -1594,26 +1915,23 @@
     }
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(m.x, m.y, 1, 0, Math.PI * 2);
+    ctx.arc(m.x, m.y, 1, 0, TAU);
     ctx.fill();
 
     ctx.restore();
   }
 
-  // 星空・流れ星エフェクトの1フレーム分の描画処理
-  function drawNightSky() {
-    const now = performance.now();
-    const dt = Math.min(0.1, (now - nightLastFrameTime) / 1000); // タブ非アクティブ復帰時の飛び防止
-    nightLastFrameTime = now;
-    nightRotationDeg += STARRY_CONFIG.rotationSpeed * dt;
+  // 星空・流れ星エフェクトの1コマ分の描画処理
+  function drawNightSky(k) {
+    nightRotationDeg += STARRY_CONFIG.rotationSpeed * (k / 60);
 
     drawNightBackgroundStars();
 
     const center = NIGHT_CENTER_PRESETS[STARRY_CONFIG.centerStar] || NIGHT_CENTER_PRESETS.sirius;
     const centerRaDeg = center.ra * 15;
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const maxR = Math.min(canvas.width, canvas.height) * 0.47;
+    const cx = viewW / 2;
+    const cy = viewH / 2;
+    const maxR = Math.min(viewW, viewH) * 0.47;
 
     nightRealStars.forEach(rs => updateNightRealStarPosition(rs, centerRaDeg, center.dec, cx, cy, maxR, NIGHT_MAX_ANG_DEG, nightRotationDeg));
 
@@ -1621,41 +1939,31 @@
     drawNightRealStars();
 
     if (nightMeteor.active) {
-      updateNightMeteorPos(nightMeteor);
+      updateNightMeteorPos(nightMeteor, k);
       drawNightMeteor(nightMeteor);
-    } else if (Math.random() < 0.004 * STARRY_CONFIG.meteorFreq) {
+    } else if (Math.random() < perFrames(0.004 * STARRY_CONFIG.meteorFreq, k)) {
       resetNightMeteor(nightMeteor);
     }
   }
 
-  function drawEffect() {
+  // 1コマ分の更新と描画（k ＝ 60fps換算で何コマ分進めるか）
+  function stepEffect(k) {
+    // 前のモードの描画設定が残らないように、毎コマ元に戻す
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
     if (currentMode === 'fireworks') {
-      ctx.fillStyle = 'rgba(5, 5, 13, 0.22)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = `rgba(5, 5, 13, ${perFrames(0.22, k).toFixed(3)})`;
+      ctx.fillRect(0, 0, viewW, viewH);
     } else {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, viewW, viewH);
     }
 
     if (currentMode === 'snow') {
-      ctx.fillStyle = '#ffffff';
-
-      for (let flake of particles) {
-        ctx.beginPath();
-        ctx.globalAlpha = flake.opacity;
-        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        flake.y += flake.speedY;
-        flake.x += flake.speedX;
-
-        if (flake.y > canvas.height) {
-          flake.y = -flake.radius;
-          flake.x = Math.random() * canvas.width;
-        }
-      }
+      drawSnow(k);
     } else if (currentMode === 'firefly') {
       for (let p of particles) {
-        p.phaseTimer++;
+        p.phaseTimer += k;
         switch (p.phase) {
           case 'idle':
             p.brightness = 0;
@@ -1679,8 +1987,13 @@
             break;
         }
 
-        const flicker = 0.92 + Math.random() * 0.08;
-        const brightness = p.brightness * flicker;
+        // ちらつき：60fpsの1コマ分の時間ごとに値を変える（画面のHzに左右されないように）
+        p.flickerTimer += k;
+        if (p.flickerTimer >= 1) {
+          p.flickerTimer %= 1;
+          p.flicker = 0.92 + Math.random() * 0.08;
+        }
+        const brightness = p.brightness * p.flicker;
         const glowOpacity = Math.max(0.04, brightness);
         const coreLightness = 55 + brightness * 40;
 
@@ -1694,28 +2007,28 @@
         gradient.addColorStop(1,   `hsla(${p.hue}, 100%, 50%, 0)`);
         ctx.beginPath();
         ctx.fillStyle = gradient;
-        ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, glowRadius, 0, TAU);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = `hsla(${p.hue}, 90%, ${Math.min(96, coreLightness + 15)}%, ${Math.min(1, glowOpacity + 0.15)})`;
-        ctx.arc(p.x, p.y, p.radius * (0.6 + brightness * 0.6), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius * (0.6 + brightness * 0.6), 0, TAU);
         ctx.fill();
 
         ctx.restore();
 
-        p.wobble += 0.02;
-        p.x += p.speedX + Math.sin(p.wobble) * 0.15;
-        p.y += p.speedY + Math.cos(p.wobble * 0.8) * 0.15;
+        p.wobble += 0.02 * k;
+        p.x += (p.speedX + Math.sin(p.wobble) * 0.15) * k;
+        p.y += (p.speedY + Math.cos(p.wobble * 0.8) * 0.15) * k;
 
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x < 0) p.x = viewW;
+        if (p.x > viewW) p.x = 0;
+        if (p.y < 0) p.y = viewH;
+        if (p.y > viewH) p.y = 0;
       }
     } else if (currentMode === 'fireworks') {
       // --- 花火打ち上げロジック ---
-      fireworkTimer++;
+      fireworkTimer += k;
       if (fireworkTimer > nextLaunch) {
         fireworkTimer = 0;
         nextLaunch = Math.floor(Math.random() * 40) + 32;
@@ -1728,13 +2041,14 @@
 
         particles.push({
           type: 'rocket',
-          x: Math.random() * (canvas.width * 0.8) + canvas.width * 0.1,
-          y: canvas.height,
-          targetY: Math.random() * (canvas.height * 0.35) + canvas.height * 0.12,
+          x: Math.random() * (viewW * 0.8) + viewW * 0.1,
+          y: viewH,
+          targetY: Math.random() * (viewH * 0.35) + viewH * 0.12,
           speedY: -(Math.random() * 2.5 + 8.0),
           hue: baseHue,
           style: style,
-          history: []
+          history: [],
+          historyAcc: 0
         });
       }
 
@@ -1743,8 +2057,7 @@
 
         if (p.type === 'rocket') {
           // 打ち上げ中の光跡（尾を引く導火の軌跡）
-          p.history.push({ x: p.x, y: p.y });
-          if (p.history.length > 6) p.history.shift();
+          recordHistory(p, 6, k);
 
           if (p.history.length > 1) {
             ctx.save();
@@ -1762,12 +2075,12 @@
           ctx.save();
           ctx.beginPath();
           ctx.fillStyle = `hsl(${p.hue}, 100%, 85%)`;
-          ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, 2.2, 0, TAU);
           ctx.fill();
           ctx.restore();
 
-          p.y += p.speedY;
-          p.speedY *= 0.98;
+          p.y += p.speedY * k;
+          p.speedY *= Math.pow(0.98, k);
 
           // 頂点に達したら開花
           if (p.y <= p.targetY || p.speedY >= -1.2) {
@@ -1831,12 +2144,12 @@
           grad.addColorStop(1, `hsla(${p.hue}, 100%, 60%, 0)`);
           ctx.beginPath();
           ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, Math.max(p.radius, 0.1), 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, Math.max(p.radius, 0.1), 0, TAU);
           ctx.fill();
           ctx.restore();
 
-          p.radius += (p.maxRadius - p.radius) * 0.35;
-          p.alpha *= 0.78;
+          p.radius += (p.maxRadius - p.radius) * perFrames(0.35, k);
+          p.alpha *= Math.pow(0.78, k);
           if (p.alpha < 0.02) particles.splice(i, 1);
         } else if (p.type === 'spark') {
           // 変化菊：燃え尽きていくにつれて色が変化する演出
@@ -1846,10 +2159,7 @@
           }
 
           // 過去座標を保持（光の尾を形成。菊は長め、牡丹は短めでほぼ粒状に）
-          p.history.push({ x: p.x, y: p.y });
-          if (p.history.length > p.maxHistory) {
-            p.history.shift();
-          }
+          recordHistory(p, p.maxHistory, k);
 
           // 1. 光の尾（中心から伸びる軌跡）の描画。うっすら長い尾＋先端付近の明るい太い光の2層にして、
           //    セグメント毎に描画する重い処理を避けつつ「先端ほど太く明るい」自然なグラデーションに見せる
@@ -1885,17 +2195,18 @@
           ctx.globalCompositeOperation = 'lighter';
           ctx.beginPath();
           ctx.fillStyle = `hsla(${p.hue}, 100%, 90%, ${p.alpha})`;
-          ctx.arc(p.x, p.y, p.size * 1.4, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 1.4, 0, TAU);
           ctx.fill();
           ctx.restore();
 
-          // 物理更新（空気抵抗で減速 -> 重力で下垂 -> アルファ値減少）
-          p.vx *= p.friction;
-          p.vy *= p.friction;
-          p.vy += p.gravity;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.alpha -= p.decay;
+          // 物理更新（空気抵抗で減速 -> 重力で下垂 -> アルファ値減少）。経過コマ数 k で補正
+          const friction = Math.pow(p.friction, k);
+          p.vx *= friction;
+          p.vy *= friction;
+          p.vy += p.gravity * k;
+          p.x += p.vx * k;
+          p.y += p.vy * k;
+          p.alpha -= p.decay * k;
 
           if (p.alpha <= 0) {
             particles.splice(i, 1);
@@ -1929,10 +2240,10 @@
         const minOp = Math.max(0, sakuraMaxOpacity - 0.4);
         const opacity = p.randomOpacity * (sakuraMaxOpacity - minOp) + minOp;
 
-        p.y += speedY;
-        p.x += Math.sin(p.y * 0.01) + speedX;
-        p.angle += angularSpeed;
-        p.flipAngle += flipSpeed;
+        p.y += speedY * k;
+        p.x += (Math.sin(p.y * 0.01) + speedX) * k;
+        p.angle += angularSpeed * k;
+        p.flipAngle += flipSpeed * k;
 
         // 花びらの描画（外側1枚＋内側1枚の二層構造）
         ctx.save();
@@ -1966,56 +2277,89 @@
         ctx.restore();
 
         // 画面外に出たら花びらを再生成（画面上部外側から再度舞い落ちる）
-        if (p.y > canvas.height + size * 2 || p.x < -size * 3 || p.x > canvas.width + size * 3) {
+        if (p.y > viewH + size * 2 || p.x < -size * 3 || p.x > viewW + size * 3) {
           particles[i] = createSakuraPetal(false);
         }
       }
     } else if (currentMode === 'starrynight') {
-      drawNightSky();
+      drawNightSky(k);
     }
+  }
 
-    effectAnimationId = requestAnimationFrame(drawEffect);
+  function effectLoop(now) {
+    const k = lastFrameTime === null
+      ? 1
+      : Math.min(MAX_FRAMES_PER_STEP, Math.max(0, (now - lastFrameTime) / FRAME_MS));
+    lastFrameTime = now;
+    stepEffect(k);
+    effectAnimationId = requestAnimationFrame(effectLoop);
+  }
+
+  // 「動きを減らす」設定時：アニメーションさせず、少し進めた1コマを静止画として描く
+  function renderStill() {
+    createParticles(currentMode);
+    for (let i = 0; i < STILL_STEPS; i++) stepEffect(1);
   }
 
   function startEffect(mode) {
-    if (!effectAnimationId) {
-      createParticles(mode);
-      drawEffect();
+    stopEffect();
+    createParticles(mode);
+    if (reduceMotion) {
+      renderStill();
+      return;
     }
+    lastFrameTime = null;
+    effectAnimationId = requestAnimationFrame(effectLoop);
   }
 
   function stopEffect() {
     if (effectAnimationId) {
       cancelAnimationFrame(effectAnimationId);
       effectAnimationId = null;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
+    currentMode = null;
+    particles = [];
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, viewW, viewH);
   }
+
+  // タブを切り替えて戻った時に、経過時間を測り直す
+  document.addEventListener('visibilitychange', () => { lastFrameTime = null; });
 
   // カード（.menu-card）の遅延遷移処理
   document.querySelectorAll('.menu-card').forEach(card => {
     card.addEventListener('click', function(e) {
+      // Ctrl／⌘／Shift／Alt＋クリック（新しいタブ・ウィンドウで開く）は、ブラウザの通常の動作に任せる
+      if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
       const targetUrl = this.getAttribute('href');
-      
+
       this.classList.add('is-active');
-      
+
+      // 「動きを減らす」設定時は、円が広がるのを待たずに移動する
       setTimeout(() => {
         window.location.href = targetUrl;
-      }, 400); 
+      }, reduceMotion ? 0 : 400);
     });
+  });
+
+  // 「戻る」でこのページが前の状態のまま復元された時に、押したカードの塗りつぶしを元に戻す
+  window.addEventListener('pageshow', () => {
+    document.querySelectorAll('.menu-card.is-active').forEach(card => card.classList.remove('is-active'));
   });
 
   // 初期化処理
   window.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
-    
+
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     document.getElementById('test-date').value = `${yyyy}-${mm}-${dd}`;
 
     populatePeriodInputs();
+    updateSavedNote();
     checkAndRun(today);
   });
 </script>
