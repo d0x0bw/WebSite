@@ -20,7 +20,7 @@
 
     body {
         font-family: "ヒラギノ丸ゴ Pro", "Hiragino Maru Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
-        -webkit-text-size-adjust: none;
+        -webkit-text-size-adjust: 100%;
         background: #e8e4da url(./images/bg.jpg) repeat center center/200px;
         color: #595037;
         line-height: 2;
@@ -298,6 +298,14 @@
     /* ==========================================================================
        4. 固有機能パーツ（改良版・CSSのみのLightboxギャラリー）
        ========================================================================== */
+    /* 写真の並び（PCは4列。スマホでは下のレスポンシブ設定で2列にする） */
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
     /* トリガー用のチェックボックス本体は画面から隠す */
     .lb-check {
         display: none;
@@ -452,6 +460,13 @@
     /* ==========================================================================
        6. レスポンシブ設定（画面幅・デバイスに応じた調整）
        ========================================================================== */
+
+    /* ── スマホ（幅600px以下）：写真を2列に ── */
+    @media screen and (max-width: 600px) {
+        .gallery-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
 
     /* ── スマホ横画面用の調整 ── */
     @media screen and (max-width:900px) and (orientation: landscape) {
@@ -685,7 +700,6 @@
         <li><a href="#about">About</a></li>
         <li><a href="#gallery">Gallery</a></li>
         <li><a href="#link">Link</a></li>
-        <li><a href="#"><i class="fab fa-instagram"></i></a></li>
       </ul>
       <label for="menu-btn-check" class="close-overlay"></label>
     </nav>
@@ -715,13 +729,13 @@
            <b>🕉️ インドの「アヒンサー（非暴力）」 </b><br>
           ・概要：仏教、ジャイナ教、ヒンドゥー教の根底にある核心的な教えです。<br>
           ・思想：言葉や行動だけでなく、心の中でも「あらゆる生き物を傷つけない」ことを目指します。<br>
-          ・影響：すべての命はつながっており、他者を変に傷つけることは自分を傷つけること（カルマ）と考え、菜食主義の基盤となりました。<br>
+          ・影響：すべての命はつながっており、他者をむやみに傷つけることは自分を傷つけること（カルマ）と考え、菜食主義の基盤となりました。<br>
           <br>
 
           <b>🕊️ 北米先住民の「すべてのものは私の親族（オール・マイ・リレーションズ）」</b><br>
           概要：ラコタ族など、ネイティブ・アメリカンに伝わる世界観です。<br>
           思想：人間、動物、植物、環境、そして岩や川までもが、すべて一つの大きな家族（親族）であると考えます。<br>
-          影響：自然から何かを得るときは必ず感謝を捧げ、必要以上の狩猟や採取を行せず、次の「7世代先」の子供たちのために自然を残すという行動規範が生み出されました。<br>
+          影響：自然から何かを得るときは必ず感謝を捧げ、必要以上の狩猟や採取を行わず、次の「7世代先」の子供たちのために自然を残すという行動規範が生み出されました。<br>
           <br>
 
           <b>⛩️ 日本の「アニミズム（八百万の神）」と「慈悲の心」</b><br>
@@ -770,7 +784,7 @@
           相手が自分に利益をもたらすから大切にする、という「取引」の姿勢を明確に否定しています。<br>
            <b>仏教：</b>敵や味方の区別なく、すべての生き物の幸せを願う（平等大慈悲）。<br>
            <b>キリスト教：</b>罪人であっても、ただ存在していることを肯定して愛する（アガペー）。<br>
-           <b>先住民族：</b>自然からの恵みを独占せず、分か分かち合い、次の世代のために残す。<br>
+           <b>先住民族：</b>自然からの恵みを独占せず、分かち合い、次の世代のために残す。<br>
           利己主義を超えた、純粋な利他主義（他者を思いやる心）が根底にあります。<br><br>
 
           <span class="look">3. 「命をいただくこと」への謙虚さと痛み</span><br>
@@ -786,77 +800,72 @@
     <div class="contents bg3" id="gallery">
       <section>
         <h2>Photo Gallery</h2>
-        <table>
-          <tr>
-            <td>
-              <input type="checkbox" id="pop01" class="lb-check">
-              <label for="pop01" class="open-btn"><img src="./Photo/photo 1.jpg" alt="Photo 1" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop01" class="close-btn"></label>
-                <label for="pop01" class="lb-img-wrap"><img src="./Photo/photo 1.jpg" alt="Photo 1"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop02" class="lb-check">
-              <label for="pop02" class="open-btn"><img src="./Photo/photo 2.jpg" alt="Photo 2" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop02" class="close-btn"></label>
-                <label for="pop02" class="lb-img-wrap"><img src="./Photo/photo 2.jpg" alt="Photo 2"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop03" class="lb-check">
-              <label for="pop03" class="open-btn"><img src="./Photo/photo 3.jpg" alt="Photo 3" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop03" class="close-btn"></label>
-                <label for="pop03" class="lb-img-wrap"><img src="./Photo/photo 3.jpg" alt="Photo 3"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop04" class="lb-check">
-              <label for="pop04" class="open-btn"><img src="./Photo/photo 4.jpg" alt="Photo 4" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop04" class="close-btn"></label>
-                <label for="pop04" class="lb-img-wrap"><img src="./Photo/photo 4.jpg" alt="Photo 4"></label>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td>
-              <input type="checkbox" id="pop05" class="lb-check">
-              <label for="pop05" class="open-btn"><img src="./Photo/photo 5.jpg" alt="photo 5" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop05" class="close-btn"></label>
-                <label for="pop05" class="lb-img-wrap"><img src="./Photo/photo 5.jpg" alt="photo 5"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop06" class="lb-check">
-              <label for="pop06" class="open-btn"><img src="./Photo/photo 6.jpg" alt="photo 6" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop06" class="close-btn"></label>
-                <label for="pop06" class="lb-img-wrap"><img src="./Photo/photo 6.jpg" alt="photo 6"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop07" class="lb-check">
-              <label for="pop07" class="open-btn"><img src="./Photo/photo 7.jpg" alt="photo 7" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop07" class="close-btn"></label>
-                <label for="pop07" class="lb-img-wrap"><img src="./Photo/photo 7.jpg" alt="photo 7"></label>
-              </div>
-            </td>
-            <td>
-              <input type="checkbox" id="pop08" class="lb-check">
-              <label for="pop08" class="open-btn"><img src="./Photo/photo 8.jpg" alt="photo 8" loading="lazy"></label>
-              <div class="lb-overlay">
-                <label for="pop08" class="close-btn"></label>
-                <label for="pop08" class="lb-img-wrap"><img src="./Photo/photo 8.jpg" alt="photo 8"></label>
-              </div>
-            </td>
-          </tr>
-          </table>
+        <div class="gallery-grid">
+          <div class="gallery-item">
+            <input type="checkbox" id="pop01" class="lb-check">
+            <label for="pop01" class="open-btn"><img src="./Photo/photo 1.jpg" alt="Photo 1" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop01" class="close-btn"></label>
+              <label for="pop01" class="lb-img-wrap"><img src="./Photo/photo 1.jpg" alt="Photo 1"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop02" class="lb-check">
+            <label for="pop02" class="open-btn"><img src="./Photo/photo 2.jpg" alt="Photo 2" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop02" class="close-btn"></label>
+              <label for="pop02" class="lb-img-wrap"><img src="./Photo/photo 2.jpg" alt="Photo 2"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop03" class="lb-check">
+            <label for="pop03" class="open-btn"><img src="./Photo/photo 3.jpg" alt="Photo 3" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop03" class="close-btn"></label>
+              <label for="pop03" class="lb-img-wrap"><img src="./Photo/photo 3.jpg" alt="Photo 3"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop04" class="lb-check">
+            <label for="pop04" class="open-btn"><img src="./Photo/photo 4.jpg" alt="Photo 4" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop04" class="close-btn"></label>
+              <label for="pop04" class="lb-img-wrap"><img src="./Photo/photo 4.jpg" alt="Photo 4"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop05" class="lb-check">
+            <label for="pop05" class="open-btn"><img src="./Photo/photo 5.jpg" alt="photo 5" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop05" class="close-btn"></label>
+              <label for="pop05" class="lb-img-wrap"><img src="./Photo/photo 5.jpg" alt="photo 5"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop06" class="lb-check">
+            <label for="pop06" class="open-btn"><img src="./Photo/photo 6.jpg" alt="photo 6" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop06" class="close-btn"></label>
+              <label for="pop06" class="lb-img-wrap"><img src="./Photo/photo 6.jpg" alt="photo 6"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop07" class="lb-check">
+            <label for="pop07" class="open-btn"><img src="./Photo/photo 7.jpg" alt="photo 7" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop07" class="close-btn"></label>
+              <label for="pop07" class="lb-img-wrap"><img src="./Photo/photo 7.jpg" alt="photo 7"></label>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <input type="checkbox" id="pop08" class="lb-check">
+            <label for="pop08" class="open-btn"><img src="./Photo/photo 8.jpg" alt="photo 8" loading="lazy"></label>
+            <div class="lb-overlay">
+              <label for="pop08" class="close-btn"></label>
+              <label for="pop08" class="lb-img-wrap"><img src="./Photo/photo 8.jpg" alt="photo 8"></label>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -888,7 +897,6 @@
 
   <a href="#" id="gotop">TOP</a>
 
-</body>
 <script>
   // メニュー内のすべてのリンク（aタグ）を取得
   const menuLinks = document.querySelectorAll('#menubar a');
@@ -903,4 +911,5 @@
     });
   });
 </script>
+</body>
 </html>
