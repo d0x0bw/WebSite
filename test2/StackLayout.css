@@ -3,6 +3,17 @@
 /* =================================================================
    StackLayout.css
    ─────────────────────────────────────────────────────────────────
+   ※ このファイルは build.js が読み込み、dist/StackLayout.css に書き出します。
+     dist 側ではなく、こちら（ルートの StackLayout.css）を編集してください。
+
+   【<%- eachGenre(...) %> について】（このコメント内の例だけは % を2つ重ねて書いています）
+   ジャンルごとに同じ形のセレクターを並べる箇所は、build.js が
+   src/genres.json から自動で展開します。{key} の部分が
+   home / genreA / genreB ... に置き換わり、カンマ区切りで並びます。
+     eachGenre('セレクター')               … HOME 以外の全ジャンル
+     eachGenre('セレクター', { home: true }) … HOME も含める
+   ジャンルを増やしても、この CSS を書き足す必要はありません。
+   ─────────────────────────────────────────────────────────────────
    【このファイルの構成】
    1.  全体の基本設定（リセット・body・スクロールバー）
    2.  ヘッダー（上部ジャンル選択エリア）
@@ -114,9 +125,19 @@ header {
   border-color: #3b82f6; /* ホバー時にブルーのボーダー */
 }
 
+/* 中間幅（タブレット・小さめのPC）：ジャンル名が長いので、ボタンを少し詰めて1行に収めやすくする */
+/* それでも収まらない場合は .genre-links の横スクロールで表示される */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .genre-links label {
+    padding: 7px 11px;
+    margin-right: 6px;
+    font-size: 13px;
+  }
+}
+
 /* 選択中のジャンルボタン：CSS の :checked 兄弟セレクター（~）で対応ラベルを光らせる */
 /* radio-home が checked → label[for="radio-home"] にグラデーションを適用、のように機能する */
-#radio-home:checked   ~ header .genre-links label[for="radio-home"],
+#radio-home:checked ~ header .genre-links label[for="radio-home"],
 #radio-genreA:checked ~ header .genre-links label[for="radio-genreA"],
 #radio-genreB:checked ~ header .genre-links label[for="radio-genreB"],
 #radio-genreC:checked ~ header .genre-links label[for="radio-genreC"],
@@ -294,6 +315,10 @@ footer a:hover { color: #00d2ff; }
 /* 各セクションの下余白 */
 .work-section { margin-bottom: 40px; }
 
+/* 本文中の画像：build.js が付ける width/height 属性は「縦横比」としてだけ使い、
+   実際の高さは横幅に合わせて自動で決める（カード画像などは下で個別に高さを指定） */
+main img { height: auto; }
+
 /* セクション内の画像共通スタイル */
 .work-section img {
   border-radius: 8px;
@@ -455,7 +480,7 @@ nav a.sub-link:hover {
 }
 
 /* アコーディオンが開いた時：▼が▲に回転し、サイバーブルーに光る */
-.sub-toggle:checked ~ .toggle-icon::after {
+.sub-toggle:checked ~ .nav-item-head .toggle-icon::after {
   transform: translateY(2px) rotate(225deg);
   border-color: #00d2ff;
 }
@@ -470,6 +495,74 @@ nav a.sub-link:hover {
   display: block;
 }
 
+
+/* =================================================================
+   7-2. サイドメニューの色分け・タイトル固定・現在地の表示
+   ─────────────────────────────────────────────────────────────────
+   ・作品タイトル（.main-link）       … 明るい白で太めに表示
+   ・セクション（.sub-link--section）  … オレンジ（「・作品紹介」「・【起】…」など）
+   ・ステップ（.sub-link--step）       … グレー（「ステップA」や考察の各項目など）
+   ・開いている作品のタイトル（.is-current）と、
+     今読んでいる位置（.is-active / .is-active-parent）は青で表示。
+     .is-current / .is-active / .is-active-parent は page.ejs の JavaScript が付け外しする。
+   ・アコーディオンが開いている間は、作品タイトル（.nav-item-head）を
+     サイドメニューの上部に固定する（position: sticky。JSオフでも動作）。
+   ================================================================= */
+
+/* 作品タイトルと▼ボタンをまとめた行（▼ボタンの絶対配置の基準にする） */
+.nav-item-head {
+  position: relative;
+}
+
+/* 開いているアコーディオンのタイトル行は、サブリンクをスクロールしても上部に固定する */
+.sub-toggle:checked ~ .nav-item-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #12151c;                       /* 下のリンクが透けないよう不透明にする */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35); /* 固定中であることが分かるよう影をつける */
+}
+
+/* 作品タイトル：サブリンクより明るく・太くして区別する */
+nav a.main-link {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+nav a.main-link:hover {
+  color: #00d2ff; /* ホバー時は他のリンクと同じ青 */
+}
+
+/* 開いている作品のタイトル：ホバー時と同じ青で表示し、左端に青いラインを付ける */
+nav a.is-current {
+  color: #00d2ff;
+  background: #1b202e;
+  box-shadow: inset 3px 0 0 #00d2ff;
+}
+
+/* セクション（「・」で始まる項目）：オレンジ */
+nav a.sub-link--section {
+  color: #f39801;
+}
+
+/* ステップ（字下げされた項目）：グレーで一回り小さく */
+nav a.sub-link--step {
+  color: #64748b;
+  font-size: 12.5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* 今読んでいる項目：青＋左端の青いライン */
+nav a.sub-link.is-active {
+  color: #00d2ff;
+  background: #161b26;
+  box-shadow: inset 3px 0 0 #00d2ff;
+}
+
+/* 今読んでいるステップが属するセクション：青 */
+nav a.sub-link--section.is-active-parent {
+  color: #00d2ff;
+}
 
 /* =================================================================
    8. コンテンツ表示切り替え（:target と :has を使った仕組み）
@@ -504,7 +597,9 @@ main:has(:target) #default-content {
    ─────────────────────────────────────────────────────────────────
    ・初期は opacity:0 + visibility:hidden で非表示。
    ・JS がスクロールを監視し、200px 以上で .is-active クラスを付与 → 表示。
-   ・JS がオフの場合は href="#" によりページ先頭へジャンプするだけ（フォールバック）。
+   ・JS 専用の機能。JS がオフの場合は .is-active が付かないため表示されない。
+     （href="#" に飛ぶと :target が外れて HOME に戻ってしまうため、
+       JS オフ時にあえて表示しない方が安全）
    ================================================================= */
 
 .page-top-btn {
@@ -701,6 +796,14 @@ main:has(:target) #default-content {
     padding-left: 35px;
     font-size: 14px;
     color: #94a3b8;
+  }
+
+  /* 開いている作品タイトルの固定位置：スマホでは半透明ヘッダーのすぐ下に固定する */
+  /* sticky の top はサイドメニューの上余白（padding-top: 60px）の内側から数えるため、 */
+  /* 「ヘッダーの高さ − 60px」を指定する（--header-h は page.ejs の JavaScript が入れる。JSオフ時は 43px） */
+  .sub-toggle:checked ~ .nav-item-head {
+    top: calc(var(--header-h, 43px) - 60px);
+    background: #191d26;
   }
 
   /* 未選択ジャンルのアコーディオン▼ボタンも非表示 */
