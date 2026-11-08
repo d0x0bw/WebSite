@@ -771,11 +771,105 @@ section {
   aspect-ratio: 1 / 2;
 }
 
-/* JS無効時の案内（ギャラリーは js/photos.js から表示するため） */
-.noscript-note {
-  padding: var(--space-md);
-  color: var(--text-muted);
-  font-size: .9rem;
+/* JSオフ用 写真ビューア ------------------------------------
+   tools/build-gallery が生成。サムネイルのリンク先（#photo-01 など）を :target で表示する。
+   拡大画像は背景画像（--src）で、表示中のスライドにだけ指定するので、開いた1枚だけ読み込まれる
+   （JSオフでは <img loading="lazy"> が無効になり、全写真が読み込まれてしまうため） */
+.css-slide {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--lightbox-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text-inverse);
+}
+
+.css-slide:target {
+  display: flex;
+}
+
+/* JSオンの時は lightbox.js のビューアを使うので出さない */
+.js .css-viewer {
+  display: none;
+}
+
+/* 表示中は背景のスクロールを止める（JSなしでできる方法） */
+html:has(.css-slide:target) {
+  overflow: hidden;
+}
+
+.css-slide-img {
+  width: 75%;
+  height: 85vh;
+  background: center / contain no-repeat;
+}
+
+.css-slide:target .css-slide-img {
+  background-image: var(--src);
+}
+
+.css-slide-counter {
+  position: absolute;
+  top: var(--space-md);
+  left: 30px;
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+
+.css-slide-close {
+  position: absolute;
+  top: 12px;
+  right: 30px;
+  font-family: var(--font-ui);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.css-slide-close:hover {
+  color: var(--accent-color);
+}
+
+.css-slide-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  width: 60px;
+  height: 90px;
+  font-family: var(--font-ui);
+  font-size: 2.6rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, .7);
+  background: rgba(0, 0, 0, .3);
+  transform: translateY(-50%);
+}
+
+.css-slide-nav.prev {
+  left: 0;
+  padding-right: 8px;
+  border-radius: 0 45px 45px 0;
+}
+
+.css-slide-nav.next {
+  right: 0;
+  padding-left: 8px;
+  border-radius: 45px 0 0 45px;
+}
+
+.css-slide-nav:hover {
+  color: var(--text-inverse);
+  background: rgba(var(--accent-rgb), .8);
+}
+
+.css-slide-close:focus-visible,
+.css-slide-nav:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
 }
 
 
@@ -1244,6 +1338,38 @@ section {
   }
 
   .lightbox-nav:hover {
+    background: rgba(0, 0, 0, .3);
+  }
+
+  /* JSオフ用 写真ビューア */
+  .css-slide-img {
+    width: 80%;
+  }
+
+  .css-slide-counter {
+    top: 15px;
+    left: 15px;
+  }
+
+  .css-slide-close {
+    top: 8px;
+    right: 15px;
+  }
+
+  .css-slide-nav {
+    width: 15%;
+    height: 70px;
+  }
+
+  .css-slide-nav.prev {
+    border-radius: 0 35px 35px 0;
+  }
+
+  .css-slide-nav.next {
+    border-radius: 35px 0 0 35px;
+  }
+
+  .css-slide-nav:hover {
     background: rgba(0, 0, 0, .3);
   }
 
