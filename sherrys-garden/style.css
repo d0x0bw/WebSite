@@ -957,7 +957,12 @@ section {
   width: 0;
   height: 2px;
   pointer-events: none;
-  background: rgba(255, 255, 255, .9);
+  /* 背景色ではなく「文字色」で塗る。
+     Dark Reader などのダークモード拡張は明るい背景色を暗く置き換えるため、
+     白い背景色だとバーが見えなくなる。文字色（白）は明るいまま残り、
+     currentColor はそのまま使われるので、拡張がオンでも表示される */
+  color: rgba(255, 255, 255, .9);
+  background-color: currentColor;
 }
 
 /* Prev / Next ------------------------------------ */
