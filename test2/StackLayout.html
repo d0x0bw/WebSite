@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スタックレイアウト・アコーディオンメニュー・JSオン/オフ両対応</title>
+  <title>Reportage Cinéma</title>
 
   <!-- Google Fontsの読み込みコード -->
   <!-- CSS の font-family 先頭の「Zen Maru Gothic」を読み込む（太さ 400/500/700） -->
@@ -31,6 +31,8 @@
   【モバイルメニューの仕組み】
   #menu-toggle（チェックボックス）で「ハンバーガーメニューの開閉」を制御。
   チェックが入ると nav が左からスライドして表示されます。
+  開いているジャンルのタイトルはメニュー上部に固定されます（その下に開いている作品タイトル）。
+  JSが有効な場合は、開いているジャンルのタイトルをもう一度タップすると作品の一覧を閉じます。
 
   【アコーディオンの仕組み】
   .sub-toggle（チェックボックス）でサブリンクの開閉を制御します。
@@ -69,6 +71,9 @@
     ・スマホ表示 → ジャンルボタンは非表示。代わりにハンバーガーボタンが表示される
     ============================================================ -->
   <header>
+    <!-- サイト名（スマホ表示時のみ表示）。タップすると HOME に戻る -->
+    <label for="radio-home" class="site-title">Reportage Cinéma</label>
+
     <!-- ジャンル選択ボタン群（PC用） -->
     <!-- label[for="..."] がラジオボタンと連動しており、クリックでジャンルが切り替わる -->
     <!-- （src/genres.json から自動生成） -->
@@ -37519,21 +37524,39 @@
     genreRadios.forEach(radio => {
       radio.addEventListener('change', () => {
         window.location.hash = ''; // URL の # 以降を空にする
+        expandAllGenres();         // 5. で閉じていたジャンルの一覧は、ジャンルを変えたら元に戻す
       });
     });
 
 
-    // ── 5. モバイルでジャンルタイトルをクリックした時のスクロール ─
-    // スマホでジャンルタイトルをタップした時、タイトル自体が見えるように
-    // 少し遅延を設けてからスクロール位置を調整する
+    // ── 5. モバイルでジャンルタイトルをクリックした時の動作 ──────────
+    // ・開いているジャンルのタイトルをもう一度タップすると、そのジャンルの作品一覧を閉じる（もう一度で開く）
+    //   ラジオボタンは選び直しても外れないので、.menu-list に .is-collapsed を付けて一覧だけを隠す
+    //   （本文に表示中の作品はそのまま。StackLayout.css の 10. を参照）
+    // ・別のジャンルをタップした時は、タイトル自体が見えるように少し遅らせてスクロール位置を調整する
+    function expandAllGenres() {
+      document.querySelectorAll('.menu-list.is-collapsed').forEach(list => list.classList.remove('is-collapsed'));
+    }
     mobileGenreTitles.forEach(title => {
-      title.addEventListener('click', () => {
+      title.addEventListener('click', (e) => {
+        const radio = document.getElementById(title.htmlFor);
+        const list  = title.closest('.menu-list');             // HOME ボタンは .menu-list の外なので null
+        if (list && radio && radio.checked) {
+          e.preventDefault();                                  // 選び直し（何も変わらない）をやめて
+          list.classList.toggle('is-collapsed');               // 一覧を閉じる／開く
+          return;
+        }
         // 50ms 待ってから scrollIntoView を実行（DOMの状態変化を待つため）
         setTimeout(() => {
           title.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 50);
       });
     });
+
+
+    // ── 5-2. ヘッダーのサイト名（HOME に戻る）をタップした時は、開いているメニューを閉じる ──
+    const siteTitle = document.querySelector('.site-title');
+    if (siteTitle) siteTitle.addEventListener('click', () => { menuToggle.checked = false; });
 
 
     // ── 6. URLのハッシュに合わせてジャンルを選び直す ────────────────
@@ -37552,6 +37575,7 @@
       const radio = document.getElementById('radio-' + genre);
       if (!radio || radio.checked) return;    // すでに正しいジャンルなら何もしない
       radio.checked = true;                   // ※ change イベントは発生しないのでハッシュは消えない
+      expandAllGenres();                      // 閉じていたジャンルの一覧も元に戻す
 
       // ジャンルを切り替えたことで本文が表示されたので、目的の位置までスクロールする
       if (target === box) {
@@ -37611,11 +37635,15 @@
       const elTop  = box.top - navTop + navEl.scrollTop;
       const elH    = isTitle ? head.offsetHeight : box.height;
 
-      // サブリンクの場合、上部に固定されたタイトル行の下から見えている必要がある
-      // （sticky の top はサイドメニューの上余白 padding-top の内側から数えられる）
-      const covered = (!isTitle && head)
-        ? padTop + (parseFloat(getComputedStyle(head).top) || 0) + head.offsetHeight
-        : padTop;
+      // 上部に固定されている行（スマホではジャンルタイトル、サブリンクの場合はさらに作品タイトル行）の
+      // 下から見えている必要がある（sticky の top はサイドメニューの上余白 padding-top の内側から数えられる）
+      const stickyBottom = row => padTop + (parseFloat(getComputedStyle(row).top) || 0) + row.offsetHeight;
+      let covered = padTop;
+      const genreTitle = el.closest('.menu-list')?.querySelector('.mobile-genre-title');
+      if (genreTitle && getComputedStyle(genreTitle).position === 'sticky') {
+        covered = Math.max(covered, stickyBottom(genreTitle));
+      }
+      if (!isTitle && head) covered = Math.max(covered, stickyBottom(head));
       const viewTop    = navEl.scrollTop + covered + 8;
       const viewBottom = navEl.scrollTop + navEl.clientHeight - padBottom - 8;
 
@@ -37629,11 +37657,16 @@
       navEl.scrollTo({ top: Math.max(0, next), behavior: onScreen ? 'smooth' : 'auto' });
     }
 
-    // スマホではヘッダーの実際の高さを CSS 変数 --header-h に入れておく
-    // （開いている作品タイトルを、ヘッダーのすぐ下に固定するため。StackLayout.css の 10. を参照）
+    // スマホではヘッダーとジャンルタイトルの実際の高さを CSS 変数 --header-h / --genre-title-h に入れておく
+    // （開いているジャンルのタイトルをヘッダーのすぐ下に、作品タイトルをその下に固定するため。
+    //   StackLayout.css の 10. を参照）
     const headerEl = document.querySelector('header');
     function setHeaderHeight() {
       document.documentElement.style.setProperty('--header-h', headerEl.offsetHeight + 'px');
+      const genreTitle = document.querySelector('.menu-list .mobile-genre-title');
+      if (genreTitle && genreTitle.offsetHeight) {             // PC 表示（非表示）の時は測らない
+        document.documentElement.style.setProperty('--genre-title-h', genreTitle.offsetHeight + 'px');
+      }
     }
     setHeaderHeight();
     window.addEventListener('resize', setHeaderHeight);
