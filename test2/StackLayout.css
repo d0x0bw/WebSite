@@ -96,6 +96,9 @@ header {
   border-bottom: 1px solid #222733;
 }
 
+/* サイト名「Reportage Cinéma」（スマホ表示時のみ表示。PC ではジャンルボタンを並べるので非表示） */
+.site-title { display: none; }
+
 /* ジャンルボタンを横並びで並べるラッパー。はみ出した場合は横スクロール可能にする */
 .genre-links {
   overflow-x: auto;
@@ -226,10 +229,14 @@ nav a {
   font-size: 14px;
   transition: all 0.2s ease;
 }
-nav a:hover {
-  background: #1b202e;
-  color: #00d2ff;
-  padding-left: 28px; /* ホバーで左にスライドするエフェクト */
+/* ホバー効果はマウスなどで「ホバーできる」端末だけに付ける。
+   （スマホではタップした後もホバー状態が残り、リンクが光ったままになるため） */
+@media (hover: hover) {
+  nav a:hover {
+    background: #1b202e;
+    color: #00d2ff;
+    padding-left: 28px; /* ホバーで左にスライドするエフェクト */
+  }
 }
 
 /* ── メインコンテンツエリア ──────────────────────────────────── */
@@ -413,9 +420,11 @@ nav a.sub-link {
   color: #64748b;
   border-bottom: none; /* サブリンク間の区切り線は省略してすっきりさせる */
 }
-nav a.sub-link:hover {
-  padding-left: 44px;
-  color: #00d2ff;
+@media (hover: hover) {
+  nav a.sub-link:hover {
+    padding-left: 44px;
+    color: #00d2ff;
+  }
 }
 
 /* スマホ：インデントを深くして階層をさらに明確に */
@@ -464,8 +473,10 @@ nav a.sub-link:hover {
   border-left: 1px solid #1e2330; /* リンクとの視覚的な区切り線 */
   transition: background 0.2s ease;
 }
-.toggle-icon:hover {
-  background: #1b202e;
+@media (hover: hover) {
+  .toggle-icon:hover {
+    background: #1b202e;
+  }
 }
 
 /* ▼アイコン本体（CSS で三角形を描画） */
@@ -528,8 +539,10 @@ nav a.main-link {
   color: #e2e8f0;
   font-weight: 500;
 }
-nav a.main-link:hover {
-  color: #00d2ff; /* ホバー時は他のリンクと同じ青 */
+@media (hover: hover) {
+  nav a.main-link:hover {
+    color: #00d2ff; /* ホバー時は他のリンクと同じ青 */
+  }
 }
 
 /* 開いている作品のタイトル：ホバー時と同じ青で表示し、左端に青いラインを付ける */
@@ -676,12 +689,33 @@ main:has(:target) #default-content {
    ・サイドナビ → 画面外（左）に隠れ、メニューON時にスライドイン
    ・ヘッダー・フッター → 半透明で画面に固定（ガラスエフェクト）
    ・メニューリストのジャンル見出し → 表示（アコーディオン状に展開）
+   ・ヘッダー左側にサイト名「Reportage Cinéma」を表示（タップで HOME）
+   ・開いているジャンルの見出しはメニュー上部に固定し、開いている作品タイトルはその下に固定
+   ・開いているジャンルの見出しをもう一度タップすると作品の一覧を閉じる（JS が .is-collapsed を付ける）
+   ・タップした時のハイライト（光る表示）は出さない
    ================================================================= */
 
 @media (max-width: 768px) {
 
   /* PCのジャンル選択ボタン群は不要なので非表示 */
   .genre-links { display: none; }
+
+  /* タップした時にリンクやボタンが光る（ハイライトされる）表示を無効にする */
+  header, nav { -webkit-tap-highlight-color: transparent; }
+
+  /* ── サイト名：ヘッダーの左側に表示（タップで HOME に戻る） ── */
+  /* 行の高さを 24px に決めておく（ヘッダーの高さ = 24px + 上下の余白 12px×2 + 下線 1px = 49px） */
+  .site-title {
+    display: block;
+    color: #e2e8f0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(0, 210, 255, 0.45);
+    cursor: pointer;
+  }
 
   /* ── ヘッダー：透過ガラス風に変更（画面上部に固定） ── */
   header {
@@ -798,13 +832,30 @@ main:has(:target) #default-content {
     color: #94a3b8;
   }
 
-  /* 開いている作品タイトルの固定位置：スマホでは半透明ヘッダーのすぐ下に固定する */
+  /* 開いているジャンルの見出し：作品タイトルと同じように、半透明ヘッダーのすぐ下に固定する */
   /* sticky の top はサイドメニューの上余白（padding-top: 60px）の内側から数えるため、 */
-  /* 「ヘッダーの高さ − 60px」を指定する（--header-h は page.ejs の JavaScript が入れる。JSオフ時は 43px） */
+  /* 「ヘッダーの高さ − 60px」を指定する（--header-h は page.ejs の JavaScript が入れる。JSオフ時は 49px） */
+  #radio-genreA:checked ~ .container nav .list-genreA .mobile-genre-title,
+  #radio-genreB:checked ~ .container nav .list-genreB .mobile-genre-title,
+  #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
+  #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
+  #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
+  #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
+    position: sticky;
+    top: calc(var(--header-h, 49px) - 60px);
+    z-index: 6;                                 /* 作品タイトルの行（z-index: 5）より手前 */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35); /* 固定中であることが分かるよう影をつける */
+  }
+
+  /* 開いている作品タイトルの固定位置：スマホではジャンルの見出しのすぐ下に固定する */
+  /* （--genre-title-h はジャンル見出しの高さ。page.ejs の JavaScript が入れる。JSオフ時は 50px） */
   .sub-toggle:checked ~ .nav-item-head {
-    top: calc(var(--header-h, 43px) - 60px);
+    top: calc(var(--header-h, 49px) - 60px + var(--genre-title-h, 50px));
     background: #191d26;
   }
+
+  /* 開いているジャンルの見出しをもう一度タップした時（JS が .is-collapsed を付ける）は、作品の一覧を隠す */
+  .menu-list.is-collapsed > :not(.mobile-genre-title) { display: none !important; }
 
   /* 未選択ジャンルのアコーディオン▼ボタンも非表示 */
   .menu-list .toggle-icon {
