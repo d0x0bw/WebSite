@@ -38,6 +38,7 @@
   .sub-toggle（チェックボックス）でサブリンクの開閉を制御します。
   開いている間は作品タイトルの行（.nav-item-head）がサイドメニュー上部に固定されます。
   JSが有効な場合は、上部ボタンのスムーズスクロールなども追加で動作。
+  さらに、読んでいる作品の進み具合をヘッダー下端のプログレスバーで表示します（スクリプトの 8 を参照）。
   さらにJSが有効な場合は、サイドメニューで次の動作が加わります（スクリプトの 7 を参照）。
     ・開いている作品のタイトルを青く表示し、その作品のメニューだけを開く（ほかは自動で閉じる）
     ・▼ボタンで別の作品のメニューを開くと、その作品の本文も表示する
@@ -95,6 +96,10 @@
       <span></span><!-- 中の線（開いた時に消える） -->
       <span></span><!-- 下の線 -->
     </label>
+
+    <!-- 読んでいる作品の進み具合（プログレスバー）。ヘッダーの下端に重ねて表示する -->
+    <!-- 幅は JavaScript（スクリプトの 8.）が変える。作品を開いていない時・JSオフの時は表示されない -->
+    <div class="reading-progress" aria-hidden="true"><span class="reading-progress-bar"></span></div>
   </header>
 
   <!-- ============================================================
@@ -3045,7 +3050,7 @@
 <div data-genre="genreA" id="work2" class="content-box">
         <h1>イノセンス</h1>
         <div class="work-section layout-wide">
-          <img loading="lazy" src="./innocence/innocence.jpg" alt="イノセンス" decoding="async">
+          <img width="1280" height="690" loading="lazy" src="./innocence/innocence.jpg" alt="イノセンス" decoding="async">
           <p style="color: #ccfbf1; letter-spacing: 0.35em; text-shadow: 0 0 6px #2dd4bf, 0 0 14px #0f766e;">INNOCENCE</p>
         </div>
         <hr>
@@ -37871,11 +37876,31 @@
     mainContent.addEventListener('scroll', () => {
       if (spyTicking) return;
       spyTicking = true;
-      requestAnimationFrame(() => { updateActive(); spyTicking = false; });
+      requestAnimationFrame(() => { updateActive(); updateProgress(); spyTicking = false; });
     });
 
     updateCurrentWork();                                      // ページを開いた時
     window.addEventListener('hashchange', updateCurrentWork); // 作品やセクションを選んだ時・「戻る」の時
+
+
+    // ── 8. 読んでいる作品の進み具合をヘッダー下端のプログレスバーで表示 ──────
+    // main のスクロール位置（一番上 = 0%、一番下 = 100%）をバーの幅にする。
+    // 幅は transform: scaleX(0〜1) で変える（StackLayout.css の 2. を参照）。
+    // 作品を開いていない時（HOME やジャンルを選んだだけの時）は非表示にする。
+    const progressEl  = document.querySelector('.reading-progress');
+    const progressBar = progressEl && progressEl.querySelector('.reading-progress-bar');
+    function updateProgress() {
+      if (!progressBar) return;
+      const show = !!currentWorkId;                           // 7-2 で決めた「いま表示している作品」
+      progressEl.classList.toggle('is-visible', show);
+      const max   = mainContent.scrollHeight - mainContent.clientHeight;
+      const ratio = !show ? 0 : (max > 0 ? Math.min(1, Math.max(0, mainContent.scrollTop / max)) : 1);
+      progressBar.style.transform = 'scaleX(' + ratio + ')';
+    }
+    updateProgress();                                         // ページを開いた時
+    window.addEventListener('hashchange', updateProgress);    // 作品を切り替えた時（updateCurrentWork の後に動く）
+    window.addEventListener('resize', updateProgress);        // 画面の大きさが変わった時
+    mainContent.addEventListener('load', updateProgress, true); // 画像が読み込まれて本文の長さが変わった時
 
   }); // DOMContentLoaded ここまで
 </script>

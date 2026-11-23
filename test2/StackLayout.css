@@ -94,6 +94,31 @@ header {
   z-index: 100;
   flex-shrink: 0;                 /* body の flex の中で高さが縮まないようにする */
   border-bottom: 1px solid #222733;
+  position: relative;             /* プログレスバー（.reading-progress）の位置の基準にする（スマホでは absolute に変わる） */
+}
+
+/* 読んでいる作品の進み具合を示すプログレスバー：ヘッダーの下端（下線の上）に重ねて表示する */
+/* 作品を開いている時だけ、page.ejs の JavaScript が .is-visible を付けて表示する（JSオフ時は表示しない） */
+.reading-progress {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -1px;            /* ヘッダーの下線（1px）に重ねる */
+  height: 3px;
+  opacity: 0;
+  pointer-events: none;    /* 下にあるボタンなどの操作を邪魔しない */
+  transition: opacity 0.3s ease;
+}
+.reading-progress.is-visible { opacity: 1; }
+
+/* バー本体：幅は JavaScript が transform: scaleX(0〜1) で変える（左端から伸びる） */
+.reading-progress-bar {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #0076ff 0%, #00d2ff 100%);
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.6);   /* サイバーブルーの発光 */
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.1s linear;
 }
 
 /* サイト名「Reportage Cinéma」（スマホ表示時のみ表示。PC ではジャンルボタンを並べるので非表示） */
