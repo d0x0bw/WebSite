@@ -110,15 +110,18 @@ header {
 }
 .reading-progress.is-visible { opacity: 1; }
 
-/* バー本体：幅は JavaScript が transform: scaleX(0〜1) で変える（左端から伸びる） */
+/* バー本体：幅は JavaScript が width（0〜100%）で変える（左端から伸びる） */
+/* 以前は transform: scaleX で伸ばしていたが、読み始め（幅が小さい時）に発光とグラデーションまで */
+/* 横に押しつぶされ、にじんだ塊のように見えたため、width に変更した（2026年11月25日） */
 .reading-progress-bar {
   display: block;
+  width: 0;
   height: 100%;
   background: linear-gradient(90deg, #0076ff 0%, #00d2ff 100%);
+  background-size: 100vw 100%;   /* グラデーションは画面幅に固定し、バーの長さで縮まないようにする */
+  background-repeat: no-repeat;
   box-shadow: 0 0 8px rgba(0, 210, 255, 0.6);   /* サイバーブルーの発光 */
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.1s linear;
+  transition: width 0.1s linear;
 }
 
 /* サイト名「Reportage Cinéma」（スマホ表示時のみ表示。PC ではジャンルボタンを並べるので非表示） */
@@ -171,7 +174,8 @@ header {
 #radio-genreC:checked ~ header .genre-links label[for="radio-genreC"],
 #radio-genreD:checked ~ header .genre-links label[for="radio-genreD"],
 #radio-genreE:checked ~ header .genre-links label[for="radio-genreE"],
-#radio-genreF:checked ~ header .genre-links label[for="radio-genreF"] {
+#radio-genreF:checked ~ header .genre-links label[for="radio-genreF"],
+#radio-genreG:checked ~ header .genre-links label[for="radio-genreG"] {
   background: linear-gradient(135deg, #0076ff 0%, #00d2ff 100%);
   color: #ffffff;
   border-color: transparent;
@@ -231,7 +235,8 @@ nav {
 #radio-genreC:checked ~ .container nav .list-genreC,
 #radio-genreD:checked ~ .container nav .list-genreD,
 #radio-genreE:checked ~ .container nav .list-genreE,
-#radio-genreF:checked ~ .container nav .list-genreF {
+#radio-genreF:checked ~ .container nav .list-genreF,
+#radio-genreG:checked ~ .container nav .list-genreG {
   display: block;
 }
 
@@ -865,7 +870,8 @@ main:has(:target) #default-content {
   #radio-genreC:checked ~ .container nav .list-genreC .mobile-genre-title,
   #radio-genreD:checked ~ .container nav .list-genreD .mobile-genre-title,
   #radio-genreE:checked ~ .container nav .list-genreE .mobile-genre-title,
-  #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title {
+  #radio-genreF:checked ~ .container nav .list-genreF .mobile-genre-title,
+  #radio-genreG:checked ~ .container nav .list-genreG .mobile-genre-title {
     position: sticky;
     top: calc(var(--header-h, 49px) - 60px);
     z-index: 6;                                 /* 作品タイトルの行（z-index: 5）より手前 */
@@ -893,14 +899,16 @@ main:has(:target) #default-content {
   #radio-genreC:checked ~ .container nav .list-genreC a,
   #radio-genreD:checked ~ .container nav .list-genreD a,
   #radio-genreE:checked ~ .container nav .list-genreE a,
-  #radio-genreF:checked ~ .container nav .list-genreF a { display: block; }
+  #radio-genreF:checked ~ .container nav .list-genreF a,
+  #radio-genreG:checked ~ .container nav .list-genreG a { display: block; }
 
   #radio-genreA:checked ~ .container nav .list-genreA .toggle-icon,
   #radio-genreB:checked ~ .container nav .list-genreB .toggle-icon,
   #radio-genreC:checked ~ .container nav .list-genreC .toggle-icon,
   #radio-genreD:checked ~ .container nav .list-genreD .toggle-icon,
   #radio-genreE:checked ~ .container nav .list-genreE .toggle-icon,
-  #radio-genreF:checked ~ .container nav .list-genreF .toggle-icon { display: flex; }
+  #radio-genreF:checked ~ .container nav .list-genreF .toggle-icon,
+  #radio-genreG:checked ~ .container nav .list-genreG .toggle-icon { display: flex; }
 
   /* スマホでは .content-box を position:static に戻してフローに乗せる */
   .content-box { position: static; }
